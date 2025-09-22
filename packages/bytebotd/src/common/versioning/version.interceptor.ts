@@ -18,7 +18,6 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
@@ -33,7 +32,6 @@ import {
   getDesktopCompatibility,
   SUPPORTED_API_VERSIONS,
   SupportedVersion,
-
 } from './api-version.decorator';
 
 /**
@@ -83,8 +81,6 @@ interface DesktopCompatibility {
 
   /** Computer use feature support */
   computerUseFeatures?: string[];
-
-
 }
 
 @Injectable()
@@ -408,7 +404,7 @@ export class VersionInterceptor implements NestInterceptor {
     multiVersions: SupportedVersion[] | null,
     warnings: string[],
   ): boolean {
-  // If endpoint supports multiple versions, check if resolved version is in the list
+    // If endpoint supports multiple versions, check if resolved version is in the list
     if (multiVersions && multiVersions.length > 0) {
       if (!multiVersions.includes(resolvedVersion as SupportedVersion)) {
         warnings.push(
@@ -442,7 +438,7 @@ export class VersionInterceptor implements NestInterceptor {
     desktopCompatibility: DesktopCompatibility | null,
     _resolvedVersion: string,
   ): string[] {
-  const issues: string[] = [];
+    const issues: string[] = [];
 
     if (!desktopCompatibility || !desktopClientInfo.isDesktopClient) {
       return issues;
@@ -526,28 +522,26 @@ export class VersionInterceptor implements NestInterceptor {
     endpointVersionConfig: Record<string, unknown>,
     operationId: string,
   ): void {
-  if (this.strictVersioning && !versionResolution.isSupported) {
-      this.logger.error(`[${operationId
-}] Strict versioning violation`, {
-  operationId,
+    if (this.strictVersioning && !versionResolution.isSupported) {
+      this.logger.error(`[${operationId}] Strict versioning violation`, {
+        operationId,
         resolvedVersion: versionResolution.resolvedVersion,
         warnings: versionResolution.warnings,
         desktopClient: versionResolution.desktopCompatibility,
-      
-});
+      });
 
       throw new HttpException(
         {
-  statusCode: HttpStatus.BAD_REQUEST,
+          statusCode: HttpStatus.BAD_REQUEST,
           error: 'Bad Request',
-      message: 'API version not supported',
-      details: {requestedVersion: versionResolution.resolvedVersion,
+          message: 'API version not supported',
+          details: {
+            requestedVersion: versionResolution.resolvedVersion,
             source: versionResolution.source,
             warnings: versionResolution.warnings,
             supportedVersions: Object.values(SUPPORTED_API_VERSIONS),
             desktopCompatibility: versionResolution.desktopCompatibility,
-          
-},
+          },
           operationId,
         },
         HttpStatus.BAD_REQUEST,
@@ -561,28 +555,26 @@ export class VersionInterceptor implements NestInterceptor {
       );
 
     if (criticalIssues.length > 0 && this.strictVersioning) {
-  this.logger.error(
-        `[${operationId
-}] Critical desktop compatibility issues`,
+      this.logger.error(
+        `[${operationId}] Critical desktop compatibility issues`,
         {
-  operationId,
+          operationId,
           criticalIssues,
           desktopClient: versionResolution.desktopCompatibility,
-        
-},
+        },
       );
 
       throw new HttpException(
         {
-  statusCode: 426, // 426 Upgrade Required,
-  error: 'Upgrade Required',
-      message: 'Desktop client version incompatible',
-      details: {compatibilityIssues: criticalIssues,
+          statusCode: 426, // 426 Upgrade Required,
+          error: 'Upgrade Required',
+          message: 'Desktop client version incompatible',
+          details: {
+            compatibilityIssues: criticalIssues,
             clientVersion: versionResolution.desktopCompatibility.clientVersion,
             isDesktopClient:
               versionResolution.desktopCompatibility.isDesktopClient,
-          
-},
+          },
           operationId,
         },
         426, // 426 Upgrade Required

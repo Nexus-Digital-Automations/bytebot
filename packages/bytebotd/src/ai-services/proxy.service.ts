@@ -1,10 +1,10 @@
 /**
  * Proxy AI Service - MAXIMUM Parlant Integration
- * 
+ *
  * Provides comprehensive AI-powered proxy operations with full Parlant conversational
  * validation for all proxy AI interactions. Every AI proxy operation is wrapped with
  * conversational validation to ensure processing aligns with user intent.
- * 
+ *
  * Features:
  * - Complete AI proxy operations (Request Routing, Response Processing, Load Balancing)
  * - Pre-execution conversational validation for ALL proxy AI operations
@@ -12,7 +12,7 @@
  * - Comprehensive audit trails for proxy AI interactions
  * - Performance optimization with intelligent caching
  * - Enterprise-grade security and request filtering
- * 
+ *
  * Architecture: Parlant-validated AI proxy with conversation-first approach
  * Security: Every AI proxy operation validated through conversational authentication
  * Performance: Sub-200ms validation with multi-level caching for proxy operations
@@ -20,12 +20,26 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
+import {
+  ParlantIntegrationService,
+  RiskLevel,
+  ParlantValidationRequest,
+  ParlantConversationContext,
+} from '../parlant/parlant-integration.service';
 
 // ===== PROXY AI INTEGRATION INTERFACES =====
 export interface ProxyProcessingContext extends ParlantConversationContext {
-  readonly proxyType: 'ai_model_routing' | 'load_balancing' | 'request_filtering' | 'response_processing';
-  readonly targetService: 'anthropic' | 'openai' | 'google' | 'internal' | 'external';
+  readonly proxyType:
+    | 'ai_model_routing'
+    | 'load_balancing'
+    | 'request_filtering'
+    | 'response_processing';
+  readonly targetService:
+    | 'anthropic'
+    | 'openai'
+    | 'google'
+    | 'internal'
+    | 'external';
   readonly operationMode: 'passthrough' | 'transform' | 'aggregate' | 'filter';
   readonly securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly cachingEnabled: boolean;
@@ -84,7 +98,7 @@ export interface ProxyResponse {
 @Injectable()
 export class ProxyService {
   private readonly logger = new Logger(ProxyService.name);
-  
+
   private requestCount = 0;
   private validationCount = 0;
   private averageProcessingTime = 0;
@@ -93,12 +107,18 @@ export class ProxyService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly parlantIntegration: ParlantIntegrationService
+    private readonly parlantIntegration: ParlantIntegrationService,
   ) {
-    const operationId = `proxy_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Proxy AI Service initialized with MAXIMUM Parlant integration`, {parlantEnabled: true,validationRequired: true,
-      auditTrailEnabled: true,
-      intelligentRoutingEnabled: this.isIntelligentRoutingEnabled(),
-    });
+    const operationId = `proxy_init${Date.now()}${Math.random().toString(36).substring(7)}`;
+    this.logger.log(
+      `[${operationId}] Proxy AI Service initialized with MAXIMUM Parlant integration`,
+      {
+        parlantEnabled: true,
+        validationRequired: true,
+        auditTrailEnabled: true,
+        intelligentRoutingEnabled: this.isIntelligentRoutingEnabled(),
+      },
+    );
 
     setInterval(() => this.logPerformanceMetrics(), 60000);
   }
@@ -117,12 +137,14 @@ export class ProxyService {
         method: request.method,
         requestSize: request.metadata.requestSize,
         securityLevel: request.context.securityLevel,
-      }
+      },
     );
 
     try {
       const validationRequest: ParlantValidationRequest = {
-        functionName: 'ProxyService.processProxyRequest',functionParams: {proxyType: request.context.proxyType,
+        functionName: 'ProxyService.processProxyRequest',
+        functionParams: {
+          proxyType: request.context.proxyType,
           targetService: request.context.targetService,
           operationMode: request.context.operationMode,
           method: request.method,
@@ -130,34 +152,52 @@ export class ProxyService {
           securityLevel: request.context.securityLevel,
           hasAIRouting: request.context.proxyType === 'ai_model_routing',
         },
-        actionDescription: `Process ${request.context.proxyType} proxy request to ${request.context.targetService} with ${request.context.operationMode} mode`,context: request.context,riskLevel: this.assessProxyRiskLevel(request),
+        actionDescription: `Process ${request.context.proxyType} proxy request to ${request.context.targetService} with ${request.context.operationMode} mode`,
+        context: request.context,
+        riskLevel: this.assessProxyRiskLevel(request),
         operationId: request.operationId,
       };
 
-      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegration.validateFunctionExecution(
+          validationRequest,
+        );
       this.validationCount++;
 
       if (!validationResponse.approved) {
-        throw new Error(`Proxy AI operation blocked by conversational validation: ${validationResponse.reasoning}`);}const response = await this.performProxyOperation(request, validationResponse.conversationId);
+        throw new Error(
+          `Proxy AI operation blocked by conversational validation: ${validationResponse.reasoning}`,
+        );
+      }
+      const response = await this.performProxyOperation(
+        request,
+        validationResponse.conversationId,
+      );
 
       const duration = Date.now() - startTime;
-      this.updatePerformanceMetrics(duration, response.proxyResult.cacheHit, !!response.aiDecisionMaking);
+      this.updatePerformanceMetrics(
+        duration,
+        response.proxyResult.cacheHit,
+        !!response.aiDecisionMaking,
+      );
 
       this.logger.log(
-        `[${request.operationId}] AI proxy processing completed successfully with Parlant validation`,{operationId: request.operationId,
+        `[${request.operationId}] AI proxy processing completed successfully with Parlant validation`,
+        {
+          operationId: request.operationId,
           responseId: response.id,
           statusCode: response.proxyResult.statusCode,
           processingTimeMs: response.proxyResult.processingTimeMs,
           cacheHit: response.proxyResult.cacheHit,
           aiRoutingUsed: !!response.aiDecisionMaking,
-          routingDecision: response.proxyResult.routingDecision?.selectedService,
+          routingDecision:
+            response.proxyResult.routingDecision?.selectedService,
           duration,
           validationId: validationResponse.conversationId,
-        }
+        },
       );
 
       return response;
-
     } catch (error) {
       const duration = Date.now() - startTime;
       this.logger.error(
@@ -166,7 +206,7 @@ export class ProxyService {
           operationId: request.operationId,
           error: error instanceof Error ? error.message : String(error),
           duration,
-        }
+        },
       );
       throw error;
     }
@@ -174,27 +214,46 @@ export class ProxyService {
 
   private async performProxyOperation(
     request: ProxyRequest,
-    conversationId: string
+    conversationId: string,
   ): Promise<ProxyResponse> {
     // TODO: Implement actual AI proxy operations
-    
+
     const startTime = Date.now();
     const cacheHit = Math.random() < 0.3; // 30% cache hit rate simulation
-    const useAIRouting = request.context.proxyType === 'ai_model_routing' && this.isIntelligentRoutingEnabled();let routingDecision;let aiDecisionMaking;
-    
+    const useAIRouting =
+      request.context.proxyType === 'ai_model_routing' &&
+      this.isIntelligentRoutingEnabled();
+    let routingDecision;
+    let aiDecisionMaking;
+
     if (useAIRouting) {
       routingDecision = {
         selectedService: this.selectOptimalService(request),
-        reason: 'AI analysis selected optimal service based on request characteristics',alternatives: ['anthropic', 'openai', 'google'].filter(s => s !== request.context.targetService),};aiDecisionMaking = {
-        routingLogic: 'Load balancing with performance optimization',confidenceScore: 0.85 + Math.random() * 0.1,factorsConsidered: ['service_load', 'response_time', 'model_capability', 'request_type'],
+        reason:
+          'AI analysis selected optimal service based on request characteristics',
+        alternatives: ['anthropic', 'openai', 'google'].filter(
+          (s) => s !== request.context.targetService,
+        ),
+      };
+      aiDecisionMaking = {
+        routingLogic: 'Load balancing with performance optimization',
+        confidenceScore: 0.85 + Math.random() * 0.1,
+        factorsConsidered: [
+          'service_load',
+          'response_time',
+          'model_capability',
+          'request_type',
+        ],
       };
     }
 
-    const processingTime = cacheHit ? 50 + Math.random() * 50 : 200 + Math.random() * 300;
-    
+    const processingTime = cacheHit
+      ? 50 + Math.random() * 50
+      : 200 + Math.random() * 300;
+
     // Simulate proxy processing
-    await new Promise(resolve => setTimeout(resolve, processingTime));
-    
+    await new Promise((resolve) => setTimeout(resolve, processingTime));
+
     const mockResponse: ProxyResponse = {
       id: `proxy${Date.now()}${Math.random().toString(36).substring(7)}`,
       processedAt: new Date(),
@@ -203,8 +262,17 @@ export class ProxyService {
       proxyResult: {
         statusCode: 200,
         headers: {
-          'Content-Type': 'application/json','X-Proxy-Service': 'Bytebot-AI-Proxy','X-Cache-Status': cacheHit ? 'HIT' : 'MISS','X-Routing-Decision': routingDecision?.selectedService ?? request.context.targetService,},body: {
-          message: 'Proxy request processed successfully',proxyType: request.context.proxyType,targetService: routingDecision?.selectedService ?? request.context.targetService,
+          'Content-Type': 'application/json',
+          'X-Proxy-Service': 'Bytebot-AI-Proxy',
+          'X-Cache-Status': cacheHit ? 'HIT' : 'MISS',
+          'X-Routing-Decision':
+            routingDecision?.selectedService ?? request.context.targetService,
+        },
+        body: {
+          message: 'Proxy request processed successfully',
+          proxyType: request.context.proxyType,
+          targetService:
+            routingDecision?.selectedService ?? request.context.targetService,
           aiRouting: !!aiDecisionMaking,
         },
         processingTimeMs: processingTime,
@@ -218,21 +286,32 @@ export class ProxyService {
         processingLatency: processingTime,
         cacheEfficiency: this.getCacheEfficiency(),
       },
-      securityFlags: ['parlant_validated', 'proxy_processed', 'security_filtered'],};if (useAIRouting) {
-      mockResponse.securityFlags.push('ai_routing_applied');}return mockResponse;
+      securityFlags: [
+        'parlant_validated',
+        'proxy_processed',
+        'security_filtered',
+      ],
+    };
+    if (useAIRouting) {
+      mockResponse.securityFlags.push('ai_routing_applied');
+    }
+    return mockResponse;
   }
 
   private selectOptimalService(request: ProxyRequest): string {
     // TODO: Implement actual AI-based service selection logic
-    const services = ['anthropic', 'openai', 'google'];const weights = this.calculateServiceWeights(request);// Simple weighted random selection for demo
+    const services = ['anthropic', 'openai', 'google'];
+    const weights = this.calculateServiceWeights(request); // Simple weighted random selection for demo
     const totalWeight = weights.reduce((sum, w) => sum + w, 0);
     let random = Math.random() * totalWeight;
-    
+
     for (let i = 0; i < services.length; i++) {
       random -= weights[i] ?? 0;
       if (random <= 0) {
-        return services[i] ?? 'anthropic';}}
-    
+        return services[i] ?? 'anthropic';
+      }
+    }
+
     return services[0] ?? 'anthropic'; // fallback
   }
 
@@ -243,51 +322,87 @@ export class ProxyService {
   }
 
   private assessProxyRiskLevel(request: ProxyRequest): RiskLevel {
-    if (request.context.proxyType === 'ai_model_routing' && request.context.operationMode === 'transform') {
+    if (
+      request.context.proxyType === 'ai_model_routing' &&
+      request.context.operationMode === 'transform'
+    ) {
       return RiskLevel._CRITICAL; // AI routing with transformation is high risk
     }
     if (request.context.securityLevel === 'CRITICAL') {
       return RiskLevel._HIGH;
     }
-    if (request.metadata.requestSize > (request.context.requestSizeLimit ?? 1000000)) {
+    if (
+      request.metadata.requestSize >
+      (request.context.requestSizeLimit ?? 1000000)
+    ) {
       return RiskLevel._MODERATE; // Large requests need more scrutiny
     }
     return RiskLevel._LOW;
   }
 
-  private updatePerformanceMetrics(duration: number, cacheHit: boolean, usedAIRouting: boolean): void {
-    this.averageProcessingTime = 
-      (this.averageProcessingTime * (this.requestCount - 1) + duration) / this.requestCount;
-    
+  private updatePerformanceMetrics(
+    duration: number,
+    cacheHit: boolean,
+    usedAIRouting: boolean,
+  ): void {
+    this.averageProcessingTime =
+      (this.averageProcessingTime * (this.requestCount - 1) + duration) /
+      this.requestCount;
+
     if (cacheHit) {
       this.cacheHits++;
     }
-    
+
     if (usedAIRouting) {
       this.aiRoutingDecisions++;
     }
   }
 
   private getCacheEfficiency(): number {
-    return this.requestCount > 0 ? (this.cacheHits / this.requestCount) * 100 : 0;
+    return this.requestCount > 0
+      ? (this.cacheHits / this.requestCount) * 100
+      : 0;
   }
 
   private logPerformanceMetrics(): void {
-    const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 0;
+    const validationRate =
+      this.requestCount > 0
+        ? (this.validationCount / this.requestCount) * 100
+        : 0;
     const cacheHitRate = this.getCacheEfficiency();
-    const aiRoutingRate = this.requestCount > 0 ? (this.aiRoutingDecisions / this.requestCount) * 100 : 0;
-    
+    const aiRoutingRate =
+      this.requestCount > 0
+        ? (this.aiRoutingDecisions / this.requestCount) * 100
+        : 0;
+
     this.logger.log('Proxy AI Service Performance Metrics', {
       requestCount: this.requestCount,
-      validationRate: `${validationRate.toFixed(2)}%`,averageProcessingTime: `${this.averageProcessingTime.toFixed(2)}ms`,cacheHitRate: `${cacheHitRate.toFixed(2)}%`,aiRoutingRate: `${aiRoutingRate.toFixed(2)}%`,
+      validationRate: `${validationRate.toFixed(2)}%`,
+      averageProcessingTime: `${this.averageProcessingTime.toFixed(2)}ms`,
+      cacheHitRate: `${cacheHitRate.toFixed(2)}%`,
+      aiRoutingRate: `${aiRoutingRate.toFixed(2)}%`,
     });
   }
 
   private isIntelligentRoutingEnabled(): boolean {
-    return this.configService.get<boolean>('PROXY_AI_ROUTING_ENABLED', true);}getServiceHealth(): { status: 'HEALTHY' | 'DEGRADED' | 'FAILED'; metrics: Record<string, unknown>; } {const avgProcessingTime = this.averageProcessingTime;const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
+    return this.configService.get<boolean>('PROXY_AI_ROUTING_ENABLED', true);
+  }
+  getServiceHealth(): {
+    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
+    metrics: Record<string, unknown>;
+  } {
+    const avgProcessingTime = this.averageProcessingTime;
+    const validationRate =
+      this.requestCount > 0
+        ? (this.validationCount / this.requestCount) * 100
+        : 100;
     const cacheHitRate = this.getCacheEfficiency();
 
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgProcessingTime > 500 || validationRate < 95 || cacheHitRate < 20) {status = 'DEGRADED';}if (avgProcessingTime > 1500 || validationRate < 80 || cacheHitRate < 10) {
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
+    if (avgProcessingTime > 500 || validationRate < 95 || cacheHitRate < 20) {
+      status = 'DEGRADED';
+    }
+    if (avgProcessingTime > 1500 || validationRate < 80 || cacheHitRate < 10) {
       status = 'FAILED';
     }
 
@@ -295,7 +410,9 @@ export class ProxyService {
       status,
       metrics: {
         requestCount: this.requestCount,
-        averageProcessingTime: `${avgProcessingTime.toFixed(2)}ms`,validationRate: `${validationRate.toFixed(2)}%`,cacheHitRate: `${cacheHitRate.toFixed(2)}%`,
+        averageProcessingTime: `${avgProcessingTime.toFixed(2)}ms`,
+        validationRate: `${validationRate.toFixed(2)}%`,
+        cacheHitRate: `${cacheHitRate.toFixed(2)}%`,
         aiRoutingDecisions: this.aiRoutingDecisions,
         intelligentRoutingEnabled: this.isIntelligentRoutingEnabled(),
       },

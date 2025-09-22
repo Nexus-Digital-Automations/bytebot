@@ -31,7 +31,9 @@ describe('Performance Testing Integration', () => {
   let moduleFixture: TestingModule;
 
   beforeAll(async () => {
-    console.log('🚀 [INTEGRATION] Setting up performance testing integration test suite...');
+    console.log(
+      '🚀 [INTEGRATION] Setting up performance testing integration test suite...',
+    );
     moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -51,15 +53,24 @@ describe('Performance Testing Integration', () => {
 
   describe('Performance Framework Core Functionality', () => {
     it('should initialize and execute performance measurements', async () => {
-      console.log('🔬 [INTEGRATION] Testing performance framework core functionality...');
+      console.log(
+        '🔬 [INTEGRATION] Testing performance framework core functionality...',
+      );
 
       // Test basic measurement capabilities
-      performanceFramework.startMeasurement('test-function', 'integration-test');
+      performanceFramework.startMeasurement(
+        'test-function',
+        'integration-test',
+      );
 
       // Simulate some work
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const metrics = performanceFramework.endMeasurement('test-function', 'integration-test', true);
+      const metrics = performanceFramework.endMeasurement(
+        'test-function',
+        'integration-test',
+        true,
+      );
       expect(metrics).toBeDefined();
       expect(metrics.executionTime).toBeGreaterThan(90); // Should be around 100ms
       expect(metrics.executionTime).toBeLessThan(200); // With some tolerance
@@ -67,11 +78,15 @@ describe('Performance Testing Integration', () => {
       expect(metrics.testName).toBe('test-function');
       expect(metrics.testSuite).toBe('integration-test');
 
-      console.log(`📊 [INTEGRATION] Performance measurement completed: ${metrics.executionTime.toFixed(2)}ms`);
+      console.log(
+        `📊 [INTEGRATION] Performance measurement completed: ${metrics.executionTime.toFixed(2)}ms`,
+      );
     }, 10000);
 
     it('should run performance benchmarks with configuration', async () => {
-      console.log('🚀 [INTEGRATION] Testing performance benchmark execution...');
+      console.log(
+        '🚀 [INTEGRATION] Testing performance benchmark execution...',
+      );
 
       const testFunction = async () => {
         // Simulate CPU-intensive work
@@ -91,10 +106,13 @@ describe('Performance Testing Integration', () => {
         measurementIterations: 5,
         concurrencyLevel: 1,
         memoryLeakThreshold: 10,
-        performanceRegression: 20
+        performanceRegression: 20,
       };
 
-      const benchmark = await performanceFramework.runBenchmark(testFunction, config);
+      const benchmark = await performanceFramework.runBenchmark(
+        testFunction,
+        config,
+      );
 
       expect(benchmark).toBeDefined();
       expect(benchmark.averageExecutionTime).toBeGreaterThan(40);
@@ -103,17 +121,31 @@ describe('Performance Testing Integration', () => {
       expect(benchmark.passed).toBe(true);
       expect(benchmark.recommendations).toBeDefined();
 
-      console.log(`📈 [INTEGRATION] Benchmark completed - Grade: ${benchmark.performanceGrade}, Avg: ${benchmark.averageExecutionTime.toFixed(2)}ms`);
+      console.log(
+        `📈 [INTEGRATION] Benchmark completed - Grade: ${benchmark.performanceGrade}, Avg: ${benchmark.averageExecutionTime.toFixed(2)}ms`,
+      );
     }, 15000);
 
-    it('should validate test execution performance', async () => {console.log('📊 [INTEGRATION] Testing test execution performance validation...');const executionMetrics = await performanceFramework.validateTestExecutionPerformance();expect(executionMetrics).toBeDefined();
+    it('should validate test execution performance', async () => {
+      console.log(
+        '📊 [INTEGRATION] Testing test execution performance validation...',
+      );
+      const executionMetrics =
+        await performanceFramework.validateTestExecutionPerformance();
+      expect(executionMetrics).toBeDefined();
       expect(typeof executionMetrics.get).toBe('function'); // Should be a Map
 
-      console.log(`📊 [INTEGRATION] Test execution validation completed: ${executionMetrics.size} test suites analyzed`);
+      console.log(
+        `📊 [INTEGRATION] Test execution validation completed: ${executionMetrics.size} test suites analyzed`,
+      );
     }, 10000);
   });
 
-  describe('Load Testing Scenarios', () => {it('should initialize load test orchestrator', async () => {console.log('🔄 [INTEGRATION] Testing load test orchestrator initialization...');
+  describe('Load Testing Scenarios', () => {
+    it('should initialize load test orchestrator', async () => {
+      console.log(
+        '🔄 [INTEGRATION] Testing load test orchestrator initialization...',
+      );
 
       await loadTestOrchestrator.initialize(AppModule);
 
@@ -121,13 +153,19 @@ describe('Performance Testing Integration', () => {
       expect(scenarios).toBeDefined();
       expect(scenarios.length).toBeGreaterThan(0);
 
-      console.log(`📋 [INTEGRATION] Load test orchestrator initialized with ${scenarios.length} scenarios`);
+      console.log(
+        `📋 [INTEGRATION] Load test orchestrator initialized with ${scenarios.length} scenarios`,
+      );
     }, 20000);
 
     it('should execute a specific load test scenario', async () => {
-      console.log('🎯 [INTEGRATION] Testing individual load test scenario execution...');
+      console.log(
+        '🎯 [INTEGRATION] Testing individual load test scenario execution...',
+      );
       try {
-        const result = await loadTestOrchestrator.executeLoadTestScenario('Health Monitoring Load Test');
+        const result = await loadTestOrchestrator.executeLoadTestScenario(
+          'Health Monitoring Load Test',
+        );
         expect(result).toBeDefined();
         expect(result.scenario).toBeDefined();
         expect(result.scenario.name).toBe('Health Monitoring Load Test');
@@ -136,8 +174,12 @@ describe('Performance Testing Integration', () => {
 
         console.log(`📈 [INTEGRATION] Load test scenario completed:`);
         console.log(`  Total requests: ${result.totalRequests}`);
-        console.log(`  Success rate: ${((result.successfulRequests / result.totalRequests) * 100).toFixed(1)}%`);
-        console.log(`  Avg response time: ${result.averageResponseTime.toFixed(2)}ms`);
+        console.log(
+          `  Success rate: ${((result.successfulRequests / result.totalRequests) * 100).toFixed(1)}%`,
+        );
+        console.log(
+          `  Avg response time: ${result.averageResponseTime.toFixed(2)}ms`,
+        );
         console.log(`  Status: ${result.passed ? '✅ PASSED' : '❌ FAILED'}`);
       } catch (error) {
         console.warn(`⚠️ [INTEGRATION] Load test scenario failed: ${error}`);
@@ -164,7 +206,7 @@ describe('Performance Testing Integration', () => {
             expectedRps: 50,
             maxResponseTime: 200,
             maxErrorRate: 2,
-            requiredResources: ['TestService']
+            requiredResources: ['TestService'],
           },
           executionTime: 5000,
           totalRequests: 50,
@@ -176,9 +218,12 @@ describe('Performance Testing Integration', () => {
           actualRps: 10,
           errorRate: 4,
           memoryUsage: process.memoryUsage(),
-          resourceUtilization: new Map([['cpu', 50], ['memory', 60]]),
+          resourceUtilization: new Map([
+            ['cpu', 50],
+            ['memory', 60],
+          ]),
           passed: true,
-          issues: []
+          issues: [],
         };
 
         results.set('Test Scenario', testResult);
@@ -194,10 +239,14 @@ describe('Performance Testing Integration', () => {
 
         console.log(`📊 [INTEGRATION] Load test report generated successfully`);
         console.log(`  Total scenarios: ${report.summary.totalScenarios}`);
-        console.log(`  Pass rate: ${(report.summary.passedScenarios / report.summary.totalScenarios * 100).toFixed(1)}%`);
+        console.log(
+          `  Pass rate: ${((report.summary.passedScenarios / report.summary.totalScenarios) * 100).toFixed(1)}%`,
+        );
         console.log(`  Overall grade: ${report.summary.overallGrade}`);
       } catch (error) {
-        console.warn(`⚠️ [INTEGRATION] Load test report generation failed: ${error}`);
+        console.warn(
+          `⚠️ [INTEGRATION] Load test report generation failed: ${error}`,
+        );
       }
     }, 10000);
   });
@@ -215,10 +264,11 @@ describe('Performance Testing Integration', () => {
         verbose: false,
         runInBand: false,
         detectOpenHandles: true,
-        forceExit: true
+        forceExit: true,
       };
 
-      const validationResult = await testExecutionValidator.validateTestExecution(config);
+      const validationResult =
+        await testExecutionValidator.validateTestExecution(config);
 
       expect(validationResult).toBeDefined();
       expect(validationResult.totalSuites).toBeGreaterThanOrEqual(0);
@@ -231,7 +281,9 @@ describe('Performance Testing Integration', () => {
       console.log(`  Total suites: ${validationResult.totalSuites}`);
       console.log(`  Total tests: ${validationResult.totalTests}`);
       console.log(`  Performance grade: ${validationResult.performanceGrade}`);
-      console.log(`  Bottlenecks found: ${validationResult.bottlenecks.length}`);
+      console.log(
+        `  Bottlenecks found: ${validationResult.bottlenecks.length}`,
+      );
     }, 20000);
 
     it('should generate execution report', async () => {
@@ -246,19 +298,27 @@ describe('Performance Testing Integration', () => {
 
       console.log(`📊 [INTEGRATION] Execution report generated:`);
       console.log(`  Total suites: ${report.totalSuites}`);
-      console.log(`  Avg execution time: ${report.averageExecutionTime.toFixed(2)}ms`);
-      console.log(`  Memory efficiency: ${report.memoryEfficiency.toFixed(1)}%`);
-      console.log(`  Reliability score: ${report.reliabilityScore.toFixed(1)}%`);
+      console.log(
+        `  Avg execution time: ${report.averageExecutionTime.toFixed(2)}ms`,
+      );
+      console.log(
+        `  Memory efficiency: ${report.memoryEfficiency.toFixed(1)}%`,
+      );
+      console.log(
+        `  Reliability score: ${report.reliabilityScore.toFixed(1)}%`,
+      );
     }, 5000);
   });
 
   describe('Performance Bottleneck Analysis', () => {
     it('should analyze function performance for bottlenecks', async () => {
-      console.log('🔬 [INTEGRATION] Testing performance bottleneck analysis...');
+      console.log(
+        '🔬 [INTEGRATION] Testing performance bottleneck analysis...',
+      );
       const slowFunction = async () => {
         // Simulate slow operation
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
         // Simulate memory allocation
         const largeArray = new Array(100000).fill(0);
         return largeArray.length;
@@ -267,11 +327,11 @@ describe('Performance Testing Integration', () => {
       const bottlenecks = await performanceBottleneckAnalyzer.analyzeFunction(
         'slowTestFunction',
         slowFunction,
-        { file: 'integration-test.spec.ts', line: 100 }
+        { file: 'integration-test.spec.ts', line: 100 },
       );
 
       expect(Array.isArray(bottlenecks)).toBe(true);
-      
+
       if (bottlenecks.length > 0) {
         const bottleneck = bottlenecks[0]!;
         expect(bottleneck.id).toBeDefined();
@@ -284,7 +344,9 @@ describe('Performance Testing Integration', () => {
         console.log(`🔍 [INTEGRATION] Bottleneck detected:`);
         console.log(`  Type: ${bottleneck.type}`);
         console.log(`  Severity: ${bottleneck.severity}`);
-        console.log(`  Execution time: ${bottleneck.metrics.executionTime.toFixed(2)}ms`);
+        console.log(
+          `  Execution time: ${bottleneck.metrics.executionTime.toFixed(2)}ms`,
+        );
       } else {
         console.log(`✅ [INTEGRATION] No significant bottlenecks detected`);
       }
@@ -303,9 +365,13 @@ describe('Performance Testing Integration', () => {
 
       console.log(`📊 [INTEGRATION] Bottleneck report generated:`);
       console.log(`  Total bottlenecks: ${report.summary.totalBottlenecks}`);
-      console.log(`  Critical bottlenecks: ${report.summary.criticalBottlenecks}`);
+      console.log(
+        `  Critical bottlenecks: ${report.summary.criticalBottlenecks}`,
+      );
       console.log(`  Categories: ${report.categories.size}`);
-      console.log(`  Optimization phases: ${report.optimizationRoadmap.length}`);
+      console.log(
+        `  Optimization phases: ${report.optimizationRoadmap.length}`,
+      );
     }, 5000);
 
     it('should start and stop profiling sessions', async () => {
@@ -315,18 +381,20 @@ describe('Performance Testing Integration', () => {
       expect(typeof sessionId).toBe('string');
 
       // Simulate some work during profiling
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const session = performanceBottleneckAnalyzer.stopProfiling();
       expect(session).toBeDefined();
-      expect((session ?? "default").sessionId).toBe(sessionId);
-      expect((session ?? "default").duration).toBeGreaterThan(90);
-      expect((session ?? "default").performanceGrade).toMatch(/[A-F]/);
+      expect((session ?? 'default').sessionId).toBe(sessionId);
+      expect((session ?? 'default').duration).toBeGreaterThan(90);
+      expect((session ?? 'default').performanceGrade).toMatch(/[A-F]/);
 
       console.log(`📊 [INTEGRATION] Profiling session completed:`);
-      console.log(`  Session ID: ${(session ?? "default").sessionId}`);
-      console.log(`  Duration: ${(session ?? "default").duration.toFixed(2)}ms`);
-      console.log(`  Grade: ${(session ?? "default").performanceGrade}`);
+      console.log(`  Session ID: ${(session ?? 'default').sessionId}`);
+      console.log(
+        `  Duration: ${(session ?? 'default').duration.toFixed(2)}ms`,
+      );
+      console.log(`  Grade: ${(session ?? 'default').performanceGrade}`);
     }, 5000);
   });
 
@@ -338,11 +406,11 @@ describe('Performance Testing Integration', () => {
         enableParallelization: true,
         maxWorkers: 2,
         memoryThreshold: 256,
-        cacheDirectory: './node_modules/.cache/jest-integration-test'
+        cacheDirectory: './node_modules/.cache/jest-integration-test',
       });
       const testFiles = [
         'src/auth/__tests__/auth.service.spec.ts',
-        'src/health/__tests__/health.service.spec.ts'
+        'src/health/__tests__/health.service.spec.ts',
       ];
       const plan = await optimizer.optimizeTestExecution(testFiles);
 
@@ -357,7 +425,9 @@ describe('Performance Testing Integration', () => {
       console.log(`📊 [INTEGRATION] Optimization plan created:`);
       console.log(`  Test groups: ${plan.testGroups.length}`);
       console.log(`  Parallelization: ${plan.parallelizationStrategy}`);
-      console.log(`  Estimated time: ${plan.estimatedExecutionTime.toFixed(2)}ms`);
+      console.log(
+        `  Estimated time: ${plan.estimatedExecutionTime.toFixed(2)}ms`,
+      );
       console.log(`  Workers: ${plan.resourceRequirements.workers}`);
 
       // Execute the plan
@@ -372,7 +442,9 @@ describe('Performance Testing Integration', () => {
       console.log(`⚡ [INTEGRATION] Optimization execution completed:`);
       console.log(`  Time saved: ${metrics.timeSaved.toFixed(2)}ms`);
       console.log(`  Cache hit rate: ${metrics.cacheHitRate.toFixed(1)}%`);
-      console.log(`  Parallelization efficiency: ${metrics.parallelizationEfficiency.toFixed(1)}%`);
+      console.log(
+        `  Parallelization efficiency: ${metrics.parallelizationEfficiency.toFixed(1)}%`,
+      );
     }, 20000);
 
     it('should provide optimization recommendations', async () => {
@@ -382,7 +454,7 @@ describe('Performance Testing Integration', () => {
       const recommendations = optimizer.getOptimizationRecommendations();
 
       expect(Array.isArray(recommendations)).toBe(true);
-      
+
       if (recommendations.length > 0) {
         const recommendation = recommendations[0]!;
         expect(recommendation.category).toBeDefined();
@@ -391,8 +463,12 @@ describe('Performance Testing Integration', () => {
         expect(recommendation.effort).toMatch(/high|medium|low/);
         expect(recommendation.implementation).toBeDefined();
 
-        console.log(`💡 [INTEGRATION] Optimization recommendations available: ${recommendations.length}`);
-        console.log(`  Example: ${recommendation.recommendation} (${recommendation.impact} impact, ${recommendation.effort} effort)`);
+        console.log(
+          `💡 [INTEGRATION] Optimization recommendations available: ${recommendations.length}`,
+        );
+        console.log(
+          `  Example: ${recommendation.recommendation} (${recommendation.impact} impact, ${recommendation.effort} effort)`,
+        );
       } else {
         console.log(`✅ [INTEGRATION] No optimization recommendations needed`);
       }
@@ -401,7 +477,9 @@ describe('Performance Testing Integration', () => {
 
   describe('CI Performance Validation', () => {
     it('should create CI performance validator', async () => {
-      console.log('🔧 [INTEGRATION] Testing CI performance validator creation...');
+      console.log(
+        '🔧 [INTEGRATION] Testing CI performance validator creation...',
+      );
       const ciValidator = createCIPerformanceValidator({
         enabled: true,
         benchmarkSuites: ['Health Monitoring Load Test'],
@@ -411,18 +489,23 @@ describe('Performance Testing Integration', () => {
           loadTestTargets: {
             responseTime: { p95: 500, p99: 1000 },
             throughput: { min: 10 },
-            errorRate: { max: 10 }
+            errorRate: { max: 10 },
           },
           cacheHitRate: { min: 50 },
-          parallelizationEfficiency: { min: 30 }
-        }
+          parallelizationEfficiency: { min: 30 },
+        },
       });
 
       expect(ciValidator).toBeDefined();
-      console.log(`✅ [INTEGRATION] CI performance validator created successfully`);
+      console.log(
+        `✅ [INTEGRATION] CI performance validator created successfully`,
+      );
     }, 5000);
 
-    it('should run complete performance validation', async () => {console.log('🚀 [INTEGRATION] Testing complete CI performance validation...');
+    it('should run complete performance validation', async () => {
+      console.log(
+        '🚀 [INTEGRATION] Testing complete CI performance validation...',
+      );
 
       const ciValidator = createCIPerformanceValidator({
         enabled: true,
@@ -433,19 +516,19 @@ describe('Performance Testing Integration', () => {
           loadTestTargets: {
             responseTime: { p95: 1000, p99: 2000 },
             throughput: { min: 1 },
-            errorRate: { max: 50 }
+            errorRate: { max: 50 },
           },
           cacheHitRate: { min: 20 },
-          parallelizationEfficiency: { min: 10 }
+          parallelizationEfficiency: { min: 10 },
         },
-        regressionDetection: { enabled: false } // Disable for integration test
+        regressionDetection: { enabled: false }, // Disable for integration test
       });
 
       const context = {
         buildId: `integration-test-${Date.now()}`,
         branch: 'integration-test',
         commitHash: 'abc123',
-        triggerType: 'commit' as const
+        triggerType: 'commit' as const,
       };
 
       try {
@@ -463,10 +546,14 @@ describe('Performance Testing Integration', () => {
         console.log(`  Build ID: ${result.buildId}`);
         console.log(`  Status: ${result.overallStatus}`);
         console.log(`  Grade: ${result.performanceGrade}`);
-        console.log(`  Test results: ${result.testResults.totalTests} tests, ${result.testResults.executionTime.toFixed(2)}ms`);
+        console.log(
+          `  Test results: ${result.testResults.totalTests} tests, ${result.testResults.executionTime.toFixed(2)}ms`,
+        );
         console.log(`  Recommendations: ${result.recommendations.length}`);
       } catch (error) {
-        console.warn(`⚠️ [INTEGRATION] CI validation failed (expected in test environment): ${error}`);
+        console.warn(
+          `⚠️ [INTEGRATION] CI validation failed (expected in test environment): ${error}`,
+        );
         // Don't fail the test - CI validation may fail due to missing dependencies
       }
     }, 60000); // 1 minute timeout for full validation
@@ -474,7 +561,9 @@ describe('Performance Testing Integration', () => {
 
   describe('End-to-End Performance Pipeline', () => {
     it('should execute complete performance testing pipeline', async () => {
-      console.log('🎯 [INTEGRATION] Testing complete performance testing pipeline...');
+      console.log(
+        '🎯 [INTEGRATION] Testing complete performance testing pipeline...',
+      );
 
       // Step 1: Clear all performance data
       performanceFramework.clearMetrics();
@@ -486,7 +575,7 @@ describe('Performance Testing Integration', () => {
       // Step 2: Run performance framework benchmark
       const benchmarkResult = await performanceFramework.runBenchmark(
         async () => {
-          await new Promise(resolve => setTimeout(resolve, 50));
+          await new Promise((resolve) => setTimeout(resolve, 50));
         },
         {
           name: 'Pipeline Integration Test',
@@ -498,64 +587,93 @@ describe('Performance Testing Integration', () => {
           measurementIterations: 3,
           concurrencyLevel: 1,
           memoryLeakThreshold: 5,
-          performanceRegression: 15
-        }
+          performanceRegression: 15,
+        },
       );
 
       expect(benchmarkResult.passed).toBe(true);
-      console.log(`📊 [INTEGRATION] Step 2: Benchmark completed - Grade: ${benchmarkResult.performanceGrade}`);
+      console.log(
+        `📊 [INTEGRATION] Step 2: Benchmark completed - Grade: ${benchmarkResult.performanceGrade}`,
+      );
 
       // Step 3: Analyze for bottlenecks
       const sessionId = performanceBottleneckAnalyzer.startProfiling();
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       const profilingSession = performanceBottleneckAnalyzer.stopProfiling();
 
       expect(profilingSession).toBeDefined();
-      console.log(`🔍 [INTEGRATION] Step 3: Profiling completed - Grade: ${(profilingSession ?? "default").performanceGrade}`);
+      console.log(
+        `🔍 [INTEGRATION] Step 3: Profiling completed - Grade: ${(profilingSession ?? 'default').performanceGrade}`,
+      );
 
       // Step 4: Generate comprehensive reports
-      const bottleneckReport = performanceBottleneckAnalyzer.generateBottleneckReport();
+      const bottleneckReport =
+        performanceBottleneckAnalyzer.generateBottleneckReport();
       const performanceReport = performanceFramework.getPerformanceReport();
 
       expect(bottleneckReport).toBeDefined();
       expect(performanceReport).toBeDefined();
 
       console.log(`📋 [INTEGRATION] Step 4: Reports generated`);
-      console.log(`  Bottlenecks: ${bottleneckReport.summary.totalBottlenecks}`);
-      console.log(`  Performance grade: ${performanceReport.summary.overallPerformanceGrade}`);
+      console.log(
+        `  Bottlenecks: ${bottleneckReport.summary.totalBottlenecks}`,
+      );
+      console.log(
+        `  Performance grade: ${performanceReport.summary.overallPerformanceGrade}`,
+      );
 
       // Step 5: Verify optimization opportunities
       const optimizer = createTestExecutionOptimizer();
-      const optimizationRecommendations = optimizer.getOptimizationRecommendations();
+      const optimizationRecommendations =
+        optimizer.getOptimizationRecommendations();
 
       expect(Array.isArray(optimizationRecommendations)).toBe(true);
-      console.log(`💡 [INTEGRATION] Step 5: Optimization recommendations: ${optimizationRecommendations.length}`);
+      console.log(
+        `💡 [INTEGRATION] Step 5: Optimization recommendations: ${optimizationRecommendations.length}`,
+      );
 
-      console.log('🎉 [INTEGRATION] Complete performance testing pipeline executed successfully');
+      console.log(
+        '🎉 [INTEGRATION] Complete performance testing pipeline executed successfully',
+      );
     }, 30000);
 
     it('should validate performance metrics collection and analysis', async () => {
-      console.log('📊 [INTEGRATION] Testing performance metrics collection and analysis...');
+      console.log(
+        '📊 [INTEGRATION] Testing performance metrics collection and analysis...',
+      );
 
       // Collect metrics from different components
       const performanceReport = performanceFramework.getPerformanceReport();
-      const bottleneckReport = performanceBottleneckAnalyzer.generateBottleneckReport();
+      const bottleneckReport =
+        performanceBottleneckAnalyzer.generateBottleneckReport();
       const executionReport = testExecutionValidator.getExecutionReport();
 
       // Validate that metrics are being collected
       expect(performanceReport.summary.totalTests).toBeGreaterThanOrEqual(0);
-      expect(bottleneckReport.summary.totalBottlenecks).toBeGreaterThanOrEqual(0);
+      expect(bottleneckReport.summary.totalBottlenecks).toBeGreaterThanOrEqual(
+        0,
+      );
       expect(executionReport.totalSuites).toBeGreaterThanOrEqual(0);
 
       // Validate that all components provide recommendations
-      expect(Array.isArray(performanceReport.optimizationOpportunities)).toBe(true);
-      expect(Array.isArray(bottleneckReport.prioritizedRecommendations)).toBe(true);
+      expect(Array.isArray(performanceReport.optimizationOpportunities)).toBe(
+        true,
+      );
+      expect(Array.isArray(bottleneckReport.prioritizedRecommendations)).toBe(
+        true,
+      );
       expect(Array.isArray(executionReport.recommendations)).toBe(true);
 
       console.log('📈 [INTEGRATION] Performance metrics validation completed:');
-      console.log(`  Framework metrics: ${performanceReport.summary.totalTests} tests`);
-      console.log(`  Bottleneck analysis: ${bottleneckReport.summary.totalBottlenecks} bottlenecks`);
-      console.log(`  Execution analysis: ${executionReport.totalSuites} suites`);
+      console.log(
+        `  Framework metrics: ${performanceReport.summary.totalTests} tests`,
+      );
+      console.log(
+        `  Bottleneck analysis: ${bottleneckReport.summary.totalBottlenecks} bottlenecks`,
+      );
+      console.log(
+        `  Execution analysis: ${executionReport.totalSuites} suites`,
+      );
     }, 10000);
   });
 
@@ -570,26 +688,44 @@ describe('Performance Testing Integration', () => {
 
       // Verify cleanup
       const performanceReport = performanceFramework.getPerformanceReport();
-      const bottleneckReport = performanceBottleneckAnalyzer.generateBottleneckReport();
+      const bottleneckReport =
+        performanceBottleneckAnalyzer.generateBottleneckReport();
       const executionReport = testExecutionValidator.getExecutionReport();
 
       // After cleanup, metrics should be minimal or empty
       expect(performanceReport.summary.totalTests).toBe(0);
       expect(bottleneckReport.summary.totalBottlenecks).toBe(0);
 
-      console.log('✅ [INTEGRATION] Performance testing cleanup completed successfully');
+      console.log(
+        '✅ [INTEGRATION] Performance testing cleanup completed successfully',
+      );
     }, 5000);
 
     it('should validate all performance testing components are working correctly', async () => {
-      console.log('✅ [INTEGRATION] Final validation of performance testing components...');
+      console.log(
+        '✅ [INTEGRATION] Final validation of performance testing components...',
+      );
 
       // Verify all components are responsive and functional
       const checks = [
-        { name: 'Performance Framework', test: () => performanceFramework.getPerformanceReport() },
-        { name: 'Bottleneck Analyzer', test: () => performanceBottleneckAnalyzer.generateBottleneckReport() },
-        { name: 'Execution Validator', test: () => testExecutionValidator.getExecutionReport() },
-        { name: 'Test Optimizer', test: () => createTestExecutionOptimizer().getOptimizationRecommendations() },
-        { name: 'CI Validator', test: () => createCIPerformanceValidator() }
+        {
+          name: 'Performance Framework',
+          test: () => performanceFramework.getPerformanceReport(),
+        },
+        {
+          name: 'Bottleneck Analyzer',
+          test: () => performanceBottleneckAnalyzer.generateBottleneckReport(),
+        },
+        {
+          name: 'Execution Validator',
+          test: () => testExecutionValidator.getExecutionReport(),
+        },
+        {
+          name: 'Test Optimizer',
+          test: () =>
+            createTestExecutionOptimizer().getOptimizationRecommendations(),
+        },
+        { name: 'CI Validator', test: () => createCIPerformanceValidator() },
       ];
 
       const results = [];
@@ -605,12 +741,16 @@ describe('Performance Testing Integration', () => {
         }
       }
 
-      const operationalCount = results.filter(r => r.status === 'operational').length;
+      const operationalCount = results.filter(
+        (r) => r.status === 'operational',
+      ).length;
       const totalCount = results.length;
 
       expect(operationalCount).toBe(totalCount);
 
-      console.log(`🎯 [INTEGRATION] Performance testing validation completed: ${operationalCount}/${totalCount} components operational`);
+      console.log(
+        `🎯 [INTEGRATION] Performance testing validation completed: ${operationalCount}/${totalCount} components operational`,
+      );
     }, 10000);
   });
 

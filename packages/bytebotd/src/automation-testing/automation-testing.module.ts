@@ -1,4 +1,12 @@
-import { Module } from '@nestjs/common';import { AutomationTestController } from './automation-test.controller';import { AutomationTestService } from './automation-test.service';import { FormAutomationModule } from '../form-automation/form-automation.module';import { DataExtractionModule } from '../data-extraction/data-extraction.module';import { WorkflowAutomationModule } from '../workflow-automation/workflow-automation.module';import { FileManagementModule } from '../file-management/file-management.module';import { ContentMonitoringModule } from '../content-monitoring/content-monitoring.module';import { ErrorHandlingModule } from '../common/error-handling/error-handling.module';
+import { Module } from '@nestjs/common';
+import { AutomationTestController } from './automation-test.controller';
+import { AutomationTestService } from './automation-test.service';
+import { FormAutomationModule } from '../form-automation/form-automation.module';
+import { DataExtractionModule } from '../data-extraction/data-extraction.module';
+import { WorkflowAutomationModule } from '../workflow-automation/workflow-automation.module';
+import { FileManagementModule } from '../file-management/file-management.module';
+import { ContentMonitoringModule } from '../content-monitoring/content-monitoring.module';
+import { ErrorHandlingModule } from '../common/error-handling/error-handling.module';
 
 /**
  * Automation Testing Module

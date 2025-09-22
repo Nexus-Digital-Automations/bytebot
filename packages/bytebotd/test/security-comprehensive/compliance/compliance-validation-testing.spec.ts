@@ -30,7 +30,7 @@ import {
   SecurityRiskLevel,
   SecurityTestUtils,
   ComplianceStandard,
-  ComplianceViolation
+  ComplianceViolation,
 } from '../framework/security-test-framework';
 
 // ===== COMPLIANCE TESTING INTERFACES =====
@@ -51,14 +51,14 @@ enum ComplianceTestMethod {
   CONFIGURATION_CHECK = 'CONFIGURATION_CHECK',
   POLICY_REVIEW = 'POLICY_REVIEW',
   AUDIT_TRAIL_ANALYSIS = 'AUDIT_TRAIL_ANALYSIS',
-  DATA_FLOW_ANALYSIS = 'DATA_FLOW_ANALYSIS'
+  DATA_FLOW_ANALYSIS = 'DATA_FLOW_ANALYSIS',
 }
 
 enum ComplianceCriticality {
   CRITICAL = 'CRITICAL',
   HIGH = 'HIGH',
   MEDIUM = 'MEDIUM',
-  LOW = 'LOW'
+  LOW = 'LOW',
 }
 
 interface ComplianceValidationCriteria {
@@ -85,7 +85,7 @@ enum ComplianceStatus {
   NON_COMPLIANT = 'NON_COMPLIANT',
   PARTIALLY_COMPLIANT = 'PARTIALLY_COMPLIANT',
   NOT_APPLICABLE = 'NOT_APPLICABLE',
-  REQUIRES_REVIEW = 'REQUIRES_REVIEW'
+  REQUIRES_REVIEW = 'REQUIRES_REVIEW',
 }
 
 interface ComplianceEvidence {
@@ -112,8 +112,8 @@ describe('Compliance Validation Testing Suite', () => {
       testMethod: ComplianceTestMethod.POLICY_REVIEW,
       criticality: ComplianceCriticality.CRITICAL,
       validationCriteria: {
-        expectedBehavior: 'Security policies documented and accessible'
-      }
+        expectedBehavior: 'Security policies documented and accessible',
+      },
     },
     {
       id: 'SOC2-CC2.1',
@@ -124,8 +124,8 @@ describe('Compliance Validation Testing Suite', () => {
       criticality: ComplianceCriticality.HIGH,
       validationCriteria: {
         auditEventType: 'data_access',
-        expectedBehavior: 'Comprehensive audit trails maintained'
-      }
+        expectedBehavior: 'Comprehensive audit trails maintained',
+      },
     },
     {
       id: 'SOC2-CC3.1',
@@ -136,8 +136,8 @@ describe('Compliance Validation Testing Suite', () => {
       criticality: ComplianceCriticality.HIGH,
       validationCriteria: {
         configurationKey: 'risk_assessment_enabled',
-        expectedBehavior: 'Risk assessment processes implemented'
-      }
+        expectedBehavior: 'Risk assessment processes implemented',
+      },
     },
 
     // GDPR Requirements
@@ -150,20 +150,22 @@ describe('Compliance Validation Testing Suite', () => {
       criticality: ComplianceCriticality.CRITICAL,
       validationCriteria: {
         dataClassification: 'personal_data',
-        expectedBehavior: 'Lawful basis documented for personal data processing'
-      }
+        expectedBehavior:
+          'Lawful basis documented for personal data processing',
+      },
     },
     {
       id: 'GDPR-Art17',
       standard: ComplianceStandard.GDPR,
       requirement: 'Right to Erasure',
-      description: 'Data subjects have right to erasure (right to be forgotten)',
+      description:
+        'Data subjects have right to erasure (right to be forgotten)',
       testMethod: ComplianceTestMethod.AUTOMATED_SCAN,
       criticality: ComplianceCriticality.HIGH,
       validationCriteria: {
         endpoint: '/api/users/delete',
-        expectedBehavior: 'Data deletion functionality implemented'
-      }
+        expectedBehavior: 'Data deletion functionality implemented',
+      },
     },
     {
       id: 'GDPR-Art32',
@@ -174,8 +176,8 @@ describe('Compliance Validation Testing Suite', () => {
       criticality: ComplianceCriticality.CRITICAL,
       validationCriteria: {
         configurationKey: 'encryption_at_rest',
-        expectedBehavior: 'Data encryption implemented'
-      }
+        expectedBehavior: 'Data encryption implemented',
+      },
     },
 
     // HIPAA Requirements
@@ -187,8 +189,8 @@ describe('Compliance Validation Testing Suite', () => {
       testMethod: ComplianceTestMethod.POLICY_REVIEW,
       criticality: ComplianceCriticality.CRITICAL,
       validationCriteria: {
-        expectedBehavior: 'Security officer assigned and documented'
-      }
+        expectedBehavior: 'Security officer assigned and documented',
+      },
     },
     {
       id: 'HIPAA-164.312',
@@ -199,8 +201,8 @@ describe('Compliance Validation Testing Suite', () => {
       criticality: ComplianceCriticality.CRITICAL,
       validationCriteria: {
         endpoint: '/api/health/records',
-        expectedBehavior: 'PHI access controls and encryption enforced'
-      }
+        expectedBehavior: 'PHI access controls and encryption enforced',
+      },
     },
 
     // PCI-DSS Requirements
@@ -213,8 +215,9 @@ describe('Compliance Validation Testing Suite', () => {
       criticality: ComplianceCriticality.CRITICAL,
       validationCriteria: {
         configurationKey: 'default_credentials_changed',
-        expectedBehavior: 'Default passwords changed and strong passwords enforced'
-      }
+        expectedBehavior:
+          'Default passwords changed and strong passwords enforced',
+      },
     },
     {
       id: 'PCI-DSS-3.4',
@@ -225,21 +228,23 @@ describe('Compliance Validation Testing Suite', () => {
       criticality: ComplianceCriticality.CRITICAL,
       validationCriteria: {
         dataClassification: 'payment_card_data',
-        expectedBehavior: 'Payment card data encrypted in storage and transit'
-      }
-    }
+        expectedBehavior: 'Payment card data encrypted in storage and transit',
+      },
+    },
   ];
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [AppModule],
-      providers: [SecurityTestFramework]
+      providers: [SecurityTestFramework],
     }).compile();
 
     app = module.createNestApplication();
     await app.init();
 
-    securityFramework = module.get<SecurityTestFramework>(SecurityTestFramework);
+    securityFramework = module.get<SecurityTestFramework>(
+      SecurityTestFramework,
+    );
     await securityFramework.initialize(module);
 
     configService = module.get<ConfigService>(ConfigService);
@@ -251,18 +256,20 @@ describe('Compliance Validation Testing Suite', () => {
   });
 
   describe('SOC 2 Type II Compliance Testing', () => {
-
     it('should validate SOC 2 security policies and procedures (CC1.1)', async () => {
       await securityFramework.executeSecurityTest(
         'SOC 2 Security Policies Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Check for security policy endpoints
-          const policyResponse = await request(app.getHttpServer())
-            .get('/api/security/policies');
+          const policyResponse = await request(app.getHttpServer()).get(
+            '/api/security/policies',
+          );
 
           if (policyResponse.status === 200) {
-            const responseBody = policyResponse.body as { policies?: unknown[] };
+            const responseBody = policyResponse.body as {
+              policies?: unknown[];
+            };
             expect(responseBody.policies).toBeDefined();
             expect(Array.isArray(responseBody.policies)).toBeTruthy();
             expect(responseBody.policies?.length ?? 0).toBeGreaterThan(0);
@@ -270,7 +277,7 @@ describe('Compliance Validation Testing Suite', () => {
             // Policy endpoint doesn't exist - this is a compliance gap
             expect(policyResponse.status).toBe(404);
           }
-        }
+        },
       );
     });
 
@@ -279,7 +286,10 @@ describe('Compliance Validation Testing Suite', () => {
         'SOC 2 Audit Trail Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const token = securityFramework.generateTestJWT({ userId: '123', role: 'admin' });
+          const token = securityFramework.generateTestJWT({
+            userId: '123',
+            role: 'admin',
+          });
 
           // Perform an auditable action
           const actionResponse = await request(app.getHttpServer())
@@ -288,7 +298,7 @@ describe('Compliance Validation Testing Suite', () => {
             .send({
               username: 'audituser',
               email: 'audit@test.com',
-              role: 'user'
+              role: 'user',
             });
 
           // Check if audit trail was generated
@@ -302,7 +312,7 @@ describe('Compliance Validation Testing Suite', () => {
             expect(responseBody.logs).toBeDefined();
             expect(Array.isArray(responseBody.logs)).toBeTruthy();
           }
-        }
+        },
       );
     });
 
@@ -312,8 +322,14 @@ describe('Compliance Validation Testing Suite', () => {
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test different user roles and their access
-          const userToken = securityFramework.generateTestJWT({ userId: '123', role: 'user' });
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const userToken = securityFramework.generateTestJWT({
+            userId: '123',
+            role: 'user',
+          });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // User should not access admin functions
           const userAdminResponse = await request(app.getHttpServer())
@@ -327,19 +343,21 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           expect([200, 404]).toContain(adminResponse.status);
-        }
+        },
       );
     });
   });
 
   describe('GDPR Compliance Testing', () => {
-
     it('should validate GDPR data subject rights implementation (Article 15-22)', async () => {
       await securityFramework.executeSecurityTest(
         'GDPR Data Subject Rights Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const token = securityFramework.generateTestJWT({ userId: '123', role: 'user' });
+          const token = securityFramework.generateTestJWT({
+            userId: '123',
+            role: 'user',
+          });
 
           // Test right to access (Article 15)
           const accessResponse = await request(app.getHttpServer())
@@ -347,7 +365,9 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (accessResponse.status === 200) {
-            const responseBody = accessResponse.body as { personalData?: unknown };
+            const responseBody = accessResponse.body as {
+              personalData?: unknown;
+            };
             expect(responseBody.personalData).toBeDefined();
           }
 
@@ -364,10 +384,12 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (portabilityResponse.status === 200) {
-            const responseBody = portabilityResponse.body as { exportData?: unknown };
+            const responseBody = portabilityResponse.body as {
+              exportData?: unknown;
+            };
             expect(responseBody.exportData).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -376,7 +398,10 @@ describe('Compliance Validation Testing Suite', () => {
         'GDPR Consent Management Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const token = securityFramework.generateTestJWT({ userId: '123', role: 'user' });
+          const token = securityFramework.generateTestJWT({
+            userId: '123',
+            role: 'user',
+          });
 
           // Test consent withdrawal
           const consentResponse = await request(app.getHttpServer())
@@ -384,11 +409,13 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`)
             .send({
               consentType: 'marketing',
-              granted: false
+              granted: false,
             });
 
           if (consentResponse.status === 200) {
-            const responseBody = consentResponse.body as { consentUpdated?: boolean };
+            const responseBody = consentResponse.body as {
+              consentUpdated?: boolean;
+            };
             expect(responseBody.consentUpdated).toBeTruthy();
           }
 
@@ -398,11 +425,13 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (historyResponse.status === 200) {
-            const responseBody = historyResponse.body as { consentHistory?: unknown[] };
+            const responseBody = historyResponse.body as {
+              consentHistory?: unknown[];
+            };
             expect(responseBody.consentHistory).toBeDefined();
             expect(Array.isArray(responseBody.consentHistory)).toBeTruthy();
           }
-        }
+        },
       );
     });
 
@@ -411,7 +440,10 @@ describe('Compliance Validation Testing Suite', () => {
         'GDPR Breach Notification Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Test breach reporting endpoint
           const breachResponse = await request(app.getHttpServer())
@@ -420,45 +452,54 @@ describe('Compliance Validation Testing Suite', () => {
             .send({
               breachType: 'data_exposure',
               affectedRecords: 100,
-              description: 'Test breach scenario'
+              description: 'Test breach scenario',
             });
 
           if (breachResponse.status === 201) {
-            const responseBody = breachResponse.body as { breachId?: string; notificationRequired?: boolean };
+            const responseBody = breachResponse.body as {
+              breachId?: string;
+              notificationRequired?: boolean;
+            };
             expect(responseBody.breachId).toBeDefined();
             expect(responseBody.notificationRequired).toBeDefined();
           }
-        }
+        },
       );
     });
   });
 
   describe('HIPAA Compliance Testing', () => {
-
     it('should validate HIPAA administrative safeguards (164.308)', async () => {
       await securityFramework.executeSecurityTest(
         'HIPAA Administrative Safeguards Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test security officer assignment
-          const securityOfficerResponse = await request(app.getHttpServer())
-            .get('/api/security/officer');
+          const securityOfficerResponse = await request(
+            app.getHttpServer(),
+          ).get('/api/security/officer');
 
           if (securityOfficerResponse.status === 200) {
-            const responseBody = securityOfficerResponse.body as { securityOfficer?: unknown; contact?: unknown };
+            const responseBody = securityOfficerResponse.body as {
+              securityOfficer?: unknown;
+              contact?: unknown;
+            };
             expect(responseBody.securityOfficer).toBeDefined();
             expect(responseBody.contact).toBeDefined();
           }
 
           // Test workforce training records
-          const trainingResponse = await request(app.getHttpServer())
-            .get('/api/security/training/records');
+          const trainingResponse = await request(app.getHttpServer()).get(
+            '/api/security/training/records',
+          );
 
           if (trainingResponse.status === 200) {
-            const responseBody = trainingResponse.body as { trainingRecords?: unknown };
+            const responseBody = trainingResponse.body as {
+              trainingRecords?: unknown;
+            };
             expect(responseBody.trainingRecords).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -468,23 +509,29 @@ describe('Compliance Validation Testing Suite', () => {
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test facility access controls
-          const facilityResponse = await request(app.getHttpServer())
-            .get('/api/security/facility/access');
+          const facilityResponse = await request(app.getHttpServer()).get(
+            '/api/security/facility/access',
+          );
 
           if (facilityResponse.status === 200) {
-            const responseBody = facilityResponse.body as { accessControls?: unknown };
+            const responseBody = facilityResponse.body as {
+              accessControls?: unknown;
+            };
             expect(responseBody.accessControls).toBeDefined();
           }
 
           // Test workstation use controls
-          const workstationResponse = await request(app.getHttpServer())
-            .get('/api/security/workstation/controls');
+          const workstationResponse = await request(app.getHttpServer()).get(
+            '/api/security/workstation/controls',
+          );
 
           if (workstationResponse.status === 200) {
-            const responseBody = workstationResponse.body as { workstationControls?: unknown };
+            const responseBody = workstationResponse.body as {
+              workstationControls?: unknown;
+            };
             expect(responseBody.workstationControls).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -493,7 +540,10 @@ describe('Compliance Validation Testing Suite', () => {
         'HIPAA Technical Safeguards Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const token = securityFramework.generateTestJWT({ userId: '123', role: 'healthcare_provider' });
+          const token = securityFramework.generateTestJWT({
+            userId: '123',
+            role: 'healthcare_provider',
+          });
 
           // Test PHI access controls
           const phiResponse = await request(app.getHttpServer())
@@ -501,7 +551,10 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (phiResponse.status === 200) {
-            const responseBody = phiResponse.body as { accessLogged?: boolean; encryptionApplied?: boolean };
+            const responseBody = phiResponse.body as {
+              accessLogged?: boolean;
+              encryptionApplied?: boolean;
+            };
             expect(responseBody.accessLogged).toBeTruthy();
             expect(responseBody.encryptionApplied).toBeTruthy();
           } else {
@@ -517,37 +570,43 @@ describe('Compliance Validation Testing Suite', () => {
             const responseBody = auditResponse.body as { auditLogs?: unknown };
             expect(responseBody.auditLogs).toBeDefined();
           }
-        }
+        },
       );
     });
   });
 
   describe('PCI-DSS Compliance Testing', () => {
-
     it('should validate PCI-DSS secure network controls (Requirement 1-2)', async () => {
       await securityFramework.executeSecurityTest(
         'PCI-DSS Network Security Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test firewall configuration
-          const firewallResponse = await request(app.getHttpServer())
-            .get('/api/security/firewall/status');
+          const firewallResponse = await request(app.getHttpServer()).get(
+            '/api/security/firewall/status',
+          );
 
           if (firewallResponse.status === 200) {
-            const responseBody = firewallResponse.body as { firewallEnabled?: boolean; defaultDeny?: boolean };
+            const responseBody = firewallResponse.body as {
+              firewallEnabled?: boolean;
+              defaultDeny?: boolean;
+            };
             expect(responseBody.firewallEnabled).toBeTruthy();
             expect(responseBody.defaultDeny).toBeTruthy();
           }
 
           // Test default password changes
-          const defaultsResponse = await request(app.getHttpServer())
-            .get('/api/security/defaults/status');
+          const defaultsResponse = await request(app.getHttpServer()).get(
+            '/api/security/defaults/status',
+          );
 
           if (defaultsResponse.status === 200) {
-            const responseBody = defaultsResponse.body as { defaultsChanged?: boolean };
+            const responseBody = defaultsResponse.body as {
+              defaultsChanged?: boolean;
+            };
             expect(responseBody.defaultsChanged).toBeTruthy();
           }
-        }
+        },
       );
     });
 
@@ -556,7 +615,10 @@ describe('Compliance Validation Testing Suite', () => {
         'PCI-DSS Data Protection Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const token = securityFramework.generateTestJWT({ userId: '123', role: 'payment_processor' });
+          const token = securityFramework.generateTestJWT({
+            userId: '123',
+            role: 'payment_processor',
+          });
 
           // Test cardholder data encryption
           const cardDataResponse = await request(app.getHttpServer())
@@ -565,11 +627,14 @@ describe('Compliance Validation Testing Suite', () => {
             .send({
               cardNumber: '4111111111111111',
               expiryDate: '12/25',
-              cvv: '123'
+              cvv: '123',
             });
 
           if (cardDataResponse.status === 200) {
-            const responseBody = cardDataResponse.body as { encryptionApplied?: boolean; dataRedacted?: boolean };
+            const responseBody = cardDataResponse.body as {
+              encryptionApplied?: boolean;
+              dataRedacted?: boolean;
+            };
             expect(responseBody.encryptionApplied).toBeTruthy();
             expect(responseBody.dataRedacted).toBeTruthy();
           }
@@ -580,10 +645,12 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (transmissionResponse.status === 200) {
-            const responseBody = transmissionResponse.body as { secureTransmission?: boolean };
+            const responseBody = transmissionResponse.body as {
+              secureTransmission?: boolean;
+            };
             expect(responseBody.secureTransmission).toBeTruthy();
           }
-        }
+        },
       );
     });
 
@@ -593,8 +660,14 @@ describe('Compliance Validation Testing Suite', () => {
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test role-based access
-          const userToken = securityFramework.generateTestJWT({ userId: '123', role: 'user' });
-          const paymentToken = securityFramework.generateTestJWT({ userId: '456', role: 'payment_processor' });
+          const userToken = securityFramework.generateTestJWT({
+            userId: '123',
+            role: 'user',
+          });
+          const paymentToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'payment_processor',
+          });
 
           // Regular user should not access payment functions
           const userPaymentResponse = await request(app.getHttpServer())
@@ -615,32 +688,38 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${paymentToken}`);
 
           if (identificationResponse.status === 200) {
-            const responseBody = identificationResponse.body as { uniqueId?: string };
+            const responseBody = identificationResponse.body as {
+              uniqueId?: string;
+            };
             expect(responseBody.uniqueId).toBeDefined();
           }
-        }
+        },
       );
     });
   });
 
   describe('ISO 27001 Compliance Testing', () => {
-
     it('should validate ISO 27001 information security policy (A.5.1)', async () => {
       await securityFramework.executeSecurityTest(
         'ISO 27001 Security Policy Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test security policy availability
-          const policyResponse = await request(app.getHttpServer())
-            .get('/api/security/policy/iso27001');
+          const policyResponse = await request(app.getHttpServer()).get(
+            '/api/security/policy/iso27001',
+          );
 
           if (policyResponse.status === 200) {
-            const responseBody = policyResponse.body as { policy?: unknown; lastUpdated?: unknown; approvedBy?: unknown };
+            const responseBody = policyResponse.body as {
+              policy?: unknown;
+              lastUpdated?: unknown;
+              approvedBy?: unknown;
+            };
             expect(responseBody.policy).toBeDefined();
             expect(responseBody.lastUpdated).toBeDefined();
             expect(responseBody.approvedBy).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -649,7 +728,10 @@ describe('Compliance Validation Testing Suite', () => {
         'ISO 27001 Risk Management Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Test risk assessment
           const riskResponse = await request(app.getHttpServer())
@@ -657,7 +739,10 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (riskResponse.status === 200) {
-            const responseBody = riskResponse.body as { riskAssessment?: unknown; riskRegister?: unknown };
+            const responseBody = riskResponse.body as {
+              riskAssessment?: unknown;
+              riskRegister?: unknown;
+            };
             expect(responseBody.riskAssessment).toBeDefined();
             expect(responseBody.riskRegister).toBeDefined();
           }
@@ -668,24 +753,26 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (treatmentResponse.status === 200) {
-            const responseBody = treatmentResponse.body as { riskTreatment?: unknown };
+            const responseBody = treatmentResponse.body as {
+              riskTreatment?: unknown;
+            };
             expect(responseBody.riskTreatment).toBeDefined();
           }
-        }
+        },
       );
     });
   });
 
   describe('NIST CSF Compliance Testing', () => {
-
     it('should validate NIST CSF identify function', async () => {
       await securityFramework.executeSecurityTest(
         'NIST CSF Identify Function Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test asset inventory
-          const assetsResponse = await request(app.getHttpServer())
-            .get('/api/security/assets/inventory');
+          const assetsResponse = await request(app.getHttpServer()).get(
+            '/api/security/assets/inventory',
+          );
 
           if (assetsResponse.status === 200) {
             const responseBody = assetsResponse.body as { assets?: unknown[] };
@@ -694,14 +781,17 @@ describe('Compliance Validation Testing Suite', () => {
           }
 
           // Test business environment
-          const environmentResponse = await request(app.getHttpServer())
-            .get('/api/security/business/environment');
+          const environmentResponse = await request(app.getHttpServer()).get(
+            '/api/security/business/environment',
+          );
 
           if (environmentResponse.status === 200) {
-            const responseBody = environmentResponse.body as { businessEnvironment?: unknown };
+            const responseBody = environmentResponse.body as {
+              businessEnvironment?: unknown;
+            };
             expect(responseBody.businessEnvironment).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -711,23 +801,29 @@ describe('Compliance Validation Testing Suite', () => {
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test access control
-          const accessResponse = await request(app.getHttpServer())
-            .get('/api/security/access/controls');
+          const accessResponse = await request(app.getHttpServer()).get(
+            '/api/security/access/controls',
+          );
 
           if (accessResponse.status === 200) {
-            const responseBody = accessResponse.body as { accessControls?: unknown };
+            const responseBody = accessResponse.body as {
+              accessControls?: unknown;
+            };
             expect(responseBody.accessControls).toBeDefined();
           }
 
           // Test data security
-          const dataSecurityResponse = await request(app.getHttpServer())
-            .get('/api/security/data/protection');
+          const dataSecurityResponse = await request(app.getHttpServer()).get(
+            '/api/security/data/protection',
+          );
 
           if (dataSecurityResponse.status === 200) {
-            const responseBody = dataSecurityResponse.body as { dataProtection?: unknown };
+            const responseBody = dataSecurityResponse.body as {
+              dataProtection?: unknown;
+            };
             expect(responseBody.dataProtection).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -736,7 +832,10 @@ describe('Compliance Validation Testing Suite', () => {
         'NIST CSF Detect/Respond/Recover Validation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Test detection capabilities
           const detectionResponse = await request(app.getHttpServer())
@@ -744,7 +843,9 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (detectionResponse.status === 200) {
-            const responseBody = detectionResponse.body as { detectionCapabilities?: unknown };
+            const responseBody = detectionResponse.body as {
+              detectionCapabilities?: unknown;
+            };
             expect(responseBody.detectionCapabilities).toBeDefined();
           }
 
@@ -754,7 +855,9 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (responseResponse.status === 200) {
-            const responseBody = responseResponse.body as { responseCapabilities?: unknown };
+            const responseBody = responseResponse.body as {
+              responseCapabilities?: unknown;
+            };
             expect(responseBody.responseCapabilities).toBeDefined();
           }
 
@@ -764,41 +867,50 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (recoveryResponse.status === 200) {
-            const responseBody = recoveryResponse.body as { recoveryProcedures?: unknown };
+            const responseBody = recoveryResponse.body as {
+              recoveryProcedures?: unknown;
+            };
             expect(responseBody.recoveryProcedures).toBeDefined();
           }
-        }
+        },
       );
     });
   });
 
   describe('Cross-Standard Compliance Validation', () => {
-
     it('should validate cross-standard compliance alignment', async () => {
       await securityFramework.executeSecurityTest(
         'Cross-Standard Compliance Alignment',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
           // Test alignment between different standards
-          const alignmentResponse = await request(app.getHttpServer())
-            .get('/api/compliance/alignment');
+          const alignmentResponse = await request(app.getHttpServer()).get(
+            '/api/compliance/alignment',
+          );
 
           if (alignmentResponse.status === 200) {
-            const responseBody = alignmentResponse.body as { standards?: unknown; commonControls?: unknown; gapAnalysis?: unknown };
+            const responseBody = alignmentResponse.body as {
+              standards?: unknown;
+              commonControls?: unknown;
+              gapAnalysis?: unknown;
+            };
             expect(responseBody.standards).toBeDefined();
             expect(responseBody.commonControls).toBeDefined();
             expect(responseBody.gapAnalysis).toBeDefined();
           }
 
           // Validate that security controls address multiple standards
-          const controlsResponse = await request(app.getHttpServer())
-            .get('/api/security/controls/mapping');
+          const controlsResponse = await request(app.getHttpServer()).get(
+            '/api/security/controls/mapping',
+          );
 
           if (controlsResponse.status === 200) {
-            const responseBody = controlsResponse.body as { controlMappings?: unknown };
+            const responseBody = controlsResponse.body as {
+              controlMappings?: unknown;
+            };
             expect(responseBody.controlMappings).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -807,7 +919,10 @@ describe('Compliance Validation Testing Suite', () => {
         'Comprehensive Compliance Report Generation',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           const reportResponse = await request(app.getHttpServer())
             .post('/api/compliance/report/generate')
@@ -815,17 +930,22 @@ describe('Compliance Validation Testing Suite', () => {
             .send({
               standards: ['SOC2_TYPE_II', 'GDPR', 'HIPAA', 'PCI_DSS'],
               includeEvidence: true,
-              includeRecommendations: true
+              includeRecommendations: true,
             });
 
           if (reportResponse.status === 200) {
-            const responseBody = reportResponse.body as { complianceReport?: unknown; complianceStatus?: unknown; violations?: unknown; recommendations?: unknown };
+            const responseBody = reportResponse.body as {
+              complianceReport?: unknown;
+              complianceStatus?: unknown;
+              violations?: unknown;
+              recommendations?: unknown;
+            };
             expect(responseBody.complianceReport).toBeDefined();
             expect(responseBody.complianceStatus).toBeDefined();
             expect(responseBody.violations).toBeDefined();
             expect(responseBody.recommendations).toBeDefined();
           }
-        }
+        },
       );
     });
   });

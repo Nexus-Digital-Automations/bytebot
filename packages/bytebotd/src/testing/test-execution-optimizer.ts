@@ -91,7 +91,11 @@ export interface OptimizationConfig {
 export interface TestExecutionPlan {
   readonly testGroups: TestGroup[];
   readonly executionOrder: string[];
-  readonly parallelizationStrategy: 'none' | 'file-level' | 'test-level' | 'adaptive';
+  readonly parallelizationStrategy:
+    | 'none'
+    | 'file-level'
+    | 'test-level'
+    | 'adaptive';
   readonly estimatedExecutionTime: number;
   readonly resourceRequirements: {
     memory: number;
@@ -158,7 +162,10 @@ export interface OptimizationMetrics {
 export class TestExecutionOptimizer extends EventEmitter {
   private readonly testCache: Map<string, TestCacheEntry> = new Map();
   private readonly dependencyGraph: Map<string, Set<string>> = new Map();
-  private readonly testMetrics: Map<string, { executionTime: number; memoryUsage: number; stability: number }> = new Map();
+  private readonly testMetrics: Map<
+    string,
+    { executionTime: number; memoryUsage: number; stability: number }
+  > = new Map();
   private readonly config: OptimizationConfig;
   private workerPool: WorkerProcess[] = [];
   private resourceMonitor: NodeJS.Timeout | null = null;
@@ -172,8 +179,12 @@ export class TestExecutionOptimizer extends EventEmitter {
   /**
    * Optimize test execution plan
    */
-  public async optimizeTestExecution(testFiles: string[]): Promise<TestExecutionPlan> {
-    console.log(`🚀 [OPTIMIZER] Optimizing test execution for ${testFiles.length} test files...`);
+  public async optimizeTestExecution(
+    testFiles: string[],
+  ): Promise<TestExecutionPlan> {
+    console.log(
+      `🚀 [OPTIMIZER] Optimizing test execution for ${testFiles.length} test files...`,
+    );
     const optimizationStart = performance.now();
     try {
       // Load historical metrics and cache
@@ -187,17 +198,25 @@ export class TestExecutionOptimizer extends EventEmitter {
       }
 
       // Create test groups for parallel execution
-      const testGroups = await this.createOptimalTestGroups(testFiles, dependencyMap);
+      const testGroups = await this.createOptimalTestGroups(
+        testFiles,
+        dependencyMap,
+      );
 
       // Determine execution order
       const executionOrder = this.calculateOptimalExecutionOrder(testGroups);
 
       // Determine parallelization strategy
-      const parallelizationStrategy = this.selectParallelizationStrategy(testGroups);
+      const parallelizationStrategy =
+        this.selectParallelizationStrategy(testGroups);
 
       // Estimate execution time and resource requirements
-      const estimatedExecutionTime = this.estimateExecutionTime(testGroups, parallelizationStrategy);
-      const resourceRequirements = this.calculateResourceRequirements(testGroups);
+      const estimatedExecutionTime = this.estimateExecutionTime(
+        testGroups,
+        parallelizationStrategy,
+      );
+      const resourceRequirements =
+        this.calculateResourceRequirements(testGroups);
 
       // Plan caching strategy
       const cacheStrategy = await this.planCacheStrategy(testFiles);
@@ -208,12 +227,14 @@ export class TestExecutionOptimizer extends EventEmitter {
         parallelizationStrategy,
         estimatedExecutionTime,
         resourceRequirements,
-        cacheStrategy
+        cacheStrategy,
       };
 
       const optimizationTime = performance.now() - optimizationStart;
 
-      console.log(`📊 [OPTIMIZER] Optimization completed in ${optimizationTime.toFixed(2)}ms:`);
+      console.log(
+        `📊 [OPTIMIZER] Optimization completed in ${optimizationTime.toFixed(2)}ms:`,
+      );
       console.log(`  Test groups: ${testGroups.length}`);
       console.log(`  Parallelization: ${parallelizationStrategy}`);
       console.log(`  Estimated time: ${estimatedExecutionTime.toFixed(2)}ms`);
@@ -223,7 +244,10 @@ export class TestExecutionOptimizer extends EventEmitter {
       this.emit('planOptimized', plan);
       return plan;
     } catch (error) {
-      console.error('❌ [OPTIMIZER] Test execution optimization failed:', error);
+      console.error(
+        '❌ [OPTIMIZER] Test execution optimization failed:',
+        error,
+      );
       throw error;
     }
   }
@@ -231,7 +255,9 @@ export class TestExecutionOptimizer extends EventEmitter {
   /**
    * Execute optimized test plan
    */
-  public async executeOptimizedPlan(plan: TestExecutionPlan): Promise<OptimizationMetrics> {
+  public async executeOptimizedPlan(
+    plan: TestExecutionPlan,
+  ): Promise<OptimizationMetrics> {
     console.log('🎯 [OPTIMIZER] Executing optimized test plan...');
 
     const executionStart = performance.now();
@@ -254,7 +280,9 @@ export class TestExecutionOptimizer extends EventEmitter {
       const executionTime = performance.now() - executionStart;
       const finalMemory = process.memoryUsage();
 
-      const originalExecutionTime = this.estimateOriginalExecutionTime(plan.testGroups);
+      const originalExecutionTime = this.estimateOriginalExecutionTime(
+        plan.testGroups,
+      );
       const timeSaved = Math.max(0, originalExecutionTime - executionTime);
 
       const metrics: OptimizationMetrics = {
@@ -262,20 +290,32 @@ export class TestExecutionOptimizer extends EventEmitter {
         optimizedExecutionTime: executionTime,
         timeSaved,
         cacheHitRate: this.calculateCacheHitRate(results),
-        parallelizationEfficiency: this.calculateParallelizationEfficiency(plan, executionTime),
-        memoryOptimization: ((initialMemory.heapUsed - finalMemory.heapUsed) / initialMemory.heapUsed) * 100,
+        parallelizationEfficiency: this.calculateParallelizationEfficiency(
+          plan,
+          executionTime,
+        ),
+        memoryOptimization:
+          ((initialMemory.heapUsed - finalMemory.heapUsed) /
+            initialMemory.heapUsed) *
+          100,
         resourceUtilization: {
           cpu: 75, // Simulated
           memory: (finalMemory.heapUsed / finalMemory.heapTotal) * 100,
-          workers: plan.resourceRequirements.workers
-        }
+          workers: plan.resourceRequirements.workers,
+        },
       };
 
       console.log(`✅ [OPTIMIZER] Execution completed with optimizations:`);
-      console.log(`  Time saved: ${metrics.timeSaved.toFixed(2)}ms (${((metrics.timeSaved / metrics.originalExecutionTime) * 100).toFixed(1)}%)`);
+      console.log(
+        `  Time saved: ${metrics.timeSaved.toFixed(2)}ms (${((metrics.timeSaved / metrics.originalExecutionTime) * 100).toFixed(1)}%)`,
+      );
       console.log(`  Cache hit rate: ${metrics.cacheHitRate.toFixed(1)}%`);
-      console.log(`  Parallelization efficiency: ${metrics.parallelizationEfficiency.toFixed(1)}%`);
-      console.log(`  Memory optimization: ${metrics.memoryOptimization.toFixed(1)}%`);
+      console.log(
+        `  Parallelization efficiency: ${metrics.parallelizationEfficiency.toFixed(1)}%`,
+      );
+      console.log(
+        `  Memory optimization: ${metrics.memoryOptimization.toFixed(1)}%`,
+      );
 
       this.emit('executionCompleted', metrics);
       return metrics;
@@ -343,7 +383,7 @@ export class TestExecutionOptimizer extends EventEmitter {
     return {
       memoryFreed,
       gcCollections,
-      optimizations
+      optimizations,
     };
   }
 
@@ -351,14 +391,24 @@ export class TestExecutionOptimizer extends EventEmitter {
    * Get optimization recommendations
    */
   public getOptimizationRecommendations(): Array<{
-    category: 'caching' | 'parallelization' | 'memory' | 'scheduling' | 'dependencies';
+    category:
+      | 'caching'
+      | 'parallelization'
+      | 'memory'
+      | 'scheduling'
+      | 'dependencies';
     recommendation: string;
     impact: 'high' | 'medium' | 'low';
     effort: 'low' | 'medium' | 'high';
     implementation: string;
   }> {
     const recommendations: Array<{
-      category: 'caching' | 'parallelization' | 'memory' | 'scheduling' | 'dependencies';
+      category:
+        | 'caching'
+        | 'parallelization'
+        | 'memory'
+        | 'scheduling'
+        | 'dependencies';
       recommendation: string;
       impact: 'high' | 'medium' | 'low';
       effort: 'low' | 'medium' | 'high';
@@ -366,11 +416,17 @@ export class TestExecutionOptimizer extends EventEmitter {
     }> = [];
 
     // Analyze current performance and suggest improvements
-    const avgTestTime = Array.from(this.testMetrics.values())
-      .reduce((sum, m) => sum + m.executionTime, 0) / (this.testMetrics.size || 1);
+    const avgTestTime =
+      Array.from(this.testMetrics.values()).reduce(
+        (sum, m) => sum + m.executionTime,
+        0,
+      ) / (this.testMetrics.size || 1);
 
-    const avgMemoryUsage = Array.from(this.testMetrics.values())
-      .reduce((sum, m) => sum + m.memoryUsage, 0) / (this.testMetrics.size || 1);
+    const avgMemoryUsage =
+      Array.from(this.testMetrics.values()).reduce(
+        (sum, m) => sum + m.memoryUsage,
+        0,
+      ) / (this.testMetrics.size || 1);
 
     // Caching recommendations
     if (!this.config.enableCaching) {
@@ -379,7 +435,7 @@ export class TestExecutionOptimizer extends EventEmitter {
         recommendation: 'Enable test result caching to skip unchanged tests',
         impact: 'high',
         effort: 'low',
-        implementation: 'Set enableCaching: true in optimization config'
+        implementation: 'Set enableCaching: true in optimization config',
       });
     }
 
@@ -390,18 +446,19 @@ export class TestExecutionOptimizer extends EventEmitter {
         recommendation: 'Increase parallel worker count for better performance',
         impact: 'high',
         effort: 'low',
-        implementation: 'Increase maxWorkers to match CPU cores'
+        implementation: 'Increase maxWorkers to match CPU cores',
       });
     }
 
     // Memory recommendations
-    if (avgMemoryUsage > 100 * 1024 * 1024) { // 100MB
+    if (avgMemoryUsage > 100 * 1024 * 1024) {
+      // 100MB
       recommendations.push({
         category: 'memory',
         recommendation: 'Optimize memory usage in tests',
         impact: 'medium',
         effort: 'medium',
-        implementation: 'Implement proper cleanup and reduce test data size'
+        implementation: 'Implement proper cleanup and reduce test data size',
       });
     }
 
@@ -412,7 +469,7 @@ export class TestExecutionOptimizer extends EventEmitter {
         recommendation: 'Optimize slow tests or implement better scheduling',
         impact: 'high',
         effort: 'medium',
-        implementation: 'Profile slow tests and optimize or mock dependencies'
+        implementation: 'Profile slow tests and optimize or mock dependencies',
       });
     }
 
@@ -423,7 +480,7 @@ export class TestExecutionOptimizer extends EventEmitter {
         recommendation: 'Reduce test dependencies for better parallelization',
         impact: 'medium',
         effort: 'high',
-        implementation: 'Refactor tests to reduce inter-test dependencies'
+        implementation: 'Refactor tests to reduce inter-test dependencies',
       });
     }
 
@@ -457,7 +514,9 @@ export class TestExecutionOptimizer extends EventEmitter {
   /**
    * Analyze test dependencies
    */
-  private async analyzeDependencies(testFiles: string[]): Promise<Map<string, string[]>> {
+  private async analyzeDependencies(
+    testFiles: string[],
+  ): Promise<Map<string, string[]>> {
     console.log('🔍 [OPTIMIZER] Analyzing test dependencies...');
     const dependencyMap = new Map<string, string[]>();
     for (const testFile of testFiles) {
@@ -471,15 +530,20 @@ export class TestExecutionOptimizer extends EventEmitter {
         if (!this.dependencyGraph.has(testFile)) {
           this.dependencyGraph.set(testFile, new Set());
         }
-        dependencies.forEach(dep => this.dependencyGraph.get(testFile)!.add(dep));
-
+        dependencies.forEach((dep) =>
+          this.dependencyGraph.get(testFile)!.add(dep),
+        );
       } catch (error) {
-        console.warn(`⚠️ [OPTIMIZER] Failed to analyze dependencies for ${testFile}: ${error}`);
+        console.warn(
+          `⚠️ [OPTIMIZER] Failed to analyze dependencies for ${testFile}: ${error}`,
+        );
         dependencyMap.set(testFile, []);
       }
     }
 
-    console.log(`📊 [OPTIMIZER] Dependency analysis completed: ${dependencyMap.size} files analyzed`);
+    console.log(
+      `📊 [OPTIMIZER] Dependency analysis completed: ${dependencyMap.size} files analyzed`,
+    );
     return dependencyMap;
   }
 
@@ -506,7 +570,9 @@ export class TestExecutionOptimizer extends EventEmitter {
       }
     }
 
-    return dependencies.filter(dep => !dep.startsWith('.') && !dep.startsWith('node_modules'));
+    return dependencies.filter(
+      (dep) => !dep.startsWith('.') && !dep.startsWith('node_modules'),
+    );
   }
 
   /**
@@ -514,7 +580,7 @@ export class TestExecutionOptimizer extends EventEmitter {
    */
   private async createOptimalTestGroups(
     testFiles: string[],
-    dependencyMap: Map<string, string[]>
+    dependencyMap: Map<string, string[]>,
   ): Promise<TestGroup[]> {
     console.log('🔄 [OPTIMIZER] Creating optimal test groups...');
 
@@ -536,10 +602,11 @@ export class TestExecutionOptimizer extends EventEmitter {
         id: `group_${testGroups.length}`,
         tests: [testFile],
         estimatedTime: this.testMetrics.get(testFile)?.executionTime || 1000,
-        memoryRequirement: this.testMetrics.get(testFile)?.memoryUsage || 50 * 1024 * 1024,
+        memoryRequirement:
+          this.testMetrics.get(testFile)?.memoryUsage || 50 * 1024 * 1024,
         dependencies: dependencyMap.get(testFile) || [],
         canRunInParallel: true,
-        priority: 'medium'
+        priority: 'medium',
       };
 
       testGroups.push(testGroup);
@@ -560,30 +627,48 @@ export class TestExecutionOptimizer extends EventEmitter {
   }
 
   private calculateOptimalExecutionOrder(testGroups: TestGroup[]): string[] {
-    return testGroups.map(group => group.id);
+    return testGroups.map((group) => group.id);
   }
 
-  private selectParallelizationStrategy(testGroups: TestGroup[]): 'none' | 'file-level' | 'test-level' | 'adaptive' {
+  private selectParallelizationStrategy(
+    testGroups: TestGroup[],
+  ): 'none' | 'file-level' | 'test-level' | 'adaptive' {
     return 'adaptive';
   }
 
-  private estimateExecutionTime(testGroups: TestGroup[], strategy: string): number {
+  private estimateExecutionTime(
+    testGroups: TestGroup[],
+    strategy: string,
+  ): number {
     return testGroups.reduce((sum, group) => sum + group.estimatedTime, 0);
   }
 
-  private calculateResourceRequirements(testGroups: TestGroup[]): { memory: number; cpu: number; workers: number } {
+  private calculateResourceRequirements(testGroups: TestGroup[]): {
+    memory: number;
+    cpu: number;
+    workers: number;
+  } {
     return {
-      memory: testGroups.reduce((sum, group) => sum + group.memoryRequirement, 0),
+      memory: testGroups.reduce(
+        (sum, group) => sum + group.memoryRequirement,
+        0,
+      ),
       cpu: 80,
-      workers: Math.min(this.config.maxWorkers, testGroups.length)
+      workers: Math.min(this.config.maxWorkers, testGroups.length),
     };
   }
 
-  private async planCacheStrategy(testFiles: string[]): Promise<{ enabled: boolean; cacheableTests: string[]; invalidatedTests: string[] }> {
+  private async planCacheStrategy(
+    testFiles: string[],
+  ): Promise<{
+    enabled: boolean;
+    cacheableTests: string[];
+    invalidatedTests: string[];
+  }> {
     return {
       enabled: this.config.enableCaching,
       cacheableTests: testFiles.filter(() => Math.random() > 0.3),
-      invalidatedTests: testFiles.filter(() => Math.random() < 0.2)
+      invalidatedTests: testFiles.filter(() => Math.random() < 0.2),
     };
   }
 
@@ -605,14 +690,19 @@ export class TestExecutionOptimizer extends EventEmitter {
   }
 
   private estimateOriginalExecutionTime(testGroups: TestGroup[]): number {
-    return testGroups.reduce((sum, group) => sum + group.estimatedTime, 0) * 1.2;
+    return (
+      testGroups.reduce((sum, group) => sum + group.estimatedTime, 0) * 1.2
+    );
   }
 
   private calculateCacheHitRate(results: any[]): number {
     return 75; // Placeholder
   }
 
-  private calculateParallelizationEfficiency(plan: TestExecutionPlan, executionTime: number): number {
+  private calculateParallelizationEfficiency(
+    plan: TestExecutionPlan,
+    executionTime: number,
+  ): number {
     return 85; // Placeholder
   }
 
@@ -637,8 +727,9 @@ export class TestExecutionOptimizer extends EventEmitter {
     const maxMetricsCount = 1000;
 
     if (this.testMetrics.size > maxMetricsCount) {
-      const sorted = Array.from(this.testMetrics.entries())
-        .sort((a, b) => b[1].stability - a[1].stability);
+      const sorted = Array.from(this.testMetrics.entries()).sort(
+        (a, b) => b[1].stability - a[1].stability,
+      );
 
       this.testMetrics.clear();
       sorted.slice(0, maxMetricsCount).forEach(([key, value]) => {
@@ -651,7 +742,9 @@ export class TestExecutionOptimizer extends EventEmitter {
 /**
  * Create optimized test execution optimizer
  */
-export function createTestExecutionOptimizer(config: Partial<OptimizationConfig> = {}): TestExecutionOptimizer {
+export function createTestExecutionOptimizer(
+  config: Partial<OptimizationConfig> = {},
+): TestExecutionOptimizer {
   const defaultConfig: OptimizationConfig = {
     enableCaching: true,
     enableParallelization: true,
@@ -663,7 +756,7 @@ export function createTestExecutionOptimizer(config: Partial<OptimizationConfig>
     resourceManagement: true,
     intelligentScheduling: true,
     adaptiveWorkerAllocation: true,
-    ...config
+    ...config,
   };
 
   return new TestExecutionOptimizer(defaultConfig);

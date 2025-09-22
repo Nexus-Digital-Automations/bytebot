@@ -126,13 +126,31 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   ) {
     // Initialize circuit breaker configuration
     this.config = {
-      failureThreshold: this.configService.get<number>('CIRCUIT_BREAKER_FAILURE_THRESHOLD', 5),
-      successThreshold: this.configService.get<number>('CIRCUIT_BREAKER_SUCCESS_THRESHOLD', 3),
+      failureThreshold: this.configService.get<number>(
+        'CIRCUIT_BREAKER_FAILURE_THRESHOLD',
+        5,
+      ),
+      successThreshold: this.configService.get<number>(
+        'CIRCUIT_BREAKER_SUCCESS_THRESHOLD',
+        3,
+      ),
       timeout: this.configService.get<number>('CIRCUIT_BREAKER_TIMEOUT', 60000), // 1 minute
-      responseTimeThreshold: this.configService.get<number>('CIRCUIT_BREAKER_RESPONSE_TIME_THRESHOLD', 5000), // 5 seconds
-      resetTimeout: this.configService.get<number>('CIRCUIT_BREAKER_RESET_TIMEOUT', 300000), // 5 minutes
-      fallbackEnabled: this.configService.get<boolean>('CIRCUIT_BREAKER_FALLBACK_ENABLED', true),
-      monitoringEnabled: this.configService.get<boolean>('CIRCUIT_BREAKER_MONITORING_ENABLED', true),
+      responseTimeThreshold: this.configService.get<number>(
+        'CIRCUIT_BREAKER_RESPONSE_TIME_THRESHOLD',
+        5000,
+      ), // 5 seconds
+      resetTimeout: this.configService.get<number>(
+        'CIRCUIT_BREAKER_RESET_TIMEOUT',
+        300000,
+      ), // 5 minutes
+      fallbackEnabled: this.configService.get<boolean>(
+        'CIRCUIT_BREAKER_FALLBACK_ENABLED',
+        true,
+      ),
+      monitoringEnabled: this.configService.get<boolean>(
+        'CIRCUIT_BREAKER_MONITORING_ENABLED',
+        true,
+      ),
     };
 
     // Initialize metrics
@@ -169,7 +187,10 @@ export class CircuitBreakerAuthGuard implements CanActivate {
 
     try {
       // Check if route is marked as public
-      const isPublic = this.reflector.get<boolean>('_isPublic', context.getHandler());
+      const isPublic = this.reflector.get<boolean>(
+        '_isPublic',
+        context.getHandler(),
+      );
       if (isPublic) {
         this.logger.debug(`Public route accessed: ${request.url}`);
         return true;
@@ -181,7 +202,9 @@ export class CircuitBreakerAuthGuard implements CanActivate {
         if (this.config.fallbackEnabled) {
           return await this.handleFallbackAuthentication(request, context);
         } else {
-          throw new ServiceUnavailableException('Authentication service temporarily unavailable');
+          throw new ServiceUnavailableException(
+            'Authentication service temporarily unavailable',
+          );
         }
       }
 
@@ -196,8 +219,8 @@ export class CircuitBreakerAuthGuard implements CanActivate {
         const executionTime = performance.now() - startTime;
         this.logger.debug(
           `Circuit breaker authentication successful: ${request.user.username} ` +
-          `[attemptId: ${attemptId}, executionTime: ${executionTime.toFixed(2)}ms, ` +
-          `state: ${this.metrics.state}]`
+            `[attemptId: ${attemptId}, executionTime: ${executionTime.toFixed(2)}ms, ` +
+            `state: ${this.metrics.state}]`,
         );
       }
 
@@ -214,9 +237,9 @@ export class CircuitBreakerAuthGuard implements CanActivate {
 
       this.logger.error(
         `Circuit breaker authentication failed: ${(error as Error).message} ` +
-        `[attemptId: ${attemptId}, executionTime: ${executionTime.toFixed(2)}ms, ` +
-        `state: ${this.metrics.state}]`,
-        (error as Error).stack
+          `[attemptId: ${attemptId}, executionTime: ${executionTime.toFixed(2)}ms, ` +
+          `state: ${this.metrics.state}]`,
+        (error as Error).stack,
       );
 
       throw error;
@@ -235,7 +258,8 @@ export class CircuitBreakerAuthGuard implements CanActivate {
 
       case CircuitBreakerState.OPEN:
         // Check if timeout has elapsed to move to half-open
-        const timeSinceStateChange = now - this.metrics.stateChangedAt.getTime();
+        const timeSinceStateChange =
+          now - this.metrics.stateChangedAt.getTime();
         if (timeSinceStateChange >= this.config.timeout) {
           this.changeState(CircuitBreakerState.HALF_OPEN);
           return true;
@@ -297,7 +321,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   ): Promise<boolean> {
     try {
       this.logger.warn(
-        `Circuit breaker OPEN - attempting fallback authentication for ${request.url}`
+        `Circuit breaker OPEN - attempting fallback authentication for ${request.url}`,
       );
 
       // Implement basic fallback authentication
@@ -324,16 +348,18 @@ export class CircuitBreakerAuthGuard implements CanActivate {
       }
 
       this.logger.debug(
-        `Fallback authentication successful for user: ${basicPayload.username}`
+        `Fallback authentication successful for user: ${basicPayload.username}`,
       );
 
       return true;
     } catch (error) {
       this.logger.error(
         `Fallback authentication failed: ${(error as Error).message}`,
-        (error as Error).stack
+        (error as Error).stack,
       );
-      throw new ServiceUnavailableException('Authentication service unavailable');
+      throw new ServiceUnavailableException(
+        'Authentication service unavailable',
+      );
     }
   }
 
@@ -353,7 +379,10 @@ export class CircuitBreakerAuthGuard implements CanActivate {
    */
   private async validateJwtToken(token: string): Promise<JWTPayload> {
     try {
-      const secret = this.configService.get<string>('JWT_SECRET_HS256', 'default-secret');
+      const secret = this.configService.get<string>(
+        'JWT_SECRET_HS256',
+        'default-secret',
+      );
       const payload = this.jwtService.verify(token, {
         secret,
         algorithms: ['HS256'],
@@ -381,7 +410,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
       if (parts.length !== 3) return null;
 
       const payload = JSON.parse(
-        Buffer.from(parts[1], 'base64url').toString()
+        Buffer.from(parts[1], 'base64url').toString(),
       ) as JWTPayload;
 
       // Basic checks
@@ -420,7 +449,8 @@ export class CircuitBreakerAuthGuard implements CanActivate {
       this.metrics.averageResponseTime = result.responseTime;
     } else {
       this.metrics.averageResponseTime =
-        (this.metrics.averageResponseTime * (this.metrics.totalAttempts - 1) + result.responseTime) /
+        (this.metrics.averageResponseTime * (this.metrics.totalAttempts - 1) +
+          result.responseTime) /
         this.metrics.totalAttempts;
     }
 
@@ -486,7 +516,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
 
     this.logger.warn(
       `Circuit breaker state changed: ${oldState} -> ${newState} ` +
-      `[failures: ${this.metrics.failureCount}, successes: ${this.metrics.successCount}]`
+        `[failures: ${this.metrics.failureCount}, successes: ${this.metrics.successCount}]`,
     );
   }
 
@@ -505,7 +535,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
     if (oldFailures > 0 || oldSuccesses > 0) {
       this.logger.debug(
         `Circuit breaker metrics reset: failures ${oldFailures} -> ${this.metrics.failureCount}, ` +
-        `successes ${oldSuccesses} -> ${this.metrics.successCount}`
+          `successes ${oldSuccesses} -> ${this.metrics.successCount}`,
       );
     }
   }
@@ -514,18 +544,19 @@ export class CircuitBreakerAuthGuard implements CanActivate {
    * Log circuit breaker metrics
    */
   private logMetrics(lastResult: AuthAttemptResult): void {
-    const successRate = this.metrics.totalAttempts > 0
-      ? (this.metrics.successCount / this.metrics.totalAttempts) * 100
-      : 0;
+    const successRate =
+      this.metrics.totalAttempts > 0
+        ? (this.metrics.successCount / this.metrics.totalAttempts) * 100
+        : 0;
 
     this.logger.debug(
       `Circuit Breaker Metrics - State: ${this.metrics.state}, ` +
-      `Success Rate: ${successRate.toFixed(1)}%, ` +
-      `Avg Response Time: ${this.metrics.averageResponseTime.toFixed(2)}ms, ` +
-      `Failures: ${this.metrics.failureCount}, ` +
-      `Successes: ${this.metrics.successCount}, ` +
-      `Last Result: ${lastResult.success ? 'SUCCESS' : 'FAILURE'} ` +
-      `(${lastResult.responseTime.toFixed(2)}ms)`
+        `Success Rate: ${successRate.toFixed(1)}%, ` +
+        `Avg Response Time: ${this.metrics.averageResponseTime.toFixed(2)}ms, ` +
+        `Failures: ${this.metrics.failureCount}, ` +
+        `Successes: ${this.metrics.successCount}, ` +
+        `Last Result: ${lastResult.success ? 'SUCCESS' : 'FAILURE'} ` +
+        `(${lastResult.responseTime.toFixed(2)}ms)`,
     );
   }
 
@@ -568,12 +599,14 @@ export class CircuitBreakerAuthGuard implements CanActivate {
     averageResponseTime: number;
     lastFailure?: Date;
   } {
-    const successRate = this.metrics.totalAttempts > 0
-      ? (this.metrics.successCount / this.metrics.totalAttempts) * 100
-      : 100;
+    const successRate =
+      this.metrics.totalAttempts > 0
+        ? (this.metrics.successCount / this.metrics.totalAttempts) * 100
+        : 100;
 
     return {
-      healthy: this.metrics.state === CircuitBreakerState.CLOSED && successRate > 80,
+      healthy:
+        this.metrics.state === CircuitBreakerState.CLOSED && successRate > 80,
       state: this.metrics.state,
       successRate,
       averageResponseTime: this.metrics.averageResponseTime,

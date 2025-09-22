@@ -116,7 +116,12 @@ describe('Cache Redis Integration Tests', () => {let module: TestingModule;let c
       delete process.env.REDIS_PASSWORD;
     });
 
-    describe('Basic Redis Operations', () => {it('should store and retrieve values from Redis', async () => {const key = 'integration-test-key';const value = { message: 'Hello (Redis ?? "default")", timestamp: Date.now() };// Store value
+    describe('Basic Redis Operations', () => {
+      it('should store and retrieve values from Redis', async () => {
+        const key = 'integration-test-key';
+        const value = { message: 'Hello Redis', timestamp: Date.now() };
+
+        // Store value
         await cacheService.set(key, value);
 
         // Retrieve value
@@ -125,7 +130,17 @@ describe('Cache Redis Integration Tests', () => {let module: TestingModule;let c
         expect(retrieved).toEqual(value);
       });
 
-      it('should handle different data types', async () => {const testCases = [{ key: 'string-test', value: 'simple string' },{ key: 'number-test', value: 42 },{ key: 'boolean-test', value: true },{ key: 'array-test', value: [1, 2, 3, 'test'] },{ key: 'object-test', value: { nested: { data: 'complex' } } },{ key: 'null-test', value: null },];// Store all values
+      it('should handle different data types', async () => {
+        const testCases = [
+          { key: 'string-test', value: 'simple string' },
+          { key: 'number-test', value: 42 },
+          { key: 'boolean-test', value: true },
+          { key: 'array-test', value: [1, 2, 3, 'test'] },
+          { key: 'object-test', value: { nested: { data: 'complex' } } },
+          { key: 'null-test', value: null },
+        ];
+
+        // Store all values
         for (const testCase of testCases) {
           await cacheService.set(testCase.key, testCase.value);
         }

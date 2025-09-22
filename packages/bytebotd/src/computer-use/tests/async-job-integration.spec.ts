@@ -76,8 +76,12 @@ describe('Async Job System Integration', () => {
     await app.init();
 
     asyncJobService = moduleFixture.get<AsyncJobService>(AsyncJobService);
-    enhancedAsyncJobService = moduleFixture.get<EnhancedAsyncJobService>(EnhancedAsyncJobService);
-    cancellationService = moduleFixture.get<JobCancellationTimeoutService>(JobCancellationTimeoutService);
+    enhancedAsyncJobService = moduleFixture.get<EnhancedAsyncJobService>(
+      EnhancedAsyncJobService,
+    );
+    cancellationService = moduleFixture.get<JobCancellationTimeoutService>(
+      JobCancellationTimeoutService,
+    );
     jobEventsGateway = moduleFixture.get<JobEventsGateway>(JobEventsGateway);
   });
 
@@ -117,7 +121,9 @@ describe('Async Job System Integration', () => {
 
       const jobStatus: JobStatusResponseDto = statusResponse.body;
       expect(jobStatus.jobId).toBe(jobSubmission.jobId);
-      expect([JobStatus.PENDING, JobStatus.IN_PROGRESS]).toContain(jobStatus.status);
+      expect([JobStatus.PENDING, JobStatus.IN_PROGRESS]).toContain(
+        jobStatus.status,
+      );
 
       // 3. Wait for job completion
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -145,7 +151,9 @@ describe('Async Job System Integration', () => {
 
     it('should handle job failure scenarios', async () => {
       // Mock computer action failure
-      mockComputerUseService.action.mockRejectedValue(new Error('Action execution failed'));
+      mockComputerUseService.action.mockRejectedValue(
+        new Error('Action execution failed'),
+      );
 
       const actionDto: ComputerActionDto = {
         action: 'click',
@@ -282,7 +290,11 @@ describe('Async Job System Integration', () => {
           .expect(200);
 
         const jobStatus: JobStatusResponseDto = statusResponse.body;
-        expect([JobStatus.CANCELLED, JobStatus.PENDING, JobStatus.IN_PROGRESS]).toContain(jobStatus.status);
+        expect([
+          JobStatus.CANCELLED,
+          JobStatus.PENDING,
+          JobStatus.IN_PROGRESS,
+        ]).toContain(jobStatus.status);
       }
     });
 
@@ -301,7 +313,9 @@ describe('Async Job System Integration', () => {
 
       // Configure timeout for the job
       const timeoutResponse = await request(app.getHttpServer())
-        .post(`/computer-use/cancellation/${jobSubmission.jobId}/timeout-config`)
+        .post(
+          `/computer-use/cancellation/${jobSubmission.jobId}/timeout-config`,
+        )
         .send({
           softTimeoutMs: 5000,
           hardTimeoutMs: 10000,
@@ -532,7 +546,9 @@ describe('Async Job System Integration', () => {
       const jobSubmission: JobSubmissionResponseDto = submitResponse.body;
 
       await request(app.getHttpServer())
-        .post(`/computer-use/cancellation/${jobSubmission.jobId}/timeout-config`)
+        .post(
+          `/computer-use/cancellation/${jobSubmission.jobId}/timeout-config`,
+        )
         .send({
           softTimeoutMs: 10000,
           hardTimeoutMs: 5000, // Invalid: hard timeout less than soft timeout
@@ -598,8 +614,9 @@ describe('Async Job System Integration', () => {
       // Rapidly poll job status
       const statusPromises: Promise<any>[] = [];
       for (let i = 0; i < 10; i++) {
-        const promise = request(app.getHttpServer())
-          .get(`/computer-use/status/${jobSubmission.jobId}`);
+        const promise = request(app.getHttpServer()).get(
+          `/computer-use/status/${jobSubmission.jobId}`,
+        );
         statusPromises.push(promise);
       }
 
@@ -654,7 +671,7 @@ describe('Async Job System Integration', () => {
       const statusChecks = jobSubmissions.map((submission) =>
         request(app.getHttpServer())
           .get(`/computer-use/status/${submission.body.jobId}`)
-          .expect(200)
+          .expect(200),
       );
 
       const statusResults = await Promise.all(statusChecks);

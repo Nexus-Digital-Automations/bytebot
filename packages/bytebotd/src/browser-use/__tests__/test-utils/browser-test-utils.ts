@@ -112,11 +112,14 @@ export class MockBrowserUseServiceFactory {
       },
     }));
 
-    mock.executeInteraction.mockImplementation(async (sessionId, interaction) => ({
-      success: true,
-      data: { result: `${interaction.type} executed successfully` },
-      screenshot: interaction.type === 'screenshot' ? 'base64screenshot' : undefined,
-    }));
+    mock.executeInteraction.mockImplementation(
+      async (sessionId, interaction) => ({
+        success: true,
+        data: { result: `${interaction.type} executed successfully` },
+        screenshot:
+          interaction.type === 'screenshot' ? 'base64screenshot' : undefined,
+      }),
+    );
 
     mock.getHealthStatus.mockImplementation(() => ({
       success: true,
@@ -162,15 +165,17 @@ export class MockBrowserInteractionServiceFactory {
       message: `Text typed in ${selector} successfully`,
     }));
 
-    mock.performInteraction.mockImplementation(async (type, selector, sessionId, options) => ({
-      data: { success: true, result: `${type} interaction completed` },
-      elementInfo: {
-        tagName: 'BUTTON',
-        id: selector.replace('#', ''),
-        className: 'test-element',
-      },
-      screenshot: options?.captureScreenshot ? 'base64screenshot' : undefined,
-    }));
+    mock.performInteraction.mockImplementation(
+      async (type, selector, sessionId, options) => ({
+        data: { success: true, result: `${type} interaction completed` },
+        elementInfo: {
+          tagName: 'BUTTON',
+          id: selector.replace('#', ''),
+          className: 'test-element',
+        },
+        screenshot: options?.captureScreenshot ? 'base64screenshot' : undefined,
+      }),
+    );
 
     return mock;
   }
@@ -355,7 +360,9 @@ export class BrowserTestDataGenerator {
     };
   }
 
-  static generateMockBrowserSession(overrides: Partial<MockBrowserSession> = {}): MockBrowserSession {
+  static generateMockBrowserSession(
+    overrides: Partial<MockBrowserSession> = {},
+  ): MockBrowserSession {
     return {
       sessionId: uuidv4(),
       status: 'active',
@@ -372,7 +379,9 @@ export class BrowserTestDataGenerator {
     };
   }
 
-  static generateMockBrowserTask(overrides: Partial<MockBrowserTask> = {}): MockBrowserTask {
+  static generateMockBrowserTask(
+    overrides: Partial<MockBrowserTask> = {},
+  ): MockBrowserTask {
     return {
       taskId: uuidv4(),
       sessionId: 'test-session-123',
@@ -432,7 +441,7 @@ export class PerformanceTestUtils {
    */
   static async measurePerformance<T>(
     operation: () => Promise<T>,
-    iterations: number = 1
+    iterations: number = 1,
   ): Promise<{ result: T; metrics: TestPerformanceMetrics }> {
     const memoryBefore = process.memoryUsage();
     const startTime = performance.now();
@@ -469,7 +478,7 @@ export class PerformanceTestUtils {
    */
   static async measureConcurrentPerformance<T>(
     operation: () => Promise<T>,
-    concurrency: number
+    concurrency: number,
   ): Promise<{
     results: T[];
     metrics: {
@@ -484,30 +493,33 @@ export class PerformanceTestUtils {
     const memoryBefore = process.memoryUsage();
     const startTime = performance.now();
 
-    const operations = Array(concurrency).fill(null).map(async () => {
-      const opStart = performance.now();
-      try {
-        const result = await operation();
-        const opEnd = performance.now();
-        return { success: true, result, duration: opEnd - opStart };
-      } catch (error) {
-        const opEnd = performance.now();
-        return { success: false, error, duration: opEnd - opStart };
-      }
-    });
+    const operations = Array(concurrency)
+      .fill(null)
+      .map(async () => {
+        const opStart = performance.now();
+        try {
+          const result = await operation();
+          const opEnd = performance.now();
+          return { success: true, result, duration: opEnd - opStart };
+        } catch (error) {
+          const opEnd = performance.now();
+          return { success: false, error, duration: opEnd - opStart };
+        }
+      });
 
     const outcomes = await Promise.all(operations);
     const endTime = performance.now();
     const memoryAfter = process.memoryUsage();
 
-    const successful = outcomes.filter(o => o.success);
-    const durations = outcomes.map(o => o.duration);
+    const successful = outcomes.filter((o) => o.success);
+    const durations = outcomes.map((o) => o.duration);
 
     return {
-      results: successful.map(o => o.result),
+      results: successful.map((o) => o.result),
       metrics: {
         totalDuration: endTime - startTime,
-        averageDuration: durations.reduce((a, b) => a + b, 0) / durations.length,
+        averageDuration:
+          durations.reduce((a, b) => a + b, 0) / durations.length,
         minDuration: Math.min(...durations),
         maxDuration: Math.max(...durations),
         memoryDelta: memoryAfter.heapUsed - memoryBefore.heapUsed,
@@ -524,17 +536,23 @@ export class PerformanceTestUtils {
     requirements: {
       maxDuration?: number;
       maxMemoryIncrease?: number;
-    }
+    },
   ): void {
-    if (requirements.maxDuration && metrics.duration > requirements.maxDuration) {
+    if (
+      requirements.maxDuration &&
+      metrics.duration > requirements.maxDuration
+    ) {
       throw new Error(
-        `Performance requirement failed: Duration ${metrics.duration}ms exceeds limit ${requirements.maxDuration}ms`
+        `Performance requirement failed: Duration ${metrics.duration}ms exceeds limit ${requirements.maxDuration}ms`,
       );
     }
 
-    if (requirements.maxMemoryIncrease && metrics.memoryUsage.delta.heapUsed > requirements.maxMemoryIncrease) {
+    if (
+      requirements.maxMemoryIncrease &&
+      metrics.memoryUsage.delta.heapUsed > requirements.maxMemoryIncrease
+    ) {
       throw new Error(
-        `Performance requirement failed: Memory increase ${metrics.memoryUsage.delta.heapUsed} bytes exceeds limit ${requirements.maxMemoryIncrease} bytes`
+        `Performance requirement failed: Memory increase ${metrics.memoryUsage.delta.heapUsed} bytes exceeds limit ${requirements.maxMemoryIncrease} bytes`,
       );
     }
   }
@@ -549,7 +567,7 @@ export class SecurityTestUtils {
    */
   static testInputSanitization(
     operation: (input: string) => Promise<any>,
-    payloads: string[]
+    payloads: string[],
   ): Promise<{ payload: string; result: any; safe: boolean }[]> {
     return Promise.all(
       payloads.map(async (payload) => {
@@ -562,14 +580,17 @@ export class SecurityTestUtils {
           // Errors might indicate proper security measures
           return { payload, result: error, safe: true };
         }
-      })
+      }),
     );
   }
 
   /**
    * Check if output contains malicious content
    */
-  private static containsMaliciousOutput(output: any, originalPayload: string): boolean {
+  private static containsMaliciousOutput(
+    output: any,
+    originalPayload: string,
+  ): boolean {
     const outputStr = JSON.stringify(output).toLowerCase();
     const payloadLower = originalPayload.toLowerCase();
 
@@ -585,8 +606,9 @@ export class SecurityTestUtils {
       '..\\',
     ];
 
-    return dangerousPatterns.some(pattern =>
-      payloadLower.includes(pattern) && outputStr.includes(pattern)
+    return dangerousPatterns.some(
+      (pattern) =>
+        payloadLower.includes(pattern) && outputStr.includes(pattern),
     );
   }
 
@@ -596,7 +618,7 @@ export class SecurityTestUtils {
   static async testRateLimit(
     operation: () => Promise<any>,
     requestCount: number,
-    timeWindow: number
+    timeWindow: number,
   ): Promise<{
     totalRequests: number;
     successfulRequests: number;
@@ -604,20 +626,22 @@ export class SecurityTestUtils {
     rateLimitEffective: boolean;
   }> {
     const startTime = Date.now();
-    const promises = Array(requestCount).fill(null).map(async () => {
-      try {
-        await operation();
-        return { success: true };
-      } catch (error) {
-        return { success: false, error };
-      }
-    });
+    const promises = Array(requestCount)
+      .fill(null)
+      .map(async () => {
+        try {
+          await operation();
+          return { success: true };
+        } catch (error) {
+          return { success: false, error };
+        }
+      });
 
     const results = await Promise.all(promises);
     const endTime = Date.now();
     const actualDuration = endTime - startTime;
 
-    const successful = results.filter(r => r.success).length;
+    const successful = results.filter((r) => r.success).length;
     const blocked = results.length - successful;
 
     // Rate limiting is effective if some requests were blocked
@@ -649,7 +673,8 @@ export const browserTestMatchers = {
 
   toHaveValidTiming(received: any) {
     const timing = received?.timing || received;
-    const isValid = timing &&
+    const isValid =
+      timing &&
       typeof timing.startTime === 'number' &&
       typeof timing.endTime === 'number' &&
       typeof timing.duration === 'number' &&
@@ -657,7 +682,8 @@ export const browserTestMatchers = {
       timing.duration === timing.endTime - timing.startTime;
 
     return {
-      message: () => `Expected ${JSON.stringify(received)} to have valid timing information`,
+      message: () =>
+        `Expected ${JSON.stringify(received)} to have valid timing information`,
       pass: isValid,
     };
   },
@@ -666,7 +692,8 @@ export const browserTestMatchers = {
     const isWithin = received <= threshold;
 
     return {
-      message: () => `Expected ${received}ms to be within performance threshold of ${threshold}ms`,
+      message: () =>
+        `Expected ${received}ms to be within performance threshold of ${threshold}ms`,
       pass: isWithin,
     };
   },
@@ -676,12 +703,13 @@ export const browserTestMatchers = {
     const inputLower = originalInput.toLowerCase();
 
     const dangerousPatterns = ['<script', 'javascript:', 'onerror='];
-    const containsDangerous = dangerousPatterns.some(pattern =>
-      inputLower.includes(pattern) && outputStr.includes(pattern)
+    const containsDangerous = dangerousPatterns.some(
+      (pattern) => inputLower.includes(pattern) && outputStr.includes(pattern),
     );
 
     return {
-      message: () => `Expected output to not contain dangerous patterns from input: ${originalInput}`,
+      message: () =>
+        `Expected output to not contain dangerous patterns from input: ${originalInput}`,
       pass: !containsDangerous,
     };
   },
@@ -691,25 +719,33 @@ export const browserTestMatchers = {
  * Test module builder with common configurations
  */
 export class BrowserTestModuleBuilder {
-  static async createTestModule(options: {
-    mockBrowserUseService?: any;
-    mockBrowserInteractionService?: any;
-    mockBrowserSessionService?: any;
-    enableLogging?: boolean;
-  } = {}): Promise<TestingModule> {
+  static async createTestModule(
+    options: {
+      mockBrowserUseService?: any;
+      mockBrowserInteractionService?: any;
+      mockBrowserSessionService?: any;
+      enableLogging?: boolean;
+    } = {},
+  ): Promise<TestingModule> {
     const module = await Test.createTestingModule({
       providers: [
         {
           provide: 'BrowserUseService',
-          useValue: options.mockBrowserUseService || MockBrowserUseServiceFactory.createWithDefaults(),
+          useValue:
+            options.mockBrowserUseService ||
+            MockBrowserUseServiceFactory.createWithDefaults(),
         },
         {
           provide: 'BrowserInteractionService',
-          useValue: options.mockBrowserInteractionService || MockBrowserInteractionServiceFactory.createWithDefaults(),
+          useValue:
+            options.mockBrowserInteractionService ||
+            MockBrowserInteractionServiceFactory.createWithDefaults(),
         },
         {
           provide: 'BrowserSessionService',
-          useValue: options.mockBrowserSessionService || MockBrowserSessionServiceFactory.createWithDefaults(),
+          useValue:
+            options.mockBrowserSessionService ||
+            MockBrowserSessionServiceFactory.createWithDefaults(),
         },
       ],
     }).compile();
@@ -741,11 +777,15 @@ export class TestCleanupUtils {
     }
   }
 
-  static async waitFor(condition: () => boolean, timeout: number = 5000, interval: number = 100): Promise<void> {
+  static async waitFor(
+    condition: () => boolean,
+    timeout: number = 5000,
+    interval: number = 100,
+  ): Promise<void> {
     const startTime = Date.now();
 
     while (!condition() && Date.now() - startTime < timeout) {
-      await new Promise(resolve => setTimeout(resolve, interval));
+      await new Promise((resolve) => setTimeout(resolve, interval));
     }
 
     if (!condition()) {

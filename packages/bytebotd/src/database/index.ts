@@ -54,9 +54,7 @@ export {
   type RepositoryOperationContext,
   type BusinessValidationResult,
 } from './repositories/base-conversational-repository.service';
-export {
-  type UserOperationContext,
-} from './repositories/user-conversational-repository.service';
+export { type UserOperationContext } from './repositories/user-conversational-repository.service';
 
 // ===== EXAMPLES AND INTEGRATION =====
 export {
@@ -127,7 +125,10 @@ export function createOperationContext(
     userId,
     userRole,
     businessPurpose,
-    sessionId: additional?.sessionId ?? `session_${Date.now()}`,correlationId: additional?.correlationId ?? `op_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    sessionId: additional?.sessionId ?? `session_${Date.now()}`,
+    correlationId:
+      additional?.correlationId ??
+      `op_${Date.now()}_${Math.random().toString(36).substring(7)}`,
     metadata: additional?.metadata ?? {},
     ...additional,
   };
@@ -197,15 +198,35 @@ export function createDefaultValidationConfig(): ConversationalValidationConfig 
  * Sanitize operation data for logging (remove sensitive information)
  */
 export function sanitizeOperationData(data: unknown): unknown {
-  if (!data || typeof data !== 'object') {return data;}
+  if (!data || typeof data !== 'object') {
+    return data;
+  }
 
   const sensitiveFields = [
-    'password','passwordHash','token','secret','key','apiKey','accessToken','refreshToken','sessionToken','authToken','privateKey','publicKey','salt','hash',];const sanitized = { ...data as Record<string, unknown> };
+    'password',
+    'passwordHash',
+    'token',
+    'secret',
+    'key',
+    'apiKey',
+    'accessToken',
+    'refreshToken',
+    'sessionToken',
+    'authToken',
+    'privateKey',
+    'publicKey',
+    'salt',
+    'hash',
+  ];
+  const sanitized = { ...(data as Record<string, unknown>) };
 
-  Object.keys(sanitized).forEach(key => {
+  Object.keys(sanitized).forEach((key) => {
     const lowerKey = key.toLowerCase();
-    if (sensitiveFields.some(field => lowerKey.includes(field))) {
-      sanitized[key] = '[REDACTED]';} else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {sanitized[key] = sanitizeOperationData(sanitized[key]);}
+    if (sensitiveFields.some((field) => lowerKey.includes(field))) {
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
+      sanitized[key] = sanitizeOperationData(sanitized[key]);
+    }
   });
 
   return sanitized;
@@ -224,11 +245,18 @@ export function validateOperationContext(context: StandardOperationContext): {
 
   // Required fields
   if (!context.userId) {
-    errors.push('userId is required');}if (!context.userRole) {
-    errors.push('userRole is required');}if (!context.businessPurpose) {
-    errors.push('businessPurpose is required');}// Warnings for missing optional fields
+    errors.push('userId is required');
+  }
+  if (!context.userRole) {
+    errors.push('userRole is required');
+  }
+  if (!context.businessPurpose) {
+    errors.push('businessPurpose is required');
+  } // Warnings for missing optional fields
   if (!context.sessionId) {
-    warnings.push('sessionId not provided - using generated value');}if (!context.correlationId) {
+    warnings.push('sessionId not provided - using generated value');
+  }
+  if (!context.correlationId) {
     warnings.push('correlationId not provided - using generated value');
   }
 

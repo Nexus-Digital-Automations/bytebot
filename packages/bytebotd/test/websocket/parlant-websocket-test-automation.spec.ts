@@ -33,9 +33,7 @@ import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
 import { EventEmitter } from 'events';
 import * as fs from 'fs/promises';
-import {
-  ConversationalWebSocketBridgeService,
-} from '../../src/common/websocket/conversational-websocket-bridge.service';
+import { ConversationalWebSocketBridgeService } from '../../src/common/websocket/conversational-websocket-bridge.service';
 import { ParlantWebSocketIntegrationService } from '../../src/common/websocket/parlant-websocket-integration.service';
 
 // ===== TEST AUTOMATION FRAMEWORK =====
@@ -50,7 +48,10 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   private continuousMonitoring = false;
   private monitoringInterval: NodeJS.Timeout | null = null;
 
-  constructor(private baseUrl: string, private options: AutomationFrameworkOptions = {}) {
+  constructor(
+    private baseUrl: string,
+    private options: AutomationFrameworkOptions = {},
+  ) {
     super();
     this.automationMetrics = {
       totalTestsExecuted: 0,
@@ -232,7 +233,6 @@ class WebSocketTestAutomationFramework extends EventEmitter {
           suiteName: suite.name,
           result: suiteResult,
         });
-
       } catch (error) {
         const failedResult: TestSuiteResult = {
           suiteId,
@@ -256,13 +256,16 @@ class WebSocketTestAutomationFramework extends EventEmitter {
       }
 
       // Cool-down period between suites
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
     const totalExecutionTime = performance.now() - executionStartTime;
 
     // Calculate comprehensive metrics
-    const comprehensiveMetrics = this.calculateComprehensiveMetrics(suiteResults, totalExecutionTime);
+    const comprehensiveMetrics = this.calculateComprehensiveMetrics(
+      suiteResults,
+      totalExecutionTime,
+    );
 
     // Generate certification
     const certification = this.generateCertification(comprehensiveMetrics);
@@ -273,8 +276,10 @@ class WebSocketTestAutomationFramework extends EventEmitter {
     const result: ComprehensiveTestResult = {
       executionTime: totalExecutionTime,
       totalSuites: suiteResults.size,
-      passedSuites: Array.from(suiteResults.values()).filter(r => r.passed).length,
-      failedSuites: Array.from(suiteResults.values()).filter(r => !r.passed).length,
+      passedSuites: Array.from(suiteResults.values()).filter((r) => r.passed)
+        .length,
+      failedSuites: Array.from(suiteResults.values()).filter((r) => !r.passed)
+        .length,
       suiteResults,
       metrics: comprehensiveMetrics,
       certification,
@@ -292,7 +297,10 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   /**
    * Execute individual test suite
    */
-  private async executeTestSuite(suiteId: string, suite: TestSuite): Promise<TestSuiteResult> {
+  private async executeTestSuite(
+    suiteId: string,
+    suite: TestSuite,
+  ): Promise<TestSuiteResult> {
     const suiteStartTime = performance.now();
 
     const testResults: TestResult[] = [];
@@ -326,7 +334,10 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   /**
    * Execute individual test with automation
    */
-  private async executeIndividualTest(suiteId: string, test: TestConfiguration): Promise<TestResult> {
+  private async executeIndividualTest(
+    suiteId: string,
+    test: TestConfiguration,
+  ): Promise<TestResult> {
     const testStartTime = performance.now();
 
     let testPassed = false;
@@ -349,7 +360,7 @@ class WebSocketTestAutomationFramework extends EventEmitter {
 
       if (!testPassed && retryCount <= test.retries) {
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
       }
     }
 
@@ -369,7 +380,10 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   /**
    * Run specific test implementation
    */
-  private async runSpecificTest(suiteId: string, testName: string): Promise<boolean> {
+  private async runSpecificTest(
+    suiteId: string,
+    testName: string,
+  ): Promise<boolean> {
     switch (suiteId) {
       case 'bidirectional_communication':
         return this.runBidirectionalTest(testName);
@@ -390,7 +404,10 @@ class WebSocketTestAutomationFramework extends EventEmitter {
    * Run bidirectional communication tests
    */
   private async runBidirectionalTest(testName: string): Promise<boolean> {
-    const client = new AutomationTestClient(this.baseUrl, `auto_${testName}_${Date.now()}`);
+    const client = new AutomationTestClient(
+      this.baseUrl,
+      `auto_${testName}_${Date.now()}`,
+    );
 
     try {
       await client.connect();
@@ -505,8 +522,10 @@ class WebSocketTestAutomationFramework extends EventEmitter {
    * Calculate total estimated duration
    */
   private calculateTotalEstimatedDuration(): number {
-    return Array.from(this.testSuites.values())
-      .reduce((total, suite) => total + suite.estimatedDuration, 0);
+    return Array.from(this.testSuites.values()).reduce(
+      (total, suite) => total + suite.estimatedDuration,
+      0,
+    );
   }
 
   /**
@@ -514,19 +533,20 @@ class WebSocketTestAutomationFramework extends EventEmitter {
    */
   private calculateComprehensiveMetrics(
     suiteResults: Map<string, TestSuiteResult>,
-    totalTime: number
+    totalTime: number,
   ): ComprehensiveMetrics {
     const allResults = Array.from(suiteResults.values());
-    const allTests = allResults.flatMap(suite => suite.testResults);
+    const allTests = allResults.flatMap((suite) => suite.testResults);
 
     const totalTests = allTests.length;
-    const passedTests = allTests.filter(test => test.passed).length;
+    const passedTests = allTests.filter((test) => test.passed).length;
     const failedTests = totalTests - passedTests;
 
     const successRate = totalTests > 0 ? passedTests / totalTests : 0;
 
     // Calculate performance metrics
-    const averageTestDuration = allTests.reduce((sum, test) => sum + test.duration, 0) / totalTests;
+    const averageTestDuration =
+      allTests.reduce((sum, test) => sum + test.duration, 0) / totalTests;
 
     // Performance grading
     let performanceGrade: 'EXCELLENT' | 'GOOD' | 'ACCEPTABLE' | 'POOR';
@@ -549,11 +569,26 @@ class WebSocketTestAutomationFramework extends EventEmitter {
       averageTestDuration,
       performanceGrade,
       coverage: {
-        bidirectionalCommunication: this.getSuiteCoverage('bidirectional_communication', suiteResults),
-        performanceStress: this.getSuiteCoverage('performance_stress', suiteResults),
-        protocolCompliance: this.getSuiteCoverage('protocol_compliance', suiteResults),
-        securityAuthentication: this.getSuiteCoverage('security_authentication', suiteResults),
-        enterpriseIntegration: this.getSuiteCoverage('enterprise_integration', suiteResults),
+        bidirectionalCommunication: this.getSuiteCoverage(
+          'bidirectional_communication',
+          suiteResults,
+        ),
+        performanceStress: this.getSuiteCoverage(
+          'performance_stress',
+          suiteResults,
+        ),
+        protocolCompliance: this.getSuiteCoverage(
+          'protocol_compliance',
+          suiteResults,
+        ),
+        securityAuthentication: this.getSuiteCoverage(
+          'security_authentication',
+          suiteResults,
+        ),
+        enterpriseIntegration: this.getSuiteCoverage(
+          'enterprise_integration',
+          suiteResults,
+        ),
       },
     };
   }
@@ -561,11 +596,14 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   /**
    * Get suite coverage percentage
    */
-  private getSuiteCoverage(suiteId: string, suiteResults: Map<string, TestSuiteResult>): number {
+  private getSuiteCoverage(
+    suiteId: string,
+    suiteResults: Map<string, TestSuiteResult>,
+  ): number {
     const result = suiteResults.get(suiteId);
     if (!result?.executed) return 0;
 
-    const passedTests = result.testResults.filter(test => test.passed).length;
+    const passedTests = result.testResults.filter((test) => test.passed).length;
     const totalTests = result.testResults.length;
 
     return totalTests > 0 ? passedTests / totalTests : 0;
@@ -574,7 +612,9 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   /**
    * Generate certification based on metrics
    */
-  private generateCertification(metrics: ComprehensiveMetrics): TestCertification {
+  private generateCertification(
+    metrics: ComprehensiveMetrics,
+  ): TestCertification {
     const requirements = {
       minSuccessRate: 0.95,
       maxAverageTestDuration: 15000,
@@ -584,20 +624,35 @@ class WebSocketTestAutomationFramework extends EventEmitter {
 
     const checks = {
       successRate: metrics.successRate >= requirements.minSuccessRate,
-      executionTime: metrics.averageTestDuration <= requirements.maxAverageTestDuration,
-      bidirectionalCoverage: metrics.coverage.bidirectionalCommunication >= requirements.minCoveragePerSuite,
-      performanceCoverage: metrics.coverage.performanceStress >= requirements.minCoveragePerSuite,
-      complianceCoverage: metrics.coverage.protocolCompliance >= requirements.minCoveragePerSuite,
-      securityCoverage: metrics.coverage.securityAuthentication >= requirements.minCoveragePerSuite,
-      enterpriseCoverage: metrics.coverage.enterpriseIntegration >= requirements.minCoveragePerSuite,
-      performanceGrade: requirements.requiredPerformanceGrade.includes(metrics.performanceGrade),
+      executionTime:
+        metrics.averageTestDuration <= requirements.maxAverageTestDuration,
+      bidirectionalCoverage:
+        metrics.coverage.bidirectionalCommunication >=
+        requirements.minCoveragePerSuite,
+      performanceCoverage:
+        metrics.coverage.performanceStress >= requirements.minCoveragePerSuite,
+      complianceCoverage:
+        metrics.coverage.protocolCompliance >= requirements.minCoveragePerSuite,
+      securityCoverage:
+        metrics.coverage.securityAuthentication >=
+        requirements.minCoveragePerSuite,
+      enterpriseCoverage:
+        metrics.coverage.enterpriseIntegration >=
+        requirements.minCoveragePerSuite,
+      performanceGrade: requirements.requiredPerformanceGrade.includes(
+        metrics.performanceGrade,
+      ),
     };
 
-    const passedChecks = Object.values(checks).filter(check => check).length;
+    const passedChecks = Object.values(checks).filter((check) => check).length;
     const totalChecks = Object.keys(checks).length;
     const certificationScore = passedChecks / totalChecks;
 
-    let certificationLevel: 'ENTERPRISE_READY' | 'PRODUCTION_READY' | 'DEVELOPMENT_READY' | 'NOT_READY';
+    let certificationLevel:
+      | 'ENTERPRISE_READY'
+      | 'PRODUCTION_READY'
+      | 'DEVELOPMENT_READY'
+      | 'NOT_READY';
     if (certificationScore >= 0.95) {
       certificationLevel = 'ENTERPRISE_READY';
     } else if (certificationScore >= 0.85) {
@@ -624,39 +679,69 @@ class WebSocketTestAutomationFramework extends EventEmitter {
    */
   private generateRecommendations(
     checks: Record<string, boolean>,
-    metrics: ComprehensiveMetrics
+    metrics: ComprehensiveMetrics,
   ): string[] {
     const recommendations: string[] = [];
 
     if (!checks.successRate) {
-      recommendations.push(`Improve test success rate: current ${(metrics.successRate * 100).toFixed(1)}%, target ≥95%`);
+      recommendations.push(
+        `Improve test success rate: current ${(metrics.successRate * 100).toFixed(1)}%, target ≥95%`,
+      );
     }
 
     if (!checks.executionTime) {
-      recommendations.push(`Optimize test execution time: current ${metrics.averageTestDuration.toFixed(0)}ms, target ≤15000ms`);
+      recommendations.push(
+        `Optimize test execution time: current ${metrics.averageTestDuration.toFixed(0)}ms, target ≤15000ms`,
+      );
     }
 
     if (!checks.performanceGrade) {
-      recommendations.push(`Improve overall performance grade: current ${metrics.performanceGrade}, target EXCELLENT or GOOD`);
+      recommendations.push(
+        `Improve overall performance grade: current ${metrics.performanceGrade}, target EXCELLENT or GOOD`,
+      );
     }
 
     // Coverage recommendations
     const coverageItems = [
-      { key: 'bidirectionalCoverage', name: 'Bidirectional Communication', value: metrics.coverage.bidirectionalCommunication },
-      { key: 'performanceCoverage', name: 'Performance & Stress', value: metrics.coverage.performanceStress },
-      { key: 'complianceCoverage', name: 'Protocol Compliance', value: metrics.coverage.protocolCompliance },
-      { key: 'securityCoverage', name: 'Security & Authentication', value: metrics.coverage.securityAuthentication },
-      { key: 'enterpriseCoverage', name: 'Enterprise Integration', value: metrics.coverage.enterpriseIntegration },
+      {
+        key: 'bidirectionalCoverage',
+        name: 'Bidirectional Communication',
+        value: metrics.coverage.bidirectionalCommunication,
+      },
+      {
+        key: 'performanceCoverage',
+        name: 'Performance & Stress',
+        value: metrics.coverage.performanceStress,
+      },
+      {
+        key: 'complianceCoverage',
+        name: 'Protocol Compliance',
+        value: metrics.coverage.protocolCompliance,
+      },
+      {
+        key: 'securityCoverage',
+        name: 'Security & Authentication',
+        value: metrics.coverage.securityAuthentication,
+      },
+      {
+        key: 'enterpriseCoverage',
+        name: 'Enterprise Integration',
+        value: metrics.coverage.enterpriseIntegration,
+      },
     ];
 
     for (const item of coverageItems) {
       if (!checks[item.key]) {
-        recommendations.push(`Improve ${item.name} test coverage: current ${(item.value * 100).toFixed(1)}%, target ≥90%`);
+        recommendations.push(
+          `Improve ${item.name} test coverage: current ${(item.value * 100).toFixed(1)}%, target ≥90%`,
+        );
       }
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('All requirements met. Maintain current quality standards.');
+      recommendations.push(
+        'All requirements met. Maintain current quality standards.',
+      );
     }
 
     return recommendations;
@@ -665,10 +750,14 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   /**
    * Calculate suite-specific metrics
    */
-  private calculateSuiteMetrics(testResults: TestResult[], duration: number): TestSuiteMetrics {
+  private calculateSuiteMetrics(
+    testResults: TestResult[],
+    duration: number,
+  ): TestSuiteMetrics {
     const totalTests = testResults.length;
-    const passedTests = testResults.filter(test => test.passed).length;
-    const averageTestDuration = testResults.reduce((sum, test) => sum + test.duration, 0) / totalTests;
+    const passedTests = testResults.filter((test) => test.passed).length;
+    const averageTestDuration =
+      testResults.reduce((sum, test) => sum + test.duration, 0) / totalTests;
 
     return {
       totalTests,
@@ -697,26 +786,35 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   /**
    * Update automation metrics
    */
-  private updateAutomationMetrics(comprehensiveMetrics: ComprehensiveMetrics): void {
-    this.automationMetrics.totalTestsExecuted += comprehensiveMetrics.totalTests;
+  private updateAutomationMetrics(
+    comprehensiveMetrics: ComprehensiveMetrics,
+  ): void {
+    this.automationMetrics.totalTestsExecuted +=
+      comprehensiveMetrics.totalTests;
     this.automationMetrics.totalTestsPassed += comprehensiveMetrics.passedTests;
     this.automationMetrics.totalTestsFailed += comprehensiveMetrics.failedTests;
-    this.automationMetrics.totalExecutionTime += comprehensiveMetrics.totalExecutionTime;
+    this.automationMetrics.totalExecutionTime +=
+      comprehensiveMetrics.totalExecutionTime;
 
-    this.automationMetrics.averageExecutionTime = this.automationMetrics.totalExecutionTime /
+    this.automationMetrics.averageExecutionTime =
+      this.automationMetrics.totalExecutionTime /
       (this.automationMetrics.totalTestsExecuted || 1);
 
-    this.automationMetrics.successRate = this.automationMetrics.totalTestsPassed /
+    this.automationMetrics.successRate =
+      this.automationMetrics.totalTestsPassed /
       (this.automationMetrics.totalTestsExecuted || 1);
 
-    this.automationMetrics.performanceGrade = comprehensiveMetrics.performanceGrade;
+    this.automationMetrics.performanceGrade =
+      comprehensiveMetrics.performanceGrade;
     this.automationMetrics.lastExecutionTime = Date.now();
   }
 
   /**
    * Generate detailed test report
    */
-  private async generateDetailedReport(result: ComprehensiveTestResult): Promise<void> {
+  private async generateDetailedReport(
+    result: ComprehensiveTestResult,
+  ): Promise<void> {
     if (!this.options.generateReports) return;
 
     const reportData = {
@@ -740,7 +838,8 @@ class WebSocketTestAutomationFramework extends EventEmitter {
       automationMetrics: this.automationMetrics,
     };
 
-    const reportPath = this.options.reportPath ??
+    const reportPath =
+      this.options.reportPath ??
       `/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/development/reports/websocket-automation-${Date.now()}.json`;
 
     try {
@@ -754,7 +853,8 @@ class WebSocketTestAutomationFramework extends EventEmitter {
   /**
    * Start continuous monitoring
    */
-  startContinuousMonitoring(interval: number = 300000): void { // 5 minutes default
+  startContinuousMonitoring(interval: number = 300000): void {
+    // 5 minutes default
     if (this.continuousMonitoring) {
       this.stopContinuousMonitoring();
     }
@@ -811,7 +911,10 @@ class AutomationTestClient extends EventEmitter {
   private ws: WebSocket.WebSocket | null = null;
   private connected = false;
 
-  constructor(private url: string, private clientId: string) {
+  constructor(
+    private url: string,
+    private clientId: string,
+  ) {
     super();
   }
 
@@ -833,19 +936,19 @@ class AutomationTestClient extends EventEmitter {
   async testBasicBidirectionalFlow(): Promise<boolean> {
     // Implementation would test basic bidirectional message flow
     // This is a simplified version
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     return this.connected;
   }
 
   async testConversationSerialization(): Promise<boolean> {
     // Implementation would test conversation data serialization
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
     return this.connected;
   }
 
   async testRealTimeStreaming(): Promise<boolean> {
     // Implementation would test real-time streaming
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     return this.connected;
   }
 
@@ -865,19 +968,19 @@ class AutomatedPerformanceTester {
 
   async validateSubMillisecondLatency(): Promise<boolean> {
     // Implementation would validate sub-100ms latency
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     return true; // Simplified
   }
 
   async validateConcurrentConnections(): Promise<boolean> {
     // Implementation would validate concurrent connections
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     return true; // Simplified
   }
 
   async validateThroughputOptimization(): Promise<boolean> {
     // Implementation would validate throughput
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     return true; // Simplified
   }
 }
@@ -890,19 +993,19 @@ class AutomatedComplianceTester {
 
   async validateRFC6455Compliance(): Promise<boolean> {
     // Implementation would validate RFC 6455 compliance
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     return true; // Simplified
   }
 
   async validateDeliveryGuarantees(): Promise<boolean> {
     // Implementation would validate delivery guarantees
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     return true; // Simplified
   }
 
   async validateErrorHandling(): Promise<boolean> {
     // Implementation would validate error handling
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     return true; // Simplified
   }
 }
@@ -915,13 +1018,13 @@ class AutomatedSecurityTester {
 
   async validateConnectionSecurity(): Promise<boolean> {
     // Implementation would validate connection security
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise((resolve) => setTimeout(resolve, 1200));
     return true; // Simplified
   }
 
   async validateMessageIntegrity(): Promise<boolean> {
     // Implementation would validate message integrity
-    await new Promise(resolve => setTimeout(resolve, 1800));
+    await new Promise((resolve) => setTimeout(resolve, 1800));
     return true; // Simplified
   }
 }
@@ -934,13 +1037,13 @@ class AutomatedEnterpriseTester {
 
   async validateEnterpriseScalability(): Promise<boolean> {
     // Implementation would validate enterprise scalability
-    await new Promise(resolve => setTimeout(resolve, 8000));
+    await new Promise((resolve) => setTimeout(resolve, 8000));
     return true; // Simplified
   }
 
   async validateProductionReadiness(): Promise<boolean> {
     // Implementation would validate production readiness
-    await new Promise(resolve => setTimeout(resolve, 4000));
+    await new Promise((resolve) => setTimeout(resolve, 4000));
     return true; // Simplified
   }
 }
@@ -1019,7 +1122,11 @@ interface ComprehensiveMetrics {
 
 interface TestCertification {
   certified: boolean;
-  certificationLevel: 'ENTERPRISE_READY' | 'PRODUCTION_READY' | 'DEVELOPMENT_READY' | 'NOT_READY';
+  certificationLevel:
+    | 'ENTERPRISE_READY'
+    | 'PRODUCTION_READY'
+    | 'DEVELOPMENT_READY'
+    | 'NOT_READY';
   certificationScore: number;
   timestamp: Date;
   validityPeriod: number;
@@ -1046,7 +1153,12 @@ interface AutomationMetrics {
   averageExecutionTime: number;
   successRate: number;
   performanceGrade: 'EXCELLENT' | 'GOOD' | 'ACCEPTABLE' | 'POOR' | 'UNKNOWN';
-  certificationLevel: 'ENTERPRISE_READY' | 'PRODUCTION_READY' | 'DEVELOPMENT_READY' | 'NOT_READY' | 'NONE';
+  certificationLevel:
+    | 'ENTERPRISE_READY'
+    | 'PRODUCTION_READY'
+    | 'DEVELOPMENT_READY'
+    | 'NOT_READY'
+    | 'NONE';
   lastExecutionTime: number;
   continuousMonitoringActive: boolean;
 }
@@ -1056,12 +1168,12 @@ interface AutomationMetrics {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
     };
     return config[key] ?? defaultValue;
   }),
@@ -1092,14 +1204,18 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
 
     // Initialize services
     await integrationService.onModuleInit();
 
     // Give services time to start
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // Initialize automation framework
     automationFramework = new WebSocketTestAutomationFramework(TEST_URL, {
@@ -1174,8 +1290,12 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
       });
 
       // Validate certification requirements
-      expect(result.certification.certificationLevel).toMatch(/ENTERPRISE_READY|PRODUCTION_READY|DEVELOPMENT_READY/);
-      expect(result.certification.certificationScore).toBeGreaterThanOrEqual(0.7);
+      expect(result.certification.certificationLevel).toMatch(
+        /ENTERPRISE_READY|PRODUCTION_READY|DEVELOPMENT_READY/,
+      );
+      expect(result.certification.certificationScore).toBeGreaterThanOrEqual(
+        0.7,
+      );
     });
 
     it('should validate individual test suite execution and metrics', async () => {
@@ -1187,8 +1307,12 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
       for (const suiteResult of suiteResults) {
         expect(suiteResult.executed).toBe(true);
         expect(suiteResult.testResults.length).toBeGreaterThan(0);
-        expect(suiteResult.metrics.totalTests).toBe(suiteResult.testResults.length);
-        expect(suiteResult.metrics.passedTests + suiteResult.metrics.failedTests).toBe(suiteResult.metrics.totalTests);
+        expect(suiteResult.metrics.totalTests).toBe(
+          suiteResult.testResults.length,
+        );
+        expect(
+          suiteResult.metrics.passedTests + suiteResult.metrics.failedTests,
+        ).toBe(suiteResult.metrics.totalTests);
 
         console.log(`Suite Validation [${suiteResult.suiteName}]:`, {
           executed: suiteResult.executed,
@@ -1202,8 +1326,12 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
       }
 
       // Validate comprehensive metrics
-      expect(result.metrics.totalTests).toBe(suiteResults.reduce((sum, suite) => sum + suite.metrics.totalTests, 0));
-      expect(result.metrics.passedTests).toBe(suiteResults.reduce((sum, suite) => sum + suite.metrics.passedTests, 0));
+      expect(result.metrics.totalTests).toBe(
+        suiteResults.reduce((sum, suite) => sum + suite.metrics.totalTests, 0),
+      );
+      expect(result.metrics.passedTests).toBe(
+        suiteResults.reduce((sum, suite) => sum + suite.metrics.passedTests, 0),
+      );
     });
 
     it('should generate comprehensive test coverage metrics', async () => {
@@ -1220,7 +1348,9 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
 
       // Calculate overall coverage
       const coverageValues = Object.values(coverage);
-      const averageCoverage = coverageValues.reduce((sum, val) => sum + val, 0) / coverageValues.length;
+      const averageCoverage =
+        coverageValues.reduce((sum, val) => sum + val, 0) /
+        coverageValues.length;
 
       expect(averageCoverage).toBeGreaterThanOrEqual(0.5); // 50% minimum average coverage
 
@@ -1231,7 +1361,12 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
         securityAuthentication: `${(coverage.securityAuthentication * 100).toFixed(1)}%`,
         enterpriseIntegration: `${(coverage.enterpriseIntegration * 100).toFixed(1)}%`,
         averageCoverage: `${(averageCoverage * 100).toFixed(1)}%`,
-        coverageGrade: averageCoverage >= 0.9 ? 'EXCELLENT' : averageCoverage >= 0.8 ? 'GOOD' : 'NEEDS_IMPROVEMENT',
+        coverageGrade:
+          averageCoverage >= 0.9
+            ? 'EXCELLENT'
+            : averageCoverage >= 0.8
+              ? 'GOOD'
+              : 'NEEDS_IMPROVEMENT',
       });
     });
 
@@ -1254,14 +1389,17 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
       const requirementKeys = Object.keys(requirements);
 
       expect(requirementKeys.length).toBeGreaterThan(0);
-      expect(requirementKeys.every(key => typeof requirements[key] === 'boolean')).toBe(true);
+      expect(
+        requirementKeys.every((key) => typeof requirements[key] === 'boolean'),
+      ).toBe(true);
 
       console.log('Certification Analysis:', {
         certified: certification.certified,
         certificationLevel: certification.certificationLevel,
         certificationScore: `${(certification.certificationScore * 100).toFixed(1)}%`,
         validityPeriod: `${certification.validityPeriod} days`,
-        requirementsPassed: Object.values(requirements).filter(req => req).length,
+        requirementsPassed: Object.values(requirements).filter((req) => req)
+          .length,
         totalRequirements: Object.keys(requirements).length,
         recommendations: certification.recommendations.length,
         certificationGrade: certification.certified ? 'PASSED' : 'FAILED',
@@ -1271,7 +1409,7 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
     it('should track automation metrics and performance over time', async () => {
       // Execute automation multiple times to build metrics
       await automationFramework.executeComprehensiveTestSuite();
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await automationFramework.executeComprehensiveTestSuite();
 
       const automationMetrics = automationFramework.getAutomationMetrics();
@@ -1292,7 +1430,8 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
         averageExecutionTime: `${automationMetrics.averageExecutionTime.toFixed(2)}ms`,
         performanceGrade: automationMetrics.performanceGrade,
         certificationLevel: automationMetrics.certificationLevel,
-        continuousMonitoringActive: automationMetrics.continuousMonitoringActive,
+        continuousMonitoringActive:
+          automationMetrics.continuousMonitoringActive,
       });
     });
   });
@@ -1321,7 +1460,7 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
       automationFramework.startContinuousMonitoring(2000); // 2 seconds
 
       // Wait for a few monitoring runs
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      await new Promise((resolve) => setTimeout(resolve, 6000));
 
       // Stop continuous monitoring
       automationFramework.stopContinuousMonitoring();
@@ -1362,7 +1501,9 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
 
       console.log('Test History Validation:', {
         historicalSuites: testHistory.size,
-        allSuitesExecuted: Array.from(testHistory.values()).every(result => result.executed),
+        allSuitesExecuted: Array.from(testHistory.values()).every(
+          (result) => result.executed,
+        ),
         historyMaintenance: 'VALIDATED',
       });
     });
@@ -1383,13 +1524,22 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
       };
 
       const reliabilityMetrics = {
-        successRateMet: result.metrics.successRate >= enterpriseRequirements.minSuccessRate,
-        executionTimeMet: result.executionTime <= enterpriseRequirements.maxExecutionTime,
-        certificationScoreMet: result.certification.certificationScore >= enterpriseRequirements.minCertificationScore,
-        coverageMet: Object.values(result.metrics.coverage).every(coverage => coverage >= enterpriseRequirements.requiredCoverageLevel * 0.8), // Allow 20% tolerance
+        successRateMet:
+          result.metrics.successRate >= enterpriseRequirements.minSuccessRate,
+        executionTimeMet:
+          result.executionTime <= enterpriseRequirements.maxExecutionTime,
+        certificationScoreMet:
+          result.certification.certificationScore >=
+          enterpriseRequirements.minCertificationScore,
+        coverageMet: Object.values(result.metrics.coverage).every(
+          (coverage) =>
+            coverage >= enterpriseRequirements.requiredCoverageLevel * 0.8,
+        ), // Allow 20% tolerance
       };
 
-      const reliabilityScore = Object.values(reliabilityMetrics).filter(met => met).length / Object.keys(reliabilityMetrics).length;
+      const reliabilityScore =
+        Object.values(reliabilityMetrics).filter((met) => met).length /
+        Object.keys(reliabilityMetrics).length;
 
       expect(reliabilityScore).toBeGreaterThanOrEqual(0.75); // 75% of enterprise requirements
 
@@ -1398,11 +1548,18 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
         executionTime: `${result.executionTime.toFixed(2)}ms (required: ≤300000ms)`,
         certificationScore: `${(result.certification.certificationScore * 100).toFixed(1)}% (required: ≥85%)`,
         reliabilityScore: `${(reliabilityScore * 100).toFixed(1)}%`,
-        enterpriseGrade: reliabilityScore >= 0.9 ? 'ENTERPRISE_READY' : reliabilityScore >= 0.75 ? 'PRODUCTION_READY' : 'DEVELOPMENT_READY',
+        enterpriseGrade:
+          reliabilityScore >= 0.9
+            ? 'ENTERPRISE_READY'
+            : reliabilityScore >= 0.75
+              ? 'PRODUCTION_READY'
+              : 'DEVELOPMENT_READY',
         requirements: {
           successRate: reliabilityMetrics.successRateMet ? '✓' : '✗',
           executionTime: reliabilityMetrics.executionTimeMet ? '✓' : '✗',
-          certificationScore: reliabilityMetrics.certificationScoreMet ? '✓' : '✗',
+          certificationScore: reliabilityMetrics.certificationScoreMet
+            ? '✓'
+            : '✗',
           coverage: reliabilityMetrics.coverageMet ? '✓' : '✗',
         },
       });
@@ -1422,26 +1579,50 @@ describe('PARLANT WebSocket Test Automation Framework', () => {
         performanceConsistency: result.metrics.performanceGrade !== 'POOR',
         certificationValidity: result.certification.certified,
         automationStability: endTime - startTime < 600000, // 10 minutes max
-        comprehensiveCoverage: Object.values(result.metrics.coverage).every(coverage => coverage > 0),
+        comprehensiveCoverage: Object.values(result.metrics.coverage).every(
+          (coverage) => coverage > 0,
+        ),
       };
 
-      const productionReadiness = Object.values(productionMetrics).filter(metric => metric).length / Object.keys(productionMetrics).length;
+      const productionReadiness =
+        Object.values(productionMetrics).filter((metric) => metric).length /
+        Object.keys(productionMetrics).length;
 
       expect(productionReadiness).toBeGreaterThanOrEqual(0.8); // 80% production readiness
 
       console.log('Production Readiness Assessment:', {
         productionReadiness: `${(productionReadiness * 100).toFixed(1)}%`,
-        automationReliability: result.overallSuccess ? 'RELIABLE' : 'UNRELIABLE',
+        automationReliability: result.overallSuccess
+          ? 'RELIABLE'
+          : 'UNRELIABLE',
         performanceGrade: result.metrics.performanceGrade,
-        certificationStatus: result.certification.certified ? 'CERTIFIED' : 'NOT_CERTIFIED',
-        automationStability: endTime - startTime < 600000 ? 'STABLE' : 'UNSTABLE',
-        productionGrade: productionReadiness >= 0.9 ? 'PRODUCTION_READY' : productionReadiness >= 0.8 ? 'NEAR_PRODUCTION' : 'DEVELOPMENT_STAGE',
+        certificationStatus: result.certification.certified
+          ? 'CERTIFIED'
+          : 'NOT_CERTIFIED',
+        automationStability:
+          endTime - startTime < 600000 ? 'STABLE' : 'UNSTABLE',
+        productionGrade:
+          productionReadiness >= 0.9
+            ? 'PRODUCTION_READY'
+            : productionReadiness >= 0.8
+              ? 'NEAR_PRODUCTION'
+              : 'DEVELOPMENT_STAGE',
         productionMetrics: {
-          executionReliability: productionMetrics.executionReliability ? '✓' : '✗',
-          performanceConsistency: productionMetrics.performanceConsistency ? '✓' : '✗',
-          certificationValidity: productionMetrics.certificationValidity ? '✓' : '✗',
-          automationStability: productionMetrics.automationStability ? '✓' : '✗',
-          comprehensiveCoverage: productionMetrics.comprehensiveCoverage ? '✓' : '✗',
+          executionReliability: productionMetrics.executionReliability
+            ? '✓'
+            : '✗',
+          performanceConsistency: productionMetrics.performanceConsistency
+            ? '✓'
+            : '✗',
+          certificationValidity: productionMetrics.certificationValidity
+            ? '✓'
+            : '✗',
+          automationStability: productionMetrics.automationStability
+            ? '✓'
+            : '✗',
+          comprehensiveCoverage: productionMetrics.comprehensiveCoverage
+            ? '✓'
+            : '✗',
         },
       });
     });

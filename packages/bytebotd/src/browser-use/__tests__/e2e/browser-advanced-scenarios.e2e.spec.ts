@@ -46,8 +46,8 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         .send({
           options: {
             headless: true,
-            viewport: { width: 1920, height: 1080 }
-          }
+            viewport: { width: 1920, height: 1080 },
+          },
         })
         .expect(201);
 
@@ -59,7 +59,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/navigate`)
           .send({
             url: 'https://demo.opencart.com',
-            waitFor: 'networkidle0'
+            waitFor: 'networkidle0',
           })
           .expect(200);
 
@@ -69,7 +69,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .send({
             selector: 'input[name="search"]',
             text: 'MacBook',
-            options: { clear: true, delay: 10 }
+            options: { clear: true, delay: 10 },
           })
           .expect(200);
 
@@ -77,7 +77,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/click`)
           .send({
             selector: 'button[type="submit"]',
-            options: { waitFor: 'navigation' }
+            options: { waitFor: 'navigation' },
           })
           .expect(200);
 
@@ -86,7 +86,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/click`)
           .send({
             selector: '.product-thumb:first-child h4 a',
-            options: { waitFor: 'navigation', timeout: 10000 }
+            options: { waitFor: 'navigation', timeout: 10000 },
           });
 
         // Handle case where product layout might be different
@@ -96,7 +96,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
             .post(`/browser-use/sessions/${sessionId}/click`)
             .send({
               selector: '.product-layout:first-child .product-thumb h4 a',
-              options: { waitFor: 'navigation', timeout: 10000 }
+              options: { waitFor: 'navigation', timeout: 10000 },
             })
             .expect(200);
         }
@@ -106,7 +106,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/click`)
           .send({
             selector: '#button-cart',
-            options: { waitFor: 'visible', timeout: 5000 }
+            options: { waitFor: 'visible', timeout: 5000 },
           });
 
         // Verify add to cart succeeded (or handle if cart button not available)
@@ -116,7 +116,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
             .post(`/browser-use/sessions/${sessionId}/click`)
             .send({
               selector: '.btn-group .btn.dropdown-toggle',
-              options: { waitFor: 'visible' }
+              options: { waitFor: 'visible' },
             })
             .expect(200);
 
@@ -125,9 +125,17 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
             .post(`/browser-use/sessions/${sessionId}/extract`)
             .send({
               queries: [
-                { name: 'cartItems', selector: '.dropdown-menu .table tbody tr', attribute: 'count' },
-                { name: 'cartTotal', selector: '.dropdown-menu .text-right', attribute: 'textContent' }
-              ]
+                {
+                  name: 'cartItems',
+                  selector: '.dropdown-menu .table tbody tr',
+                  attribute: 'count',
+                },
+                {
+                  name: 'cartTotal',
+                  selector: '.dropdown-menu .text-right',
+                  attribute: 'textContent',
+                },
+              ],
             })
             .expect(200);
 
@@ -140,8 +148,8 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .send({
             options: {
               fullPage: true,
-              quality: 90
-            }
+              quality: 90,
+            },
           })
           .expect(200);
 
@@ -150,10 +158,9 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           screenshot: expect.any(String),
           dimensions: expect.objectContaining({
             width: expect.any(Number),
-            height: expect.any(Number)
-          })
+            height: expect.any(Number),
+          }),
         });
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -165,7 +172,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -177,7 +184,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/navigate`)
           .send({
             url: 'https://jsonplaceholder.typicode.com',
-            waitFor: 'networkidle0'
+            waitFor: 'networkidle0',
           })
           .expect(200);
 
@@ -206,7 +213,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
                   loaded: false,
                   error: error.message
                 }));
-            `
+            `,
           })
           .expect(200);
 
@@ -215,8 +222,8 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           result: expect.objectContaining({
             loaded: true,
             title: expect.any(String),
-            contentLength: expect.any(Number)
-          })
+            contentLength: expect.any(Number),
+          }),
         });
 
         // Verify dynamic content exists
@@ -224,15 +231,22 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/extract`)
           .send({
             queries: [
-              { name: 'dynamicTitle', selector: '#dynamic-content h2', attribute: 'textContent' },
-              { name: 'dynamicBody', selector: '#dynamic-content p', attribute: 'textContent' }
-            ]
+              {
+                name: 'dynamicTitle',
+                selector: '#dynamic-content h2',
+                attribute: 'textContent',
+              },
+              {
+                name: 'dynamicBody',
+                selector: '#dynamic-content p',
+                attribute: 'textContent',
+              },
+            ],
           })
           .expect(200);
 
         expect(contentCheck.body.data.dynamicTitle).toBeTruthy();
         expect(contentCheck.body.data.dynamicBody).toBeTruthy();
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -246,8 +260,8 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         .send({
           options: {
             headless: true,
-            viewport: { width: 1920, height: 1080 }
-          }
+            viewport: { width: 1920, height: 1080 },
+          },
         })
         .expect(201);
 
@@ -259,42 +273,42 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/navigate`)
           .send({
             url: 'https://www.w3schools.com/html/tryit.asp?filename=tryhtml_default',
-            waitFor: 'load'
+            waitFor: 'load',
           })
           .expect(200);
 
         // Wait for iframe to load
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // Simulate complex interaction pattern
         const interactions = [
           // Switch to iframe context
           {
             action: 'execute',
-            script: 'document.getElementById("iframeResult").focus();'
+            script: 'document.getElementById("iframeResult").focus();',
           },
           // Click multiple elements with delays (human-like behavior)
           {
             action: 'click',
             selector: 'body',
-            options: { delay: 100 }
+            options: { delay: 100 },
           },
           // Scroll simulation
           {
             action: 'execute',
-            script: 'window.scrollTo(0, document.body.scrollHeight / 2);'
+            script: 'window.scrollTo(0, document.body.scrollHeight / 2);',
           },
           // Keyboard navigation simulation
           {
             action: 'keyboard',
             key: 'Tab',
-            modifiers: []
+            modifiers: [],
           },
           {
             action: 'keyboard',
             key: 'Enter',
-            modifiers: []
-          }
+            modifiers: [],
+          },
         ];
 
         for (const interaction of interactions) {
@@ -310,7 +324,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
                 .post(`/browser-use/sessions/${sessionId}/click`)
                 .send({
                   selector: interaction.selector,
-                  options: interaction.options
+                  options: interaction.options,
                 });
               break;
             case 'keyboard':
@@ -318,13 +332,15 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
                 .post(`/browser-use/sessions/${sessionId}/keyboard`)
                 .send({
                   key: interaction.key,
-                  modifiers: interaction.modifiers
+                  modifiers: interaction.modifiers,
                 });
               break;
           }
 
           // Human-like delays between interactions
-          await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 100));
+          await new Promise((resolve) =>
+            setTimeout(resolve, 150 + Math.random() * 100),
+          );
         }
 
         // Verify interactions were processed
@@ -336,10 +352,9 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           status: 'active',
           metrics: expect.objectContaining({
             totalRequests: expect.any(Number),
-            successfulRequests: expect.any(Number)
-          })
+            successfulRequests: expect.any(Number),
+          }),
         });
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -359,7 +374,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           const response = await request(app.getHttpServer())
             .post('/browser-use/sessions')
             .send({
-              options: { headless: true }
+              options: { headless: true },
             })
             .expect(201);
           sessionIds.push(response.body.sessionId);
@@ -369,7 +384,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         const exceedLimitResponse = await request(app.getHttpServer())
           .post('/browser-use/sessions')
           .send({
-            options: { headless: true }
+            options: { headless: true },
           })
           .expect(429); // Too Many Requests
 
@@ -377,10 +392,9 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           error: expect.objectContaining({
             type: 'ResourceLimitError',
             code: 'MAX_SESSIONS_EXCEEDED',
-            message: expect.stringContaining('session limit')
-          })
+            message: expect.stringContaining('session limit'),
+          }),
         });
-
       } finally {
         // Cleanup all sessions
         for (const sessionId of sessionIds) {
@@ -399,7 +413,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -414,7 +428,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/navigate`)
           .send({
             url: dataUrl,
-            waitFor: 'load'
+            waitFor: 'load',
           })
           .expect(200);
 
@@ -423,15 +437,23 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/extract`)
           .send({
             queries: [
-              { name: 'contentLength', selector: '#content', attribute: 'textContent.length' },
-              { name: 'sampleContent', selector: '#content', attribute: 'textContent', limit: 1000 }
-            ]
+              {
+                name: 'contentLength',
+                selector: '#content',
+                attribute: 'textContent.length',
+              },
+              {
+                name: 'sampleContent',
+                selector: '#content',
+                attribute: 'textContent',
+                limit: 1000,
+              },
+            ],
           })
           .expect(200);
 
         expect(extractResponse.body.data.contentLength).toBe(1000000);
         expect(extractResponse.body.data.sampleContent).toHaveLength(1000);
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -443,7 +465,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -456,17 +478,19 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .expect(200);
 
         // Fire rapid successive requests
-        const rapidRequests = Array(20).fill(null).map((_, i) =>
-          request(app.getHttpServer())
-            .post(`/browser-use/sessions/${sessionId}/execute`)
-            .send({
-              script: `return { index: ${i}, timestamp: Date.now() };`
-            })
-        );
+        const rapidRequests = Array(20)
+          .fill(null)
+          .map((_, i) =>
+            request(app.getHttpServer())
+              .post(`/browser-use/sessions/${sessionId}/execute`)
+              .send({
+                script: `return { index: ${i}, timestamp: Date.now() };`,
+              }),
+          );
 
         const results = await Promise.allSettled(rapidRequests);
-        const successful = results.filter(r => r.status === 'fulfilled');
-        const failed = results.filter(r => r.status === 'rejected');
+        const successful = results.filter((r) => r.status === 'fulfilled');
+        const failed = results.filter((r) => r.status === 'rejected');
 
         // Should handle most requests but may queue or throttle some
         expect(successful.length).toBeGreaterThanOrEqual(10);
@@ -476,7 +500,6 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           // Verify error types are appropriate
           expect(failed.length).toBeLessThan(10);
         }
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -488,7 +511,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -500,23 +523,23 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           {
             endpoint: 'navigate',
             payload: { url: 'not-a-valid-url' },
-            expectedError: 'INVALID_URL'
+            expectedError: 'INVALID_URL',
           },
           {
             endpoint: 'click',
             payload: { selector: '' },
-            expectedError: 'INVALID_SELECTOR'
+            expectedError: 'INVALID_SELECTOR',
           },
           {
             endpoint: 'type',
             payload: { selector: 'body', text: null },
-            expectedError: 'INVALID_INPUT'
+            expectedError: 'INVALID_INPUT',
           },
           {
             endpoint: 'execute',
             payload: { script: undefined },
-            expectedError: 'MISSING_SCRIPT'
-          }
+            expectedError: 'MISSING_SCRIPT',
+          },
         ];
 
         for (const test of malformedTests) {
@@ -528,8 +551,8 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           expect(response.body).toMatchObject({
             error: expect.objectContaining({
               type: 'ValidationError',
-              code: test.expectedError
-            })
+              code: test.expectedError,
+            }),
           });
         }
 
@@ -537,7 +560,6 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         await request(app.getHttpServer())
           .get(`/browser-use/sessions/${sessionId}/status`)
           .expect(200);
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -555,10 +577,10 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
             headless: true,
             networkConditions: {
               downloadThroughput: 50 * 1024, // 50 KB/s
-              uploadThroughput: 20 * 1024,   // 20 KB/s
-              latency: 500 // 500ms
-            }
-          }
+              uploadThroughput: 20 * 1024, // 20 KB/s
+              latency: 500, // 500ms
+            },
+          },
         })
         .expect(201);
 
@@ -573,7 +595,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .send({
             url: 'https://httpbin.org/delay/2',
             waitFor: 'networkidle0',
-            timeout: 15000
+            timeout: 15000,
           })
           .expect(200);
 
@@ -581,12 +603,11 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
 
         expect(navigateResponse.body).toMatchObject({
           success: true,
-          loadTime: expect.any(Number)
+          loadTime: expect.any(Number),
         });
 
         // Verify load time reflects network conditions
         expect(loadTime).toBeGreaterThan(2000); // At least 2 seconds due to delay + slow network
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -598,7 +619,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -608,8 +629,8 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         // Simulate intermittent connectivity by trying unreliable endpoints
         const unreliableEndpoints = [
           'https://httpbin.org/status/503', // Service unavailable
-          'https://httpbin.org/delay/10',   // Very slow response
-          'https://httpbin.org/status/200'  // Should work
+          'https://httpbin.org/delay/10', // Very slow response
+          'https://httpbin.org/status/200', // Should work
         ];
 
         let successCount = 0;
@@ -622,7 +643,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
               .send({
                 url,
                 waitFor: 'load',
-                timeout: 5000 // Short timeout to simulate network issues
+                timeout: 5000, // Short timeout to simulate network issues
               });
 
             if (response.status === 200) {
@@ -636,7 +657,6 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         // Should have at least one success and handle errors gracefully
         expect(successCount).toBeGreaterThanOrEqual(1);
         expect(successCount + errorCount).toBe(unreliableEndpoints.length);
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -648,7 +668,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -663,15 +683,15 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
             retryOptions: {
               maxRetries: 3,
               retryDelay: 1000,
-              retryOn: [503, 504, 502]
-            }
+              retryOn: [503, 504, 502],
+            },
           });
 
         // Should either succeed after retries or fail with proper error
         if (response.status === 200) {
           expect(response.body).toMatchObject({
             success: true,
-            retries: expect.any(Number)
+            retries: expect.any(Number),
           });
         } else {
           expect(response.status).toBe(503);
@@ -679,11 +699,10 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
             error: expect.objectContaining({
               type: 'NetworkError',
               retries: 3,
-              lastAttempt: expect.any(String)
-            })
+              lastAttempt: expect.any(String),
+            }),
           });
         }
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -697,7 +716,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -731,7 +750,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
                 processed: true
               };
             `,
-            timeout: 10000
+            timeout: 10000,
           });
 
         if (memoryIntensiveResponse.status === 200) {
@@ -739,8 +758,8 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
             success: true,
             result: expect.objectContaining({
               created: 100000,
-              processed: true
-            })
+              processed: true,
+            }),
           });
         } else {
           // Should fail gracefully with resource limit error
@@ -748,11 +767,10 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           expect(memoryIntensiveResponse.body).toMatchObject({
             error: expect.objectContaining({
               type: 'ResourceLimitError',
-              code: 'MEMORY_LIMIT_EXCEEDED'
-            })
+              code: 'MEMORY_LIMIT_EXCEEDED',
+            }),
           });
         }
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -772,7 +790,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         const response = await request(app.getHttpServer())
           .post('/browser-use/sessions')
           .send({
-            options: { headless: true }
+            options: { headless: true },
           })
           .expect(201);
         sessionIds.push(response.body.sessionId);
@@ -793,20 +811,22 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         memory: expect.objectContaining({
           used: expect.any(Number),
           available: expect.any(Number),
-          percentage: expect.any(Number)
+          percentage: expect.any(Number),
         }),
         sessions: expect.objectContaining({
           active: expect.any(Number),
-          total: expect.any(Number)
+          total: expect.any(Number),
         }),
         browser: expect.objectContaining({
           processes: expect.any(Number),
-          tabs: expect.any(Number)
-        })
+          tabs: expect.any(Number),
+        }),
       });
 
       // Memory usage should have increased
-      expect(activeResources.body.memory.used).toBeGreaterThan(initialResources.body.memory.used);
+      expect(activeResources.body.memory.used).toBeGreaterThan(
+        initialResources.body.memory.used,
+      );
       expect(activeResources.body.sessions.active).toBe(3);
 
       // Cleanup
@@ -817,7 +837,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       }
 
       // Verify cleanup reduced resource usage
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const finalResources = await request(app.getHttpServer())
         .get('/browser-use/resources')
@@ -832,7 +852,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -844,7 +864,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/navigate`)
           .send({
             url: 'https://quotes.toscrape.com',
-            waitFor: 'networkidle0'
+            waitFor: 'networkidle0',
           })
           .expect(200);
 
@@ -854,10 +874,23 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .send({
             queries: [
               { name: 'quotes', selector: '.quote', attribute: 'count' },
-              { name: 'firstQuoteText', selector: '.quote:first-child .text', attribute: 'textContent' },
-              { name: 'firstQuoteAuthor', selector: '.quote:first-child .author', attribute: 'textContent' },
-              { name: 'tags', selector: '.quote:first-child .tag', attribute: 'textContent', multiple: true }
-            ]
+              {
+                name: 'firstQuoteText',
+                selector: '.quote:first-child .text',
+                attribute: 'textContent',
+              },
+              {
+                name: 'firstQuoteAuthor',
+                selector: '.quote:first-child .author',
+                attribute: 'textContent',
+              },
+              {
+                name: 'tags',
+                selector: '.quote:first-child .tag',
+                attribute: 'textContent',
+                multiple: true,
+              },
+            ],
           })
           .expect(200);
 
@@ -865,18 +898,20 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           quotes: expect.any(Number),
           firstQuoteText: expect.any(String),
           firstQuoteAuthor: expect.any(String),
-          tags: expect.arrayContaining([expect.any(String)])
+          tags: expect.arrayContaining([expect.any(String)]),
         });
 
         expect(scrapingResponse.body.data.quotes).toBeGreaterThan(0);
-        expect(scrapingResponse.body.data.firstQuoteText.length).toBeGreaterThan(10);
+        expect(
+          scrapingResponse.body.data.firstQuoteText.length,
+        ).toBeGreaterThan(10);
 
         // Navigate to next page
         const nextPageResponse = await request(app.getHttpServer())
           .post(`/browser-use/sessions/${sessionId}/click`)
           .send({
             selector: '.next a',
-            options: { waitFor: 'navigation' }
+            options: { waitFor: 'navigation' },
           });
 
         if (nextPageResponse.status === 200) {
@@ -886,14 +921,17 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
             .send({
               queries: [
                 { name: 'quotes', selector: '.quote', attribute: 'count' },
-                { name: 'pageNumber', selector: '.current', attribute: 'textContent' }
-              ]
+                {
+                  name: 'pageNumber',
+                  selector: '.current',
+                  attribute: 'textContent',
+                },
+              ],
             })
             .expect(200);
 
           expect(secondPageData.body.data.quotes).toBeGreaterThan(0);
         }
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
@@ -907,8 +945,8 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
         .send({
           options: {
             headless: true,
-            viewport: { width: 1280, height: 1024 }
-          }
+            viewport: { width: 1280, height: 1024 },
+          },
         })
         .expect(201);
 
@@ -920,7 +958,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/navigate`)
           .send({
             url: 'https://www.w3schools.com/html/html_forms.asp',
-            waitFor: 'networkidle0'
+            waitFor: 'networkidle0',
           })
           .expect(200);
 
@@ -929,26 +967,32 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
           // Take initial screenshot
           {
             action: 'screenshot',
-            description: 'Initial page state'
+            description: 'Initial page state',
           },
           // Test form interaction
           {
             action: 'type',
             selector: 'input[type="text"]:first',
             text: 'Test User',
-            description: 'Fill first name'
+            description: 'Fill first name',
           },
           // Verify form was filled
           {
             action: 'extract',
-            queries: [{ name: 'inputValue', selector: 'input[type="text"]:first', attribute: 'value' }],
-            description: 'Verify input value'
+            queries: [
+              {
+                name: 'inputValue',
+                selector: 'input[type="text"]:first',
+                attribute: 'value',
+              },
+            ],
+            description: 'Verify input value',
           },
           // Take screenshot after interaction
           {
             action: 'screenshot',
-            description: 'After form interaction'
-          }
+            description: 'After form interaction',
+          },
         ];
 
         const testResults = [];
@@ -970,7 +1014,7 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
                   .send({
                     selector: step.selector,
                     text: step.text,
-                    options: { delay: 10 }
+                    options: { delay: 10 },
                   });
                 break;
               case 'extract':
@@ -985,32 +1029,32 @@ describe('Advanced Browser Automation Scenarios E2E Tests', () => {
               step: step.description,
               status: 'passed',
               duration,
-              data: response?.body
+              data: response?.body,
             });
-
           } catch (error) {
             testResults.push({
               step: step.description,
               status: 'failed',
               error: error.message,
-              duration: Date.now() - startTime
+              duration: Date.now() - startTime,
             });
           }
         }
 
         // Verify test results
-        const passedTests = testResults.filter(r => r.status === 'passed');
-        const failedTests = testResults.filter(r => r.status === 'failed');
+        const passedTests = testResults.filter((r) => r.status === 'passed');
+        const failedTests = testResults.filter((r) => r.status === 'failed');
 
         expect(passedTests.length).toBeGreaterThanOrEqual(3);
         expect(failedTests.length).toBeLessThan(2);
 
         // Verify specific test assertions
-        const extractResult = testResults.find(r => r.step === 'Verify input value');
+        const extractResult = testResults.find(
+          (r) => r.step === 'Verify input value',
+        );
         if (extractResult && extractResult.status === 'passed') {
           expect(extractResult.data.data.inputValue).toBe('Test User');
         }
-
       } finally {
         await request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)

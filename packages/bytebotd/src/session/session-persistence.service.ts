@@ -14,14 +14,23 @@
  * @since PARLANT Phase 1 Integration
  */
 
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnApplicationShutdown,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import Redis from 'ioredis';
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';
+import {
+  SecurityAuditService,
+  AuditEventType,
+  AuditSeverity,
+} from '../security/security-audit.service';
 import { SessionMetadata, SessionState } from './session-management.service';
 
 // ===== SESSION PERSISTENCE ENUMS =====
@@ -30,40 +39,40 @@ import { SessionMetadata, SessionState } from './session-management.service';
  * Persistence storage tiers for different data types
  */
 export enum PersistenceStorageTier {
-  MEMORY = 'MEMORY',                    // In-memory cache (fastest access)
-  SSD_PRIMARY = 'SSD_PRIMARY',          // Primary SSD storage
-  SSD_REPLICA = 'SSD_REPLICA',          // Replica SSD storage
-  HDD_ARCHIVE = 'HDD_ARCHIVE',          // Long-term archive storage
-  CLOUD_BACKUP = 'CLOUD_BACKUP',        // Cloud backup storage
-  DISTRIBUTED = 'DISTRIBUTED'           // Distributed storage across nodes
-}/**
+  MEMORY = 'MEMORY', // In-memory cache (fastest access)
+  SSD_PRIMARY = 'SSD_PRIMARY', // Primary SSD storage
+  SSD_REPLICA = 'SSD_REPLICA', // Replica SSD storage
+  HDD_ARCHIVE = 'HDD_ARCHIVE', // Long-term archive storage
+  CLOUD_BACKUP = 'CLOUD_BACKUP', // Cloud backup storage
+  DISTRIBUTED = 'DISTRIBUTED', // Distributed storage across nodes
+} /**
  * Replication strategies for session data
  */
 export enum ReplicationStrategy {
-  SYNCHRONOUS = 'SYNCHRONOUS',          // Immediate replication
-  ASYNCHRONOUS = 'ASYNCHRONOUS',        // Background replication
-  HYBRID = 'HYBRID',                    // Mixed approach based on priority
-  CONSENSUS = 'CONSENSUS',              // Consensus-based replication
-  EVENTUAL_CONSISTENCY = 'EVENTUAL_CONSISTENCY' // Eventually consistent
-}/**
+  SYNCHRONOUS = 'SYNCHRONOUS', // Immediate replication
+  ASYNCHRONOUS = 'ASYNCHRONOUS', // Background replication
+  HYBRID = 'HYBRID', // Mixed approach based on priority
+  CONSENSUS = 'CONSENSUS', // Consensus-based replication
+  EVENTUAL_CONSISTENCY = 'EVENTUAL_CONSISTENCY', // Eventually consistent
+} /**
  * Recovery point objectives for different session types
  */
 export enum RecoveryPointObjective {
-  ZERO_DATA_LOSS = 'ZERO_DATA_LOSS',    // RPO = 0 (critical sessions)
-  FIVE_SECONDS = 'FIVE_SECONDS',        // RPO = 5s (important sessions)
-  ONE_MINUTE = 'ONE_MINUTE',            // RPO = 1m (standard sessions)
-  FIVE_MINUTES = 'FIVE_MINUTES',        // RPO = 5m (low priority sessions)
-  BEST_EFFORT = 'BEST_EFFORT'          // Best effort recovery
-}/**
+  ZERO_DATA_LOSS = 'ZERO_DATA_LOSS', // RPO = 0 (critical sessions)
+  FIVE_SECONDS = 'FIVE_SECONDS', // RPO = 5s (important sessions)
+  ONE_MINUTE = 'ONE_MINUTE', // RPO = 1m (standard sessions)
+  FIVE_MINUTES = 'FIVE_MINUTES', // RPO = 5m (low priority sessions)
+  BEST_EFFORT = 'BEST_EFFORT', // Best effort recovery
+} /**
  * Recovery time objectives for different scenarios
  */
 export enum RecoveryTimeObjective {
-  IMMEDIATE = 'IMMEDIATE',              // RTO < 1s (automatic failover)
-  FIVE_SECONDS = 'FIVE_SECONDS',        // RTO < 5s (fast recovery)
-  THIRTY_SECONDS = 'THIRTY_SECONDS',    // RTO < 30s (standard recovery)
-  TWO_MINUTES = 'TWO_MINUTES',          // RTO < 2m (manual intervention)
-  BEST_EFFORT = 'BEST_EFFORT'          // Best effort recovery
-}/**
+  IMMEDIATE = 'IMMEDIATE', // RTO < 1s (automatic failover)
+  FIVE_SECONDS = 'FIVE_SECONDS', // RTO < 5s (fast recovery)
+  THIRTY_SECONDS = 'THIRTY_SECONDS', // RTO < 30s (standard recovery)
+  TWO_MINUTES = 'TWO_MINUTES', // RTO < 2m (manual intervention)
+  BEST_EFFORT = 'BEST_EFFORT', // Best effort recovery
+} /**
  * Persistence health status
  */
 export enum PersistenceHealthStatus {
@@ -72,8 +81,8 @@ export enum PersistenceHealthStatus {
   WARNING = 'WARNING',
   CRITICAL = 'CRITICAL',
   FAILED = 'FAILED',
-  RECOVERING = 'RECOVERING'
-}/**
+  RECOVERING = 'RECOVERING',
+} /**
  * Backup operation types
  */
 export enum BackupOperationType {
@@ -81,8 +90,8 @@ export enum BackupOperationType {
   INCREMENTAL_BACKUP = 'INCREMENTAL_BACKUP',
   DIFFERENTIAL_BACKUP = 'DIFFERENTIAL_BACKUP',
   CONTINUOUS_BACKUP = 'CONTINUOUS_BACKUP',
-  SNAPSHOT_BACKUP = 'SNAPSHOT_BACKUP'
-}// ===== SESSION PERSISTENCE INTERFACES =====
+  SNAPSHOT_BACKUP = 'SNAPSHOT_BACKUP',
+} // ===== SESSION PERSISTENCE INTERFACES =====
 
 /**
  * Session persistence configuration
@@ -346,7 +355,12 @@ export interface HealthMonitoringConfig {
  */
 export interface HealthCheck {
   readonly checkId: string;
-  readonly checkType: 'connectivity' | 'performance' | 'capacity' | 'integrity' | 'replication';
+  readonly checkType:
+    | 'connectivity'
+    | 'performance'
+    | 'capacity'
+    | 'integrity'
+    | 'replication';
   readonly enabled: boolean;
   readonly intervalMs: number;
   readonly timeoutMs: number;
@@ -419,7 +433,11 @@ export interface AggregationRule {
  */
 export interface MetricsExportTarget {
   readonly targetId: string;
-  readonly targetType: 'prometheus' | 'grafana' | 'elasticsearch' | 'cloudwatch';
+  readonly targetType:
+    | 'prometheus'
+    | 'grafana'
+    | 'elasticsearch'
+    | 'cloudwatch';
   readonly endpoint: string;
   readonly credentials: StorageCredentials;
   readonly enabled: boolean;
@@ -505,7 +523,11 @@ export interface ReplicationError {
  */
 export interface RecoveryOperation {
   readonly operationId: string;
-  readonly operationType: 'node_recovery' | 'data_recovery' | 'full_restore' | 'point_in_time_recovery';
+  readonly operationType:
+    | 'node_recovery'
+    | 'data_recovery'
+    | 'full_restore'
+    | 'point_in_time_recovery';
   readonly startTime: Date;
   readonly endTime?: Date;
   readonly status: 'running' | 'completed' | 'failed' | 'cancelled';
@@ -728,11 +750,16 @@ export interface HealthRecommendation {
  * disaster recovery, and comprehensive monitoring capabilities.
  */
 @Injectable()
-export class SessionPersistenceService implements OnModuleInit, OnApplicationShutdown {
+export class SessionPersistenceService
+  implements OnModuleInit, OnApplicationShutdown
+{
   private readonly logger = new Logger(SessionPersistenceService.name);
   private readonly config: SessionPersistenceConfig;
   private readonly storageNodes = new Map<string, Redis>();
-  private readonly persistenceRecords = new Map<string, SessionPersistenceRecord>();
+  private readonly persistenceRecords = new Map<
+    string,
+    SessionPersistenceRecord
+  >();
   private readonly recoveryOperations = new Map<string, RecoveryOperation>();
   private healthMonitoringInterval?: NodeJS.Timeout;
   private replicationMonitoringInterval?: NodeJS.Timeout;
@@ -742,24 +769,51 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
   constructor(
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly auditService: SecurityAuditService
+    private readonly auditService: SecurityAuditService,
   ) {
     // Initialize persistence configuration
     this.config = {
-      enabled: this.configService.get<boolean>('SESSION_PERSISTENCE_ENABLED', true),
-      primaryStorageTier: this.configService.get<PersistenceStorageTier>('PRIMARY_STORAGE_TIER', PersistenceStorageTier.SSD_PRIMARY),
-      replicationStrategy: this.configService.get<ReplicationStrategy>('REPLICATION_STRATEGY', ReplicationStrategy.HYBRID),
-      replicationFactor: this.configService.get<number>('REPLICATION_FACTOR', 3),
-      recoveryPointObjective: this.configService.get<RecoveryPointObjective>('RECOVERY_POINT_OBJECTIVE', RecoveryPointObjective.FIVE_SECONDS),
-      recoveryTimeObjective: this.configService.get<RecoveryTimeObjective>('RECOVERY_TIME_OBJECTIVE', RecoveryTimeObjective.THIRTY_SECONDS),
-      encryptionEnabled: this.configService.get<boolean>('PERSISTENCE_ENCRYPTION_ENABLED', true),
-      compressionEnabled: this.configService.get<boolean>('PERSISTENCE_COMPRESSION_ENABLED', true),
-      checksumValidation: this.configService.get<boolean>('PERSISTENCE_CHECKSUM_VALIDATION', true),
+      enabled: this.configService.get<boolean>(
+        'SESSION_PERSISTENCE_ENABLED',
+        true,
+      ),
+      primaryStorageTier: this.configService.get<PersistenceStorageTier>(
+        'PRIMARY_STORAGE_TIER',
+        PersistenceStorageTier.SSD_PRIMARY,
+      ),
+      replicationStrategy: this.configService.get<ReplicationStrategy>(
+        'REPLICATION_STRATEGY',
+        ReplicationStrategy.HYBRID,
+      ),
+      replicationFactor: this.configService.get<number>(
+        'REPLICATION_FACTOR',
+        3,
+      ),
+      recoveryPointObjective: this.configService.get<RecoveryPointObjective>(
+        'RECOVERY_POINT_OBJECTIVE',
+        RecoveryPointObjective.FIVE_SECONDS,
+      ),
+      recoveryTimeObjective: this.configService.get<RecoveryTimeObjective>(
+        'RECOVERY_TIME_OBJECTIVE',
+        RecoveryTimeObjective.THIRTY_SECONDS,
+      ),
+      encryptionEnabled: this.configService.get<boolean>(
+        'PERSISTENCE_ENCRYPTION_ENABLED',
+        true,
+      ),
+      compressionEnabled: this.configService.get<boolean>(
+        'PERSISTENCE_COMPRESSION_ENABLED',
+        true,
+      ),
+      checksumValidation: this.configService.get<boolean>(
+        'PERSISTENCE_CHECKSUM_VALIDATION',
+        true,
+      ),
       storageNodes: this.getDefaultStorageNodes(),
       backupConfiguration: this.getDefaultBackupConfiguration(),
       retentionPolicies: this.getDefaultRetentionPolicies(),
       healthMonitoring: this.getDefaultHealthMonitoring(),
-      performanceTargets: this.getDefaultPerformanceTargets()
+      performanceTargets: this.getDefaultPerformanceTargets(),
     };
 
     this.logger.log('Session Persistence Service initialized');
@@ -767,7 +821,9 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
     this.logger.log(`Primary storage tier: ${this.config.primaryStorageTier}`);
     this.logger.log(`Replication strategy: ${this.config.replicationStrategy}`);
     this.logger.log(`Replication factor: ${this.config.replicationFactor}`);
-    this.logger.log(`RPO: ${this.config.recoveryPointObjective}, RTO: ${this.config.recoveryTimeObjective}`);
+    this.logger.log(
+      `RPO: ${this.config.recoveryPointObjective}, RTO: ${this.config.recoveryTimeObjective}`,
+    );
   }
 
   /**
@@ -805,7 +861,10 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
 
       this.logger.log('Session Persistence Service fully initialized');
     } catch (error) {
-      this.logger.error('Failed to initialize Session Persistence Service', error);
+      this.logger.error(
+        'Failed to initialize Session Persistence Service',
+        error,
+      );
       throw error;
     }
   }
@@ -826,7 +885,10 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       }
 
       // Stop backup schedules
-      for (const [scheduleId, interval] of this.backupScheduleIntervals.entries()) {
+      for (const [
+        scheduleId,
+        interval,
+      ] of this.backupScheduleIntervals.entries()) {
         clearInterval(interval);
       }
 
@@ -838,7 +900,10 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
 
       this.logger.log('Session Persistence Service shutdown completed');
     } catch (error) {
-      this.logger.error('Error during Session Persistence Service shutdown', error);
+      this.logger.error(
+        'Error during Session Persistence Service shutdown',
+        error,
+      );
     }
   }
 
@@ -847,7 +912,9 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
   /**
    * Persist session data across storage tiers
    */
-  async persistSession(sessionMetadata: SessionMetadata): Promise<SessionPersistenceRecord> {
+  async persistSession(
+    sessionMetadata: SessionMetadata,
+  ): Promise<SessionPersistenceRecord> {
     const startTime = Date.now();
     const recordId = uuidv4();
 
@@ -863,13 +930,19 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
 
       if (this.config.compressionEnabled) {
         const compressedData = await this.compressData(sessionData);
-        compressionRatio = this.calculateCompressionRatio(sessionData, compressedData);
+        compressionRatio = this.calculateCompressionRatio(
+          sessionData,
+          compressedData,
+        );
         processedData = compressedData;
       }
 
       // Apply encryption if enabled
       if (this.config.encryptionEnabled) {
-        processedData = await this.encryptData(processedData, sessionMetadata.sessionId);
+        processedData = await this.encryptData(
+          processedData,
+          sessionMetadata.sessionId,
+        );
       }
 
       // Calculate checksum
@@ -879,7 +952,10 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       const storageNodes = await this.selectStorageNodes(sessionMetadata);
 
       // Persist data to selected nodes
-      const replicationResults = await this.replicateData(processedData, storageNodes);
+      const replicationResults = await this.replicateData(
+        processedData,
+        storageNodes,
+      );
 
       // Create persistence record
       const persistenceRecord: SessionPersistenceRecord = {
@@ -887,32 +963,41 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         sessionId: sessionMetadata.sessionId,
         userId: sessionMetadata.userId,
         persistenceTimestamp: new Date(),
-        storageNodes: storageNodes.map(node => node.nodeId),
+        storageNodes: storageNodes.map((node) => node.nodeId),
         dataSize: JSON.stringify(processedData).length,
         compressionRatio,
         encryptionApplied: this.config.encryptionEnabled,
         checksumHash,
         metadata: {
           originalDataSize: JSON.stringify(sessionData).length,
-          compressedDataSize: compressionRatio ? JSON.stringify(processedData).length : undefined,
-          encryptedDataSize: this.config.encryptionEnabled ? JSON.stringify(processedData).length : undefined,
+          compressedDataSize: compressionRatio
+            ? JSON.stringify(processedData).length
+            : undefined,
+          encryptedDataSize: this.config.encryptionEnabled
+            ? JSON.stringify(processedData).length
+            : undefined,
           storageFormat: 'json',
-          compressionAlgorithm: this.config.compressionEnabled ? 'gzip' : undefined,
-          encryptionAlgorithm: this.config.encryptionEnabled ? 'aes-256-gcm' : undefined,
+          compressionAlgorithm: this.config.compressionEnabled
+            ? 'gzip'
+            : undefined,
+          encryptionAlgorithm: this.config.encryptionEnabled
+            ? 'aes-256-gcm'
+            : undefined,
           integrityAlgorithm: 'sha256',
           persistenceVersion: '1.0.0',
-          customMetadata: {}},
+          customMetadata: {},
+        },
         replicationStatus: {
           primaryNode: storageNodes[0].nodeId,
-          replicaNodes: storageNodes.slice(1).map(node => node.nodeId),
+          replicaNodes: storageNodes.slice(1).map((node) => node.nodeId),
           replicationLagMs: 0,
           consistencyStatus: 'consistent',
           lastReplicationTime: new Date(),
           replicationErrors: [],
-          replicationHealth: PersistenceHealthStatus.HEALTHY
+          replicationHealth: PersistenceHealthStatus.HEALTHY,
         },
         lastVerified: new Date(),
-        expiresAt: sessionMetadata.expiresAt
+        expiresAt: sessionMetadata.expiresAt,
       };
 
       // Store persistence record
@@ -922,7 +1007,11 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       await this.persistRecordMetadata(persistenceRecord);
 
       // Emit persistence event
-      this.eventEmitter.emit('session.persisted', sessionMetadata.sessionId, recordId);
+      this.eventEmitter.emit(
+        'session.persisted',
+        sessionMetadata.sessionId,
+        recordId,
+      );
 
       // Audit persistence operation
       await this.auditService.logSecurityEvent({
@@ -936,15 +1025,20 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
           dataSize: persistenceRecord.dataSize,
           compressionRatio,
           encryptionApplied: persistenceRecord.encryptionApplied,
-          executionTime: Date.now() - startTime
+          executionTime: Date.now() - startTime,
         },
-        metadata: { persistenceRecord }
+        metadata: { persistenceRecord },
       });
 
-      this.logger.debug(`Session persisted successfully: ${sessionMetadata.sessionId} -> ${recordId}`);
+      this.logger.debug(
+        `Session persisted successfully: ${sessionMetadata.sessionId} -> ${recordId}`,
+      );
       return persistenceRecord;
     } catch (error) {
-      this.logger.error(`Failed to persist session: ${sessionMetadata.sessionId}`, error);
+      this.logger.error(
+        `Failed to persist session: ${sessionMetadata.sessionId}`,
+        error,
+      );
 
       // Audit persistence failure
       await this.auditService.logSecurityEvent({
@@ -954,8 +1048,8 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         sessionId: sessionMetadata.sessionId,
         details: {
           error: error.message,
-          executionTime: Date.now() - startTime
-        }
+          executionTime: Date.now() - startTime,
+        },
       });
 
       throw error;
@@ -974,7 +1068,9 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       // Find persistence record
       const persistenceRecord = await this.findPersistenceRecord(sessionId);
       if (!persistenceRecord) {
-        this.logger.debug(`No persistence record found for session: ${sessionId}`);
+        this.logger.debug(
+          `No persistence record found for session: ${sessionId}`,
+        );
         return null;
       }
 
@@ -982,14 +1078,18 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       const recoveryNode = await this.selectRecoveryNode(persistenceRecord);
 
       // Retrieve data from storage
-      const retrievedData = await this.retrieveData(persistenceRecord, recoveryNode);
+      const retrievedData = await this.retrieveData(
+        persistenceRecord,
+        recoveryNode,
+      );
 
       // Verify data integrity
       if (this.config.checksumValidation) {
         const currentChecksum = await this.calculateChecksum(retrievedData);
         if (currentChecksum !== persistenceRecord.checksumHash) {
           throw new Error('Data integrity verification failed during recovery');
-        }}
+        }
+      }
 
       // Decrypt data if encrypted
       let processedData = retrievedData;
@@ -1003,15 +1103,20 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       }
 
       // Reconstruct session metadata
-      const recoveredSession = await this.reconstructSessionMetadata(processedData);
+      const recoveredSession =
+        await this.reconstructSessionMetadata(processedData);
 
       // Update persistence record with recovery information
       await this.updatePersistenceRecord(persistenceRecord.recordId, {
-        lastVerified: new Date()
+        lastVerified: new Date(),
       });
 
       // Emit recovery event
-      this.eventEmitter.emit('session.recovered', sessionId, persistenceRecord.recordId);
+      this.eventEmitter.emit(
+        'session.recovered',
+        sessionId,
+        persistenceRecord.recordId,
+      );
 
       // Audit recovery operation
       await this.auditService.logSecurityEvent({
@@ -1024,9 +1129,9 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
           recoveryNode: recoveryNode.nodeId,
           dataSize: persistenceRecord.dataSize,
           integrityVerified: this.config.checksumValidation,
-          executionTime: Date.now() - startTime
+          executionTime: Date.now() - startTime,
         },
-        metadata: { recoveredSession }
+        metadata: { recoveredSession },
       });
 
       this.logger.log(`Session recovered successfully: ${sessionId}`);
@@ -1042,8 +1147,8 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         sessionId,
         details: {
           error: error.message,
-          executionTime: Date.now() - startTime
-        }
+          executionTime: Date.now() - startTime,
+        },
       });
 
       throw error;
@@ -1055,7 +1160,10 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
   /**
    * Perform disaster recovery operation
    */
-  async performDisasterRecovery(recoveryPoint: Date, targetSessions?: string[]): Promise<RecoveryOperation> {
+  async performDisasterRecovery(
+    recoveryPoint: Date,
+    targetSessions?: string[],
+  ): Promise<RecoveryOperation> {
     const operationId = uuidv4();
     const startTime = Date.now();
 
@@ -1076,7 +1184,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
           currentPhase: 'initialization',
           estimatedTimeRemaining: 0,
           dataTransferred: 0,
-          dataRemaining: 0
+          dataRemaining: 0,
         },
         affectedSessions: targetSessions || [],
         recoveryPoint,
@@ -1092,33 +1200,48 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
             cpuPercent: 0,
             memoryPercent: 0,
             diskIOPercent: 0,
-            networkIOPercent: 0
+            networkIOPercent: 0,
           },
           networkUtilization: 0,
-          errorRate: 0
-        }
+          errorRate: 0,
+        },
       };
 
       // Store recovery operation
       this.recoveryOperations.set(operationId, recoveryOperation);
 
       // Identify sessions to recover
-      const sessionsToRecover = await this.identifySessionsForRecovery(recoveryPoint, targetSessions);
+      const sessionsToRecover = await this.identifySessionsForRecovery(
+        recoveryPoint,
+        targetSessions,
+      );
       recoveryOperation.progress.totalSessions = sessionsToRecover.length;
       recoveryOperation.affectedSessions = sessionsToRecover;
 
       // Estimate recovery duration
-      recoveryOperation.estimatedDuration = this.estimateRecoveryDuration(sessionsToRecover);
+      recoveryOperation.estimatedDuration =
+        this.estimateRecoveryDuration(sessionsToRecover);
 
       // Select source and target nodes
-      recoveryOperation.sourceNodes = await this.selectSourceNodesForRecovery(recoveryPoint);
+      recoveryOperation.sourceNodes =
+        await this.selectSourceNodesForRecovery(recoveryPoint);
       recoveryOperation.targetNodes = await this.selectTargetNodesForRecovery();
 
       // Execute recovery phases
       // Execute recovery phases
-      for (const phase of ['preparation', 'data_retrieval', 'data_restoration', 'verification', 'finalization']) {
+      for (const phase of [
+        'preparation',
+        'data_retrieval',
+        'data_restoration',
+        'verification',
+        'finalization',
+      ]) {
         recoveryOperation.progress.currentPhase = phase;
-        await this.executeRecoveryPhase(recoveryOperation, phase, sessionsToRecover);
+        await this.executeRecoveryPhase(
+          recoveryOperation,
+          phase,
+          sessionsToRecover,
+        );
       }
 
       // Complete recovery operation
@@ -1142,9 +1265,9 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
           recoveredSessions: recoveryOperation.progress.recoveredSessions,
           failedSessions: recoveryOperation.progress.failedSessions,
           actualDuration: recoveryOperation.actualDuration,
-          successRate: recoveryOperation.metrics.successRate
+          successRate: recoveryOperation.metrics.successRate,
         },
-        metadata: { recoveryOperation }
+        metadata: { recoveryOperation },
       });
 
       this.logger.log(`Disaster recovery completed: ${operationId}`);
@@ -1164,7 +1287,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
           errorMessage: error.message,
           timestamp: new Date(),
           retryAttempt: 0,
-          resolved: false
+          resolved: false,
         });
       }
 
@@ -1204,11 +1327,15 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         nodeHealth,
         replicationHealth,
         performanceMetrics,
-        capacityReport
+        capacityReport,
       );
 
       // Determine overall health status
-      const overallHealth = this.determineOverallHealth(nodeHealth, replicationHealth, performanceMetrics);
+      const overallHealth = this.determineOverallHealth(
+        nodeHealth,
+        replicationHealth,
+        performanceMetrics,
+      );
 
       const healthReport: PersistenceHealthReport = {
         reportId,
@@ -1219,7 +1346,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         performanceMetrics,
         capacityReport,
         alertSummary,
-        recommendations
+        recommendations,
       };
 
       // Audit health report generation
@@ -1233,12 +1360,14 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
           nodeCount: nodeHealth.length,
           alertCount: alertSummary.totalAlerts,
           recommendationCount: recommendations.length,
-          executionTime: Date.now() - startTime
+          executionTime: Date.now() - startTime,
         },
-        metadata: { healthReport }
+        metadata: { healthReport },
       });
 
-      this.logger.debug(`Health report generated: ${reportId}, Overall health: ${overallHealth}`);
+      this.logger.debug(
+        `Health report generated: ${reportId}, Overall health: ${overallHealth}`,
+      );
       return healthReport;
     } catch (error) {
       this.logger.error('Failed to generate health report', error);
@@ -1259,13 +1388,18 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       this.logger.debug('Starting scheduled backup operation');
 
       // Find active backup schedules
-      const activeSchedules = this.config.backupConfiguration.schedules.filter(schedule => schedule.enabled);
+      const activeSchedules = this.config.backupConfiguration.schedules.filter(
+        (schedule) => schedule.enabled,
+      );
 
       for (const schedule of activeSchedules) {
         try {
           await this.executeBackupSchedule(schedule);
         } catch (error) {
-          this.logger.error(`Backup schedule failed: ${schedule.scheduleId}`, error);
+          this.logger.error(
+            `Backup schedule failed: ${schedule.scheduleId}`,
+            error,
+          );
         }
       }
 
@@ -1290,17 +1424,21 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
             enableOfflineQueue: false,
             lazyConnect: true,
             connectTimeout: 10000,
-            commandTimeout: 5000
+            commandTimeout: 5000,
           });
 
           await redis.connect();
           this.storageNodes.set(nodeConfig.nodeId, redis);
 
-          this.logger.log(`Connected to storage node: ${nodeConfig.nodeId} (${nodeConfig.nodeType})`);
+          this.logger.log(
+            `Connected to storage node: ${nodeConfig.nodeId} (${nodeConfig.nodeType})`,
+          );
         }
       }
 
-      this.logger.log(`Initialized ${this.storageNodes.size} storage node connections`);
+      this.logger.log(
+        `Initialized ${this.storageNodes.size} storage node connections`,
+      );
     } catch (error) {
       this.logger.error('Failed to initialize storage nodes', error);
       throw error;
@@ -1321,7 +1459,9 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       }
     }, this.config.healthMonitoring.checkIntervalMs);
 
-    this.logger.log(`Health monitoring started: ${this.config.healthMonitoring.checkIntervalMs}ms`);
+    this.logger.log(
+      `Health monitoring started: ${this.config.healthMonitoring.checkIntervalMs}ms`,
+    );
   }
 
   /**
@@ -1345,32 +1485,47 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
    * Initialize event handlers
    */
   private initializeEventHandlers(): void {
-    this.eventEmitter.on('session.created', async (session: SessionMetadata) => {
-      if (this.config.enabled) {
-        try {
-          await this.persistSession(session);
-        } catch (error) {
-          this.logger.error(`Failed to persist new session: ${session.sessionId}`, error);
+    this.eventEmitter.on(
+      'session.created',
+      async (session: SessionMetadata) => {
+        if (this.config.enabled) {
+          try {
+            await this.persistSession(session);
+          } catch (error) {
+            this.logger.error(
+              `Failed to persist new session: ${session.sessionId}`,
+              error,
+            );
+          }
         }
-      }
-    });
+      },
+    );
 
-    this.eventEmitter.on('session.updated', async (session: SessionMetadata) => {
-      if (this.config.enabled) {
-        try {
-          await this.persistSession(session);
-        } catch (error) {
-          this.logger.error(`Failed to persist updated session: ${session.sessionId}`, error);
+    this.eventEmitter.on(
+      'session.updated',
+      async (session: SessionMetadata) => {
+        if (this.config.enabled) {
+          try {
+            await this.persistSession(session);
+          } catch (error) {
+            this.logger.error(
+              `Failed to persist updated session: ${session.sessionId}`,
+              error,
+            );
+          }
         }
-      }
-    });
+      },
+    );
 
     this.eventEmitter.on('session.terminated', async (sessionId: string) => {
       if (this.config.enabled) {
         try {
           await this.markSessionForCleanup(sessionId);
         } catch (error) {
-          this.logger.error(`Failed to mark session for cleanup: ${sessionId}`, error);
+          this.logger.error(
+            `Failed to mark session for cleanup: ${sessionId}`,
+            error,
+          );
         }
       }
     });
@@ -1394,7 +1549,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         archiveAfterDays: 90,
         deleteAfterDays: 2555,
         compressAfterDays: 30,
-        encryptionRequired: true
+        encryptionRequired: true,
       },
       destinations: [],
       encryption: {
@@ -1403,14 +1558,14 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         keyManagement: 'local',
         keyRotationDays: 90,
         encryptInTransit: true,
-        encryptAtRest: true
+        encryptAtRest: true,
       },
       compression: {
         enabled: true,
         algorithm: 'gzip',
         compressionLevel: 6,
         chunkSizeMB: 64,
-        parallelCompression: true
+        parallelCompression: true,
       },
       verification: {
         enabled: true,
@@ -1418,7 +1573,8 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         integrityChecks: true,
         restoreTests: false,
         verificationSchedule: '0 2 * * 0',
-        samplePercentage: 10},
+        samplePercentage: 10,
+      },
       monitoring: {
         enabled: true,
         alertOnFailure: true,
@@ -1427,10 +1583,10 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
           maxBackupDurationMinutes: 240,
           minBackupSpeedMBps: 10,
           maxErrorRatePercent: 1,
-          maxRetryAttempts: 3
+          maxRetryAttempts: 3,
         },
-        notificationChannels: []
-      }
+        notificationChannels: [],
+      },
     };
   }
 
@@ -1450,7 +1606,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         errorRateWarningPercent: 1,
         errorRateCriticalPercent: 5,
         replicationLagWarningMs: 10000,
-        replicationLagCriticalMs: 30000
+        replicationLagCriticalMs: 30000,
       },
       autoRecovery: {
         enabled: true,
@@ -1458,7 +1614,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         recoveryIntervalMs: 30000,
         failoverEnabled: true,
         automaticFailback: false,
-        escalationRules: []
+        escalationRules: [],
       },
       dashboardEnabled: true,
       metricsCollection: {
@@ -1467,8 +1623,8 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
         retentionDays: 30,
         metrics: [],
         aggregationRules: [],
-        exportTargets: []
-      }
+        exportTargets: [],
+      },
     };
   }
   private getDefaultPerformanceTargets(): PerformanceTargets {
@@ -1480,10 +1636,9 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       consistencyLevel: 'strong',
       durabilityTarget: 11,
       recoveryTimeTargetMs: 30000,
-      recoveryPointTargetMs: 5000
+      recoveryPointTargetMs: 5000,
     };
   }
-
 
   // Additional placeholder methods...
   private async loadPersistenceRecords(): Promise<void> {
@@ -1534,39 +1689,61 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
     return 'checksum';
   }
 
-  private async selectStorageNodes(session: SessionMetadata): Promise<StorageNodeConfig[]> {
+  private async selectStorageNodes(
+    session: SessionMetadata,
+  ): Promise<StorageNodeConfig[]> {
     return [];
   }
 
-  private async replicateData(data: any, nodes: StorageNodeConfig[]): Promise<any> {
+  private async replicateData(
+    data: any,
+    nodes: StorageNodeConfig[],
+  ): Promise<any> {
     return {};
   }
 
-  private async persistRecordMetadata(record: SessionPersistenceRecord): Promise<void> {
+  private async persistRecordMetadata(
+    record: SessionPersistenceRecord,
+  ): Promise<void> {
     // Implementation placeholder
   }
 
-  private async findPersistenceRecord(sessionId: string): Promise<SessionPersistenceRecord | null> {
+  private async findPersistenceRecord(
+    sessionId: string,
+  ): Promise<SessionPersistenceRecord | null> {
     return null;
   }
 
-  private async selectRecoveryNode(record: SessionPersistenceRecord): Promise<StorageNodeConfig> {
+  private async selectRecoveryNode(
+    record: SessionPersistenceRecord,
+  ): Promise<StorageNodeConfig> {
     return {} as StorageNodeConfig;
   }
 
-  private async retrieveData(record: SessionPersistenceRecord, node: StorageNodeConfig): Promise<any> {
+  private async retrieveData(
+    record: SessionPersistenceRecord,
+    node: StorageNodeConfig,
+  ): Promise<any> {
     return {};
   }
 
-  private async reconstructSessionMetadata(data: any): Promise<SessionMetadata> {
+  private async reconstructSessionMetadata(
+    data: any,
+  ): Promise<SessionMetadata> {
     return {} as SessionMetadata;
   }
 
-  private async updatePersistenceRecord(recordId: string, updates: Partial<SessionPersistenceRecord>): Promise<void> {
+  private async updatePersistenceRecord(
+    recordId: string,
+    updates: Partial<SessionPersistenceRecord>,
+  ): Promise<void> {
     // Implementation placeholder
   }
 
-  private async identifySessionsForRecovery(recoveryPoint: Date, targetSessions?: string[]): Promise<string[]> {
+  private async identifySessionsForRecovery(
+    recoveryPoint: Date,
+    targetSessions?: string[],
+  ): Promise<string[]> {
     return [];
   }
 
@@ -1574,7 +1751,9 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
     return 60000;
   }
 
-  private async selectSourceNodesForRecovery(recoveryPoint: Date): Promise<string[]> {
+  private async selectSourceNodesForRecovery(
+    recoveryPoint: Date,
+  ): Promise<string[]> {
     return [];
   }
 
@@ -1582,7 +1761,11 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
     return [];
   }
 
-  private async executeRecoveryPhase(operation: RecoveryOperation, phase: string, sessions: string[]): Promise<void> {
+  private async executeRecoveryPhase(
+    operation: RecoveryOperation,
+    phase: string,
+    sessions: string[],
+  ): Promise<void> {
     // Implementation placeholder
   }
 
@@ -1598,7 +1781,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       nodesOutOfSync: 0,
       lastFullSync: new Date(),
       replicationErrors: 0,
-      replicationThroughput: 0
+      replicationThroughput: 0,
     };
   }
   private async collectPerformanceMetrics(): Promise<PersistencePerformanceMetrics> {
@@ -1611,7 +1794,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       p99WriteLatencyMs: 0,
       operationsPerSecond: 0,
       errorRate: 0,
-      availability: 99.99
+      availability: 99.99,
     };
   }
   private async generateCapacityReport(): Promise<CapacityReport> {
@@ -1621,7 +1804,7 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       availableCapacity: 0,
       utilizationPercent: 0,
       growthTrend: 'stable',
-      recommendedActions: []
+      recommendedActions: [],
     };
   }
   private async summarizeAlerts(): Promise<AlertSummary> {
@@ -1632,31 +1815,36 @@ export class SessionPersistenceService implements OnModuleInit, OnApplicationShu
       infoAlerts: 0,
       resolvedAlerts: 0,
       alertsByCategory: {},
-      topAlerts: []
+      topAlerts: [],
     };
   }
   private async generateHealthRecommendations(
     nodeHealth: NodeHealthReport[],
     replicationHealth: ReplicationHealthReport,
     performanceMetrics: PersistencePerformanceMetrics,
-    capacityReport: CapacityReport
+    capacityReport: CapacityReport,
   ): Promise<HealthRecommendation[]> {
     return [];
   }
   private determineOverallHealth(
     nodeHealth: NodeHealthReport[],
     replicationHealth: ReplicationHealthReport,
-    performanceMetrics: PersistencePerformanceMetrics
+    performanceMetrics: PersistencePerformanceMetrics,
   ): PersistenceHealthStatus {
     return PersistenceHealthStatus.HEALTHY;
   }
   private getHealthSeverity(health: PersistenceHealthStatus): AuditSeverity {
     switch (health) {
-      case PersistenceHealthStatus.FAILED: return AuditSeverity.CRITICAL;
-      case PersistenceHealthStatus.CRITICAL: return AuditSeverity.HIGH;
-      case PersistenceHealthStatus.WARNING: return AuditSeverity.MEDIUM;
-      case PersistenceHealthStatus.DEGRADED: return AuditSeverity.LOW;
-      default: return AuditSeverity.INFO;
+      case PersistenceHealthStatus.FAILED:
+        return AuditSeverity.CRITICAL;
+      case PersistenceHealthStatus.CRITICAL:
+        return AuditSeverity.HIGH;
+      case PersistenceHealthStatus.WARNING:
+        return AuditSeverity.MEDIUM;
+      case PersistenceHealthStatus.DEGRADED:
+        return AuditSeverity.LOW;
+      default:
+        return AuditSeverity.INFO;
     }
   }
 

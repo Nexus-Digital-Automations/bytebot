@@ -54,9 +54,12 @@ describe('Browser Automation Integration Tests', () => {
 
   beforeAll(async () => {
     // Create mock services with realistic behaviors
-    const mockBrowserUseService = MockBrowserUseServiceFactory.createWithDefaults();
-    const mockBrowserInteractionService = MockBrowserInteractionServiceFactory.createWithDefaults();
-    const mockBrowserSessionService = MockBrowserSessionServiceFactory.createWithDefaults();
+    const mockBrowserUseService =
+      MockBrowserUseServiceFactory.createWithDefaults();
+    const mockBrowserInteractionService =
+      MockBrowserInteractionServiceFactory.createWithDefaults();
+    const mockBrowserSessionService =
+      MockBrowserSessionServiceFactory.createWithDefaults();
 
     // Create testing module with real controller and mocked services
     module = await Test.createTestingModule({
@@ -79,12 +82,15 @@ describe('Browser Automation Integration Tests', () => {
 
     // Create NestJS application
     app = module.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ transform: true, whitelist: true }),
+    );
 
     await app.init();
 
     // Get service instances
-    browserUseController = module.get<BrowserUseController>(BrowserUseController);
+    browserUseController =
+      module.get<BrowserUseController>(BrowserUseController);
     browserUseService = module.get(BrowserUseService);
     browserInteractionService = module.get(BrowserInteractionService);
     browserSessionService = module.get(BrowserSessionService);
@@ -102,9 +108,10 @@ describe('Browser Automation Integration Tests', () => {
   describe('Complete Browser Session Lifecycle Integration', () => {
     it('should handle full session lifecycle with task execution', async () => {
       // Step 1: Create browser session
-      const sessionDto = BrowserTestDataGenerator.generateCreateBrowserSessionDto({
-        sessionId: testSessionId,
-      });
+      const sessionDto =
+        BrowserTestDataGenerator.generateCreateBrowserSessionDto({
+          sessionId: testSessionId,
+        });
 
       browserSessionService.createSession.mockResolvedValue({
         success: true,
@@ -112,7 +119,10 @@ describe('Browser Automation Integration Tests', () => {
         metadata: { createdAt: new Date() },
       });
 
-      const sessionResult = await browserUseController.createSession(sessionDto, mockUser);
+      const sessionResult = await browserUseController.createSession(
+        sessionDto,
+        mockUser,
+      );
 
       expect(sessionResult.success).toBe(true);
       expect(sessionResult.sessionId).toBe(testSessionId);
@@ -143,18 +153,22 @@ describe('Browser Automation Integration Tests', () => {
         },
       });
 
-      const executeResult = await browserUseController.executeScript(executeDto, mockUser);
+      const executeResult = await browserUseController.executeScript(
+        executeDto,
+        mockUser,
+      );
 
       expect(executeResult.success).toBe(true);
       expect(executeResult.sessionId).toBe(testSessionId);
       expect(executeResult.screenshots).toContain('base64screenshot');
 
       // Step 3: Perform interactions in session
-      const interactionDto = BrowserTestDataGenerator.generateBrowserInteractionDto({
-        sessionId: testSessionId,
-        type: 'click',
-        selector: '#test-button',
-      });
+      const interactionDto =
+        BrowserTestDataGenerator.generateBrowserInteractionDto({
+          sessionId: testSessionId,
+          type: 'click',
+          selector: '#test-button',
+        });
 
       browserUseService.executeInteraction.mockResolvedValue({
         success: true,
@@ -162,7 +176,10 @@ describe('Browser Automation Integration Tests', () => {
         screenshot: undefined,
       });
 
-      const interactionResult = await browserUseController.performInteraction(interactionDto, mockUser);
+      const interactionResult = await browserUseController.performInteraction(
+        interactionDto,
+        mockUser,
+      );
 
       expect(interactionResult.success).toBe(true);
       expect(interactionResult.sessionId).toBe(testSessionId);
@@ -178,35 +195,56 @@ describe('Browser Automation Integration Tests', () => {
         lastActivity: new Date(),
       });
 
-      const statusResult = await browserUseController.getStatus(statusDto, mockUser);
+      const statusResult = await browserUseController.getStatus(
+        statusDto,
+        mockUser,
+      );
 
       expect(statusResult.healthy).toBe(true);
       expect(statusResult.session).toBeDefined();
 
       // Step 5: Get task history
-      const taskHistoryResult = await browserUseController.getSessionTasks(testSessionId, {}, mockUser);
+      const taskHistoryResult = await browserUseController.getSessionTasks(
+        testSessionId,
+        {},
+        mockUser,
+      );
 
-      expect(browserUseService.getSessionTasks).toHaveBeenCalledWith(testSessionId, undefined, undefined);
+      expect(browserUseService.getSessionTasks).toHaveBeenCalledWith(
+        testSessionId,
+        undefined,
+        undefined,
+      );
 
       // Verify all service interactions
-      expect(browserSessionService.createSession).toHaveBeenCalledWith(sessionDto);
+      expect(browserSessionService.createSession).toHaveBeenCalledWith(
+        sessionDto,
+      );
       expect(browserUseService.createTask).toHaveBeenCalled();
       expect(browserUseService.getTask).toHaveBeenCalledWith(testTaskId);
       expect(browserUseService.executeInteraction).toHaveBeenCalled();
     });
 
     it('should handle session creation failure and recovery', async () => {
-      const sessionDto = BrowserTestDataGenerator.generateCreateBrowserSessionDto();
+      const sessionDto =
+        BrowserTestDataGenerator.generateCreateBrowserSessionDto();
 
       // Simulate session creation failure
-      browserSessionService.createSession.mockRejectedValue(new Error('Session creation failed'));
+      browserSessionService.createSession.mockRejectedValue(
+        new Error('Session creation failed'),
+      );
 
-      const sessionResult = await browserUseController.createSession(sessionDto, mockUser);
+      const sessionResult = await browserUseController.createSession(
+        sessionDto,
+        mockUser,
+      );
 
       expect(sessionResult.success).toBe(false);
 
       // Verify service was called despite failure
-      expect(browserSessionService.createSession).toHaveBeenCalledWith(sessionDto);
+      expect(browserSessionService.createSession).toHaveBeenCalledWith(
+        sessionDto,
+      );
     });
 
     it('should handle concurrent sessions and tasks', async () => {
@@ -215,9 +253,10 @@ describe('Browser Automation Integration Tests', () => {
 
       // Create multiple sessions concurrently
       const sessionPromises = sessionIds.map(async (sessionId, index) => {
-        const sessionDto = BrowserTestDataGenerator.generateCreateBrowserSessionDto({
-          sessionId,
-        });
+        const sessionDto =
+          BrowserTestDataGenerator.generateCreateBrowserSessionDto({
+            sessionId,
+          });
 
         browserSessionService.createSession.mockResolvedValueOnce({
           success: true,
@@ -287,7 +326,8 @@ describe('Browser Automation Integration Tests', () => {
         metadata: { createdAt: new Date() },
       });
 
-      const sessionDto = BrowserTestDataGenerator.generateCreateBrowserSessionDto({ sessionId });
+      const sessionDto =
+        BrowserTestDataGenerator.generateCreateBrowserSessionDto({ sessionId });
       await browserUseController.createSession(sessionDto, mockUser);
 
       // Execute task
@@ -308,8 +348,13 @@ describe('Browser Automation Integration Tests', () => {
         },
       });
 
-      const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({ sessionId });
-      const executeResult = await browserUseController.executeScript(executeDto, mockUser);
+      const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({
+        sessionId,
+      });
+      const executeResult = await browserUseController.executeScript(
+        executeDto,
+        mockUser,
+      );
 
       // Verify session ID consistency across services
       expect(executeResult.sessionId).toBe(sessionId);
@@ -325,8 +370,13 @@ describe('Browser Automation Integration Tests', () => {
         lastActivity: new Date(),
       });
 
-      const statusDto = BrowserTestDataGenerator.generateBrowserStatusDto({ sessionId });
-      const statusResult = await browserUseController.getStatus(statusDto, mockUser);
+      const statusDto = BrowserTestDataGenerator.generateBrowserStatusDto({
+        sessionId,
+      });
+      const statusResult = await browserUseController.getStatus(
+        statusDto,
+        mockUser,
+      );
 
       expect(statusResult.session.sessionId).toBe(sessionId);
     });
@@ -374,7 +424,9 @@ describe('Browser Automation Integration Tests', () => {
   describe('Error Recovery and Resilience Integration', () => {
     it('should handle service failures gracefully with retry logic', async () => {
       const sessionId = uuidv4();
-      const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({ sessionId });
+      const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({
+        sessionId,
+      });
 
       // Simulate service failure on first attempt
       browserUseService.createTask
@@ -387,7 +439,10 @@ describe('Browser Automation Integration Tests', () => {
         });
 
       // The controller should handle the error gracefully
-      const result = await browserUseController.executeScript(executeDto, mockUser);
+      const result = await browserUseController.executeScript(
+        executeDto,
+        mockUser,
+      );
 
       // First call failed, but controller handled it
       expect(result.success).toBe(false);
@@ -415,10 +470,15 @@ describe('Browser Automation Integration Tests', () => {
         },
       });
 
-      const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({ sessionId });
+      const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({
+        sessionId,
+      });
 
       // This should timeout and handle gracefully
-      const result = await browserUseController.executeScript(executeDto, mockUser);
+      const result = await browserUseController.executeScript(
+        executeDto,
+        mockUser,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('timeout');
@@ -428,23 +488,32 @@ describe('Browser Automation Integration Tests', () => {
       const sessionId = uuidv4();
 
       // Simulate network errors
-      browserSessionService.createSession.mockRejectedValue(new Error('Network error: ECONNREFUSED'));
+      browserSessionService.createSession.mockRejectedValue(
+        new Error('Network error: ECONNREFUSED'),
+      );
 
-      const sessionDto = BrowserTestDataGenerator.generateCreateBrowserSessionDto({ sessionId });
-      await expect(browserUseController.createSession(sessionDto, mockUser)).rejects.toThrow('Network error: ECONNREFUSED');
+      const sessionDto =
+        BrowserTestDataGenerator.generateCreateBrowserSessionDto({ sessionId });
+      await expect(
+        browserUseController.createSession(sessionDto, mockUser),
+      ).rejects.toThrow('Network error: ECONNREFUSED');
 
       // Verify error is properly propagated
-      expect(browserSessionService.createSession).toHaveBeenCalledWith(sessionDto);
+      expect(browserSessionService.createSession).toHaveBeenCalledWith(
+        sessionDto,
+      );
     });
   });
 
   describe('Performance Integration Testing', () => {
     it('should maintain performance under concurrent load', async () => {
       const concurrentRequests = 10;
-      const sessionIds = Array.from({ length: concurrentRequests }, () => uuidv4());
+      const sessionIds = Array.from({ length: concurrentRequests }, () =>
+        uuidv4(),
+      );
 
       // Setup mocks for concurrent execution
-      sessionIds.forEach(sessionId => {
+      sessionIds.forEach((sessionId) => {
         browserSessionService.createSession.mockResolvedValueOnce({
           success: true,
           sessionId,
@@ -470,17 +539,23 @@ describe('Browser Automation Integration Tests', () => {
 
       const operation = async () => {
         const sessionId = sessionIds.pop();
-        const sessionDto = BrowserTestDataGenerator.generateCreateBrowserSessionDto({ sessionId });
-        const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({ sessionId });
+        const sessionDto =
+          BrowserTestDataGenerator.generateCreateBrowserSessionDto({
+            sessionId,
+          });
+        const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({
+          sessionId,
+        });
 
         await browserUseController.createSession(sessionDto, mockUser);
         return await browserUseController.executeScript(executeDto, mockUser);
       };
 
-      const { results, metrics } = await PerformanceTestUtils.measureConcurrentPerformance(
-        operation,
-        concurrentRequests
-      );
+      const { results, metrics } =
+        await PerformanceTestUtils.measureConcurrentPerformance(
+          operation,
+          concurrentRequests,
+        );
 
       // Verify performance requirements
       expect(metrics.successRate).toBe(1.0); // 100% success rate
@@ -488,7 +563,7 @@ describe('Browser Automation Integration Tests', () => {
       expect(metrics.maxDuration).toBeLessThan(500); // No single request over 500ms
       expect(metrics.memoryDelta).toBeLessThan(50 * 1024 * 1024); // Memory increase < 50MB
 
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.success).toBe(true);
       });
     });
@@ -537,11 +612,13 @@ describe('Browser Automation Integration Tests', () => {
             results.push(await operation());
           }
           return results;
-        }
+        },
       );
 
       // Memory usage should remain reasonable
-      expect(metrics.memoryUsage.delta.heapUsed).toBeLessThan(100 * 1024 * 1024); // < 100MB increase
+      expect(metrics.memoryUsage.delta.heapUsed).toBeLessThan(
+        100 * 1024 * 1024,
+      ); // < 100MB increase
 
       // Total operation time should be reasonable
       expect(metrics.duration).toBeLessThan(10000); // < 10 seconds for 100 operations
@@ -550,7 +627,8 @@ describe('Browser Automation Integration Tests', () => {
 
   describe('Security Integration Testing', () => {
     it('should validate input sanitization across service boundaries', async () => {
-      const maliciousInputs = BrowserTestDataGenerator.generateMaliciousInputs();
+      const maliciousInputs =
+        BrowserTestDataGenerator.generateMaliciousInputs();
 
       // Test XSS payloads
       for (const xssPayload of maliciousInputs.xssPayloads) {
@@ -574,7 +652,10 @@ describe('Browser Automation Integration Tests', () => {
           },
         });
 
-        const result = await browserUseController.executeScript(executeDto, mockUser);
+        const result = await browserUseController.executeScript(
+          executeDto,
+          mockUser,
+        );
 
         // Should either succeed with sanitized input or fail safely
         if (result.success) {
@@ -588,9 +669,11 @@ describe('Browser Automation Integration Tests', () => {
       // Note: In a real test, we would test without authentication tokens
       // For now, we verify that user context is passed through all operations
 
-      const sessionDto = BrowserTestDataGenerator.generateCreateBrowserSessionDto();
+      const sessionDto =
+        BrowserTestDataGenerator.generateCreateBrowserSessionDto();
       const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto();
-      const interactionDto = BrowserTestDataGenerator.generateBrowserInteractionDto();
+      const interactionDto =
+        BrowserTestDataGenerator.generateBrowserInteractionDto();
       const statusDto = BrowserTestDataGenerator.generateBrowserStatusDto();
 
       // Mock successful responses
@@ -663,16 +746,20 @@ describe('Browser Automation Integration Tests', () => {
       }
 
       const rapidRequestOperation = async () => {
-        const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({ sessionId });
+        const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({
+          sessionId,
+        });
         return await browserUseController.executeScript(executeDto, mockUser);
       };
 
       // Execute rapid requests
-      const promises = Array(rapidRequests).fill(null).map(() => rapidRequestOperation());
+      const promises = Array(rapidRequests)
+        .fill(null)
+        .map(() => rapidRequestOperation());
       const results = await Promise.all(promises);
 
       // All requests should complete (no rate limiting in mock scenario)
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.success).toBe(true);
       });
 
@@ -735,7 +822,9 @@ describe('Browser Automation Integration Tests', () => {
         metadata: { createdAt: new Date() },
       });
 
-      browserSessionService.getSessionStatus.mockImplementation(async () => sessionState);
+      browserSessionService.getSessionStatus.mockImplementation(
+        async () => sessionState,
+      );
 
       browserUseService.createTask.mockResolvedValue({
         success: true,
@@ -754,18 +843,26 @@ describe('Browser Automation Integration Tests', () => {
       });
 
       // Create session
-      const sessionDto = BrowserTestDataGenerator.generateCreateBrowserSessionDto({ sessionId });
+      const sessionDto =
+        BrowserTestDataGenerator.generateCreateBrowserSessionDto({ sessionId });
       await browserUseController.createSession(sessionDto, mockUser);
 
       // Execute operations and verify state consistency
-      const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({ sessionId });
+      const executeDto = BrowserTestDataGenerator.generateBrowserExecuteDto({
+        sessionId,
+      });
       await browserUseController.executeScript(executeDto, mockUser);
 
       // Update mock state to simulate activity
       sessionState.lastActivity = new Date();
 
-      const statusDto = BrowserTestDataGenerator.generateBrowserStatusDto({ sessionId });
-      const statusResult = await browserUseController.getStatus(statusDto, mockUser);
+      const statusDto = BrowserTestDataGenerator.generateBrowserStatusDto({
+        sessionId,
+      });
+      const statusResult = await browserUseController.getStatus(
+        statusDto,
+        mockUser,
+      );
 
       expect(statusResult.session.sessionId).toBe(sessionId);
       expect(statusResult.session.active).toBe(true);
@@ -798,7 +895,10 @@ describe('Browser Automation Integration Tests', () => {
         sessionId: undefined, // Get all sessions
       });
 
-      const healthResult = await browserUseController.getStatus(statusDto, mockUser);
+      const healthResult = await browserUseController.getStatus(
+        statusDto,
+        mockUser,
+      );
 
       expect(healthResult.healthy).toBe(true);
       expect(healthResult.system.activeSessions).toBe(3);
@@ -821,8 +921,9 @@ describe('Browser Automation Integration Tests', () => {
 
       const statusDto = BrowserTestDataGenerator.generateBrowserStatusDto();
 
-      await expect(browserUseController.getStatus(statusDto, mockUser))
-        .rejects.toThrow('System health check failed');
+      await expect(
+        browserUseController.getStatus(statusDto, mockUser),
+      ).rejects.toThrow('System health check failed');
     });
   });
 });

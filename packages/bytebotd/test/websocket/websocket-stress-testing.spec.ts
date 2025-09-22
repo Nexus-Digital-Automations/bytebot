@@ -98,7 +98,7 @@ class StressTestClient extends EventEmitter {
   constructor(
     private url: string,
     private clientId: string,
-    private config: Partial<StressTestConfig> = {}
+    private config: Partial<StressTestConfig> = {},
   ) {
     super();
   }
@@ -139,7 +139,6 @@ class StressTestClient extends EventEmitter {
           this.connected = false;
           this.emit('disconnected', { clientId: this.clientId });
         });
-
       } catch (error) {
         reject(error);
       }
@@ -160,9 +159,8 @@ class StressTestClient extends EventEmitter {
         clientId: this.clientId,
         message,
         latency,
-        totalReceived: this.messagesReceived
+        totalReceived: this.messagesReceived,
       });
-
     } catch (error) {
       this.errors++;
       this.emit('messageError', { clientId: this.clientId, error });
@@ -209,7 +207,7 @@ class StressTestClient extends EventEmitter {
 
       // Small delay between batches to prevent overwhelming
       if (batch < batches - 1) {
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
       }
     }
   }
@@ -246,9 +244,11 @@ class StressTestClient extends EventEmitter {
       messagesSent: this.messagesSent,
       messagesReceived: this.messagesReceived,
       errors: this.errors,
-      averageLatency: this.latencies.length > 0
-        ? this.latencies.reduce((sum, lat) => sum + lat, 0) / this.latencies.length
-        : 0,
+      averageLatency:
+        this.latencies.length > 0
+          ? this.latencies.reduce((sum, lat) => sum + lat, 0) /
+            this.latencies.length
+          : 0,
       maxLatency: this.latencies.length > 0 ? Math.max(...this.latencies) : 0,
       minLatency: this.latencies.length > 0 ? Math.min(...this.latencies) : 0,
     };
@@ -283,7 +283,7 @@ class StressTestOrchestrator extends EventEmitter {
 
   constructor(
     private baseUrl: string,
-    private config: StressTestConfig
+    private config: StressTestConfig,
   ) {
     super();
   }
@@ -307,7 +307,6 @@ class StressTestOrchestrator extends EventEmitter {
 
       // Phase 4: Resource cleanup test
       await this.testResourceCleanup();
-
     } finally {
       clearInterval(monitoringInterval);
       this.testEndTime = performance.now();
@@ -321,7 +320,10 @@ class StressTestOrchestrator extends EventEmitter {
     let establishedConnections = 0;
     let failedConnections = 0;
 
-    this.emit('phase', { name: 'Connection Establishment', status: 'starting' });
+    this.emit('phase', {
+      name: 'Connection Establishment',
+      status: 'starting',
+    });
 
     for (let i = 0; i < this.config.maxConnections; i++) {
       const clientId = `stress_client_${i.toString().padStart(5, '0')}`;
@@ -331,7 +333,10 @@ class StressTestOrchestrator extends EventEmitter {
 
       client.on('connected', () => {
         establishedConnections++;
-        this.emit('connectionEstablished', { total: establishedConnections, target: this.config.maxConnections });
+        this.emit('connectionEstablished', {
+          total: establishedConnections,
+          target: this.config.maxConnections,
+        });
       });
 
       client.on('error', () => {
@@ -342,13 +347,15 @@ class StressTestOrchestrator extends EventEmitter {
       connectionPromises.push(
         client.connect().catch(() => {
           // Connection failure tracked in error handler
-        })
+        }),
       );
 
       // Batch connections to prevent overwhelming
       if ((i + 1) % this.config.connectionBatchSize === 0) {
-        await Promise.allSettled(connectionPromises.splice(0, this.config.connectionBatchSize));
-        await new Promise(resolve => setTimeout(resolve, 100)); // Batch delay
+        await Promise.allSettled(
+          connectionPromises.splice(0, this.config.connectionBatchSize),
+        );
+        await new Promise((resolve) => setTimeout(resolve, 100)); // Batch delay
       }
     }
 
@@ -359,21 +366,26 @@ class StressTestOrchestrator extends EventEmitter {
       name: 'Connection Establishment',
       status: 'completed',
       established: establishedConnections,
-      failed: failedConnections
+      failed: failedConnections,
     });
   }
 
   private async executeMessageFlooding(): Promise<void> {
     this.emit('phase', { name: 'Message Flooding', status: 'starting' });
 
-    const connectedClients = Array.from(this.clients.values()).filter(client => client.isConnected());
-    const messagesPerClient = Math.floor(this.config.messageFloodRate / connectedClients.length);
+    const connectedClients = Array.from(this.clients.values()).filter(
+      (client) => client.isConnected(),
+    );
+    const messagesPerClient = Math.floor(
+      this.config.messageFloodRate / connectedClients.length,
+    );
 
-    const floodPromises = connectedClients.map(client =>
-      client.sendMessageFlood(messagesPerClient, this.config.messageBurstSize)
-        .catch(error => {
+    const floodPromises = connectedClients.map((client) =>
+      client
+        .sendMessageFlood(messagesPerClient, this.config.messageBurstSize)
+        .catch((error) => {
           this.emit('floodError', { clientId: client['clientId'], error });
-        })
+        }),
     );
 
     await Promise.allSettled(floodPromises);
@@ -384,18 +396,23 @@ class StressTestOrchestrator extends EventEmitter {
   private async testConnectionRecovery(): Promise<void> {
     this.emit('phase', { name: 'Connection Recovery', status: 'starting' });
 
-    const connectedClients = Array.from(this.clients.values()).filter(client => client.isConnected());
-    const clientsToDisrupt = connectedClients.slice(0, Math.floor(connectedClients.length * 0.1)); // 10%
+    const connectedClients = Array.from(this.clients.values()).filter(
+      (client) => client.isConnected(),
+    );
+    const clientsToDisrupt = connectedClients.slice(
+      0,
+      Math.floor(connectedClients.length * 0.1),
+    ); // 10%
 
     // Simulate connection disruption
-    clientsToDisrupt.forEach(client => {
+    clientsToDisrupt.forEach((client) => {
       if (client['ws']) {
         client['ws'].terminate(); // Abrupt termination
       }
     });
 
     // Wait for recovery
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     this.emit('phase', { name: 'Connection Recovery', status: 'completed' });
   }
@@ -404,8 +421,8 @@ class StressTestOrchestrator extends EventEmitter {
     this.emit('phase', { name: 'Resource Cleanup', status: 'starting' });
 
     const disconnectPromises = Array.from(this.clients.values())
-      .filter(client => client.isConnected())
-      .map(client => client.disconnect());
+      .filter((client) => client.isConnected())
+      .map((client) => client.disconnect());
 
     await Promise.allSettled(disconnectPromises);
 
@@ -428,35 +445,54 @@ class StressTestOrchestrator extends EventEmitter {
       this.emit('resourceSnapshot', {
         memory: memUsage,
         cpu: cpuUsage,
-        connections: Array.from(this.clients.values()).filter(c => c.isConnected()).length
+        connections: Array.from(this.clients.values()).filter((c) =>
+          c.isConnected(),
+        ).length,
       });
     }, 1000);
   }
 
   private calculateMetrics(initialMemory: number): StressTestMetrics {
-    const allMetrics = Array.from(this.clients.values()).map(client => client.getMetrics());
+    const allMetrics = Array.from(this.clients.values()).map((client) =>
+      client.getMetrics(),
+    );
 
-    const totalMessagesSent = allMetrics.reduce((sum, m) => sum + m.messagesSent, 0);
-    const totalMessagesReceived = allMetrics.reduce((sum, m) => sum + m.messagesReceived, 0);
+    const totalMessagesSent = allMetrics.reduce(
+      (sum, m) => sum + m.messagesSent,
+      0,
+    );
+    const totalMessagesReceived = allMetrics.reduce(
+      (sum, m) => sum + m.messagesReceived,
+      0,
+    );
     const totalErrors = allMetrics.reduce((sum, m) => sum + m.errors, 0);
 
-    const allLatencies = allMetrics.flatMap(m => [m.averageLatency]).filter(lat => lat > 0);
-    const averageLatency = allLatencies.length > 0
-      ? allLatencies.reduce((sum, lat) => sum + lat, 0) / allLatencies.length
-      : 0;
+    const allLatencies = allMetrics
+      .flatMap((m) => [m.averageLatency])
+      .filter((lat) => lat > 0);
+    const averageLatency =
+      allLatencies.length > 0
+        ? allLatencies.reduce((sum, lat) => sum + lat, 0) / allLatencies.length
+        : 0;
 
     const testDuration = this.testEndTime - this.testStartTime;
     const finalMemory = process.memoryUsage().heapUsed;
 
     return {
-      connectionsEstablished: Array.from(this.clients.values()).filter(c => c.isConnected()).length,
-      connectionFailures: this.config.maxConnections - Array.from(this.clients.values()).filter(c => c.isConnected()).length,
+      connectionsEstablished: Array.from(this.clients.values()).filter((c) =>
+        c.isConnected(),
+      ).length,
+      connectionFailures:
+        this.config.maxConnections -
+        Array.from(this.clients.values()).filter((c) => c.isConnected()).length,
       messagesSent: totalMessagesSent,
       messagesReceived: totalMessagesReceived,
       messagesLost: totalMessagesSent - totalMessagesReceived,
       averageLatency,
-      maxLatency: Math.max(...allMetrics.map(m => m.maxLatency)),
-      minLatency: Math.min(...allMetrics.map(m => m.minLatency).filter(lat => lat > 0)),
+      maxLatency: Math.max(...allMetrics.map((m) => m.maxLatency)),
+      minLatency: Math.min(
+        ...allMetrics.map((m) => m.minLatency).filter((lat) => lat > 0),
+      ),
       memoryUsage: {
         initial: initialMemory,
         peak: Math.max(...this.memorySnapshots),
@@ -464,15 +500,17 @@ class StressTestOrchestrator extends EventEmitter {
         leaked: finalMemory - initialMemory,
       },
       cpuUsage: {
-        average: this.cpuSnapshots.length > 0
-          ? this.cpuSnapshots.reduce((sum, cpu) => sum + cpu, 0) / this.cpuSnapshots.length
-          : 0,
+        average:
+          this.cpuSnapshots.length > 0
+            ? this.cpuSnapshots.reduce((sum, cpu) => sum + cpu, 0) /
+              this.cpuSnapshots.length
+            : 0,
         peak: Math.max(...this.cpuSnapshots),
       },
       errorCount: totalErrors,
       recoveryTime: 0, // Would need specific measurement
       throughput: totalMessagesSent / (testDuration / 1000),
-      stability: Math.max(0, 1 - (totalErrors / Math.max(totalMessagesSent, 1))),
+      stability: Math.max(0, 1 - totalErrors / Math.max(totalMessagesSent, 1)),
     };
   }
 }
@@ -508,7 +546,7 @@ class MalformedMessageTester {
         try {
           for (const malformedMessage of this.malformedMessages) {
             client.send(malformedMessage);
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
 
             if (client.readyState === WebSocket.WebSocket.OPEN) {
               connectionsMaintained++;
@@ -516,7 +554,7 @@ class MalformedMessageTester {
           }
 
           // Wait for potential error responses
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
 
           client.close();
 
@@ -525,7 +563,6 @@ class MalformedMessageTester {
             errorsHandled: errorsHandled,
             connectionsMaintained,
           });
-
         } catch (error) {
           reject(error);
         }
@@ -552,12 +589,12 @@ class MalformedMessageTester {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
     };
     return config[key] ?? defaultValue;
   }),
@@ -587,11 +624,15 @@ describe('WebSocket Stress Testing Suite', () => {
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
 
     await integrationService.onModuleInit();
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   afterAll(async () => {
@@ -672,7 +713,9 @@ describe('WebSocket Stress Testing Suite', () => {
       const tester = new MalformedMessageTester();
       const results = await tester.testMalformedMessageHandling(TEST_URL);
 
-      expect(results.connectionsMaintained).toBeGreaterThan(results.messagesSent * 0.8); // 80% maintained
+      expect(results.connectionsMaintained).toBeGreaterThan(
+        results.messagesSent * 0.8,
+      ); // 80% maintained
       expect(results.errorsHandled).toBeGreaterThan(0); // Some errors should be handled
 
       console.log('Malformed Message Test Results:', {
@@ -695,7 +738,7 @@ describe('WebSocket Stress Testing Suite', () => {
       }
 
       // Wait for connection to be recognized as closed
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       expect(client.isConnected()).toBe(false);
 
       // Attempt reconnection
@@ -725,7 +768,8 @@ describe('WebSocket Stress Testing Suite', () => {
       const results = await orchestrator.executeStressTest();
 
       // Memory should not grow excessively
-      const memoryGrowthRatio = results.memoryUsage.peak / results.memoryUsage.initial;
+      const memoryGrowthRatio =
+        results.memoryUsage.peak / results.memoryUsage.initial;
       expect(memoryGrowthRatio).toBeLessThan(10); // Less than 10x growth
 
       // Memory should be cleaned up after test

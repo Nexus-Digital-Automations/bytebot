@@ -44,17 +44,22 @@ export class ExampleUserManagementService {
   /**
    * Example: Create a new user with comprehensive validation
    */
-  async createUser(userData: {
-    email: string;
-    password: string;
-    role: string;
-    name?: string;
-  }, operationContext: {
-    userId: string;
-    userRole: string;
-    businessJustification: string;
-  }): Promise<UserEntity> {
-    this.logger.log('Creating new user with conversational validation', {email: userData.email,role: userData.role,
+  async createUser(
+    userData: {
+      email: string;
+      password: string;
+      role: string;
+      name?: string;
+    },
+    operationContext: {
+      userId: string;
+      userRole: string;
+      businessJustification: string;
+    },
+  ): Promise<UserEntity> {
+    this.logger.log('Creating new user with conversational validation', {
+      email: userData.email,
+      role: userData.role,
       requestedBy: operationContext.userId,
     });
 
@@ -67,23 +72,29 @@ export class ExampleUserManagementService {
           role: userData.role,
           isActive: true,
           ...(userData.name && { name: userData.name }),
-        } as Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'>,{userId: operationContext.userId,
+        } as Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'>,
+        {
+          userId: operationContext.userId,
           userRole: operationContext.userRole,
           businessPurpose: operationContext.businessJustification,
           requireEmailValidation: true,
           requirePasswordValidation: true,
           requireRoleValidation: true,
-        }
+        },
       );
 
-      this.logger.log('User created successfully with conversational validation', {userId: newUser.id,email: newUser.email,
-        role: newUser.role,
-      });
+      this.logger.log(
+        'User created successfully with conversational validation',
+        { userId: newUser.id, email: newUser.email, role: newUser.role },
+      );
 
       return newUser;
-
     } catch (error) {
-      this.logger.error('Failed to create user', {email: userData.email,error: error instanceof Error ? error.message : 'Unknown error',requestedBy: operationContext.userId,});
+      this.logger.error('Failed to create user', {
+        email: userData.email,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestedBy: operationContext.userId,
+      });
       throw error;
     }
   }
@@ -98,37 +109,45 @@ export class ExampleUserManagementService {
       userId: string;
       userRole: string;
       businessJustification?: string;
-    }
+    },
   ): Promise<UserEntity | null> {
-    this.logger.log('Updating user with conversational validation', {targetUserId: userId,updateFields: Object.keys(updates),
+    this.logger.log('Updating user with conversational validation', {
+      targetUserId: userId,
+      updateFields: Object.keys(updates),
       requestedBy: operationContext.userId,
     });
 
     try {
       // Check if updating sensitive fields (higher risk)
       const isSensitiveUpdate = ['role', 'isActive', 'passwordHash'].some(
-        field => field in updates
+        (field) => field in updates,
       );
 
-      const updatedUser = await this.userRepository.update(
-        userId,
-        updates,
-        {
-          userId: operationContext.userId,
-          userRole: operationContext.userRole,
-          businessPurpose: operationContext.businessJustification ??
-            `Update user profile ${isSensitiveUpdate ? '(sensitive fields)' : ''}`,
-          requireRoleValidation: 'role' in updates,});
+      const updatedUser = await this.userRepository.update(userId, updates, {
+        userId: operationContext.userId,
+        userRole: operationContext.userRole,
+        businessPurpose:
+          operationContext.businessJustification ??
+          `Update user profile ${isSensitiveUpdate ? '(sensitive fields)' : ''}`,
+        requireRoleValidation: 'role' in updates,
+      });
 
       if (updatedUser) {
-        this.logger.log('User updated successfully', {userId: updatedUser.id,changes: Object.keys(updates),
+        this.logger.log('User updated successfully', {
+          userId: updatedUser.id,
+          changes: Object.keys(updates),
           requestedBy: operationContext.userId,
         });
       } else {
-        this.logger.warn('User not found for update', { userId });}return updatedUser;
-
+        this.logger.warn('User not found for update', { userId });
+      }
+      return updatedUser;
     } catch (error) {
-      this.logger.error('Failed to update user', {userId,error: error instanceof Error ? error.message : 'Unknown error',requestedBy: operationContext.userId,});
+      this.logger.error('Failed to update user', {
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestedBy: operationContext.userId,
+      });
       throw error;
     }
   }
@@ -143,9 +162,11 @@ export class ExampleUserManagementService {
       userRole: string;
       businessJustification: string;
       confirmDeletion: boolean;
-    }
+    },
   ): Promise<boolean> {
-    this.logger.warn('Attempting to delete user with multi-party approval', {targetUserId: userId,requestedBy: operationContext.userId,
+    this.logger.warn('Attempting to delete user with multi-party approval', {
+      targetUserId: userId,
+      requestedBy: operationContext.userId,
       confirmed: operationContext.confirmDeletion,
     });
 
@@ -161,7 +182,9 @@ export class ExampleUserManagementService {
         throw new Error(`User ${userId} not found`);
       }
 
-      this.logger.warn('Proceeding with user deletion', {targetUser: {id: userToDelete.id,
+      this.logger.warn('Proceeding with user deletion', {
+        targetUser: {
+          id: userToDelete.id,
           email: userToDelete.email,
           role: userToDelete.role,
           isActive: userToDelete.isActive,
@@ -169,26 +192,28 @@ export class ExampleUserManagementService {
         requestedBy: operationContext.userId,
       });
 
-      const deleted = await this.userRepository.delete(
-        userId,
-        {
-          userId: operationContext.userId,
-          userRole: operationContext.userRole,
-          businessPurpose: operationContext.businessJustification,
-          confirmDeletion: operationContext.confirmDeletion,
-        }
-      );
+      const deleted = await this.userRepository.delete(userId, {
+        userId: operationContext.userId,
+        userRole: operationContext.userRole,
+        businessPurpose: operationContext.businessJustification,
+        confirmDeletion: operationContext.confirmDeletion,
+      });
 
       if (deleted) {
-        this.logger.warn('User deleted successfully', {deletedUserId: userId,deletedEmail: userToDelete.email,
+        this.logger.warn('User deleted successfully', {
+          deletedUserId: userId,
+          deletedEmail: userToDelete.email,
           requestedBy: operationContext.userId,
         });
       }
 
       return deleted;
-
     } catch (error) {
-      this.logger.error('Failed to delete user', {userId,error: error instanceof Error ? error.message : 'Unknown error',requestedBy: operationContext.userId,});
+      this.logger.error('Failed to delete user', {
+        userId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestedBy: operationContext.userId,
+      });
       throw error;
     }
   }
@@ -207,9 +232,11 @@ export class ExampleUserManagementService {
       userId: string;
       userRole: string;
       businessJustification: string;
-    }
+    },
   ): Promise<UserEntity[]> {
-    this.logger.log('Bulk creating users with conversational validation', {userCount: usersData.length,requestedBy: operationContext.userId,
+    this.logger.log('Bulk creating users with conversational validation', {
+      userCount: usersData.length,
+      requestedBy: operationContext.userId,
     });
 
     try {
@@ -223,22 +250,29 @@ export class ExampleUserManagementService {
       }));
 
       const createdUsers = await this.userRepository.bulkCreate(
-        repoData as Array<Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'>>,{userId: operationContext.userId,
+        repoData as Array<Omit<UserEntity, 'id' | 'createdAt' | 'updatedAt'>>,
+        {
+          userId: operationContext.userId,
           userRole: operationContext.userRole,
           businessPurpose: operationContext.businessJustification,
           requireEmailValidation: true,
           requireRoleValidation: true,
-        }
+        },
       );
 
-      this.logger.log('Bulk user creation completed', {requestedCount: usersData.length,createdCount: createdUsers.length,
+      this.logger.log('Bulk user creation completed', {
+        requestedCount: usersData.length,
+        createdCount: createdUsers.length,
         requestedBy: operationContext.userId,
       });
 
       return createdUsers;
-
     } catch (error) {
-      this.logger.error('Failed to bulk create users', {userCount: usersData.length,error: error instanceof Error ? error.message : 'Unknown error',requestedBy: operationContext.userId,});
+      this.logger.error('Failed to bulk create users', {
+        userCount: usersData.length,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestedBy: operationContext.userId,
+      });
       throw error;
     }
   }
@@ -253,9 +287,11 @@ export class ExampleUserManagementService {
       userRole: string;
       businessJustification: string;
       dryRun?: boolean;
-    }
+    },
   ): Promise<{ affected: number; users: UserEntity[] }> {
-    this.logger.log('Deactivating inactive users', {inactiveDays,dryRun: operationContext.dryRun,
+    this.logger.log('Deactivating inactive users', {
+      inactiveDays,
+      dryRun: operationContext.dryRun,
       requestedBy: operationContext.userId,
     });
 
@@ -264,16 +300,23 @@ export class ExampleUserManagementService {
       const allUsers = await this.userRepository.findActiveUsers({
         userId: operationContext.userId,
         userRole: operationContext.userRole,
-        businessPurpose: 'Find users for deactivation analysis',});// For demonstration, we'll simulate finding inactive users
-      const inactiveUsers = allUsers.filter(user =>
-        user.lastLoginAt &&
-        new Date(user.lastLoginAt).getTime() < Date.now() - (inactiveDays * 24 * 60 * 60 * 1000)
+        businessPurpose: 'Find users for deactivation analysis',
+      }); // For demonstration, we'll simulate finding inactive users
+      const inactiveUsers = allUsers.filter(
+        (user) =>
+          user.lastLoginAt &&
+          new Date(user.lastLoginAt).getTime() <
+            Date.now() - inactiveDays * 24 * 60 * 60 * 1000,
       );
 
       if (operationContext.dryRun) {
         this.logger.log('Dry run: Would deactivate users', {
           userCount: inactiveUsers.length,
-          users: inactiveUsers.map(u => ({ id: u.id, email: u.email, lastLogin: u.lastLoginAt })),
+          users: inactiveUsers.map((u) => ({
+            id: u.id,
+            email: u.email,
+            lastLogin: u.lastLoginAt,
+          })),
         });
 
         return { affected: inactiveUsers.length, users: inactiveUsers };
@@ -290,26 +333,34 @@ export class ExampleUserManagementService {
               userId: operationContext.userId,
               userRole: operationContext.userRole,
               businessPurpose: `${operationContext.businessJustification} - User inactive for ${inactiveDays} days`,
-            }
+            },
           );
 
           if (deactivated) {
             deactivatedUsers.push(deactivated);
           }
         } catch (error) {
-          this.logger.error('Failed to deactivate individual user', {userId: user.id,email: user.email,
-            error: error instanceof Error ? error.message : 'Unknown error',});// Continue with other users
+          this.logger.error('Failed to deactivate individual user', {
+            userId: user.id,
+            email: user.email,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          }); // Continue with other users
         }
       }
 
-      this.logger.log('User deactivation completed', {targetCount: inactiveUsers.length,deactivatedCount: deactivatedUsers.length,
+      this.logger.log('User deactivation completed', {
+        targetCount: inactiveUsers.length,
+        deactivatedCount: deactivatedUsers.length,
         requestedBy: operationContext.userId,
       });
 
       return { affected: deactivatedUsers.length, users: deactivatedUsers };
-
     } catch (error) {
-      this.logger.error('Failed to deactivate inactive users', {inactiveDays,error: error instanceof Error ? error.message : 'Unknown error',requestedBy: operationContext.userId,});
+      this.logger.error('Failed to deactivate inactive users', {
+        inactiveDays,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestedBy: operationContext.userId,
+      });
       throw error;
     }
   }
@@ -328,9 +379,11 @@ export class ExampleUserManagementService {
       userId: string;
       userRole: string;
       businessJustification?: string;
-    }
+    },
   ): Promise<UserEntity[]> {
-    this.logger.log('Searching users with conversational validation', {criteria,requestedBy: operationContext.userId,
+    this.logger.log('Searching users with conversational validation', {
+      criteria,
+      requestedBy: operationContext.userId,
     });
 
     try {
@@ -338,67 +391,75 @@ export class ExampleUserManagementService {
 
       // Different search strategies based on criteria
       if (criteria.email) {
-        const user = await this.userRepository.findByEmail(
-          criteria.email,
-          {
-            userId: operationContext.userId,
-            userRole: operationContext.userRole,
-            businessPurpose: operationContext.businessJustification ?? 'Search user by email',
-          }
-        );
+        const user = await this.userRepository.findByEmail(criteria.email, {
+          userId: operationContext.userId,
+          userRole: operationContext.userRole,
+          businessPurpose:
+            operationContext.businessJustification ?? 'Search user by email',
+        });
         users = user ? [user] : [];
       } else if (criteria.role) {
-        users = await this.userRepository.findByRole(
-          criteria.role,
-          {
-            userId: operationContext.userId,
-            userRole: operationContext.userRole,
-            businessPurpose: operationContext.businessJustification ?? `Search users by role: ${criteria.role}`,
-          }
-        );
+        users = await this.userRepository.findByRole(criteria.role, {
+          userId: operationContext.userId,
+          userRole: operationContext.userRole,
+          businessPurpose:
+            operationContext.businessJustification ??
+            `Search users by role: ${criteria.role}`,
+        });
       } else if (criteria.isActive !== undefined) {
         if (criteria.isActive) {
           users = await this.userRepository.findActiveUsers({
             userId: operationContext.userId,
             userRole: operationContext.userRole,
-            businessPurpose: operationContext.businessJustification ?? 'Search active users',});} else {
+            businessPurpose:
+              operationContext.businessJustification ?? 'Search active users',
+          });
+        } else {
           // Find all users and filter inactive (in real implementation, this would be a proper query)
-          const allUsers = await this.userRepository.findAll(
-            undefined,
-            {
-              userId: operationContext.userId,
-              userRole: operationContext.userRole,
-              businessPurpose: operationContext.businessJustification ?? 'Search inactive users',});
-          users = allUsers.filter(user => !user.isActive);
+          const allUsers = await this.userRepository.findAll(undefined, {
+            userId: operationContext.userId,
+            userRole: operationContext.userRole,
+            businessPurpose:
+              operationContext.businessJustification ?? 'Search inactive users',
+          });
+          users = allUsers.filter((user) => !user.isActive);
         }
       } else {
         // General search
-        users = await this.userRepository.findAll(
-          undefined,
-          {
-            userId: operationContext.userId,
-            userRole: operationContext.userRole,
-            businessPurpose: operationContext.businessJustification ?? 'General user search',});
+        users = await this.userRepository.findAll(undefined, {
+          userId: operationContext.userId,
+          userRole: operationContext.userRole,
+          businessPurpose:
+            operationContext.businessJustification ?? 'General user search',
+        });
       }
 
       // Apply name pattern filtering if specified
       let filteredUsers = Array.from(users);
       if (criteria.namePattern?.trim()) {
         const pattern = criteria.namePattern.toLowerCase();
-        filteredUsers = filteredUsers.filter(user =>
-          user.email.toLowerCase().includes(pattern) ||
-          (user as UserEntity & { name?: string }).name?.toLowerCase().includes(pattern)
+        filteredUsers = filteredUsers.filter(
+          (user) =>
+            user.email.toLowerCase().includes(pattern) ||
+            (user as UserEntity & { name?: string }).name
+              ?.toLowerCase()
+              .includes(pattern),
         );
       }
 
-      this.logger.log('User search completed', {criteria,totalFound: filteredUsers.length,
+      this.logger.log('User search completed', {
+        criteria,
+        totalFound: filteredUsers.length,
         requestedBy: operationContext.userId,
       });
 
       return filteredUsers;
-
     } catch (error) {
-      this.logger.error('Failed to search users', {criteria,error: error instanceof Error ? error.message : 'Unknown error',requestedBy: operationContext.userId,});
+      this.logger.error('Failed to search users', {
+        criteria,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        requestedBy: operationContext.userId,
+      });
       throw error;
     }
   }
@@ -418,15 +479,18 @@ export class ExampleUserManagementService {
       const cacheStatus = this.conversationalDbService.getCacheStatus();
       const backupStatus = this.conversationalDbService.getBackupStatus();
 
-      this.logger.log('Repository health retrieved', {totalOperations: metrics.totalOperations,approvalRate: (metrics.approvedOperations / (metrics.totalOperations ?? 1)) * 100,
+      this.logger.log('Repository health retrieved', {
+        totalOperations: metrics.totalOperations,
+        approvalRate:
+          (metrics.approvedOperations / (metrics.totalOperations ?? 1)) * 100,
         cacheHitRate: cacheStatus.hitRate,
         totalBackups: backupStatus.totalBackups,
       });
 
       return { metrics, cacheStatus, backupStatus };
-
     } catch (error) {
-      this.logger.error('Failed to get repository health', {error: error instanceof Error ? error.message : 'Unknown error',
+      this.logger.error('Failed to get repository health', {
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       throw error;
     }
@@ -447,7 +511,9 @@ export class ExampleUserManagementService {
  * Example usage patterns for the conversational database service
  */
 export class ConversationalDatabaseUsageExamples {
-  private readonly logger = new Logger(ConversationalDatabaseUsageExamples.name);
+  private readonly logger = new Logger(
+    ConversationalDatabaseUsageExamples.name,
+  );
 
   constructor(
     private readonly userManagementService: ExampleUserManagementService,
@@ -457,141 +523,272 @@ export class ConversationalDatabaseUsageExamples {
    * Example: Administrative user creation workflow
    */
   async exampleAdminUserCreation(): Promise<void> {
-    this.logger.log('=== Example: Admin User Creation Workflow ===');try {const newUser = await this.userManagementService.createUser(
+    this.logger.log('=== Example: Admin User Creation Workflow ===');
+    try {
+      const newUser = await this.userManagementService.createUser(
         {
-          email: 'admin@example.com',password: 'SecurePassword123!',role: 'admin',name: 'System Administrator',},{
-          userId: 'system',userRole: 'system',businessJustification: 'Creating initial system administrator account for platform setup',});
+          email: 'admin@example.com',
+          password: 'SecurePassword123!',
+          role: 'admin',
+          name: 'System Administrator',
+        },
+        {
+          userId: 'system',
+          userRole: 'system',
+          businessJustification:
+            'Creating initial system administrator account for platform setup',
+        },
+      );
 
-      this.logger.log('Admin user created successfully', {userId: newUser.id,email: newUser.email,
+      this.logger.log('Admin user created successfully', {
+        userId: newUser.id,
+        email: newUser.email,
         role: newUser.role,
       });
-
     } catch (error) {
-      this.logger.error('Admin user creation failed', {error: error instanceof Error ? error.message : 'Unknown error',});}
+      this.logger.error('Admin user creation failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 
   /**
    * Example: Bulk user import workflow
    */
   async exampleBulkUserImport(): Promise<void> {
-    this.logger.log('=== Example: Bulk User Import Workflow ===');try {const usersToImport = [
-        { email: 'user1@example.com', password: 'Password1!', role: 'user', name: 'User One' },{ email: 'user2@example.com', password: 'Password2!', role: 'user', name: 'User Two' },{ email: 'moderator@example.com', password: 'ModPass123!', role: 'moderator', name: 'Moderator User' },];const createdUsers = await this.userManagementService.bulkCreateUsers(
+    this.logger.log('=== Example: Bulk User Import Workflow ===');
+    try {
+      const usersToImport = [
+        {
+          email: 'user1@example.com',
+          password: 'Password1!',
+          role: 'user',
+          name: 'User One',
+        },
+        {
+          email: 'user2@example.com',
+          password: 'Password2!',
+          role: 'user',
+          name: 'User Two',
+        },
+        {
+          email: 'moderator@example.com',
+          password: 'ModPass123!',
+          role: 'moderator',
+          name: 'Moderator User',
+        },
+      ];
+      const createdUsers = await this.userManagementService.bulkCreateUsers(
         usersToImport,
         {
-          userId: 'admin_123',userRole: 'admin',businessJustification: 'Bulk import of initial user accounts for team onboarding',});
+          userId: 'admin_123',
+          userRole: 'admin',
+          businessJustification:
+            'Bulk import of initial user accounts for team onboarding',
+        },
+      );
 
-      this.logger.log('Bulk user import completed', {requestedCount: usersToImport.length,createdCount: createdUsers.length,
-        users: createdUsers.map(u => ({ id: u.id, email: u.email, role: u.role })),
+      this.logger.log('Bulk user import completed', {
+        requestedCount: usersToImport.length,
+        createdCount: createdUsers.length,
+        users: createdUsers.map((u) => ({
+          id: u.id,
+          email: u.email,
+          role: u.role,
+        })),
       });
-
     } catch (error) {
-      this.logger.error('Bulk user import failed', {error: error instanceof Error ? error.message : 'Unknown error',});}
+      this.logger.error('Bulk user import failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 
   /**
    * Example: User role change workflow (sensitive operation)
    */
   async exampleUserRoleChange(): Promise<void> {
-    this.logger.log('=== Example: User Role Change Workflow ===');try {// First, find the user
+    this.logger.log('=== Example: User Role Change Workflow ===');
+    try {
+      // First, find the user
       const users = await this.userManagementService.searchUsers(
-        { email: 'user1@example.com' },{userId: 'admin_123',userRole: 'admin',businessJustification: 'Find user for role elevation',});
+        { email: 'user1@example.com' },
+        {
+          userId: 'admin_123',
+          userRole: 'admin',
+          businessJustification: 'Find user for role elevation',
+        },
+      );
 
       if (users.length === 0) {
-        this.logger.warn('User not found for role change');return;}
+        this.logger.warn('User not found for role change');
+        return;
+      }
 
       const user = users[0];
       if (!user) {
-        this.logger.warn('User data is invalid');return;}
+        this.logger.warn('User data is invalid');
+        return;
+      }
 
       // Update user role (sensitive operation requiring high-level approval)
       const updatedUser = await this.userManagementService.updateUser(
         user.id,
-        { role: 'moderator' },{userId: 'admin_123',userRole: 'admin',businessJustification: 'Promote user to moderator role based on performance review and team needs',});
+        { role: 'moderator' },
+        {
+          userId: 'admin_123',
+          userRole: 'admin',
+          businessJustification:
+            'Promote user to moderator role based on performance review and team needs',
+        },
+      );
 
       if (updatedUser) {
-        this.logger.log('User role changed successfully', {userId: updatedUser.id,email: updatedUser.email,
+        this.logger.log('User role changed successfully', {
+          userId: updatedUser.id,
+          email: updatedUser.email,
           oldRole: user.role,
           newRole: updatedUser.role,
         });
       }
-
     } catch (error) {
-      this.logger.error('User role change failed', {error: error instanceof Error ? error.message : 'Unknown error',});}
+      this.logger.error('User role change failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 
   /**
    * Example: User deactivation workflow (alternative to deletion)
    */
   async exampleUserDeactivation(): Promise<void> {
-    this.logger.log('=== Example: User Deactivation Workflow ===');try {// Perform dry run first
-      const dryRunResult = await this.userManagementService.deactivateInactiveUsers(
-        90, // 90 days of inactivity
-        {
-          userId: 'admin_123',userRole: 'admin',businessJustification: 'Quarterly cleanup of inactive user accounts for security compliance',dryRun: true,}
-      );
+    this.logger.log('=== Example: User Deactivation Workflow ===');
+    try {
+      // Perform dry run first
+      const dryRunResult =
+        await this.userManagementService.deactivateInactiveUsers(
+          90, // 90 days of inactivity
+          {
+            userId: 'admin_123',
+            userRole: 'admin',
+            businessJustification:
+              'Quarterly cleanup of inactive user accounts for security compliance',
+            dryRun: true,
+          },
+        );
 
-      this.logger.log('Dry run completed - users that would be deactivated', {affectedCount: dryRunResult.affected,users: dryRunResult.users.map(u => ({ id: u.id, email: u.email, lastLogin: u.lastLoginAt })),
+      this.logger.log('Dry run completed - users that would be deactivated', {
+        affectedCount: dryRunResult.affected,
+        users: dryRunResult.users.map((u) => ({
+          id: u.id,
+          email: u.email,
+          lastLogin: u.lastLoginAt,
+        })),
       });
 
       // If dry run shows reasonable results, proceed with actual deactivation
-      if (dryRunResult.affected > 0 && dryRunResult.affected < 100) { // Safety check
-        const actualResult = await this.userManagementService.deactivateInactiveUsers(
-          90,
-          {
-            userId: 'admin_123',userRole: 'admin',businessJustification: 'Quarterly cleanup of inactive user accounts for security compliance',dryRun: false,}
-        );
+      if (dryRunResult.affected > 0 && dryRunResult.affected < 100) {
+        // Safety check
+        const actualResult =
+          await this.userManagementService.deactivateInactiveUsers(90, {
+            userId: 'admin_123',
+            userRole: 'admin',
+            businessJustification:
+              'Quarterly cleanup of inactive user accounts for security compliance',
+            dryRun: false,
+          });
 
-        this.logger.log('User deactivation completed', {deactivatedCount: actualResult.affected,users: actualResult.users.map(u => ({ id: u.id, email: u.email })),
+        this.logger.log('User deactivation completed', {
+          deactivatedCount: actualResult.affected,
+          users: actualResult.users.map((u) => ({ id: u.id, email: u.email })),
         });
       } else {
-        this.logger.warn('Dry run results require manual review', {affectedCount: dryRunResult.affected,});
+        this.logger.warn('Dry run results require manual review', {
+          affectedCount: dryRunResult.affected,
+        });
       }
-
     } catch (error) {
-      this.logger.error('User deactivation workflow failed', {error: error instanceof Error ? error.message : 'Unknown error',});}
+      this.logger.error('User deactivation workflow failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 
   /**
    * Example: Critical user deletion workflow (requires multi-party approval)
    */
   async exampleCriticalUserDeletion(): Promise<void> {
-    this.logger.log('=== Example: Critical User Deletion Workflow ===');try {// Find user to delete
+    this.logger.log('=== Example: Critical User Deletion Workflow ===');
+    try {
+      // Find user to delete
       const users = await this.userManagementService.searchUsers(
-        { email: 'test_user_to_delete@example.com' },{userId: 'admin_123',userRole: 'admin',businessJustification: 'Find user account for deletion due to policy violation',});
+        { email: 'test_user_to_delete@example.com' },
+        {
+          userId: 'admin_123',
+          userRole: 'admin',
+          businessJustification:
+            'Find user account for deletion due to policy violation',
+        },
+      );
 
       if (users.length === 0) {
-        this.logger.warn('User not found for deletion');return;}
+        this.logger.warn('User not found for deletion');
+        return;
+      }
 
       const userToDelete = users[0];
       if (!userToDelete) {
-        this.logger.warn('User data is invalid for deletion');return;}
+        this.logger.warn('User data is invalid for deletion');
+        return;
+      }
 
       // Attempt deletion (this will require conversational approval and multi-party consent)
       const deleted = await this.userManagementService.deleteUser(
         userToDelete.id,
         {
-          userId: 'admin_123',userRole: 'admin',businessJustification: 'Delete user account due to confirmed policy violation and security breach. Legal review completed.',confirmDeletion: true,}
+          userId: 'admin_123',
+          userRole: 'admin',
+          businessJustification:
+            'Delete user account due to confirmed policy violation and security breach. Legal review completed.',
+          confirmDeletion: true,
+        },
       );
 
       if (deleted) {
-        this.logger.warn('User account deleted successfully', {deletedUserId: userToDelete.id,deletedEmail: userToDelete.email,
+        this.logger.warn('User account deleted successfully', {
+          deletedUserId: userToDelete.id,
+          deletedEmail: userToDelete.email,
         });
       } else {
-        this.logger.warn('User deletion was not completed (may require additional approvals)');}} catch (error) {
-      this.logger.error('Critical user deletion failed', {error: error instanceof Error ? error.message : 'Unknown error',});}
+        this.logger.warn(
+          'User deletion was not completed (may require additional approvals)',
+        );
+      }
+    } catch (error) {
+      this.logger.error('Critical user deletion failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 
   /**
    * Example: Repository health monitoring
    */
   async exampleRepositoryHealthMonitoring(): Promise<void> {
-    this.logger.log('=== Example: Repository Health Monitoring ===');try {const health = await this.userManagementService.getRepositoryHealth();
+    this.logger.log('=== Example: Repository Health Monitoring ===');
+    try {
+      const health = await this.userManagementService.getRepositoryHealth();
 
-      this.logger.log('Repository Health Report', {totalOperations: health.metrics.totalOperations,approvedOperations: health.metrics.approvedOperations,
+      this.logger.log('Repository Health Report', {
+        totalOperations: health.metrics.totalOperations,
+        approvedOperations: health.metrics.approvedOperations,
         rejectedOperations: health.metrics.rejectedOperations,
-        approvalRate: health.metrics.totalOperations > 0
-          ? (health.metrics.approvedOperations / health.metrics.totalOperations) * 100
-          : 0,
+        approvalRate:
+          health.metrics.totalOperations > 0
+            ? (health.metrics.approvedOperations /
+                health.metrics.totalOperations) *
+              100
+            : 0,
         averageValidationTime: health.metrics.averageValidationTime,
         cacheSize: health.cacheStatus.size,
         cacheHitRate: health.cacheStatus.hitRate,
@@ -599,25 +796,50 @@ export class ConversationalDatabaseUsageExamples {
       });
 
       // Alert if metrics indicate issues
-      if (health.metrics.rejectedOperations > health.metrics.approvedOperations) {
-        this.logger.warn('High rejection rate detected - may indicate permission or validation issues');}if (health.metrics.averageValidationTime > 5000) { // 5 seconds
-        this.logger.warn('High validation time detected - may indicate performance issues');}if (health.cacheStatus.hitRate < 50) {
-        this.logger.warn('Low cache hit rate - may indicate inefficient query patterns');}} catch (error) {
-      this.logger.error('Repository health monitoring failed', {error: error instanceof Error ? error.message : 'Unknown error',});}
+      if (
+        health.metrics.rejectedOperations > health.metrics.approvedOperations
+      ) {
+        this.logger.warn(
+          'High rejection rate detected - may indicate permission or validation issues',
+        );
+      }
+      if (health.metrics.averageValidationTime > 5000) {
+        // 5 seconds
+        this.logger.warn(
+          'High validation time detected - may indicate performance issues',
+        );
+      }
+      if (health.cacheStatus.hitRate < 50) {
+        this.logger.warn(
+          'Low cache hit rate - may indicate inefficient query patterns',
+        );
+      }
+    } catch (error) {
+      this.logger.error('Repository health monitoring failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 
   /**
    * Run all examples in sequence
    */
   async runAllExamples(): Promise<void> {
-    this.logger.log('=== Running All Conversational Database Examples ===');try {await this.exampleAdminUserCreation();
+    this.logger.log('=== Running All Conversational Database Examples ===');
+    try {
+      await this.exampleAdminUserCreation();
       await this.exampleBulkUserImport();
       await this.exampleUserRoleChange();
       await this.exampleUserDeactivation();
       await this.exampleCriticalUserDeletion();
       await this.exampleRepositoryHealthMonitoring();
 
-      this.logger.log('=== All Examples Completed Successfully ===');} catch (error) {this.logger.error('Examples execution failed', {error: error instanceof Error ? error.message : 'Unknown error',});}
+      this.logger.log('=== All Examples Completed Successfully ===');
+    } catch (error) {
+      this.logger.error('Examples execution failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 }
 
@@ -627,10 +849,7 @@ export class ConversationalDatabaseUsageExamples {
  * Example module demonstrating how to integrate conversational database services
  */
 @Module({
-  imports: [
-    ConfigModule,
-    ParlantModule,
-  ],
+  imports: [ConfigModule, ParlantModule],
   providers: [
     ConversationalDatabaseService,
     // In a real implementation, you would inject actual repository implementations
@@ -641,12 +860,16 @@ export class ConversationalDatabaseUsageExamples {
         const mockRepository = {
           findById: () => null,
           findAll: () => [],
-          create: (data: Partial<UserEntity>) => ({ id: 'mock-id', ...data } as UserEntity),
+          create: (data: Partial<UserEntity>) =>
+            ({ id: 'mock-id', ...data }) as UserEntity,
           update: () => null,
           delete: () => false,
           count: () => 0,
         };
-        return new UserConversationalRepositoryService(conversationalDbService, mockRepository as unknown as Repository<UserEntity>);
+        return new UserConversationalRepositoryService(
+          conversationalDbService,
+          mockRepository as unknown as Repository<UserEntity>,
+        );
       },
       inject: [ConversationalDatabaseService],
     },

@@ -206,7 +206,11 @@ export interface DecisionReasoning {
  */
 export interface BypassInfo {
   readonly bypassId: string;
-  readonly bypassType: 'EMERGENCY' | 'SCHEDULED_MAINTENANCE' | 'ADMINISTRATIVE' | 'TECHNICAL';
+  readonly bypassType:
+    | 'EMERGENCY'
+    | 'SCHEDULED_MAINTENANCE'
+    | 'ADMINISTRATIVE'
+    | 'TECHNICAL';
   readonly requestedBy: string;
   readonly approvedBy: string;
   readonly reason: string;
@@ -262,7 +266,12 @@ export interface ComplianceMetadata {
  */
 export interface ComplianceClassification {
   readonly classificationId: string;
-  readonly level: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' | 'CLASSIFIED';
+  readonly level:
+    | 'PUBLIC'
+    | 'INTERNAL'
+    | 'CONFIDENTIAL'
+    | 'RESTRICTED'
+    | 'CLASSIFIED';
   readonly dataClassification: DataClassification;
   readonly regulatory: RegulatoryClassification[];
   readonly industry: IndustryClassification[];
@@ -278,7 +287,12 @@ export interface RegulatoryNotification {
   readonly notificationId: string;
   readonly regulatoryBody: string;
   readonly framework: string;
-  readonly eventType: 'INCIDENT' | 'VIOLATION' | 'BREACH' | 'AUDIT' | 'CERTIFICATION';
+  readonly eventType:
+    | 'INCIDENT'
+    | 'VIOLATION'
+    | 'BREACH'
+    | 'AUDIT'
+    | 'CERTIFICATION';
   readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   readonly description: string;
   readonly impactAssessment: ImpactAssessment;
@@ -314,7 +328,7 @@ export enum EvidenceType {
   DOCUMENT = 'DOCUMENT',
   SCREENSHOT = 'SCREENSHOT',
   VIDEO_RECORDING = 'VIDEO_RECORDING',
-  AUDIO_RECORDING = 'AUDIO_RECORDING'
+  AUDIO_RECORDING = 'AUDIO_RECORDING',
 }
 
 /**
@@ -427,7 +441,12 @@ export interface DigitalSignature {
   readonly certificateChain: Certificate[];
   readonly revocationStatus: RevocationStatus;
   readonly trustLevel: TrustLevel;
-  readonly validationStatus: 'VALID' | 'INVALID' | 'EXPIRED' | 'REVOKED' | 'UNKNOWN';
+  readonly validationStatus:
+    | 'VALID'
+    | 'INVALID'
+    | 'EXPIRED'
+    | 'REVOKED'
+    | 'UNKNOWN';
 }
 
 // =============================================================================
@@ -624,7 +643,11 @@ export interface ConversationSentiment {
  */
 export interface ConversationComplexity {
   readonly complexityId: string;
-  readonly overallComplexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX' | 'HIGHLY_COMPLEX';
+  readonly overallComplexity:
+    | 'SIMPLE'
+    | 'MODERATE'
+    | 'COMPLEX'
+    | 'HIGHLY_COMPLEX';
   readonly linguisticComplexity: number;
   readonly topicalComplexity: number;
   readonly technicalComplexity: number;
@@ -681,7 +704,12 @@ export interface BehavioralIndicator {
  */
 export interface ReasoningFactor {
   readonly factorId: string;
-  readonly category: 'TECHNICAL' | 'BUSINESS' | 'LEGAL' | 'ETHICAL' | 'OPERATIONAL';
+  readonly category:
+    | 'TECHNICAL'
+    | 'BUSINESS'
+    | 'LEGAL'
+    | 'ETHICAL'
+    | 'OPERATIONAL';
   readonly weight: number;
   readonly impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
   readonly confidence: number;
@@ -953,7 +981,11 @@ export interface PackageIntegrity {
  */
 export interface TamperingEvidence {
   readonly evidenceId: string;
-  readonly type: 'CHECKSUM_MISMATCH' | 'SIGNATURE_INVALID' | 'TIMESTAMP_INCONSISTENT' | 'STRUCTURAL_CHANGE';
+  readonly type:
+    | 'CHECKSUM_MISMATCH'
+    | 'SIGNATURE_INVALID'
+    | 'TIMESTAMP_INCONSISTENT'
+    | 'STRUCTURAL_CHANGE';
   readonly detected: Date;
   readonly details: string;
   readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -1080,7 +1112,11 @@ export interface RetentionPolicy {
  */
 export interface DisposalPolicy {
   readonly policyId: string;
-  readonly method: 'SECURE_DELETE' | 'CRYPTOGRAPHIC_ERASURE' | 'PHYSICAL_DESTRUCTION' | 'DEGAUSSING';
+  readonly method:
+    | 'SECURE_DELETE'
+    | 'CRYPTOGRAPHIC_ERASURE'
+    | 'PHYSICAL_DESTRUCTION'
+    | 'DEGAUSSING';
   readonly certification: boolean;
   readonly verification: string[];
   readonly audit: boolean;
@@ -1091,7 +1127,12 @@ export interface DisposalPolicy {
  */
 export interface EvidenceAnalysis {
   readonly analysisId: string;
-  readonly type: 'CONTENT' | 'METADATA' | 'FORENSIC' | 'STATISTICAL' | 'COMPARATIVE';
+  readonly type:
+    | 'CONTENT'
+    | 'METADATA'
+    | 'FORENSIC'
+    | 'STATISTICAL'
+    | 'COMPARATIVE';
   readonly method: string;
   readonly results: AnalysisResult[];
   readonly confidence: number;
@@ -1217,7 +1258,11 @@ export interface TimelineDependency {
   readonly dependencyId: string;
   readonly predecessor: string;
   readonly successor: string;
-  readonly type: 'FINISH_TO_START' | 'START_TO_START' | 'FINISH_TO_FINISH' | 'START_TO_FINISH';
+  readonly type:
+    | 'FINISH_TO_START'
+    | 'START_TO_START'
+    | 'FINISH_TO_FINISH'
+    | 'START_TO_FINISH';
   readonly lag: number;
   readonly critical: boolean;
 }
@@ -1302,7 +1347,11 @@ export interface TimelinePhase {
 
 export interface DisposalPlan {
   readonly planId: string;
-  readonly method: 'SECURE_DELETE' | 'PHYSICAL_DESTRUCTION' | 'DEGAUSSING' | 'OVERWRITE';
+  readonly method:
+    | 'SECURE_DELETE'
+    | 'PHYSICAL_DESTRUCTION'
+    | 'DEGAUSSING'
+    | 'OVERWRITE';
   readonly schedule: Date;
   readonly responsible: string;
   readonly certification: boolean;

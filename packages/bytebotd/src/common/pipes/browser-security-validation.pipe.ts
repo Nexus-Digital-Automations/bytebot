@@ -48,7 +48,12 @@ interface BrowserSecurityConfig {
  * Validation context for browser operations
  */
 interface ValidationContext {
-  operationType: 'navigation' | 'interaction' | 'extraction' | 'screenshot' | 'upload';
+  operationType:
+    | 'navigation'
+    | 'interaction'
+    | 'extraction'
+    | 'screenshot'
+    | 'upload';
   sessionId?: string;
   userId?: string;
   endpoint: string;
@@ -96,16 +101,38 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
         'http:',
         'https:',
       ]),
-      maxUrlLength: this.configService.get<number>('BROWSER_MAX_URL_LENGTH', 2048),
-      maxSelectorLength: this.configService.get<number>('BROWSER_MAX_SELECTOR_LENGTH', 500),
-      maxTextLength: this.configService.get<number>('BROWSER_MAX_TEXT_LENGTH', 10000),
-      maxScriptLength: this.configService.get<number>('BROWSER_MAX_SCRIPT_LENGTH', 1000),
-      allowedFileExtensions: this.parseConfigArray('BROWSER_ALLOWED_FILE_EXTENSIONS', [
-        '.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.csv', '.json',
-      ]),
-      maxFileSize: this.configService.get<number>('BROWSER_MAX_FILE_SIZE', 10485760), // 10MB
-      enableStrictValidation: this.configService.get<boolean>('BROWSER_STRICT_VALIDATION', true),
-      enableAuditLogging: this.configService.get<boolean>('BROWSER_AUDIT_LOGGING', true),
+      maxUrlLength: this.configService.get<number>(
+        'BROWSER_MAX_URL_LENGTH',
+        2048,
+      ),
+      maxSelectorLength: this.configService.get<number>(
+        'BROWSER_MAX_SELECTOR_LENGTH',
+        500,
+      ),
+      maxTextLength: this.configService.get<number>(
+        'BROWSER_MAX_TEXT_LENGTH',
+        10000,
+      ),
+      maxScriptLength: this.configService.get<number>(
+        'BROWSER_MAX_SCRIPT_LENGTH',
+        1000,
+      ),
+      allowedFileExtensions: this.parseConfigArray(
+        'BROWSER_ALLOWED_FILE_EXTENSIONS',
+        ['.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.csv', '.json'],
+      ),
+      maxFileSize: this.configService.get<number>(
+        'BROWSER_MAX_FILE_SIZE',
+        10485760,
+      ), // 10MB
+      enableStrictValidation: this.configService.get<boolean>(
+        'BROWSER_STRICT_VALIDATION',
+        true,
+      ),
+      enableAuditLogging: this.configService.get<boolean>(
+        'BROWSER_AUDIT_LOGGING',
+        true,
+      ),
     };
 
     this.logger.log('Browser Security Validation Pipe initialized');
@@ -129,7 +156,11 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
       const validationErrors = await validate(dto);
 
       if (validationErrors.length > 0) {
-        this.logSecurityViolation('validation_error', validationErrors, context);
+        this.logSecurityViolation(
+          'validation_error',
+          validationErrors,
+          context,
+        );
         throw new BadRequestException({
           message: 'Validation failed',
           errors: this.formatValidationErrors(validationErrors),
@@ -138,7 +169,10 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
       }
 
       // Perform browser-specific security validation
-      const securityResult = await this.performSecurityValidation(value, context);
+      const securityResult = await this.performSecurityValidation(
+        value,
+        context,
+      );
 
       if (!securityResult.isValid) {
         this.handleSecurityViolations(securityResult, context);
@@ -150,9 +184,9 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
       const executionTime = Date.now() - startTime;
       this.logger.debug(
         `Browser security validation completed - ` +
-        `Risk score: ${securityResult.riskScore}, ` +
-        `Violations: ${securityResult.violations.length}, ` +
-        `Execution time: ${executionTime}ms`
+          `Risk score: ${securityResult.riskScore}, ` +
+          `Violations: ${securityResult.violations.length}, ` +
+          `Execution time: ${executionTime}ms`,
       );
 
       return result;
@@ -160,8 +194,8 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
       const executionTime = Date.now() - startTime;
       this.logger.error(
         `Browser security validation failed: ${(error as Error).message} ` +
-        `[Execution time: ${executionTime}ms]`,
-        (error as Error).stack
+          `[Execution time: ${executionTime}ms]`,
+        (error as Error).stack,
       );
       throw error;
     }
@@ -241,10 +275,13 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
     }
 
     // Check for critical violations
-    const criticalViolations = violations.filter(v => v.severity === 'critical');
-    const blockedViolations = violations.filter(v => v.blocked);
+    const criticalViolations = violations.filter(
+      (v) => v.severity === 'critical',
+    );
+    const blockedViolations = violations.filter((v) => v.blocked);
 
-    const isValid = criticalViolations.length === 0 && blockedViolations.length === 0;
+    const isValid =
+      criticalViolations.length === 0 && blockedViolations.length === 0;
 
     // Log violations if audit logging is enabled
     if (this.config.enableAuditLogging && violations.length > 0) {
@@ -254,7 +291,8 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
     return {
       isValid,
       violations,
-      sanitizedData: Object.keys(sanitizedData).length > 0 ? sanitizedData : undefined,
+      sanitizedData:
+        Object.keys(sanitizedData).length > 0 ? sanitizedData : undefined,
       riskScore: Math.min(riskScore, 100), // Cap at 100
     };
   }
@@ -262,7 +300,11 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
   /**
    * Validate URLs for browser navigation
    */
-  private validateUrl(url: string): { violations: SecurityViolation[]; riskScore: number; sanitized?: string } {
+  private validateUrl(url: string): {
+    violations: SecurityViolation[];
+    riskScore: number;
+    sanitized?: string;
+  } {
     const violations: SecurityViolation[] = [];
     let riskScore = 0;
     let sanitized: string | undefined;
@@ -353,7 +395,6 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
 
       // Sanitize URL (remove dangerous parameters)
       sanitized = this.sanitizeUrl(url);
-
     } catch (error) {
       violations.push({
         type: 'url_parsing_error',
@@ -372,7 +413,11 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
   /**
    * Validate CSS selectors for DOM interactions
    */
-  private validateSelector(selector: string): { violations: SecurityViolation[]; riskScore: number; sanitized?: string } {
+  private validateSelector(selector: string): {
+    violations: SecurityViolation[];
+    riskScore: number;
+    sanitized?: string;
+  } {
     const violations: SecurityViolation[] = [];
     let riskScore = 0;
     let sanitized: string | undefined;
@@ -427,7 +472,11 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
   /**
    * Validate text inputs for XSS and injection attacks
    */
-  private validateTextInput(text: string): { violations: SecurityViolation[]; riskScore: number; sanitized?: string } {
+  private validateTextInput(text: string): {
+    violations: SecurityViolation[];
+    riskScore: number;
+    sanitized?: string;
+  } {
     const violations: SecurityViolation[] = [];
     let riskScore = 0;
     let sanitized: string | undefined;
@@ -502,7 +551,11 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
   /**
    * Validate automation scripts
    */
-  private validateScript(script: string): { violations: SecurityViolation[]; riskScore: number; sanitized?: string } {
+  private validateScript(script: string): {
+    violations: SecurityViolation[];
+    riskScore: number;
+    sanitized?: string;
+  } {
     const violations: SecurityViolation[] = [];
     let riskScore = 0;
     let sanitized: string | undefined;
@@ -558,12 +611,19 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
   /**
    * Validate file paths
    */
-  private validateFilePath(filePath: string): { violations: SecurityViolation[]; riskScore: number } {
+  private validateFilePath(filePath: string): {
+    violations: SecurityViolation[];
+    riskScore: number;
+  } {
     const violations: SecurityViolation[] = [];
     let riskScore = 0;
 
     // Path traversal detection
-    if (filePath.includes('../') || filePath.includes('..\\') || filePath.includes('%2e%2e')) {
+    if (
+      filePath.includes('../') ||
+      filePath.includes('..\\') ||
+      filePath.includes('%2e%2e')
+    ) {
       violations.push({
         type: 'path_traversal_attempt',
         field: 'filePath',
@@ -576,7 +636,9 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
     }
 
     // File extension validation
-    const extension = filePath.substring(filePath.lastIndexOf('.')).toLowerCase();
+    const extension = filePath
+      .substring(filePath.lastIndexOf('.'))
+      .toLowerCase();
     if (!this.config.allowedFileExtensions.includes(extension)) {
       violations.push({
         type: 'invalid_file_extension',
@@ -595,7 +657,11 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
   /**
    * Validate parameters object
    */
-  private validateParameters(params: any): { violations: SecurityViolation[]; riskScore: number; sanitized?: any } {
+  private validateParameters(params: any): {
+    violations: SecurityViolation[];
+    riskScore: number;
+    sanitized?: any;
+  } {
     const violations: SecurityViolation[] = [];
     let riskScore = 0;
     let sanitized: any = undefined;
@@ -635,7 +701,7 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
    * Check if domain is allowed
    */
   private isDomainAllowed(hostname: string): boolean {
-    return this.config.allowedDomains.some(domain => {
+    return this.config.allowedDomains.some((domain) => {
       if (domain.startsWith('*.')) {
         const baseDomain = domain.substring(2);
         return hostname === baseDomain || hostname.endsWith(`.${baseDomain}`);
@@ -653,7 +719,7 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
 
       // Remove dangerous query parameters
       const dangerousParams = ['javascript', 'onclick', 'onload', 'onerror'];
-      dangerousParams.forEach(param => {
+      dangerousParams.forEach((param) => {
         parsedUrl.searchParams.delete(param);
       });
 
@@ -697,14 +763,17 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
     try {
       return JSON.parse(value);
     } catch {
-      return value.split(',').map(item => item.trim());
+      return value.split(',').map((item) => item.trim());
     }
   }
 
   /**
    * Create validation context
    */
-  private createValidationContext(data: any, metadata: ArgumentMetadata): ValidationContext {
+  private createValidationContext(
+    data: any,
+    metadata: ArgumentMetadata,
+  ): ValidationContext {
     // Extract operation type from data or metadata
     let operationType: ValidationContext['operationType'] = 'interaction';
 
@@ -725,14 +794,19 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
   /**
    * Handle security violations
    */
-  private handleSecurityViolations(result: ValidationResult, context: ValidationContext): void {
-    const criticalViolations = result.violations.filter(v => v.severity === 'critical');
-    const blockedViolations = result.violations.filter(v => v.blocked);
+  private handleSecurityViolations(
+    result: ValidationResult,
+    context: ValidationContext,
+  ): void {
+    const criticalViolations = result.violations.filter(
+      (v) => v.severity === 'critical',
+    );
+    const blockedViolations = result.violations.filter((v) => v.blocked);
 
     if (criticalViolations.length > 0 || blockedViolations.length > 0) {
       throw new BadRequestException({
         message: 'Security validation failed',
-        violations: blockedViolations.map(v => ({
+        violations: blockedViolations.map((v) => ({
           type: v.type,
           field: v.field,
           reason: v.reason,
@@ -764,7 +838,7 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
       details: violations,
     };
 
-    if (violations.some(v => 'severity' in v && v.severity === 'critical')) {
+    if (violations.some((v) => 'severity' in v && v.severity === 'critical')) {
       this.logger.error(`Critical security violation: ${type}`, logData);
     } else {
       this.logger.warn(`Security violation: ${type}`, logData);
@@ -775,11 +849,13 @@ export class BrowserSecurityValidationPipe implements PipeTransform {
    * Format validation errors for response
    */
   private formatValidationErrors(errors: ValidationError[]): any[] {
-    return errors.map(error => ({
+    return errors.map((error) => ({
       field: error.property,
       value: error.value,
       constraints: error.constraints,
-      children: error.children?.length ? this.formatValidationErrors(error.children) : undefined,
+      children: error.children?.length
+        ? this.formatValidationErrors(error.children)
+        : undefined,
     }));
   }
 }

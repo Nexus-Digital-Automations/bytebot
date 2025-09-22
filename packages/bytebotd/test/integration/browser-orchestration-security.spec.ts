@@ -158,7 +158,10 @@ describe('Browser Orchestration Security Tests', () => {
       for (const token of invalidTokens) {
         await request(app.getHttpServer())
           .get('/browser-orchestration/orchestrations')
-          .set('Authorization', token.startsWith('Bearer') ? token : `Bearer ${token}`)
+          .set(
+            'Authorization',
+            token.startsWith('Bearer') ? token : `Bearer ${token}`,
+          )
           .expect(HttpStatus.UNAUTHORIZED);
       }
     });
@@ -172,7 +175,7 @@ describe('Browser Orchestration Security Tests', () => {
           permissions: ['*'],
         },
         'wrong-secret',
-        { expiresIn: '1h' }
+        { expiresIn: '1h' },
       );
 
       await request(app.getHttpServer())
@@ -189,7 +192,7 @@ describe('Browser Orchestration Security Tests', () => {
           permissions: ['*'],
         },
         securityConfig.jwtSecret,
-        { expiresIn: '-1h' } // Expired 1 hour ago
+        { expiresIn: '-1h' }, // Expired 1 hour ago
       );
 
       await request(app.getHttpServer())
@@ -211,7 +214,10 @@ describe('Browser Orchestration Security Tests', () => {
           .send(invalidCredentials);
 
         if (i < securityConfig.maxLoginAttempts) {
-          expect([HttpStatus.UNAUTHORIZED, HttpStatus.TOO_MANY_REQUESTS]).toContain(response.status);
+          expect([
+            HttpStatus.UNAUTHORIZED,
+            HttpStatus.TOO_MANY_REQUESTS,
+          ]).toContain(response.status);
         } else {
           expect(response.status).toBe(HttpStatus.TOO_MANY_REQUESTS);
         }
@@ -247,7 +253,10 @@ describe('Browser Orchestration Security Tests', () => {
             role: 'viewer',
           });
 
-        expect([HttpStatus.BAD_REQUEST, HttpStatus.UNPROCESSABLE_ENTITY]).toContain(response.status);
+        expect([
+          HttpStatus.BAD_REQUEST,
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        ]).toContain(response.status);
       }
     });
   });
@@ -327,12 +336,16 @@ describe('Browser Orchestration Security Tests', () => {
 
       // Test execute permissions
       await request(app.getHttpServer())
-        .post(`/browser-orchestration/orchestrations/${orchestrationId}/execute`)
+        .post(
+          `/browser-orchestration/orchestrations/${orchestrationId}/execute`,
+        )
         .set('Authorization', `Bearer ${testUsers.operator.token}`)
         .expect(HttpStatus.OK);
 
       await request(app.getHttpServer())
-        .post(`/browser-orchestration/orchestrations/${orchestrationId}/execute`)
+        .post(
+          `/browser-orchestration/orchestrations/${orchestrationId}/execute`,
+        )
         .set('Authorization', `Bearer ${testUsers.viewer.token}`)
         .expect(HttpStatus.FORBIDDEN);
 
@@ -358,7 +371,7 @@ describe('Browser Orchestration Security Tests', () => {
           originalRole: 'viewer',
         },
         securityConfig.jwtSecret,
-        { expiresIn: '1h' }
+        { expiresIn: '1h' },
       );
 
       // The system should detect this as unauthorized
@@ -410,13 +423,17 @@ describe('Browser Orchestration Security Tests', () => {
 
       // Viewer should not be able to access operator's orchestration
       await request(app.getHttpServer())
-        .get(`/browser-orchestration/orchestrations/${operatorOrchestration.body.id}`)
+        .get(
+          `/browser-orchestration/orchestrations/${operatorOrchestration.body.id}`,
+        )
         .set('Authorization', `Bearer ${testUsers.viewer.token}`)
         .expect(HttpStatus.FORBIDDEN);
 
       // Operator should not be able to modify viewer's orchestration
       await request(app.getHttpServer())
-        .post(`/browser-orchestration/orchestrations/${viewerOrchestration.body.id}/execute`)
+        .post(
+          `/browser-orchestration/orchestrations/${viewerOrchestration.body.id}/execute`,
+        )
         .set('Authorization', `Bearer ${testUsers.operator.token}`)
         .expect(HttpStatus.FORBIDDEN);
     });
@@ -453,7 +470,9 @@ describe('Browser Orchestration Security Tests', () => {
           .send(maliciousDto);
 
         // Should either be created safely (sanitized) or rejected
-        expect([HttpStatus.CREATED, HttpStatus.BAD_REQUEST]).toContain(response.status);
+        expect([HttpStatus.CREATED, HttpStatus.BAD_REQUEST]).toContain(
+          response.status,
+        );
 
         if (response.status === HttpStatus.CREATED) {
           // Verify the data was sanitized
@@ -536,7 +555,10 @@ describe('Browser Orchestration Security Tests', () => {
           .send(maliciousDto);
 
         // Should reject dangerous URLs
-        expect([HttpStatus.BAD_REQUEST, HttpStatus.UNPROCESSABLE_ENTITY]).toContain(response.status);
+        expect([
+          HttpStatus.BAD_REQUEST,
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        ]).toContain(response.status);
       }
     });
 
@@ -575,7 +597,9 @@ describe('Browser Orchestration Security Tests', () => {
           .send(maliciousDto);
 
         // Should reject or sanitize command injection attempts
-        expect([HttpStatus.CREATED, HttpStatus.BAD_REQUEST]).toContain(response.status);
+        expect([HttpStatus.CREATED, HttpStatus.BAD_REQUEST]).toContain(
+          response.status,
+        );
 
         if (response.status === HttpStatus.CREATED) {
           // Verify commands are sanitized
@@ -605,7 +629,7 @@ describe('Browser Orchestration Security Tests', () => {
       const tooManyRequestsResponses = responses.filter(
         (result) =>
           result.status === 'fulfilled' &&
-          result.value.status === HttpStatus.TOO_MANY_REQUESTS
+          result.value.status === HttpStatus.TOO_MANY_REQUESTS,
       );
 
       expect(tooManyRequestsResponses.length).toBeGreaterThan(0);
@@ -640,7 +664,7 @@ describe('Browser Orchestration Security Tests', () => {
       const rateLimitedResponses = results.filter(
         (result) =>
           result.status === 'fulfilled' &&
-          result.value.status === HttpStatus.TOO_MANY_REQUESTS
+          result.value.status === HttpStatus.TOO_MANY_REQUESTS,
       );
 
       // Should have some rate-limited responses
@@ -674,7 +698,10 @@ describe('Browser Orchestration Security Tests', () => {
         .send(resourceIntensiveDto);
 
       // Should reject excessive resource requests
-      expect([HttpStatus.BAD_REQUEST, HttpStatus.UNPROCESSABLE_ENTITY]).toContain(response.status);
+      expect([
+        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      ]).toContain(response.status);
     });
   });
 
@@ -713,10 +740,11 @@ describe('Browser Orchestration Security Tests', () => {
         expect(responseBody).not.toContain('4111-1111-1111-1111');
 
         // Verify data is encrypted in database
-        const orchestration = await prismaService.browserOrchestration.findUnique({
-          where: { id: response.body.id },
-          include: { tasks: true },
-        });
+        const orchestration =
+          await prismaService.browserOrchestration.findUnique({
+            where: { id: response.body.id },
+            include: { tasks: true },
+          });
 
         if (orchestration && orchestration.tasks.length > 0) {
           const taskConfig = orchestration.tasks[0].configuration as any;
@@ -738,7 +766,7 @@ describe('Browser Orchestration Security Tests', () => {
             instructions: 'Make API call with sensitive data',
             priority: TaskPriority.NORMAL,
             headers: {
-              'Authorization': 'Bearer secret-token-12345',
+              Authorization: 'Bearer secret-token-12345',
               'X-API-Key': 'api-key-67890',
             },
             bodyData: {
@@ -793,7 +821,10 @@ describe('Browser Orchestration Security Tests', () => {
 
       // Check for required security headers
       expect(response.headers['x-content-type-options']).toBe('nosniff');
-      expect(response.headers['x-frame-options']).toBeOneOf(['DENY', 'SAMEORIGIN']);
+      expect(response.headers['x-frame-options']).toBeOneOf([
+        'DENY',
+        'SAMEORIGIN',
+      ]);
       expect(response.headers['x-xss-protection']).toBe('1; mode=block');
       expect(response.headers['strict-transport-security']).toBeDefined();
       expect(response.headers['content-security-policy']).toBeDefined();
@@ -808,7 +839,9 @@ describe('Browser Orchestration Security Tests', () => {
         .set('Access-Control-Request-Headers', 'Content-Type, Authorization');
 
       expect(allowedOriginResponse.status).toBe(HttpStatus.OK);
-      expect(allowedOriginResponse.headers['access-control-allow-origin']).toBe('http://localhost:3000');
+      expect(allowedOriginResponse.headers['access-control-allow-origin']).toBe(
+        'http://localhost:3000',
+      );
 
       // Test CORS with disallowed origin
       const disallowedOriginResponse = await request(app.getHttpServer())
@@ -816,7 +849,9 @@ describe('Browser Orchestration Security Tests', () => {
         .set('Origin', 'http://malicious-site.com')
         .set('Access-Control-Request-Method', 'POST');
 
-      expect(disallowedOriginResponse.headers['access-control-allow-origin']).toBeUndefined();
+      expect(
+        disallowedOriginResponse.headers['access-control-allow-origin'],
+      ).toBeUndefined();
     });
   });
 
@@ -825,13 +860,11 @@ describe('Browser Orchestration Security Tests', () => {
     for (const [userType, userData] of Object.entries(testUsers)) {
       try {
         // Create user (if registration endpoint exists)
-        await request(app.getHttpServer())
-          .post('/auth/register')
-          .send({
-            username: userData.username,
-            password: userData.password,
-            role: userData.role,
-          });
+        await request(app.getHttpServer()).post('/auth/register').send({
+          username: userData.username,
+          password: userData.password,
+          role: userData.role,
+        });
       } catch (error) {
         // User might already exist, continue to login
       }
@@ -845,7 +878,10 @@ describe('Browser Orchestration Security Tests', () => {
             password: userData.password,
           });
 
-        if (loginResponse.status === HttpStatus.OK && loginResponse.body.accessToken) {
+        if (
+          loginResponse.status === HttpStatus.OK &&
+          loginResponse.body.accessToken
+        ) {
           userData.token = loginResponse.body.accessToken;
         } else {
           // Generate mock token for testing
@@ -856,7 +892,7 @@ describe('Browser Orchestration Security Tests', () => {
               permissions: userData.permissions,
             },
             securityConfig.jwtSecret,
-            { expiresIn: '1h' }
+            { expiresIn: '1h' },
           );
         }
       } catch (error) {
@@ -868,7 +904,7 @@ describe('Browser Orchestration Security Tests', () => {
             permissions: userData.permissions,
           },
           securityConfig.jwtSecret,
-          { expiresIn: '1h' }
+          { expiresIn: '1h' },
         );
       }
     }
@@ -882,7 +918,7 @@ describe('Browser Orchestration Security Tests', () => {
         permissions: ['*'],
       },
       securityConfig.jwtSecret,
-      { expiresIn: '-1h' }
+      { expiresIn: '-1h' },
     );
   }
 
@@ -894,16 +930,18 @@ describe('Browser Orchestration Security Tests', () => {
         permissions: ['read'],
       },
       securityConfig.jwtSecret,
-      { expiresIn: '1h' }
+      { expiresIn: '1h' },
     );
 
     // Tamper with the token by changing the payload
     const parts = validToken.split('.');
-    const tamperedPayload = Buffer.from(JSON.stringify({
-      sub: 'test-user',
-      role: 'admin', // Tampered: changed from viewer to admin
-      permissions: ['*'], // Tampered: changed permissions
-    })).toString('base64url');
+    const tamperedPayload = Buffer.from(
+      JSON.stringify({
+        sub: 'test-user',
+        role: 'admin', // Tampered: changed from viewer to admin
+        permissions: ['*'], // Tampered: changed permissions
+      }),
+    ).toString('base64url');
 
     return `${parts[0]}.${tamperedPayload}.${parts[2]}`;
   }
@@ -938,9 +976,10 @@ expect.extend({
   toBeOneOf(received, argument) {
     const pass = argument.includes(received);
     return {
-      message: () => pass
-        ? `expected ${received} not to be one of ${argument}`
-        : `expected ${received} to be one of ${argument}`,
+      message: () =>
+        pass
+          ? `expected ${received} not to be one of ${argument}`
+          : `expected ${received} to be one of ${argument}`,
       pass,
     };
   },

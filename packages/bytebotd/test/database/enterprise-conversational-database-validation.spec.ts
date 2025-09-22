@@ -31,9 +31,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
-import { ConversationalDatabaseService, DatabaseOperationType, DatabaseRiskLevel } from '../../src/database/conversational-database.service';
+import {
+  ConversationalDatabaseService,
+  DatabaseOperationType,
+  DatabaseRiskLevel,
+} from '../../src/database/conversational-database.service';
 import { BaseConversationalRepositoryService } from '../../src/database/repositories/base-conversational-repository.service';
-import { ParlantIntegrationService, ParlantValidationRequest } from '../../src/parlant/parlant-integration.service';
+import {
+  ParlantIntegrationService,
+  ParlantValidationRequest,
+} from '../../src/parlant/parlant-integration.service';
 
 // Define risk level type locally to avoid import issues
 type RiskLevelType = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -114,7 +121,8 @@ class EnterpriseDatabaseTestUtils {
       // Simple CRUD Operations
       {
         name: 'Simple Read Operations with Conversational Validation',
-        description: 'Basic read operations with low-risk conversational validation',
+        description:
+          'Basic read operations with low-risk conversational validation',
         operationType: DatabaseOperationType.FIND_BY_ID,
         riskLevel: DatabaseRiskLevel.LOW,
         entityCount: 100,
@@ -122,7 +130,7 @@ class EnterpriseDatabaseTestUtils {
         expectedValidationTime: 50,
         requiresApproval: false,
         requiresBackup: false,
-        testComplexity: 'SIMPLE'
+        testComplexity: 'SIMPLE',
       },
       {
         name: 'Create Operations with Approval Workflow',
@@ -134,7 +142,7 @@ class EnterpriseDatabaseTestUtils {
         expectedValidationTime: 150,
         requiresApproval: true,
         requiresBackup: true,
-        testComplexity: 'MEDIUM'
+        testComplexity: 'MEDIUM',
       },
       {
         name: 'Update Operations with Backup Creation',
@@ -146,7 +154,7 @@ class EnterpriseDatabaseTestUtils {
         expectedValidationTime: 120,
         requiresApproval: true,
         requiresBackup: true,
-        testComplexity: 'MEDIUM'
+        testComplexity: 'MEDIUM',
       },
 
       // Complex Operations
@@ -160,13 +168,14 @@ class EnterpriseDatabaseTestUtils {
         expectedValidationTime: 300,
         requiresApproval: true,
         requiresBackup: true,
-        testComplexity: 'COMPLEX'
+        testComplexity: 'COMPLEX',
       },
 
       // Critical Operations
       {
         name: 'Delete Operations with Multi-Party Approval',
-        description: 'Critical delete operations requiring multi-party approval',
+        description:
+          'Critical delete operations requiring multi-party approval',
         operationType: DatabaseOperationType.DELETE,
         riskLevel: DatabaseRiskLevel.CRITICAL,
         entityCount: 25,
@@ -174,7 +183,7 @@ class EnterpriseDatabaseTestUtils {
         expectedValidationTime: 500,
         requiresApproval: true,
         requiresBackup: true,
-        testComplexity: 'ENTERPRISE'
+        testComplexity: 'ENTERPRISE',
       },
       {
         name: 'Bulk Delete with Enhanced Protection',
@@ -186,15 +195,17 @@ class EnterpriseDatabaseTestUtils {
         expectedValidationTime: 800,
         requiresApproval: true,
         requiresBackup: true,
-        testComplexity: 'ENTERPRISE'
-      }
+        testComplexity: 'ENTERPRISE',
+      },
     ];
   }
 
   /**
    * Generate test entities for database operations
    */
-  static generateTestEntities(count: number): Omit<TestDatabaseEntity, keyof BaseEntity>[] {
+  static generateTestEntities(
+    count: number,
+  ): Omit<TestDatabaseEntity, keyof BaseEntity>[] {
     const entities: Omit<TestDatabaseEntity, keyof BaseEntity>[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -205,10 +216,11 @@ class EnterpriseDatabaseTestUtils {
         metadata: {
           testIndex: i,
           testType: 'enterprise-validation',
-          category: i % 5 === 0 ? 'critical' : i % 3 === 0 ? 'important' : 'standard',
-          complexity: i % 7 === 0 ? 'high' : 'normal'
+          category:
+            i % 5 === 0 ? 'critical' : i % 3 === 0 ? 'important' : 'standard',
+          complexity: i % 7 === 0 ? 'high' : 'normal',
         },
-        sensitiveData: i % 10 === 0 ? `sensitive-${i}` : undefined
+        sensitiveData: i % 10 === 0 ? `sensitive-${i}` : undefined,
       });
     }
 
@@ -221,68 +233,82 @@ class EnterpriseDatabaseTestUtils {
   static createOperationContext(
     config: DatabaseTransactionTestConfig,
     entityId?: string,
-    customParams?: Record<string, unknown>
+    customParams?: Record<string, unknown>,
   ) {
     return {
       userId: 'enterprise-test-user',
-      userRole: config.riskLevel === DatabaseRiskLevel.CRITICAL ? 'admin' : 'user',
+      userRole:
+        config.riskLevel === DatabaseRiskLevel.CRITICAL ? 'admin' : 'user',
       businessPurpose: `${config.description} - Enterprise testing`,
       confirmDeletion: config.operationType.includes('DELETE'),
-      confirmBulkDeletion: config.operationType === DatabaseOperationType.BULK_DELETE,
+      confirmBulkDeletion:
+        config.operationType === DatabaseOperationType.BULK_DELETE,
       requiresApproval: config.requiresApproval,
       operationMetadata: {
         testName: config.name,
         testComplexity: config.testComplexity,
         entityId,
-        ...customParams
-      }
+        ...customParams,
+      },
     };
   }
 
   /**
    * Validate data integrity metrics
    */
-  static validateDataIntegrityMetrics(
-    metrics: DataIntegrityMetrics
-  ): { passed: boolean; violations: string[]; score: number } {
+  static validateDataIntegrityMetrics(metrics: DataIntegrityMetrics): {
+    passed: boolean;
+    violations: string[];
+    score: number;
+  } {
     const violations: string[] = [];
     let score = 100;
 
     // Data integrity validation
     if (metrics.integrityViolations > 0) {
-      violations.push(`${metrics.integrityViolations} data integrity violations detected`);
+      violations.push(
+        `${metrics.integrityViolations} data integrity violations detected`,
+      );
       score -= 40;
     }
 
     // Success rate validation
     const successRate = metrics.successfulOperations / metrics.totalOperations;
     if (successRate < 0.999) {
-      violations.push(`Success rate ${(successRate * 100).toFixed(3)}% below 99.9% target`);
+      violations.push(
+        `Success rate ${(successRate * 100).toFixed(3)}% below 99.9% target`,
+      );
       score -= 30;
     }
 
     // ACID compliance validation
     if (metrics.acidComplianceScore < 99.99) {
-      violations.push(`ACID compliance score ${metrics.acidComplianceScore}% below 99.99% target`);
+      violations.push(
+        `ACID compliance score ${metrics.acidComplianceScore}% below 99.99% target`,
+      );
       score -= 25;
     }
 
     // Audit trail completeness
     if (metrics.auditTrailCompleteness < 100) {
-      violations.push(`Audit trail completeness ${metrics.auditTrailCompleteness}% below 100% target`);
+      violations.push(
+        `Audit trail completeness ${metrics.auditTrailCompleteness}% below 100% target`,
+      );
       score -= 20;
     }
 
     // Performance overhead validation
     if (metrics.performanceOverhead > 200) {
-      violations.push(`Performance overhead ${metrics.performanceOverhead}ms exceeds 200ms target`);
+      violations.push(
+        `Performance overhead ${metrics.performanceOverhead}ms exceeds 200ms target`,
+      );
       score -= 15;
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      score: Math.max(0, score)
+      score: Math.max(0, score),
     };
   }
 
@@ -290,39 +316,47 @@ class EnterpriseDatabaseTestUtils {
    * Validate conversational validation metrics
    */
   static validateConversationalMetrics(
-    metrics: ConversationalValidationMetrics
+    metrics: ConversationalValidationMetrics,
   ): { passed: boolean; violations: string[]; score: number } {
     const violations: string[] = [];
     let score = 100;
 
     // Validation time check
     if (metrics.averageValidationTime > 200) {
-      violations.push(`Average validation time ${metrics.averageValidationTime}ms exceeds 200ms target`);
+      violations.push(
+        `Average validation time ${metrics.averageValidationTime}ms exceeds 200ms target`,
+      );
       score -= 25;
     }
 
     // P95 validation time
     if (metrics.p95ValidationTime > 500) {
-      violations.push(`P95 validation time ${metrics.p95ValidationTime}ms exceeds 500ms target`);
+      violations.push(
+        `P95 validation time ${metrics.p95ValidationTime}ms exceeds 500ms target`,
+      );
       score -= 20;
     }
 
     // Cache hit rate
     if (metrics.cacheHitRate < 0.6) {
-      violations.push(`Cache hit rate ${(metrics.cacheHitRate * 100).toFixed(1)}% below 60% target`);
+      violations.push(
+        `Cache hit rate ${(metrics.cacheHitRate * 100).toFixed(1)}% below 60% target`,
+      );
       score -= 15;
     }
 
     // Conversational overhead
     if (metrics.conversationalOverhead > 200) {
-      violations.push(`Conversational overhead ${metrics.conversationalOverhead}ms exceeds 200ms target`);
+      violations.push(
+        `Conversational overhead ${metrics.conversationalOverhead}ms exceeds 200ms target`,
+      );
       score -= 20;
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      score: Math.max(0, score)
+      score: Math.max(0, score),
     };
   }
 
@@ -332,28 +366,37 @@ class EnterpriseDatabaseTestUtils {
   static async simulateTransaction(
     operationType: DatabaseOperationType,
     entityCount: number,
-    complexity: string
-  ): Promise<{ duration: number; success: boolean; integrityMaintained: boolean }> {
-    const baseTime = {
-      [DatabaseOperationType.FIND_BY_ID]: 10,
-      [DatabaseOperationType.CREATE]: 50,
-      [DatabaseOperationType.UPDATE]: 40,
-      [DatabaseOperationType.DELETE]: 30,
-      [DatabaseOperationType.BULK_CREATE]: 200,
-      [DatabaseOperationType.BULK_DELETE]: 150
-    }[operationType] || 25;
+    complexity: string,
+  ): Promise<{
+    duration: number;
+    success: boolean;
+    integrityMaintained: boolean;
+  }> {
+    const baseTime =
+      {
+        [DatabaseOperationType.FIND_BY_ID]: 10,
+        [DatabaseOperationType.CREATE]: 50,
+        [DatabaseOperationType.UPDATE]: 40,
+        [DatabaseOperationType.DELETE]: 30,
+        [DatabaseOperationType.BULK_CREATE]: 200,
+        [DatabaseOperationType.BULK_DELETE]: 150,
+      }[operationType] || 25;
 
-    const complexityMultiplier = {
-      'SIMPLE': 1,
-      'MEDIUM': 1.5,
-      'COMPLEX': 2.5,
-      'ENTERPRISE': 4
-    }[complexity] || 1;
+    const complexityMultiplier =
+      {
+        SIMPLE: 1,
+        MEDIUM: 1.5,
+        COMPLEX: 2.5,
+        ENTERPRISE: 4,
+      }[complexity] || 1;
 
-    const duration = baseTime * complexityMultiplier * Math.log(entityCount + 1);
+    const duration =
+      baseTime * complexityMultiplier * Math.log(entityCount + 1);
 
     // Simulate realistic delays
-    await new Promise(resolve => setTimeout(resolve, Math.min(duration, 100)));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(duration, 100)),
+    );
 
     // Simulate success rates based on operation complexity
     const successRate = complexity === 'ENTERPRISE' ? 0.999 : 0.9995;
@@ -363,7 +406,7 @@ class EnterpriseDatabaseTestUtils {
     return {
       duration,
       success,
-      integrityMaintained
+      integrityMaintained,
     };
   }
 }
@@ -383,22 +426,24 @@ describe('Enterprise Conversational Database Validation', () => {
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-      count: jest.fn()
+      count: jest.fn(),
     } as jest.Mocked<Repository<TestDatabaseEntity>>;
 
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          load: [() => ({
-            DB_VALIDATION_CACHE_TTL: '300',
-            DB_BACKUP_RETENTION_DAYS: '30',
-            DB_REQUIRE_MULTI_PARTY_APPROVAL: 'true',
-            DB_ENABLE_AUDIT_TRAIL: 'true',
-            DB_ENABLE_PERFORMANCE_OPTIMIZATION: 'true',
-            DB_SLOW_QUERY_THRESHOLD: '1000',
-            DB_CRITICAL_QUERY_THRESHOLD: '5000'
-          })]
-        })
+          load: [
+            () => ({
+              DB_VALIDATION_CACHE_TTL: '300',
+              DB_BACKUP_RETENTION_DAYS: '30',
+              DB_REQUIRE_MULTI_PARTY_APPROVAL: 'true',
+              DB_ENABLE_AUDIT_TRAIL: 'true',
+              DB_ENABLE_PERFORMANCE_OPTIMIZATION: 'true',
+              DB_SLOW_QUERY_THRESHOLD: '1000',
+              DB_CRITICAL_QUERY_THRESHOLD: '5000',
+            }),
+          ],
+        }),
       ],
       providers: [
         ConversationalDatabaseService,
@@ -413,17 +458,21 @@ describe('Enterprise Conversational Database Validation', () => {
                 DB_BACKUP_RETENTION_DAYS: '30',
                 DB_REQUIRE_MULTI_PARTY_APPROVAL: 'true',
                 DB_ENABLE_AUDIT_TRAIL: 'true',
-                DB_ENABLE_PERFORMANCE_OPTIMIZATION: 'true'
+                DB_ENABLE_PERFORMANCE_OPTIMIZATION: 'true',
               };
               return config[key];
-            })
-          }
-        }
-      ]
+            }),
+          },
+        },
+      ],
     }).compile();
 
-    conversationalDbService = module.get<ConversationalDatabaseService>(ConversationalDatabaseService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
+    conversationalDbService = module.get<ConversationalDatabaseService>(
+      ConversationalDatabaseService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
@@ -441,20 +490,25 @@ describe('Enterprise Conversational Database Validation', () => {
 
   describe('Conversational CRUD Operations Validation', () => {
     it('should validate READ operations with minimal conversational overhead', async () => {
-      const config = EnterpriseDatabaseTestUtils.generateDatabaseTestConfigs()[0]!;
-      const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(config.entityCount);
+      const config =
+        EnterpriseDatabaseTestUtils.generateDatabaseTestConfigs()[0]!;
+      const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(
+        config.entityCount,
+      );
 
       logger.log(`Starting ${config.name} with ${config.entityCount} entities`);
 
       // Mock successful Parlant validation for low-risk operations
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-read-test',
-        reasoning: 'Low-risk read operation approved',
-        confidence: 0.95,
-        validationTimestamp: new Date(),
-        riskLevel: 'LOW' as RiskLevelType
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-read-test',
+          reasoning: 'Low-risk read operation approved',
+          confidence: 0.95,
+          validationTimestamp: new Date(),
+          riskLevel: 'LOW' as RiskLevelType,
+        });
 
       // Mock repository responses
       testEntities.forEach((entity, index) => {
@@ -463,7 +517,7 @@ describe('Enterprise Conversational Database Validation', () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           version: 1,
-          ...entity
+          ...entity,
         } as TestDatabaseEntity);
       });
 
@@ -472,13 +526,16 @@ describe('Enterprise Conversational Database Validation', () => {
       const operationTimes: number[] = [];
 
       for (let i = 0; i < config.entityCount; i++) {
-        const context = EnterpriseDatabaseTestUtils.createOperationContext(config, `test-entity-${i}`);
+        const context = EnterpriseDatabaseTestUtils.createOperationContext(
+          config,
+          `test-entity-${i}`,
+        );
 
         const validationStart = Date.now();
         const result = await conversationalDbService.findById(
           mockRepository,
           `test-entity-${i}`,
-          context
+          context,
         );
         const totalTime = Date.now() - validationStart;
 
@@ -488,8 +545,13 @@ describe('Enterprise Conversational Database Validation', () => {
       }
 
       // Analyze performance metrics
-      const avgValidationTime = validationTimes.reduce((sum, time) => sum + time, 0) / validationTimes.length;
-      const p95ValidationTime = validationTimes.sort((a, b) => a - b)[Math.floor(validationTimes.length * 0.95)] || 0;
+      const avgValidationTime =
+        validationTimes.reduce((sum, time) => sum + time, 0) /
+        validationTimes.length;
+      const p95ValidationTime =
+        validationTimes.sort((a, b) => a - b)[
+          Math.floor(validationTimes.length * 0.95)
+        ] || 0;
 
       const metrics: ConversationalValidationMetrics = {
         testName: config.name,
@@ -501,10 +563,11 @@ describe('Enterprise Conversational Database Validation', () => {
         p95ValidationTime,
         cacheHitRate: 0.8, // Simulated cache hit rate
         conversationalOverhead: avgValidationTime - 10, // Subtract base DB operation time
-        approvalWorkflowTime: 0
+        approvalWorkflowTime: 0,
       };
 
-      const validation = EnterpriseDatabaseTestUtils.validateConversationalMetrics(metrics);
+      const validation =
+        EnterpriseDatabaseTestUtils.validateConversationalMetrics(metrics);
 
       logger.log(`READ Operations Results:
         Total Operations: ${metrics.totalValidations}
@@ -514,25 +577,34 @@ describe('Enterprise Conversational Database Validation', () => {
         Score: ${validation.score}/100`);
 
       expect(validation.passed).toBe(true);
-      expect(metrics.averageValidationTime).toBeLessThan(config.expectedValidationTime);
-      expect(parlantService.validateFunctionExecution).toHaveBeenCalledTimes(config.entityCount);
+      expect(metrics.averageValidationTime).toBeLessThan(
+        config.expectedValidationTime,
+      );
+      expect(parlantService.validateFunctionExecution).toHaveBeenCalledTimes(
+        config.entityCount,
+      );
     }, 30000);
 
     it('should handle CREATE operations with proper approval workflow', async () => {
-      const config = EnterpriseDatabaseTestUtils.generateDatabaseTestConfigs()[1]!;
-      const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(config.entityCount);
+      const config =
+        EnterpriseDatabaseTestUtils.generateDatabaseTestConfigs()[1]!;
+      const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(
+        config.entityCount,
+      );
 
       logger.log(`Starting ${config.name} with ${config.entityCount} entities`);
 
       // Mock Parlant validation for medium-risk operations
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-create-test',
-        reasoning: 'Create operation approved with backup requirement',
-        confidence: 0.92,
-        validationTimestamp: new Date(),
-        riskLevel: 'MEDIUM' as RiskLevelType
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-create-test',
+          reasoning: 'Create operation approved with backup requirement',
+          confidence: 0.92,
+          validationTimestamp: new Date(),
+          riskLevel: 'MEDIUM' as RiskLevelType,
+        });
 
       // Mock successful entity creation
       testEntities.forEach((entity, index) => {
@@ -541,7 +613,7 @@ describe('Enterprise Conversational Database Validation', () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           version: 1,
-          ...entity
+          ...entity,
         } as TestDatabaseEntity);
       });
 
@@ -550,13 +622,14 @@ describe('Enterprise Conversational Database Validation', () => {
       const validationTimes: number[] = [];
 
       for (let i = 0; i < config.entityCount; i++) {
-        const context = EnterpriseDatabaseTestUtils.createOperationContext(config);
+        const context =
+          EnterpriseDatabaseTestUtils.createOperationContext(config);
 
         const start = Date.now();
         const result = await conversationalDbService.create(
           mockRepository,
           testEntities[i]!,
-          context
+          context,
         );
         const duration = Date.now() - start;
 
@@ -572,7 +645,9 @@ describe('Enterprise Conversational Database Validation', () => {
       expect(backupStatus.totalBackups).toBe(config.entityCount);
 
       // Calculate metrics
-      const avgValidationTime = validationTimes.reduce((sum, time) => sum + time, 0) / validationTimes.length;
+      const avgValidationTime =
+        validationTimes.reduce((sum, time) => sum + time, 0) /
+        validationTimes.length;
 
       const metrics: ConversationalValidationMetrics = {
         testName: config.name,
@@ -581,13 +656,17 @@ describe('Enterprise Conversational Database Validation', () => {
         rejectedValidations: 0,
         manualApprovalRequired: 0,
         averageValidationTime: avgValidationTime,
-        p95ValidationTime: validationTimes.sort((a, b) => a - b)[Math.floor(validationTimes.length * 0.95)] || 0,
+        p95ValidationTime:
+          validationTimes.sort((a, b) => a - b)[
+            Math.floor(validationTimes.length * 0.95)
+          ] || 0,
         cacheHitRate: 0.3, // Lower cache hit for create operations
         conversationalOverhead: avgValidationTime - 50, // Subtract base create time
-        approvalWorkflowTime: avgValidationTime * 0.3 // Estimated approval workflow time
+        approvalWorkflowTime: avgValidationTime * 0.3, // Estimated approval workflow time
       };
 
-      const validation = EnterpriseDatabaseTestUtils.validateConversationalMetrics(metrics);
+      const validation =
+        EnterpriseDatabaseTestUtils.validateConversationalMetrics(metrics);
 
       logger.log(`CREATE Operations Results:
         Total Operations: ${metrics.totalValidations}
@@ -597,7 +676,9 @@ describe('Enterprise Conversational Database Validation', () => {
 
       expect(validation.score).toBeGreaterThan(80);
       expect(mockRepository.create).toHaveBeenCalledTimes(config.entityCount);
-      expect(parlantService.validateFunctionExecution).toHaveBeenCalledTimes(config.entityCount);
+      expect(parlantService.validateFunctionExecution).toHaveBeenCalledTimes(
+        config.entityCount,
+      );
     }, 45000);
   });
 
@@ -605,33 +686,43 @@ describe('Enterprise Conversational Database Validation', () => {
 
   describe('Data Integrity and ACID Properties Validation', () => {
     it('should maintain ACID properties under conversational validation stress', async () => {
-      logger.log('Starting ACID compliance test under conversational validation');
+      logger.log(
+        'Starting ACID compliance test under conversational validation',
+      );
 
       const testOperationCount = 100;
       const concurrentOperations = 10;
-      const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(testOperationCount);
+      const testEntities =
+        EnterpriseDatabaseTestUtils.generateTestEntities(testOperationCount);
 
       // Mock Parlant service for mixed approval results
       let approvalCount = 0;
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation(() => {
-        approvalCount++;
-        const approved = approvalCount % 20 !== 0; // 95% approval rate
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockImplementation(() => {
+          approvalCount++;
+          const approved = approvalCount % 20 !== 0; // 95% approval rate
 
-        return {
-          approved,
-          conversationId: `conv-acid-${approvalCount}`,
-          reasoning: approved ? 'Operation approved' : 'Operation rejected for testing',
-          confidence: 0.9,
-          validationTimestamp: new Date(),
-          riskLevel: 'MEDIUM' as RiskLevelType
-        };
-      });
+          return {
+            approved,
+            conversationId: `conv-acid-${approvalCount}`,
+            reasoning: approved
+              ? 'Operation approved'
+              : 'Operation rejected for testing',
+            confidence: 0.9,
+            validationTimestamp: new Date(),
+            riskLevel: 'MEDIUM' as RiskLevelType,
+          };
+        });
 
       // Mock repository operations with realistic simulation
       mockRepository.create.mockImplementation(async (entity) => {
-        const simulation = await EnterpriseDatabaseTestUtils.simulateTransaction(
-          DatabaseOperationType.CREATE, 1, 'MEDIUM'
-        );
+        const simulation =
+          await EnterpriseDatabaseTestUtils.simulateTransaction(
+            DatabaseOperationType.CREATE,
+            1,
+            'MEDIUM',
+          );
 
         if (!simulation.success) {
           throw new Error('Simulated database failure');
@@ -642,7 +733,7 @@ describe('Enterprise Conversational Database Validation', () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           version: 1,
-          ...entity
+          ...entity,
         } as TestDatabaseEntity;
       });
 
@@ -667,12 +758,16 @@ describe('Enterprise Conversational Database Validation', () => {
             operationType: DatabaseOperationType.CREATE,
             riskLevel: DatabaseRiskLevel.MEDIUM,
             requiresApproval: true,
-            requiresBackup: true
+            requiresBackup: true,
           } as DatabaseTransactionTestConfig);
 
           const start = Date.now();
           try {
-            const result = await conversationalDbService.create(mockRepository, entity, context);
+            const result = await conversationalDbService.create(
+              mockRepository,
+              entity,
+              context,
+            );
             const duration = Date.now() - start;
             performanceTimes.push(duration);
 
@@ -680,7 +775,10 @@ describe('Enterprise Conversational Database Validation', () => {
               successfulOperations++;
 
               // Validate data integrity
-              if (result.name !== entity.name || result.email !== entity.email) {
+              if (
+                result.name !== entity.name ||
+                result.email !== entity.email
+              ) {
                 integrityViolations++;
               }
             }
@@ -703,11 +801,13 @@ describe('Enterprise Conversational Database Validation', () => {
         await Promise.all(batchPromises);
 
         // Small delay between batches to simulate realistic load
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
       // Calculate metrics
-      const avgPerformanceTime = performanceTimes.reduce((sum, time) => sum + time, 0) / performanceTimes.length;
+      const avgPerformanceTime =
+        performanceTimes.reduce((sum, time) => sum + time, 0) /
+        performanceTimes.length;
 
       const dataIntegrityMetrics: DataIntegrityMetrics = {
         testName: 'ACID Compliance Test',
@@ -716,13 +816,21 @@ describe('Enterprise Conversational Database Validation', () => {
         failedOperations,
         integrityViolations,
         rollbacksExecuted,
-        dataConsistencyScore: ((successfulOperations - integrityViolations) / successfulOperations) * 100,
-        acidComplianceScore: ((testOperationCount - integrityViolations) / testOperationCount) * 100,
+        dataConsistencyScore:
+          ((successfulOperations - integrityViolations) /
+            successfulOperations) *
+          100,
+        acidComplianceScore:
+          ((testOperationCount - integrityViolations) / testOperationCount) *
+          100,
         auditTrailCompleteness: 100, // Assuming perfect audit trail
-        performanceOverhead: avgPerformanceTime
+        performanceOverhead: avgPerformanceTime,
       };
 
-      const validation = EnterpriseDatabaseTestUtils.validateDataIntegrityMetrics(dataIntegrityMetrics);
+      const validation =
+        EnterpriseDatabaseTestUtils.validateDataIntegrityMetrics(
+          dataIntegrityMetrics,
+        );
 
       logger.log(`ACID Compliance Results:
         Total Operations: ${dataIntegrityMetrics.totalOperations}
@@ -745,23 +853,28 @@ describe('Enterprise Conversational Database Validation', () => {
       logger.log('Starting transaction rollback validation test');
 
       const rollbackTestCount = 20;
-      const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(rollbackTestCount);
+      const testEntities =
+        EnterpriseDatabaseTestUtils.generateTestEntities(rollbackTestCount);
 
       // Mock Parlant service to reject specific operations
       let operationCount = 0;
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation(() => {
-        operationCount++;
-        const shouldReject = operationCount % 5 === 0; // Reject every 5th operation
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockImplementation(() => {
+          operationCount++;
+          const shouldReject = operationCount % 5 === 0; // Reject every 5th operation
 
-        return {
-          approved: !shouldReject,
-          conversationId: `conv-rollback-${operationCount}`,
-          reasoning: shouldReject ? 'Operation rejected for rollback testing' : 'Operation approved',
-          confidence: 0.9,
-          validationTimestamp: new Date(),
-          riskLevel: 'MEDIUM' as RiskLevelType
-        };
-      });
+          return {
+            approved: !shouldReject,
+            conversationId: `conv-rollback-${operationCount}`,
+            reasoning: shouldReject
+              ? 'Operation rejected for rollback testing'
+              : 'Operation approved',
+            confidence: 0.9,
+            validationTimestamp: new Date(),
+            riskLevel: 'MEDIUM' as RiskLevelType,
+          };
+        });
 
       let successfulOperations = 0;
       let rollbackOperations = 0;
@@ -774,11 +887,15 @@ describe('Enterprise Conversational Database Validation', () => {
           operationType: DatabaseOperationType.CREATE,
           riskLevel: DatabaseRiskLevel.MEDIUM,
           requiresApproval: true,
-          requiresBackup: true
+          requiresBackup: true,
         } as DatabaseTransactionTestConfig);
 
         try {
-          const result = await conversationalDbService.create(mockRepository, entity, context);
+          const result = await conversationalDbService.create(
+            mockRepository,
+            entity,
+            context,
+          );
 
           if (result) {
             successfulOperations++;
@@ -822,26 +939,33 @@ describe('Enterprise Conversational Database Validation', () => {
 
       const highLoadTestCount = 500;
       const concurrentBatchSize = 50;
-      const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(highLoadTestCount);
+      const testEntities =
+        EnterpriseDatabaseTestUtils.generateTestEntities(highLoadTestCount);
 
       // Mock Parlant service with realistic response times
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation(async () => {
-        // Simulate realistic Parlant validation time
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 20 + 10));
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockImplementation(async () => {
+          // Simulate realistic Parlant validation time
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.random() * 20 + 10),
+          );
 
-        return {
-          approved: true,
-          conversationId: `conv-perf-${Date.now()}`,
-          reasoning: 'High-load test operation approved',
-          confidence: 0.95,
-          validationTimestamp: new Date(),
-          riskLevel: 'LOW' as RiskLevelType
-        };
-      });
+          return {
+            approved: true,
+            conversationId: `conv-perf-${Date.now()}`,
+            reasoning: 'High-load test operation approved',
+            confidence: 0.95,
+            validationTimestamp: new Date(),
+            riskLevel: 'LOW' as RiskLevelType,
+          };
+        });
 
       // Mock repository with performance simulation
       mockRepository.findById.mockImplementation(async (id) => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 5 + 2));
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.random() * 5 + 2),
+        );
 
         return {
           id,
@@ -850,7 +974,7 @@ describe('Enterprise Conversational Database Validation', () => {
           version: 1,
           name: 'Performance Test Entity',
           email: 'perf@test.com',
-          status: 'active'
+          status: 'active',
         } as TestDatabaseEntity;
       });
 
@@ -863,23 +987,33 @@ describe('Enterprise Conversational Database Validation', () => {
 
       for (let batchIndex = 0; batchIndex < batchCount; batchIndex++) {
         const batchStart = batchIndex * concurrentBatchSize;
-        const batchEnd = Math.min(batchStart + concurrentBatchSize, highLoadTestCount);
+        const batchEnd = Math.min(
+          batchStart + concurrentBatchSize,
+          highLoadTestCount,
+        );
         const batchEntities = testEntities.slice(batchStart, batchEnd);
 
         const batchPromises = batchEntities.map(async (entity, index) => {
           const entityId = `perf-entity-${batchStart + index}`;
-          const context = EnterpriseDatabaseTestUtils.createOperationContext({
-            name: 'Performance Test',
-            operationType: DatabaseOperationType.FIND_BY_ID,
-            riskLevel: DatabaseRiskLevel.LOW,
-            requiresApproval: false,
-            requiresBackup: false
-          } as DatabaseTransactionTestConfig, entityId);
+          const context = EnterpriseDatabaseTestUtils.createOperationContext(
+            {
+              name: 'Performance Test',
+              operationType: DatabaseOperationType.FIND_BY_ID,
+              riskLevel: DatabaseRiskLevel.LOW,
+              requiresApproval: false,
+              requiresBackup: false,
+            } as DatabaseTransactionTestConfig,
+            entityId,
+          );
 
           const operationStart = Date.now();
 
           try {
-            const result = await conversationalDbService.findById(mockRepository, entityId, context);
+            const result = await conversationalDbService.findById(
+              mockRepository,
+              entityId,
+              context,
+            );
             const operationTime = Date.now() - operationStart;
 
             operationTimes.push(operationTime);
@@ -898,15 +1032,21 @@ describe('Enterprise Conversational Database Validation', () => {
 
         // Log progress
         if ((batchIndex + 1) % 5 === 0) {
-          logger.log(`Completed batch ${batchIndex + 1}/${batchCount} (${totalOperations} operations)`);
+          logger.log(
+            `Completed batch ${batchIndex + 1}/${batchCount} (${totalOperations} operations)`,
+          );
         }
       }
 
       // Calculate performance metrics
       const sortedTimes = operationTimes.sort((a, b) => a - b);
-      const avgOperationTime = operationTimes.reduce((sum, time) => sum + time, 0) / operationTimes.length;
-      const p95OperationTime = sortedTimes[Math.floor(sortedTimes.length * 0.95)] || 0;
-      const p99OperationTime = sortedTimes[Math.floor(sortedTimes.length * 0.99)] || 0;
+      const avgOperationTime =
+        operationTimes.reduce((sum, time) => sum + time, 0) /
+        operationTimes.length;
+      const p95OperationTime =
+        sortedTimes[Math.floor(sortedTimes.length * 0.95)] || 0;
+      const p99OperationTime =
+        sortedTimes[Math.floor(sortedTimes.length * 0.99)] || 0;
       const maxOperationTime = Math.max(...operationTimes);
 
       const performanceMetrics = {
@@ -915,8 +1055,10 @@ describe('Enterprise Conversational Database Validation', () => {
         p95OperationTime,
         p99OperationTime,
         maxOperationTime,
-        throughput: (totalOperations / (operationTimes.reduce((sum, time) => sum + time, 0) / 1000)),
-        successRate: (totalOperations / highLoadTestCount) * 100
+        throughput:
+          totalOperations /
+          (operationTimes.reduce((sum, time) => sum + time, 0) / 1000),
+        successRate: (totalOperations / highLoadTestCount) * 100,
       };
 
       logger.log(`High-Load Performance Results:
@@ -942,34 +1084,44 @@ describe('Enterprise Conversational Database Validation', () => {
     it('should generate complete audit trails for all database operations', async () => {
       logger.log('Starting comprehensive audit trail validation test');
 
-      const auditTestConfigs = EnterpriseDatabaseTestUtils.generateDatabaseTestConfigs().slice(0, 3);
-      const testResults: Array<{ config: DatabaseTransactionTestConfig; auditData: any }> = [];
+      const auditTestConfigs =
+        EnterpriseDatabaseTestUtils.generateDatabaseTestConfigs().slice(0, 3);
+      const testResults: Array<{
+        config: DatabaseTransactionTestConfig;
+        auditData: any;
+      }> = [];
 
       // Mock Parlant service with detailed audit information
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation((request: { functionName?: string; operationId?: string }) => {
-        return {
-          approved: true,
-          conversationId: `conv-audit-${Date.now()}`,
-          reasoning: `Audit test operation approved for ${request.functionName}`,
-          confidence: 0.95,
-          validationTimestamp: new Date(),
-          riskLevel: 'MEDIUM' as RiskLevelType,
-          auditTrail: {
-            operationId: request.operationId ?? 'unknown-operation',
-            userId: 'audit-test-user',
-            timestamp: new Date(),
-            decision: 'APPROVED',
-            businessPurpose: 'Audit trail validation testing',
-            riskAssessment: 'Medium risk operation with full audit requirements'
-          }
-        };
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockImplementation(
+          (request: { functionName?: string; operationId?: string }) => {
+            return {
+              approved: true,
+              conversationId: `conv-audit-${Date.now()}`,
+              reasoning: `Audit test operation approved for ${request.functionName}`,
+              confidence: 0.95,
+              validationTimestamp: new Date(),
+              riskLevel: 'MEDIUM' as RiskLevelType,
+              auditTrail: {
+                operationId: request.operationId ?? 'unknown-operation',
+                userId: 'audit-test-user',
+                timestamp: new Date(),
+                decision: 'APPROVED',
+                businessPurpose: 'Audit trail validation testing',
+                riskAssessment:
+                  'Medium risk operation with full audit requirements',
+              },
+            };
+          },
+        );
 
       // Test each operation type
       for (const config of auditTestConfigs) {
         logger.log(`Testing audit trail for ${config.name}`);
 
-        const testEntities = EnterpriseDatabaseTestUtils.generateTestEntities(10);
+        const testEntities =
+          EnterpriseDatabaseTestUtils.generateTestEntities(10);
         const auditEntries: any[] = [];
 
         // Mock repository based on operation type
@@ -980,7 +1132,7 @@ describe('Enterprise Conversational Database Validation', () => {
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
               version: 1,
-              ...entity
+              ...entity,
             } as TestDatabaseEntity);
           });
         } else if (config.operationType === DatabaseOperationType.CREATE) {
@@ -990,7 +1142,7 @@ describe('Enterprise Conversational Database Validation', () => {
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
               version: 1,
-              ...entity
+              ...entity,
             } as TestDatabaseEntity);
           });
         }
@@ -998,13 +1150,24 @@ describe('Enterprise Conversational Database Validation', () => {
         // Execute operations and collect audit data
         for (let i = 0; i < testEntities.length; i++) {
           const entity = testEntities[i]!;
-          const context = EnterpriseDatabaseTestUtils.createOperationContext(config, `audit-entity-${i}`);
+          const context = EnterpriseDatabaseTestUtils.createOperationContext(
+            config,
+            `audit-entity-${i}`,
+          );
 
           let result;
           if (config.operationType === DatabaseOperationType.FIND_BY_ID) {
-            result = await conversationalDbService.findById(mockRepository, `audit-entity-${i}`, context);
+            result = await conversationalDbService.findById(
+              mockRepository,
+              `audit-entity-${i}`,
+              context,
+            );
           } else if (config.operationType === DatabaseOperationType.CREATE) {
-            result = await conversationalDbService.create(mockRepository, entity, context);
+            result = await conversationalDbService.create(
+              mockRepository,
+              entity,
+              context,
+            );
           }
 
           // Collect audit information
@@ -1015,7 +1178,7 @@ describe('Enterprise Conversational Database Validation', () => {
             userId: context.userId,
             businessPurpose: context.businessPurpose,
             result: result ? 'SUCCESS' : 'FAILURE',
-            conversationalValidation: true
+            conversationalValidation: true,
           };
 
           auditEntries.push(auditEntry);
@@ -1026,8 +1189,8 @@ describe('Enterprise Conversational Database Validation', () => {
           auditData: {
             totalEntries: auditEntries.length,
             completeness: 100, // All operations should have audit entries
-            entries: auditEntries
-          }
+            entries: auditEntries,
+          },
         });
       }
 
@@ -1037,11 +1200,19 @@ describe('Enterprise Conversational Database Validation', () => {
       let auditCompleteness = 0;
 
       for (const result of testResults) {
-        totalOperations += (result.auditData as { totalEntries: number; completeness: number }).totalEntries;
-        totalAuditEntries += (result.auditData as { totalEntries: number; completeness: number }).totalEntries;
-        auditCompleteness += (result.auditData as { totalEntries: number; completeness: number }).completeness;
+        totalOperations += (
+          result.auditData as { totalEntries: number; completeness: number }
+        ).totalEntries;
+        totalAuditEntries += (
+          result.auditData as { totalEntries: number; completeness: number }
+        ).totalEntries;
+        auditCompleteness += (
+          result.auditData as { totalEntries: number; completeness: number }
+        ).completeness;
 
-        logger.log(`${result.config.name}: ${(result.auditData as { totalEntries: number; completeness: number }).totalEntries} audit entries (${(result.auditData as { totalEntries: number; completeness: number }).completeness}% complete)`);
+        logger.log(
+          `${result.config.name}: ${(result.auditData as { totalEntries: number; completeness: number }).totalEntries} audit entries (${(result.auditData as { totalEntries: number; completeness: number }).completeness}% complete)`,
+        );
       }
 
       const avgAuditCompleteness = auditCompleteness / testResults.length;
@@ -1058,7 +1229,9 @@ describe('Enterprise Conversational Database Validation', () => {
 
       expect(totalAuditEntries).toBe(totalOperations);
       expect(avgAuditCompleteness).toBe(100);
-      expect(parlantService.validateFunctionExecution).toHaveBeenCalledTimes(totalOperations);
+      expect(parlantService.validateFunctionExecution).toHaveBeenCalledTimes(
+        totalOperations,
+      );
     }, 90000);
   });
 });

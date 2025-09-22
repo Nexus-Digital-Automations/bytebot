@@ -27,16 +27,25 @@ import {
   CallHandler,
   HttpException,
   HttpStatus,
-  Logger
+  Logger,
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap, timeout, retry, retryWhen, delay, take, concatMap } from 'rxjs/operators';
+import {
+  catchError,
+  tap,
+  timeout,
+  retry,
+  retryWhen,
+  delay,
+  take,
+  concatMap,
+} from 'rxjs/operators';
 import { Request, Response } from 'express';
 import {
   BrowserUseErrorClassificationService,
   BrowserUseError,
   BrowserUseErrorCategory,
-  BrowserUseRecoveryAction
+  BrowserUseRecoveryAction,
 } from './browser-use-error-classification.service';
 import { ErrorSeverity } from '../../common/error-handling/automation-error-handler.service';
 
@@ -104,7 +113,7 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
   private readonly MAX_RETRY_ATTEMPTS = 3;
 
   constructor(
-    private readonly browserUseErrorClassification: BrowserUseErrorClassificationService
+    private readonly browserUseErrorClassification: BrowserUseErrorClassificationService,
   ) {
     this.logger.log('Browser-Use Error Interceptor initialized');
   }
@@ -124,7 +133,7 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       url: request.url,
       operation: operationContext.operation,
       sessionId: operationContext.sessionId,
-      taskId: operationContext.taskId
+      taskId: operationContext.taskId,
     });
 
     // Check circuit breaker state
@@ -133,10 +142,13 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       this.logger.warn(`[${operationId}] Circuit breaker open for operation`, {
         operationId,
         circuitBreakerKey,
-        operation: operationContext.operation
+        operation: operationContext.operation,
       });
 
-      const errorResponse = this.createCircuitBreakerErrorResponse(operationId, operationContext);
+      const errorResponse = this.createCircuitBreakerErrorResponse(
+        operationId,
+        operationContext,
+      );
       throw new HttpException(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
@@ -145,7 +157,7 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       timeout(this.REQUEST_TIMEOUT_MS),
 
       // Implement retry logic with exponential backoff
-      retryWhen(errors =>
+      retryWhen((errors) =>
         errors.pipe(
           concatMap((error, attempt) =>
             this.shouldRetry(error, attempt, operationContext)
@@ -155,41 +167,44 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
                       operationId,
                       attempt: attempt + 1,
                       error: error.message,
-                      operation: operationContext.operation
+                      operation: operationContext.operation,
                     });
-                  })
+                  }),
                 )
-              : throwError(error)
+              : throwError(error),
           ),
-          take(this.MAX_RETRY_ATTEMPTS)
-        )
+          take(this.MAX_RETRY_ATTEMPTS),
+        ),
       ),
 
       // Log successful responses
-      tap(data => {
+      tap((data) => {
         const duration = Date.now() - startTime;
-        this.logger.debug(`[${operationId}] Browser-Use API request completed successfully`, {
-          operationId,
-          duration,
-          operation: operationContext.operation,
-          sessionId: operationContext.sessionId
-        });
+        this.logger.debug(
+          `[${operationId}] Browser-Use API request completed successfully`,
+          {
+            operationId,
+            duration,
+            operation: operationContext.operation,
+            sessionId: operationContext.sessionId,
+          },
+        );
 
         // Reset circuit breaker on success
         this.recordCircuitBreakerSuccess(circuitBreakerKey);
       }),
 
       // Handle errors
-      catchError(error => {
+      catchError((error) => {
         return this.handleBrowserUseError(
           error,
           operationId,
           operationContext,
           request,
           response,
-          startTime
+          startTime,
         );
-      })
+      }),
     );
   }
 
@@ -199,7 +214,7 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
     operationContext: any,
     request: Request,
     response: Response,
-    startTime: number
+    startTime: number,
   ): Promise<Observable<never>> {
     const duration = Date.now() - startTime;
 
@@ -208,29 +223,31 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       error: error.message,
       operation: operationContext.operation,
       sessionId: operationContext.sessionId,
-      duration
+      duration,
     });
 
     try {
       // Classify the browser-use error
-      const browserUseError = await this.browserUseErrorClassification.classifyBrowserUseError(
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          ...operationContext,
-          requestId: operationId,
-          ipAddress: request.ip,
-          userAgent: request.headers['user-agent'],
-          endpoint: request.url,
-          method: request.method
-        }
-      );
+      const browserUseError =
+        await this.browserUseErrorClassification.classifyBrowserUseError(
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            ...operationContext,
+            requestId: operationId,
+            ipAddress: request.ip,
+            userAgent: request.headers['user-agent'],
+            endpoint: request.url,
+            method: request.method,
+          },
+        );
 
       // Record circuit breaker failure
       const circuitBreakerKey = `${operationContext.operation}:${operationContext.sessionId}`;
       this.recordCircuitBreakerFailure(circuitBreakerKey);
 
       // Get recovery recommendations
-      const recoveryAction = this.browserUseErrorClassification.getRecoveryAction(browserUseError);
+      const recoveryAction =
+        this.browserUseErrorClassification.getRecoveryAction(browserUseError);
 
       // Create standardized error response
       const errorResponse = this.createStandardizedErrorResponse(
@@ -238,7 +255,7 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
         operationId,
         operationContext,
         recoveryAction,
-        duration
+        duration,
       );
 
       // Set appropriate HTTP status code
@@ -250,8 +267,14 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       }
 
       // Add retry headers for retryable errors
-      if (recoveryAction.strategy === 'retry' || recoveryAction.strategy === 'retry_with_backoff') {
-        response.setHeader('Retry-After', Math.ceil((recoveryAction.backoffMs || 1000) / 1000));
+      if (
+        recoveryAction.strategy === 'retry' ||
+        recoveryAction.strategy === 'retry_with_backoff'
+      ) {
+        response.setHeader(
+          'Retry-After',
+          Math.ceil((recoveryAction.backoffMs || 1000) / 1000),
+        );
       }
 
       this.logger.error(`[${operationId}] Browser-Use API error handled`, {
@@ -261,17 +284,19 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
         severity: browserUseError.severity,
         httpStatus,
         recoveryStrategy: recoveryAction.strategy,
-        duration
+        duration,
       });
 
       throw new HttpException(errorResponse, httpStatus);
-
     } catch (handlingError) {
       this.logger.error(`[${operationId}] Error handling failed`, {
         operationId,
         originalError: error.message,
-        handlingError: handlingError instanceof Error ? handlingError.message : String(handlingError),
-        duration
+        handlingError:
+          handlingError instanceof Error
+            ? handlingError.message
+            : String(handlingError),
+        duration,
       });
 
       // Fallback error response
@@ -283,24 +308,32 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
           category: 'technical',
           severity: 'high',
           message: 'An unexpected error occurred during browser automation',
-          userMessage: 'The browser automation operation failed. Please try again later.',
+          userMessage:
+            'The browser automation operation failed. Please try again later.',
           details: { originalError: error.message },
           timestamp: new Date().toISOString(),
-          traceId: operationId
+          traceId: operationId,
         },
         context: operationContext,
         recovery: {
           attempted: false,
           retryable: true,
-          recommendations: ['Check system status', 'Retry the operation', 'Contact support if problem persists']
+          recommendations: [
+            'Check system status',
+            'Retry the operation',
+            'Contact support if problem persists',
+          ],
         },
         support: {
           documentationUrl: '/docs/api/browser-use',
-          contactInfo: 'support@bytebot.com'
-        }
+          contactInfo: 'support@bytebot.com',
+        },
       };
 
-      throw new HttpException(fallbackResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        fallbackResponse,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -332,7 +365,7 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       sessionId: params.sessionId || body.sessionId || query.sessionId,
       taskId: body.taskId || query.taskId || request.headers['x-task-id'],
       pageUrl: body.url || body.pageUrl || query.url,
-      selector: body.selector || query.selector
+      selector: body.selector || query.selector,
     };
   }
 
@@ -341,7 +374,7 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
     operationId: string,
     operationContext: any,
     recoveryAction: BrowserUseRecoveryAction,
-    duration: number
+    duration: number,
   ): BrowserUseErrorResponse {
     return {
       success: false,
@@ -354,13 +387,16 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
         userMessage: this.getUserFriendlyMessage(browserUseError),
         details: {
           originalError: browserUseError.originalError?.message,
-          stackTrace: process.env.NODE_ENV === 'development' ? browserUseError.stackTrace : undefined,
+          stackTrace:
+            process.env.NODE_ENV === 'development'
+              ? browserUseError.stackTrace
+              : undefined,
           performanceMetrics: browserUseError.performanceMetrics,
           browserInfo: browserUseError.browserInfo,
-          duration
+          duration,
         },
         timestamp: browserUseError.timestamp.toISOString(),
-        traceId: operationId
+        traceId: operationId,
       },
       context: {
         sessionId: operationContext.sessionId,
@@ -368,27 +404,40 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
         operation: operationContext.operation,
         pageUrl: browserUseError.pageUrl,
         retryAttempt: browserUseError.recoveryAttempts,
-        maxRetries: browserUseError.maxRecoveryAttempts
+        maxRetries: browserUseError.maxRecoveryAttempts,
       },
       recovery: {
         attempted: (browserUseError.recoveryAttempts || 0) > 0,
         strategy: recoveryAction.strategy,
         retryable: recoveryAction.maxRetries > 0,
         retryAfterMs: recoveryAction.backoffMs,
-        recommendations: this.getRecoveryRecommendations(browserUseError, recoveryAction)
+        recommendations: this.getRecoveryRecommendations(
+          browserUseError,
+          recoveryAction,
+        ),
       },
       support: {
-        documentationUrl: this.getDocumentationUrl(browserUseError.browserUseCategory),
+        documentationUrl: this.getDocumentationUrl(
+          browserUseError.browserUseCategory,
+        ),
         contactInfo: 'support@bytebot.com',
-        debugInfo: process.env.NODE_ENV === 'development' ? {
-          sessionErrorCount: browserUseError.recoveryAttempts,
-          circuitBreakerState: this.getCircuitBreakerState(`${operationContext.operation}:${operationContext.sessionId}`)
-        } : undefined
-      }
+        debugInfo:
+          process.env.NODE_ENV === 'development'
+            ? {
+                sessionErrorCount: browserUseError.recoveryAttempts,
+                circuitBreakerState: this.getCircuitBreakerState(
+                  `${operationContext.operation}:${operationContext.sessionId}`,
+                ),
+              }
+            : undefined,
+      },
     };
   }
 
-  private createCircuitBreakerErrorResponse(operationId: string, operationContext: any): BrowserUseErrorResponse {
+  private createCircuitBreakerErrorResponse(
+    operationId: string,
+    operationContext: any,
+  ): BrowserUseErrorResponse {
     return {
       success: false,
       error: {
@@ -397,13 +446,14 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
         category: 'resource_exhaustion',
         severity: 'high',
         message: 'Circuit breaker is open due to repeated failures',
-        userMessage: 'The service is temporarily unavailable due to repeated errors. Please try again later.',
+        userMessage:
+          'The service is temporarily unavailable due to repeated errors. Please try again later.',
         details: {
           circuitBreakerState: 'open',
-          reason: 'Too many consecutive failures'
+          reason: 'Too many consecutive failures',
         },
         timestamp: new Date().toISOString(),
-        traceId: operationId
+        traceId: operationId,
       },
       context: operationContext,
       recovery: {
@@ -413,17 +463,21 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
         recommendations: [
           'Wait for the circuit breaker to reset',
           'Check system health status',
-          'Try a different session if available'
-        ]
+          'Try a different session if available',
+        ],
       },
       support: {
         documentationUrl: '/docs/api/circuit-breaker',
-        contactInfo: 'support@bytebot.com'
-      }
+        contactInfo: 'support@bytebot.com',
+      },
     };
   }
 
-  private shouldRetry(error: any, attempt: number, operationContext: any): boolean {
+  private shouldRetry(
+    error: any,
+    attempt: number,
+    operationContext: any,
+  ): boolean {
     if (attempt >= this.MAX_RETRY_ATTEMPTS) return false;
 
     // Don't retry if circuit breaker is open
@@ -435,17 +489,19 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       'TimeoutError',
       'NetworkError',
       'ConnectionError',
-      'TemporaryFailure'
+      'TemporaryFailure',
     ];
 
     const errorType = error.constructor.name;
     const errorMessage = error.message?.toLowerCase() || '';
 
-    return retryableErrors.includes(errorType) ||
-           errorMessage.includes('timeout') ||
-           errorMessage.includes('network') ||
-           errorMessage.includes('connection') ||
-           errorMessage.includes('temporary');
+    return (
+      retryableErrors.includes(errorType) ||
+      errorMessage.includes('timeout') ||
+      errorMessage.includes('network') ||
+      errorMessage.includes('connection') ||
+      errorMessage.includes('temporary')
+    );
   }
 
   private calculateRetryDelay(attempt: number): number {
@@ -461,7 +517,10 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
     if (!state) return false;
 
     if (state.state === 'open') {
-      if (state.nextAttemptTime && Date.now() > state.nextAttemptTime.getTime()) {
+      if (
+        state.nextAttemptTime &&
+        Date.now() > state.nextAttemptTime.getTime()
+      ) {
         // Transition to half-open
         state.state = 'half-open';
         this.logger.debug(`Circuit breaker transitioning to half-open: ${key}`);
@@ -477,7 +536,7 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
     const state = this.circuitBreakers.get(key) || {
       failures: 0,
       lastFailureTime: new Date(),
-      state: 'closed' as const
+      state: 'closed' as const,
     };
 
     state.failures += 1;
@@ -485,10 +544,12 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
 
     if (state.failures >= this.CIRCUIT_BREAKER_THRESHOLD) {
       state.state = 'open';
-      state.nextAttemptTime = new Date(Date.now() + this.CIRCUIT_BREAKER_TIMEOUT_MS);
+      state.nextAttemptTime = new Date(
+        Date.now() + this.CIRCUIT_BREAKER_TIMEOUT_MS,
+      );
       this.logger.warn(`Circuit breaker opened: ${key}`, {
         failures: state.failures,
-        nextAttemptTime: state.nextAttemptTime
+        nextAttemptTime: state.nextAttemptTime,
       });
     }
 
@@ -539,21 +600,30 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       BrowserUseErrorCategory.BOT_DETECTION,
       BrowserUseErrorCategory.CAPTCHA_DETECTED,
       BrowserUseErrorCategory.AUTHENTICATION_REQUIRED,
-      BrowserUseErrorCategory.SECURITY_CHALLENGE
+      BrowserUseErrorCategory.SECURITY_CHALLENGE,
     ];
 
     return securityCategories.includes(browserUseError.browserUseCategory);
   }
 
-  private addSecurityHeaders(response: Response, browserUseError: BrowserUseError): void {
+  private addSecurityHeaders(
+    response: Response,
+    browserUseError: BrowserUseError,
+  ): void {
     response.setHeader('X-Content-Type-Options', 'nosniff');
     response.setHeader('X-Frame-Options', 'DENY');
     response.setHeader('X-XSS-Protection', '1; mode=block');
 
-    if (browserUseError.browserUseCategory === BrowserUseErrorCategory.BOT_DETECTION) {
+    if (
+      browserUseError.browserUseCategory ===
+      BrowserUseErrorCategory.BOT_DETECTION
+    ) {
       response.setHeader('X-RateLimit-Limit', '10');
       response.setHeader('X-RateLimit-Remaining', '0');
-      response.setHeader('X-RateLimit-Reset', String(Math.ceil(Date.now() / 1000) + 3600));
+      response.setHeader(
+        'X-RateLimit-Reset',
+        String(Math.ceil(Date.now() / 1000) + 3600),
+      );
     }
   }
 
@@ -567,11 +637,13 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
       [BrowserUseErrorCategory.NAVIGATION_FAILED]: 'NAVIGATION_FAILED',
       [BrowserUseErrorCategory.PAGE_LOAD_TIMEOUT]: 'PAGE_LOAD_TIMEOUT',
       [BrowserUseErrorCategory.ELEMENT_NOT_FOUND]: 'ELEMENT_NOT_FOUND',
-      [BrowserUseErrorCategory.ELEMENT_NOT_INTERACTABLE]: 'ELEMENT_NOT_INTERACTABLE',
+      [BrowserUseErrorCategory.ELEMENT_NOT_INTERACTABLE]:
+        'ELEMENT_NOT_INTERACTABLE',
       [BrowserUseErrorCategory.BOT_DETECTION]: 'BOT_DETECTION',
       [BrowserUseErrorCategory.RATE_LIMIT_DETECTED]: 'RATE_LIMIT_DETECTED',
       [BrowserUseErrorCategory.MEMORY_EXHAUSTED]: 'MEMORY_EXHAUSTED',
-      [BrowserUseErrorCategory.TASK_EXECUTION_TIMEOUT]: 'TASK_EXECUTION_TIMEOUT'
+      [BrowserUseErrorCategory.TASK_EXECUTION_TIMEOUT]:
+        'TASK_EXECUTION_TIMEOUT',
     };
 
     return errorCodes[category] || 'UNKNOWN_ERROR';
@@ -579,23 +651,35 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
 
   private getUserFriendlyMessage(browserUseError: BrowserUseError): string {
     const userMessages = {
-      [BrowserUseErrorCategory.BROWSER_LAUNCH_FAILED]: 'Failed to start the browser. Please try again.',
-      [BrowserUseErrorCategory.BROWSER_CRASH]: 'The browser crashed unexpectedly. A new session will be created.',
-      [BrowserUseErrorCategory.SESSION_EXPIRED]: 'Your browser session has expired. Please start a new session.',
-      [BrowserUseErrorCategory.NAVIGATION_FAILED]: 'Unable to navigate to the requested page. Please check the URL.',
-      [BrowserUseErrorCategory.PAGE_LOAD_TIMEOUT]: 'The page took too long to load. Please try again.',
-      [BrowserUseErrorCategory.ELEMENT_NOT_FOUND]: 'The requested element was not found on the page.',
-      [BrowserUseErrorCategory.BOT_DETECTION]: 'The website detected automated activity. Manual verification may be required.',
-      [BrowserUseErrorCategory.RATE_LIMIT_DETECTED]: 'Rate limit exceeded. Please wait before making more requests.',
-      [BrowserUseErrorCategory.MEMORY_EXHAUSTED]: 'System resources are exhausted. Please try again later.'
+      [BrowserUseErrorCategory.BROWSER_LAUNCH_FAILED]:
+        'Failed to start the browser. Please try again.',
+      [BrowserUseErrorCategory.BROWSER_CRASH]:
+        'The browser crashed unexpectedly. A new session will be created.',
+      [BrowserUseErrorCategory.SESSION_EXPIRED]:
+        'Your browser session has expired. Please start a new session.',
+      [BrowserUseErrorCategory.NAVIGATION_FAILED]:
+        'Unable to navigate to the requested page. Please check the URL.',
+      [BrowserUseErrorCategory.PAGE_LOAD_TIMEOUT]:
+        'The page took too long to load. Please try again.',
+      [BrowserUseErrorCategory.ELEMENT_NOT_FOUND]:
+        'The requested element was not found on the page.',
+      [BrowserUseErrorCategory.BOT_DETECTION]:
+        'The website detected automated activity. Manual verification may be required.',
+      [BrowserUseErrorCategory.RATE_LIMIT_DETECTED]:
+        'Rate limit exceeded. Please wait before making more requests.',
+      [BrowserUseErrorCategory.MEMORY_EXHAUSTED]:
+        'System resources are exhausted. Please try again later.',
     };
 
-    return userMessages[browserUseError.browserUseCategory] || 'An error occurred during browser automation.';
+    return (
+      userMessages[browserUseError.browserUseCategory] ||
+      'An error occurred during browser automation.'
+    );
   }
 
   private getRecoveryRecommendations(
     browserUseError: BrowserUseError,
-    recoveryAction: BrowserUseRecoveryAction
+    recoveryAction: BrowserUseRecoveryAction,
   ): string[] {
     const recommendations: string[] = [];
 
@@ -635,17 +719,25 @@ export class BrowserUseErrorInterceptor implements NestInterceptor {
         break;
     }
 
-    return recommendations.length > 0 ? recommendations : ['Check system status and retry'];
+    return recommendations.length > 0
+      ? recommendations
+      : ['Check system status and retry'];
   }
 
   private getDocumentationUrl(category: BrowserUseErrorCategory): string {
     const docUrls = {
-      [BrowserUseErrorCategory.BROWSER_LAUNCH_FAILED]: '/docs/api/browser-use/browser-management',
-      [BrowserUseErrorCategory.SESSION_CREATE_FAILED]: '/docs/api/browser-use/session-management',
-      [BrowserUseErrorCategory.NAVIGATION_FAILED]: '/docs/api/browser-use/navigation',
-      [BrowserUseErrorCategory.ELEMENT_NOT_FOUND]: '/docs/api/browser-use/element-interaction',
-      [BrowserUseErrorCategory.BOT_DETECTION]: '/docs/api/browser-use/anti-detection',
-      [BrowserUseErrorCategory.RATE_LIMIT_DETECTED]: '/docs/api/browser-use/rate-limiting'
+      [BrowserUseErrorCategory.BROWSER_LAUNCH_FAILED]:
+        '/docs/api/browser-use/browser-management',
+      [BrowserUseErrorCategory.SESSION_CREATE_FAILED]:
+        '/docs/api/browser-use/session-management',
+      [BrowserUseErrorCategory.NAVIGATION_FAILED]:
+        '/docs/api/browser-use/navigation',
+      [BrowserUseErrorCategory.ELEMENT_NOT_FOUND]:
+        '/docs/api/browser-use/element-interaction',
+      [BrowserUseErrorCategory.BOT_DETECTION]:
+        '/docs/api/browser-use/anti-detection',
+      [BrowserUseErrorCategory.RATE_LIMIT_DETECTED]:
+        '/docs/api/browser-use/rate-limiting',
     };
 
     return docUrls[category] || '/docs/api/browser-use';

@@ -91,11 +91,13 @@ export const BrowserAuth = () => {
     ApiBearerAuth(),
     ApiResponse({
       status: 401,
-      description: 'Unauthorized - Authentication required for browser automation',
+      description:
+        'Unauthorized - Authentication required for browser automation',
     }),
     ApiResponse({
       status: 403,
-      description: 'Forbidden - Insufficient permissions for browser automation',
+      description:
+        'Forbidden - Insufficient permissions for browser automation',
     }),
   );
 };
@@ -116,7 +118,8 @@ export const BrowserRoles = (...roles: UserRole[]) => {
     BrowserAuth(),
     ApiResponse({
       status: 403,
-      description: `Forbidden - Requires one of roles: ${roles.join(`, ')}',}),
+      description: `Forbidden - Requires one of roles: ${roles.join(', ')}`,
+    }),
   );
 };
 
@@ -139,16 +142,18 @@ export const BrowserPermissions = (...permissions: Permission[]) => {
 /**
  * Set security level for browser automation endpoint
  */
-export const BrowserSecurityLevel = (level: BrowserSecurityLevel) => {
+export const SetBrowserSecurityLevel = (level: BrowserSecurityLevel) => {
   return applyDecorators(
     SetMetadata(BROWSER_SECURITY_LEVEL_KEY, level),
     BrowserAuth(),
-    ApiSecurity('browser-automation-security'),);};
+    ApiSecurity('browser-automation-security'),
+  );
+};
 
 /**
  * Set risk level for browser automation operation
  */
-export const BrowserRiskLevel = (level: BrowserRiskLevel) => {
+export const SetBrowserRiskLevel = (level: BrowserRiskLevel) => {
   return applyDecorators(
     SetMetadata(BROWSER_RISK_LEVEL_KEY, level),
     BrowserAuth(),
@@ -164,7 +169,9 @@ export const BrowserSessionRequired = () => {
     BrowserAuth(),
     ApiResponse({
       status: 400,
-      description: 'Bad Request - Valid browser session required',}),);
+      description: 'Bad Request - Valid browser session required',
+    }),
+  );
 };
 
 // ===== RATE LIMITING DECORATORS =====
@@ -177,7 +184,21 @@ export const BrowserRateLimit = (config: RateLimitConfig) => {
     SetMetadata(BROWSER_RATE_LIMIT_KEY, config),
     ApiResponse({
       status: 429,
-      description: 'Too Many Requests - Rate limit exceeded',headers: {'X-RateLimit-Limit': {description: 'Request limit per window',schema: { type: 'integer' },},'X-RateLimit-Remaining': {description: 'Remaining requests in current window',schema: { type: 'integer' },},'X-RateLimit-Reset': {description: 'Time when rate limit resets',schema: { type: 'integer' },},},
+      description: 'Too Many Requests - Rate limit exceeded',
+      headers: {
+        'X-RateLimit-Limit': {
+          description: 'Request limit per window',
+          schema: { type: 'integer' },
+        },
+        'X-RateLimit-Remaining': {
+          description: 'Remaining requests in current window',
+          schema: { type: 'integer' },
+        },
+        'X-RateLimit-Reset': {
+          description: 'Time when rate limit resets',
+          schema: { type: 'integer' },
+        },
+      },
     }),
   );
 };
@@ -189,7 +210,9 @@ export const BrowserTaskRateLimit = () => {
   return BrowserRateLimit({
     windowMs: 60000, // 1 minute
     max: 10, // 10 tasks per minute
-    message: 'Too many browser tasks created',});};
+    message: 'Too many browser tasks created',
+  });
+};
 
 /**
  * Apply standard rate limiting for browser sessions
@@ -198,7 +221,9 @@ export const BrowserSessionRateLimit = () => {
   return BrowserRateLimit({
     windowMs: 300000, // 5 minutes
     max: 5, // 5 sessions per 5 minutes
-    message: 'Too many browser sessions created',});};
+    message: 'Too many browser sessions created',
+  });
+};
 
 /**
  * Apply strict rate limiting for high-risk operations
@@ -207,7 +232,9 @@ export const BrowserStrictRateLimit = () => {
   return BrowserRateLimit({
     windowMs: 300000, // 5 minutes
     max: 3, // 3 requests per 5 minutes
-    message: 'Rate limit exceeded for high-risk browser operation',});};
+    message: 'Rate limit exceeded for high-risk browser operation',
+  });
+};
 
 // ===== VALIDATION DECORATORS =====
 
@@ -228,9 +255,13 @@ export const BrowserValidation = (config?: SecurityValidationConfig) => {
     SetMetadata(BROWSER_VALIDATION_KEY, { ...defaultConfig, ...config }),
     ApiResponse({
       status: 400,
-      description: 'Bad Request - Input validation failed',}),ApiResponse({
+      description: 'Bad Request - Input validation failed',
+    }),
+    ApiResponse({
       status: 422,
-      description: 'Unprocessable Entity - Validation processing failed',}),);
+      description: 'Unprocessable Entity - Validation processing failed',
+    }),
+  );
 };
 
 /**
@@ -253,12 +284,19 @@ export const BrowserStrictValidation = () => {
  * Enable security audit logging
  */
 export const BrowserAuditLog = (options?: {
-  logLevel?: 'info' | 'warn' | 'error';includeRequestBody?: boolean;includeResponseBody?: boolean;
+  logLevel?: 'info' | 'warn' | 'error';
+  includeRequestBody?: boolean;
+  includeResponseBody?: boolean;
   sensitiveFields?: string[];
 }) => {
   const defaultOptions = {
-    logLevel: 'info' as const,includeRequestBody: true,includeResponseBody: false,
-    sensitiveFields: ['password', 'token', 'secret', 'key'],};return SetMetadata(BROWSER_AUDIT_LOG_KEY, { ...defaultOptions, ...options });
+    logLevel: 'info' as const,
+    includeRequestBody: true,
+    includeResponseBody: false,
+    sensitiveFields: ['password', 'token', 'secret', 'key'],
+  };
+
+  return SetMetadata(BROWSER_AUDIT_LOG_KEY, { ...defaultOptions, ...options });
 };
 
 // ===== COMBINED SECURITY DECORATORS =====
@@ -269,8 +307,8 @@ export const BrowserAuditLog = (options?: {
 export const BrowserBasicSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
-    BrowserSecurityLevel(BrowserSecurityLevel.LOW),
-    BrowserRiskLevel(BrowserRiskLevel.SAFE),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.LOW),
+    SetBrowserRiskLevel(BrowserRiskLevel.SAFE),
     BrowserValidation(),
     BrowserAuditLog(),
   );
@@ -283,8 +321,8 @@ export const BrowserEnhancedSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
     BrowserRoles(UserRole._ADMIN, UserRole._OPERATOR),
-    BrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
-    BrowserRiskLevel(BrowserRiskLevel._MODERATE),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
+    SetBrowserRiskLevel(BrowserRiskLevel.MODERATE),
     BrowserValidation({
       validateInput: true,
       validateUrls: true,
@@ -304,13 +342,15 @@ export const BrowserMaximumSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
     BrowserRoles(UserRole._ADMIN),
-    BrowserPermissions(Permission.BROWSER_AUTOMATION_ADMIN),
-    BrowserSecurityLevel(BrowserSecurityLevel.CRITICAL),
-    BrowserRiskLevel(BrowserRiskLevel._CRITICAL),
+    BrowserPermissions(Permission._COMPUTER_CONTROL),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.CRITICAL),
+    SetBrowserRiskLevel(BrowserRiskLevel.CRITICAL),
     BrowserStrictValidation(),
     BrowserStrictRateLimit(),
     BrowserAuditLog({
-      logLevel: 'warn',includeRequestBody: true,includeResponseBody: true,
+      logLevel: 'warn',
+      includeRequestBody: true,
+      includeResponseBody: true,
     }),
   );
 };
@@ -321,8 +361,8 @@ export const BrowserMaximumSecurity = () => {
 export const BrowserSessionSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
-    BrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
-    BrowserRiskLevel(BrowserRiskLevel._MODERATE),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
+    SetBrowserRiskLevel(BrowserRiskLevel.MODERATE),
     BrowserValidation({
       validateInput: true,
       validateUrls: true,
@@ -340,13 +380,15 @@ export const BrowserSessionSecurity = () => {
 export const BrowserTaskSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
-    BrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
-    BrowserRiskLevel(BrowserRiskLevel.ELEVATED),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
+    SetBrowserRiskLevel(BrowserRiskLevel.ELEVATED),
     BrowserStrictValidation(),
     BrowserTaskRateLimit(),
     BrowserAuditLog({
       includeRequestBody: true,
-      sensitiveFields: ['password', 'token', 'secret', 'key', 'credential'],}),);
+      sensitiveFields: ['password', 'token', 'secret', 'key', 'credential'],
+    }),
+  );
 };
 
 /**
@@ -355,8 +397,8 @@ export const BrowserTaskSecurity = () => {
 export const BrowserExtractionSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
-    BrowserSecurityLevel(BrowserSecurityLevel.HIGH),
-    BrowserRiskLevel(BrowserRiskLevel._HIGH),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.HIGH),
+    SetBrowserRiskLevel(BrowserRiskLevel.HIGH),
     BrowserValidation({
       validateInput: true,
       validateUrls: true,
@@ -368,9 +410,23 @@ export const BrowserExtractionSecurity = () => {
     BrowserRateLimit({
       windowMs: 600000, // 10 minutes
       max: 20, // 20 extractions per 10 minutes
-      message: 'Rate limit exceeded for data extraction operations',}),BrowserAuditLog({
-      logLevel: 'warn',includeRequestBody: true,includeResponseBody: true,
-      sensitiveFields: ['password', 'token', 'secret', 'key', 'credential', 'ssn', 'social'],}),);
+      message: 'Rate limit exceeded for data extraction operations',
+    }),
+    BrowserAuditLog({
+      logLevel: 'warn',
+      includeRequestBody: true,
+      includeResponseBody: true,
+      sensitiveFields: [
+        'password',
+        'token',
+        'secret',
+        'key',
+        'credential',
+        'ssn',
+        'social',
+      ],
+    }),
+  );
 };
 
 /**
@@ -380,12 +436,14 @@ export const BrowserAdminSecurity = () => {
   return applyDecorators(
     BrowserMaximumSecurity(),
     BrowserPermissions(
-      Permission.BROWSER_AUTOMATION_ADMIN,
-      Permission.SYSTEM_ADMINISTRATION,
+      Permission._COMPUTER_CONTROL,
+      Permission._ADMIN_PERMISSION,
     ),
     ApiResponse({
       status: 403,
-      description: 'Forbidden - Administrator privileges required',}),);
+      description: 'Forbidden - Administrator privileges required',
+    }),
+  );
 };
 
 // ===== UTILITY DECORATORS =====
@@ -397,8 +455,13 @@ export const BrowserDevelopmentOnly = () => {
   return applyDecorators(
     BrowserAuth(),
     BrowserRoles(UserRole._ADMIN),
-    SetMetadata('development_only', true),ApiResponse({status: 503,
-      description: 'Service Unavailable - Development endpoint not available in production',}),);
+    SetMetadata('development_only', true),
+    ApiResponse({
+      status: 503,
+      description:
+        'Service Unavailable - Development endpoint not available in production',
+    }),
+  );
 };
 
 /**
@@ -407,8 +470,8 @@ export const BrowserDevelopmentOnly = () => {
 export const BrowserFileUploadSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
-    BrowserSecurityLevel(BrowserSecurityLevel.HIGH),
-    BrowserRiskLevel(BrowserRiskLevel._HIGH),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.HIGH),
+    SetBrowserRiskLevel(BrowserRiskLevel.HIGH),
     BrowserValidation({
       validateInput: true,
       logSecurityEvents: true,
@@ -417,8 +480,12 @@ export const BrowserFileUploadSecurity = () => {
     BrowserRateLimit({
       windowMs: 300000, // 5 minutes
       max: 5, // 5 uploads per 5 minutes
-      message: 'Rate limit exceeded for file upload operations',}),BrowserAuditLog({
-      logLevel: 'warn',includeRequestBody: false, // Don't log file contentsincludeResponseBody: false,
+      message: 'Rate limit exceeded for file upload operations',
+    }),
+    BrowserAuditLog({
+      logLevel: 'warn',
+      includeRequestBody: false, // Don't log file contents
+      includeResponseBody: false,
     }),
   );
 };
@@ -429,8 +496,8 @@ export const BrowserFileUploadSecurity = () => {
 export const BrowserScreenshotSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
-    BrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
-    BrowserRiskLevel(BrowserRiskLevel._MODERATE),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
+    SetBrowserRiskLevel(BrowserRiskLevel.MODERATE),
     BrowserValidation({
       validateInput: true,
       validateSession: true,
@@ -439,7 +506,9 @@ export const BrowserScreenshotSecurity = () => {
     BrowserRateLimit({
       windowMs: 60000, // 1 minute
       max: 30, // 30 screenshots per minute
-      message: 'Rate limit exceeded for screenshot operations',}),BrowserAuditLog(),
+      message: 'Rate limit exceeded for screenshot operations',
+    }),
+    BrowserAuditLog(),
   );
 };
 
@@ -449,8 +518,8 @@ export const BrowserScreenshotSecurity = () => {
 export const BrowserNavigationSecurity = () => {
   return applyDecorators(
     BrowserAuth(),
-    BrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
-    BrowserRiskLevel(BrowserRiskLevel.ELEVATED),
+    SetBrowserSecurityLevel(BrowserSecurityLevel.MEDIUM),
+    SetBrowserRiskLevel(BrowserRiskLevel.ELEVATED),
     BrowserValidation({
       validateInput: true,
       validateUrls: true,
@@ -460,38 +529,11 @@ export const BrowserNavigationSecurity = () => {
     BrowserRateLimit({
       windowMs: 60000, // 1 minute
       max: 50, // 50 navigations per minute
-      message: 'Rate limit exceeded for navigation operations',}),BrowserAuditLog({
+      message: 'Rate limit exceeded for navigation operations',
+    }),
+    BrowserAuditLog({
       sensitiveFields: ['password', 'token', 'secret', 'key', 'credential'],
     }),
   );
 };
 
-// ===== EXPORT ALL DECORATORS =====
-
-export {
-  BrowserAuth,
-  BrowserPublic,
-  BrowserRoles,
-  BrowserPermissions,
-  BrowserSecurityLevel as SetBrowserSecurityLevel,
-  BrowserRiskLevel as SetBrowserRiskLevel,
-  BrowserSessionRequired,
-  BrowserRateLimit,
-  BrowserTaskRateLimit,
-  BrowserSessionRateLimit,
-  BrowserStrictRateLimit,
-  BrowserValidation,
-  BrowserStrictValidation,
-  BrowserAuditLog,
-  BrowserBasicSecurity,
-  BrowserEnhancedSecurity,
-  BrowserMaximumSecurity,
-  BrowserSessionSecurity,
-  BrowserTaskSecurity,
-  BrowserExtractionSecurity,
-  BrowserAdminSecurity,
-  BrowserDevelopmentOnly,
-  BrowserFileUploadSecurity,
-  BrowserScreenshotSecurity,
-  BrowserNavigationSecurity,
-};

@@ -30,7 +30,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
-import { ConversationalDatabaseService, DatabaseOperationType, DatabaseRiskLevel } from '../../src/database/conversational-database.service';
+import {
+  ConversationalDatabaseService,
+  DatabaseOperationType,
+  DatabaseRiskLevel,
+} from '../../src/database/conversational-database.service';
 import { ParlantIntegrationService } from '../../src/parlant/parlant-integration.service';
 import { BaseEntity } from '../../src/types/index';
 
@@ -46,7 +50,7 @@ enum ComplianceFramework {
   SOX = 'SOX',
   PCI_DSS = 'PCI_DSS',
   ISO_27001 = 'ISO_27001',
-  CCPA = 'CCPA'
+  CCPA = 'CCPA',
 }
 
 /**
@@ -60,7 +64,7 @@ enum SecurityTestCategory {
   INCIDENT_RESPONSE = 'INCIDENT_RESPONSE',
   PRIVACY_PROTECTION = 'PRIVACY_PROTECTION',
   AUTHENTICATION = 'AUTHENTICATION',
-  AUTHORIZATION = 'AUTHORIZATION'
+  AUTHORIZATION = 'AUTHORIZATION',
 }
 
 /**
@@ -199,7 +203,11 @@ class SecurityTestUtils {
         name: 'Role-Based Access Control Validation',
         description: 'Validate user role permissions and access restrictions',
         category: SecurityTestCategory.ACCESS_CONTROL,
-        complianceFrameworks: [ComplianceFramework.GDPR, ComplianceFramework.HIPAA, ComplianceFramework.SOX],
+        complianceFrameworks: [
+          ComplianceFramework.GDPR,
+          ComplianceFramework.HIPAA,
+          ComplianceFramework.SOX,
+        ],
         riskLevel: DatabaseRiskLevel.HIGH,
         testComplexity: 'ADVANCED',
         sensitiveDataInvolved: true,
@@ -208,15 +216,18 @@ class SecurityTestUtils {
           'user_authentication',
           'role_authorization',
           'principle_of_least_privilege',
-          'access_logging'
+          'access_logging',
         ],
-        auditRequired: true
+        auditRequired: true,
       },
       {
         name: 'Unauthorized Access Prevention',
         description: 'Test prevention of unauthorized database access attempts',
         category: SecurityTestCategory.ACCESS_CONTROL,
-        complianceFrameworks: [ComplianceFramework.PCI_DSS, ComplianceFramework.ISO_27001],
+        complianceFrameworks: [
+          ComplianceFramework.PCI_DSS,
+          ComplianceFramework.ISO_27001,
+        ],
         riskLevel: DatabaseRiskLevel.CRITICAL,
         testComplexity: 'ENTERPRISE',
         sensitiveDataInvolved: true,
@@ -225,9 +236,9 @@ class SecurityTestUtils {
           'access_denial',
           'intrusion_detection',
           'failed_login_monitoring',
-          'account_lockout'
+          'account_lockout',
         ],
-        auditRequired: true
+        auditRequired: true,
       },
 
       // Data Encryption Testing
@@ -235,7 +246,10 @@ class SecurityTestUtils {
         name: 'Data Encryption at Rest Validation',
         description: 'Verify sensitive data encryption in database storage',
         category: SecurityTestCategory.DATA_ENCRYPTION,
-        complianceFrameworks: [ComplianceFramework.HIPAA, ComplianceFramework.PCI_DSS],
+        complianceFrameworks: [
+          ComplianceFramework.HIPAA,
+          ComplianceFramework.PCI_DSS,
+        ],
         riskLevel: DatabaseRiskLevel.HIGH,
         testComplexity: 'ADVANCED',
         sensitiveDataInvolved: true,
@@ -244,15 +258,18 @@ class SecurityTestUtils {
           'aes_256_encryption',
           'key_management',
           'encryption_verification',
-          'key_rotation'
+          'key_rotation',
         ],
-        auditRequired: true
+        auditRequired: true,
       },
       {
         name: 'Data Encryption in Transit Validation',
         description: 'Verify encryption of data during database transmission',
         category: SecurityTestCategory.DATA_ENCRYPTION,
-        complianceFrameworks: [ComplianceFramework.PCI_DSS, ComplianceFramework.GDPR],
+        complianceFrameworks: [
+          ComplianceFramework.PCI_DSS,
+          ComplianceFramework.GDPR,
+        ],
         riskLevel: DatabaseRiskLevel.HIGH,
         testComplexity: 'ADVANCED',
         sensitiveDataInvolved: true,
@@ -261,17 +278,22 @@ class SecurityTestUtils {
           'tls_encryption',
           'certificate_validation',
           'secure_protocols',
-          'man_in_middle_prevention'
+          'man_in_middle_prevention',
         ],
-        auditRequired: true
+        auditRequired: true,
       },
 
       // Audit Logging Testing
       {
         name: 'Comprehensive Audit Trail Validation',
-        description: 'Validate complete audit logging for all database operations',
+        description:
+          'Validate complete audit logging for all database operations',
         category: SecurityTestCategory.AUDIT_LOGGING,
-        complianceFrameworks: [ComplianceFramework.SOX, ComplianceFramework.HIPAA, ComplianceFramework.GDPR],
+        complianceFrameworks: [
+          ComplianceFramework.SOX,
+          ComplianceFramework.HIPAA,
+          ComplianceFramework.GDPR,
+        ],
         riskLevel: DatabaseRiskLevel.MEDIUM,
         testComplexity: 'ADVANCED',
         sensitiveDataInvolved: true,
@@ -280,9 +302,9 @@ class SecurityTestUtils {
           'comprehensive_logging',
           'tamper_evidence',
           'log_integrity',
-          'real_time_monitoring'
+          'real_time_monitoring',
         ],
-        auditRequired: true
+        auditRequired: true,
       },
 
       // Privacy Protection Testing
@@ -290,7 +312,10 @@ class SecurityTestUtils {
         name: 'GDPR Right to be Forgotten Compliance',
         description: 'Test data deletion capabilities for GDPR compliance',
         category: SecurityTestCategory.PRIVACY_PROTECTION,
-        complianceFrameworks: [ComplianceFramework.GDPR, ComplianceFramework.CCPA],
+        complianceFrameworks: [
+          ComplianceFramework.GDPR,
+          ComplianceFramework.CCPA,
+        ],
         riskLevel: DatabaseRiskLevel.CRITICAL,
         testComplexity: 'ENTERPRISE',
         sensitiveDataInvolved: true,
@@ -299,9 +324,9 @@ class SecurityTestUtils {
           'data_deletion',
           'related_data_cleanup',
           'deletion_verification',
-          'compliance_reporting'
+          'compliance_reporting',
         ],
-        auditRequired: true
+        auditRequired: true,
       },
       {
         name: 'HIPAA PHI Protection Validation',
@@ -316,9 +341,9 @@ class SecurityTestUtils {
           'phi_encryption',
           'access_controls',
           'minimum_necessary_rule',
-          'business_associate_agreements'
+          'business_associate_agreements',
         ],
-        auditRequired: true
+        auditRequired: true,
       },
 
       // Data Retention Testing
@@ -326,7 +351,11 @@ class SecurityTestUtils {
         name: 'Data Retention Policy Enforcement',
         description: 'Test automated data retention and deletion policies',
         category: SecurityTestCategory.DATA_RETENTION,
-        complianceFrameworks: [ComplianceFramework.GDPR, ComplianceFramework.SOX, ComplianceFramework.HIPAA],
+        complianceFrameworks: [
+          ComplianceFramework.GDPR,
+          ComplianceFramework.SOX,
+          ComplianceFramework.HIPAA,
+        ],
         riskLevel: DatabaseRiskLevel.HIGH,
         testComplexity: 'ADVANCED',
         sensitiveDataInvolved: true,
@@ -335,17 +364,19 @@ class SecurityTestUtils {
           'retention_enforcement',
           'automated_deletion',
           'legal_hold_support',
-          'retention_reporting'
+          'retention_reporting',
         ],
-        auditRequired: true
-      }
+        auditRequired: true,
+      },
     ];
   }
 
   /**
    * Generate sensitive test data entities
    */
-  static generateSensitiveTestEntities(count: number): Omit<SensitiveDataEntity, keyof BaseEntity>[] {
+  static generateSensitiveTestEntities(
+    count: number,
+  ): Omit<SensitiveDataEntity, keyof BaseEntity>[] {
     const entities: Omit<SensitiveDataEntity, keyof BaseEntity>[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -354,32 +385,44 @@ class SecurityTestUtils {
         lastName: `TestLast${i}`,
         email: `test${i}@sensitive-data-test.com`,
         phoneNumber: `+1-555-0${String(i).padStart(3, '0')}`,
-        dateOfBirth: new Date(1990 + (i % 30), (i % 12), (i % 28) + 1).toISOString(),
+        dateOfBirth: new Date(
+          1990 + (i % 30),
+          i % 12,
+          (i % 28) + 1,
+        ).toISOString(),
         // Conditionally add sensitive fields
-        socialSecurityNumber: i % 10 === 0 ? `XXX-XX-${String(i).padStart(4, '0')}` : undefined,
-        creditCardNumber: i % 15 === 0 ? `4111-1111-1111-${String(i).padStart(4, '0')}` : undefined,
-        bankAccountNumber: i % 20 === 0 ? `12345${String(i).padStart(10, '0')}` : undefined,
-        medicalRecordNumber: i % 8 === 0 ? `MRN${String(i).padStart(8, '0')}` : undefined,
+        socialSecurityNumber:
+          i % 10 === 0 ? `XXX-XX-${String(i).padStart(4, '0')}` : undefined,
+        creditCardNumber:
+          i % 15 === 0
+            ? `4111-1111-1111-${String(i).padStart(4, '0')}`
+            : undefined,
+        bankAccountNumber:
+          i % 20 === 0 ? `12345${String(i).padStart(10, '0')}` : undefined,
+        medicalRecordNumber:
+          i % 8 === 0 ? `MRN${String(i).padStart(8, '0')}` : undefined,
         diagnosis: i % 8 === 0 ? `Test Condition ${i}` : undefined,
         prescription: i % 8 === 0 ? `Test Medication ${i}` : undefined,
         financialData: i % 12 === 0 ? `Financial Record ${i}` : undefined,
-        auditTrail: [{
-          timestamp: new Date(),
-          action: 'CREATE',
-          userId: `test-user-${i}`,
-          ipAddress: `192.168.1.${(i % 254) + 1}`,
-          userAgent: 'Test Security Agent'
-        }],
+        auditTrail: [
+          {
+            timestamp: new Date(),
+            action: 'CREATE',
+            userId: `test-user-${i}`,
+            ipAddress: `192.168.1.${(i % 254) + 1}`,
+            userAgent: 'Test Security Agent',
+          },
+        ],
         complianceFlags: {
           gdprSubject: i % 5 === 0,
           hipaaProtected: i % 8 === 0,
           pciScope: i % 15 === 0,
-          soxRelevant: i % 12 === 0
+          soxRelevant: i % 12 === 0,
         },
         dataRetentionPolicy: {
           retentionPeriod: 365 + (i % 1095), // 1-4 years
-          legalHold: i % 50 === 0
-        }
+          legalHold: i % 50 === 0,
+        },
       };
 
       entities.push(entity);
@@ -394,7 +437,7 @@ class SecurityTestUtils {
   static createSecurityOperationContext(
     config: SecurityTestConfig,
     userRole = 'user',
-    specialPermissions: string[] = []
+    specialPermissions: string[] = [],
   ) {
     return {
       userId: `security-test-user-${Date.now()}`,
@@ -405,13 +448,13 @@ class SecurityTestUtils {
         complianceFrameworks: config.complianceFrameworks,
         sensitiveDataHandling: config.sensitiveDataInvolved,
         auditRequired: config.auditRequired,
-        specialPermissions
+        specialPermissions,
       },
       operationMetadata: {
         testCategory: config.category,
         testComplexity: config.testComplexity,
-        securityTest: true
-      }
+        securityTest: true,
+      },
     };
   }
 
@@ -421,7 +464,7 @@ class SecurityTestUtils {
   static validateComplianceFramework(
     framework: ComplianceFramework,
     operationResult: OperationResult,
-    config: SecurityTestConfig
+    config: SecurityTestConfig,
   ): ComplianceValidationResult {
     const violations: Array<{
       requirement: string;
@@ -436,12 +479,16 @@ class SecurityTestUtils {
     switch (framework) {
       case ComplianceFramework.GDPR:
         // GDPR specific validations
-        if (config.sensitiveDataInvolved && !operationResult.encryptionVerified) {
+        if (
+          config.sensitiveDataInvolved &&
+          !operationResult.encryptionVerified
+        ) {
           violations.push({
             requirement: 'Article 32 - Security of processing',
             severity: 'CRITICAL',
-            description: 'Personal data must be encrypted in transit and at rest',
-            remediation: 'Implement AES-256 encryption for all personal data'
+            description:
+              'Personal data must be encrypted in transit and at rest',
+            remediation: 'Implement AES-256 encryption for all personal data',
           });
           dataProtectionScore -= 30;
         }
@@ -450,18 +497,22 @@ class SecurityTestUtils {
           violations.push({
             requirement: 'Article 30 - Records of processing activities',
             severity: 'HIGH',
-            description: 'Complete audit trail required for all processing activities',
-            remediation: 'Implement comprehensive audit logging system'
+            description:
+              'Complete audit trail required for all processing activities',
+            remediation: 'Implement comprehensive audit logging system',
           });
           complianceScore -= 20;
         }
 
-        if (config.category === SecurityTestCategory.PRIVACY_PROTECTION && !operationResult.deletionCapability) {
+        if (
+          config.category === SecurityTestCategory.PRIVACY_PROTECTION &&
+          !operationResult.deletionCapability
+        ) {
           violations.push({
             requirement: 'Article 17 - Right to erasure',
             severity: 'CRITICAL',
             description: 'Must support complete data deletion upon request',
-            remediation: 'Implement right to be forgotten functionality'
+            remediation: 'Implement right to be forgotten functionality',
           });
           complianceScore -= 40;
         }
@@ -473,8 +524,9 @@ class SecurityTestUtils {
           violations.push({
             requirement: '164.312(a)(1) - Access control',
             severity: 'CRITICAL',
-            description: 'PHI must be protected with appropriate access controls',
-            remediation: 'Implement role-based access control for PHI'
+            description:
+              'PHI must be protected with appropriate access controls',
+            remediation: 'Implement role-based access control for PHI',
           });
           dataProtectionScore -= 35;
         }
@@ -484,7 +536,7 @@ class SecurityTestUtils {
             requirement: '164.502(b) - Minimum necessary rule',
             severity: 'HIGH',
             description: 'Only minimum necessary PHI should be accessed',
-            remediation: 'Implement minimum necessary access controls'
+            remediation: 'Implement minimum necessary access controls',
           });
           complianceScore -= 25;
         }
@@ -492,12 +544,17 @@ class SecurityTestUtils {
 
       case ComplianceFramework.PCI_DSS:
         // PCI-DSS specific validations
-        if (config.sensitiveDataInvolved && !operationResult.cardDataEncryption) {
+        if (
+          config.sensitiveDataInvolved &&
+          !operationResult.cardDataEncryption
+        ) {
           violations.push({
             requirement: 'Requirement 3 - Protect stored cardholder data',
             severity: 'CRITICAL',
-            description: 'Cardholder data must be encrypted with strong cryptography',
-            remediation: 'Implement PCI-DSS compliant encryption for cardholder data'
+            description:
+              'Cardholder data must be encrypted with strong cryptography',
+            remediation:
+              'Implement PCI-DSS compliant encryption for cardholder data',
           });
           dataProtectionScore -= 40;
         }
@@ -506,8 +563,9 @@ class SecurityTestUtils {
           violations.push({
             requirement: 'Requirement 10 - Monitor all access',
             severity: 'HIGH',
-            description: 'All access to cardholder data must be monitored and logged',
-            remediation: 'Implement comprehensive access monitoring'
+            description:
+              'All access to cardholder data must be monitored and logged',
+            remediation: 'Implement comprehensive access monitoring',
           });
           complianceScore -= 20;
         }
@@ -520,7 +578,7 @@ class SecurityTestUtils {
             requirement: 'Section 404 - Internal controls',
             severity: 'CRITICAL',
             description: 'Financial data integrity must be maintained',
-            remediation: 'Implement financial data integrity controls'
+            remediation: 'Implement financial data integrity controls',
           });
           dataProtectionScore -= 35;
         }
@@ -530,7 +588,7 @@ class SecurityTestUtils {
             requirement: 'Section 302 - Disclosure controls',
             severity: 'HIGH',
             description: 'Audit trails must be immutable and tamper-evident',
-            remediation: 'Implement immutable audit trail system'
+            remediation: 'Implement immutable audit trail system',
           });
           complianceScore -= 25;
         }
@@ -544,41 +602,52 @@ class SecurityTestUtils {
       violations,
       auditTrailComplete: operationResult.auditTrailComplete || false,
       dataProtectionScore: Math.max(0, dataProtectionScore),
-      complianceScore: Math.max(0, complianceScore)
+      complianceScore: Math.max(0, complianceScore),
     };
   }
 
   /**
    * Validate security metrics against enterprise standards
    */
-  static validateSecurityMetrics(
-    metrics: SecurityMetrics
-  ): { passed: boolean; violations: string[]; score: number } {
+  static validateSecurityMetrics(metrics: SecurityMetrics): {
+    passed: boolean;
+    violations: string[];
+    score: number;
+  } {
     const violations: string[] = [];
     let score = 100;
 
     // Security operations success rate
-    const securitySuccessRate = metrics.secureOperations / metrics.totalOperations;
+    const securitySuccessRate =
+      metrics.secureOperations / metrics.totalOperations;
     if (securitySuccessRate < 0.999) {
-      violations.push(`Security success rate ${(securitySuccessRate * 100).toFixed(3)}% below 99.9% target`);
+      violations.push(
+        `Security success rate ${(securitySuccessRate * 100).toFixed(3)}% below 99.9% target`,
+      );
       score -= 30;
     }
 
     // Security violations
     if (metrics.securityViolations > 0) {
-      violations.push(`${metrics.securityViolations} security violations detected`);
+      violations.push(
+        `${metrics.securityViolations} security violations detected`,
+      );
       score -= 40;
     }
 
     // Access control violations
     if (metrics.accessControlViolations > 0) {
-      violations.push(`${metrics.accessControlViolations} access control violations detected`);
+      violations.push(
+        `${metrics.accessControlViolations} access control violations detected`,
+      );
       score -= 35;
     }
 
     // Encryption violations
     if (metrics.encryptionViolations > 0) {
-      violations.push(`${metrics.encryptionViolations} encryption violations detected`);
+      violations.push(
+        `${metrics.encryptionViolations} encryption violations detected`,
+      );
       score -= 35;
     }
 
@@ -590,20 +659,24 @@ class SecurityTestUtils {
 
     // Security validation time
     if (metrics.averageSecurityValidationTime > 500) {
-      violations.push(`Security validation time ${metrics.averageSecurityValidationTime}ms exceeds 500ms target`);
+      violations.push(
+        `Security validation time ${metrics.averageSecurityValidationTime}ms exceeds 500ms target`,
+      );
       score -= 15;
     }
 
     // Overall security score
     if (metrics.overallSecurityScore < 95) {
-      violations.push(`Overall security score ${metrics.overallSecurityScore}% below 95% target`);
+      violations.push(
+        `Overall security score ${metrics.overallSecurityScore}% below 95% target`,
+      );
       score -= 20;
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      score: Math.max(0, score)
+      score: Math.max(0, score),
     };
   }
 }
@@ -618,18 +691,20 @@ describe('Database Security and Compliance Validation', () => {
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          load: [() => ({
-            DB_SECURITY_ENABLED: 'true',
-            DB_ENCRYPTION_ENABLED: 'true',
-            DB_AUDIT_LOGGING: 'true',
-            DB_COMPLIANCE_VALIDATION: 'true',
-            DB_ACCESS_CONTROL: 'strict',
-            GDPR_COMPLIANCE: 'true',
-            HIPAA_COMPLIANCE: 'true',
-            PCI_DSS_COMPLIANCE: 'true',
-            SOX_COMPLIANCE: 'true'
-          })]
-        })
+          load: [
+            () => ({
+              DB_SECURITY_ENABLED: 'true',
+              DB_ENCRYPTION_ENABLED: 'true',
+              DB_AUDIT_LOGGING: 'true',
+              DB_COMPLIANCE_VALIDATION: 'true',
+              DB_ACCESS_CONTROL: 'strict',
+              GDPR_COMPLIANCE: 'true',
+              HIPAA_COMPLIANCE: 'true',
+              PCI_DSS_COMPLIANCE: 'true',
+              SOX_COMPLIANCE: 'true',
+            }),
+          ],
+        }),
       ],
       providers: [
         ConversationalDatabaseService,
@@ -642,9 +717,9 @@ describe('Database Security and Compliance Validation', () => {
               reasoning: 'Test reasoning',
               confidence: 0.95,
               validationTimestamp: new Date(),
-              riskLevel: 'MEDIUM' as RiskLevelType
-            })
-          }
+              riskLevel: 'MEDIUM' as RiskLevelType,
+            }),
+          },
         },
         Logger,
         {
@@ -655,17 +730,21 @@ describe('Database Security and Compliance Validation', () => {
                 DB_SECURITY_ENABLED: 'true',
                 DB_ENCRYPTION_ENABLED: 'true',
                 DB_AUDIT_LOGGING: 'true',
-                DB_COMPLIANCE_VALIDATION: 'true'
+                DB_COMPLIANCE_VALIDATION: 'true',
               };
               return config[key];
-            })
-          }
-        }
-      ]
+            }),
+          },
+        },
+      ],
     }).compile();
 
-    conversationalDbService = module.get<ConversationalDatabaseService>(ConversationalDatabaseService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService) as jest.Mocked<ParlantIntegrationService>;
+    conversationalDbService = module.get<ConversationalDatabaseService>(
+      ConversationalDatabaseService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    ) as jest.Mocked<ParlantIntegrationService>;
     logger = module.get<Logger>(Logger);
 
     await module.init();
@@ -683,34 +762,43 @@ describe('Database Security and Compliance Validation', () => {
 
   describe('Access Control Security Validation', () => {
     it('should enforce role-based access control with conversational validation', async () => {
-      const accessControlConfigs = SecurityTestUtils.generateSecurityTestConfigs()
-        .filter(config => config.category === SecurityTestCategory.ACCESS_CONTROL);
+      const accessControlConfigs =
+        SecurityTestUtils.generateSecurityTestConfigs().filter(
+          (config) => config.category === SecurityTestCategory.ACCESS_CONTROL,
+        );
 
-      logger.log(`Testing ${accessControlConfigs.length} access control configurations`);
+      logger.log(
+        `Testing ${accessControlConfigs.length} access control configurations`,
+      );
 
       // Mock Parlant service for access control validation
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockImplementation((request: { context: { metadata?: { userRole?: string } } }) => {
-        // Simulate access control decisions based on user role
-        const userRole = request.context.metadata?.userRole || 'user';
-        const isAuthorized = userRole === 'admin' || userRole === 'database_admin';
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockImplementation(
+          (request: { context: { metadata?: { userRole?: string } } }) => {
+            // Simulate access control decisions based on user role
+            const userRole = request.context.metadata?.userRole || 'user';
+            const isAuthorized =
+              userRole === 'admin' || userRole === 'database_admin';
 
-        return {
-          approved: isAuthorized,
-          conversationId: `conv-access-control-${Date.now()}`,
-          reasoning: isAuthorized
-            ? 'Access granted based on user role and permissions'
-            : 'Access denied - insufficient privileges for sensitive data operations',
-          confidence: 0.95,
-          validationTimestamp: new Date(),
-          riskLevel: 'HIGH' as const
-        };
-      });
+            return {
+              approved: isAuthorized,
+              conversationId: `conv-access-control-${Date.now()}`,
+              reasoning: isAuthorized
+                ? 'Access granted based on user role and permissions'
+                : 'Access denied - insufficient privileges for sensitive data operations',
+              confidence: 0.95,
+              validationTimestamp: new Date(),
+              riskLevel: 'HIGH' as const,
+            };
+          },
+        );
 
       const mockRepository = {
         findById: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
-        delete: jest.fn()
+        delete: jest.fn(),
       };
 
       const accessControlResults = [];
@@ -718,7 +806,8 @@ describe('Database Security and Compliance Validation', () => {
       for (const config of accessControlConfigs) {
         logger.log(`Testing access control for: ${config.name}`);
 
-        const testEntities = SecurityTestUtils.generateSensitiveTestEntities(10);
+        const testEntities =
+          SecurityTestUtils.generateSensitiveTestEntities(10);
         let authorizedOperations = 0;
         let unauthorizedOperations = 0;
         let accessViolations = 0;
@@ -727,7 +816,10 @@ describe('Database Security and Compliance Validation', () => {
         const testRoles = ['user', 'admin', 'database_admin', 'guest'];
 
         for (const role of testRoles) {
-          const context = SecurityTestUtils.createSecurityOperationContext(config, role);
+          const context = SecurityTestUtils.createSecurityOperationContext(
+            config,
+            role,
+          );
 
           // Mock repository responses based on operation
           testEntities.forEach((entity, index) => {
@@ -736,7 +828,7 @@ describe('Database Security and Compliance Validation', () => {
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
               version: 1,
-              ...entity
+              ...entity,
             } as SensitiveDataEntity;
 
             mockRepository.findById.mockResolvedValueOnce(entityWithBase);
@@ -751,7 +843,7 @@ describe('Database Security and Compliance Validation', () => {
               const result = await conversationalDbService.findById(
                 mockRepository,
                 `access-test-${i}`,
-                context
+                context,
               );
 
               if (result) {
@@ -776,12 +868,12 @@ describe('Database Security and Compliance Validation', () => {
           authorizedOperations,
           unauthorizedOperations,
           accessViolations,
-          roleBasedControlsWorking: accessViolations === 0
+          roleBasedControlsWorking: accessViolations === 0,
         };
 
         accessControlResults.push({
           config,
-          metrics: accessControlMetrics
+          metrics: accessControlMetrics,
         });
 
         // Validate access control enforcement
@@ -791,7 +883,9 @@ describe('Database Security and Compliance Validation', () => {
 
       // Aggregate access control validation
       const totalTests = accessControlResults.length;
-      const successfulTests = accessControlResults.filter(r => r.metrics.roleBasedControlsWorking).length;
+      const successfulTests = accessControlResults.filter(
+        (r) => r.metrics.roleBasedControlsWorking,
+      ).length;
 
       logger.log(`Access Control Testing Results:
         Total Configurations: ${totalTests}
@@ -806,25 +900,32 @@ describe('Database Security and Compliance Validation', () => {
 
   describe('Data Encryption Security Validation', () => {
     it('should validate encryption at rest and in transit for sensitive data', async () => {
-      const encryptionConfigs = SecurityTestUtils.generateSecurityTestConfigs()
-        .filter(config => config.category === SecurityTestCategory.DATA_ENCRYPTION);
+      const encryptionConfigs =
+        SecurityTestUtils.generateSecurityTestConfigs().filter(
+          (config) => config.category === SecurityTestCategory.DATA_ENCRYPTION,
+        );
 
-      logger.log(`Testing ${encryptionConfigs.length} encryption configurations`);
+      logger.log(
+        `Testing ${encryptionConfigs.length} encryption configurations`,
+      );
 
       // Mock Parlant service for encryption validation
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-encryption-validation',
-        reasoning: 'Encryption validation passed for sensitive data operations',
-        confidence: 0.98,
-        validationTimestamp: new Date(),
-        riskLevel: 'HIGH' as const
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-encryption-validation',
+          reasoning:
+            'Encryption validation passed for sensitive data operations',
+          confidence: 0.98,
+          validationTimestamp: new Date(),
+          riskLevel: 'HIGH' as const,
+        });
 
       const mockRepository = {
         create: jest.fn(),
         update: jest.fn(),
-        findById: jest.fn()
+        findById: jest.fn(),
       };
 
       const encryptionResults = [];
@@ -832,13 +933,17 @@ describe('Database Security and Compliance Validation', () => {
       for (const config of encryptionConfigs) {
         logger.log(`Testing encryption for: ${config.name}`);
 
-        const sensitiveEntities = SecurityTestUtils.generateSensitiveTestEntities(5);
+        const sensitiveEntities =
+          SecurityTestUtils.generateSensitiveTestEntities(5);
         let encryptedOperations = 0;
         let unencryptedOperations = 0;
         let encryptionViolations = 0;
 
         for (const entity of sensitiveEntities) {
-          const context = SecurityTestUtils.createSecurityOperationContext(config, 'admin');
+          const context = SecurityTestUtils.createSecurityOperationContext(
+            config,
+            'admin',
+          );
 
           // Mock encrypted entity response
           const encryptedEntity = {
@@ -848,26 +953,42 @@ describe('Database Security and Compliance Validation', () => {
             version: 1,
             ...entity,
             // Simulate encrypted sensitive fields
-            socialSecurityNumber: entity.socialSecurityNumber ? 'ENCRYPTED_SSN' : undefined,
-            creditCardNumber: entity.creditCardNumber ? 'ENCRYPTED_CC' : undefined,
-            medicalRecordNumber: entity.medicalRecordNumber ? 'ENCRYPTED_MRN' : undefined
+            socialSecurityNumber: entity.socialSecurityNumber
+              ? 'ENCRYPTED_SSN'
+              : undefined,
+            creditCardNumber: entity.creditCardNumber
+              ? 'ENCRYPTED_CC'
+              : undefined,
+            medicalRecordNumber: entity.medicalRecordNumber
+              ? 'ENCRYPTED_MRN'
+              : undefined,
           } as SensitiveDataEntity;
 
           mockRepository.create.mockResolvedValueOnce(encryptedEntity);
 
           try {
-            const result = await conversationalDbService.create(mockRepository, entity, context);
+            const result = await conversationalDbService.create(
+              mockRepository,
+              entity,
+              context,
+            );
 
             // Verify encryption was applied to sensitive fields
             if (result) {
               let encryptionApplied = true;
 
-              if (entity.socialSecurityNumber && !result.socialSecurityNumber?.includes('ENCRYPTED')) {
+              if (
+                entity.socialSecurityNumber &&
+                !result.socialSecurityNumber?.includes('ENCRYPTED')
+              ) {
                 encryptionApplied = false;
                 encryptionViolations++;
               }
 
-              if (entity.creditCardNumber && !result.creditCardNumber?.includes('ENCRYPTED')) {
+              if (
+                entity.creditCardNumber &&
+                !result.creditCardNumber?.includes('ENCRYPTED')
+              ) {
                 encryptionApplied = false;
                 encryptionViolations++;
               }
@@ -889,12 +1010,13 @@ describe('Database Security and Compliance Validation', () => {
           encryptedOperations,
           unencryptedOperations,
           encryptionViolations,
-          encryptionCompliance: (encryptedOperations / sensitiveEntities.length) * 100
+          encryptionCompliance:
+            (encryptedOperations / sensitiveEntities.length) * 100,
         };
 
         encryptionResults.push({
           config,
-          metrics: encryptionMetrics
+          metrics: encryptionMetrics,
         });
 
         // Validate encryption compliance
@@ -904,7 +1026,7 @@ describe('Database Security and Compliance Validation', () => {
 
       logger.log(`Encryption Validation Results:
         Configurations Tested: ${encryptionResults.length}
-        Encryption Compliance: ${encryptionResults.every(r => r.metrics.encryptionViolations === 0) ? 'PASS' : 'FAIL'}`);
+        Encryption Compliance: ${encryptionResults.every((r) => r.metrics.encryptionViolations === 0) ? 'PASS' : 'FAIL'}`);
     }, 90000);
   });
 
@@ -914,33 +1036,43 @@ describe('Database Security and Compliance Validation', () => {
     it('should validate GDPR compliance for personal data operations', async () => {
       logger.log('Testing GDPR compliance validation');
 
-      const gdprConfig = SecurityTestUtils.generateSecurityTestConfigs()
-        .find(config => config.complianceFrameworks.includes(ComplianceFramework.GDPR))!;
+      const gdprConfig = SecurityTestUtils.generateSecurityTestConfigs().find(
+        (config) =>
+          config.complianceFrameworks.includes(ComplianceFramework.GDPR),
+      )!;
 
       // Mock Parlant service for GDPR validation
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-gdpr-validation',
-        reasoning: 'GDPR compliance validation passed for personal data processing',
-        confidence: 0.92,
-        validationTimestamp: new Date(),
-        riskLevel: 'HIGH' as const
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-gdpr-validation',
+          reasoning:
+            'GDPR compliance validation passed for personal data processing',
+          confidence: 0.92,
+          validationTimestamp: new Date(),
+          riskLevel: 'HIGH' as const,
+        });
 
       const mockRepository = {
         findById: jest.fn(),
         delete: jest.fn(),
-        findAll: jest.fn()
+        findAll: jest.fn(),
       };
 
-      const gdprTestEntities = SecurityTestUtils.generateSensitiveTestEntities(10)
-        .filter(entity => entity.complianceFlags.gdprSubject);
+      const gdprTestEntities = SecurityTestUtils.generateSensitiveTestEntities(
+        10,
+      ).filter((entity) => entity.complianceFlags.gdprSubject);
 
       let gdprCompliantOperations = 0;
       let gdprViolations = 0;
 
       for (const entity of gdprTestEntities) {
-        const context = SecurityTestUtils.createSecurityOperationContext(gdprConfig, 'admin', ['gdpr_data_controller']);
+        const context = SecurityTestUtils.createSecurityOperationContext(
+          gdprConfig,
+          'admin',
+          ['gdpr_data_controller'],
+        );
 
         // Test GDPR right to erasure
         const entityWithBase = {
@@ -948,7 +1080,7 @@ describe('Database Security and Compliance Validation', () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           version: 1,
-          ...entity
+          ...entity,
         } as SensitiveDataEntity;
 
         mockRepository.findById.mockResolvedValueOnce(entityWithBase);
@@ -959,7 +1091,7 @@ describe('Database Security and Compliance Validation', () => {
           const accessResult = await conversationalDbService.findById(
             mockRepository,
             entityWithBase.id,
-            { ...context, businessPurpose: 'GDPR subject access request' }
+            { ...context, businessPurpose: 'GDPR subject access request' },
           );
 
           // Test right to erasure
@@ -970,24 +1102,25 @@ describe('Database Security and Compliance Validation', () => {
               ...context,
               businessPurpose: 'GDPR right to erasure request',
               confirmDeletion: true,
-              gdprErasureRequest: true
-            }
+              gdprErasureRequest: true,
+            },
           );
 
           if (accessResult && deletionResult) {
             gdprCompliantOperations++;
 
             // Validate GDPR compliance
-            const complianceResult = SecurityTestUtils.validateComplianceFramework(
-              ComplianceFramework.GDPR,
-              {
-                encryptionVerified: true,
-                auditTrailComplete: true,
-                deletionCapability: true,
-                subjectAccessProvided: true
-              },
-              gdprConfig
-            );
+            const complianceResult =
+              SecurityTestUtils.validateComplianceFramework(
+                ComplianceFramework.GDPR,
+                {
+                  encryptionVerified: true,
+                  auditTrailComplete: true,
+                  deletionCapability: true,
+                  subjectAccessProvided: true,
+                },
+                gdprConfig,
+              );
 
             expect(complianceResult.compliant).toBe(true);
           }
@@ -1009,26 +1142,31 @@ describe('Database Security and Compliance Validation', () => {
     it('should validate HIPAA compliance for health information protection', async () => {
       logger.log('Testing HIPAA compliance validation');
 
-      const hipaaConfig = SecurityTestUtils.generateSecurityTestConfigs()
-        .find(config => config.complianceFrameworks.includes(ComplianceFramework.HIPAA))!;
+      const hipaaConfig = SecurityTestUtils.generateSecurityTestConfigs().find(
+        (config) =>
+          config.complianceFrameworks.includes(ComplianceFramework.HIPAA),
+      )!;
 
       // Mock Parlant service for HIPAA validation
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-hipaa-validation',
-        reasoning: 'HIPAA compliance validation passed for PHI protection',
-        confidence: 0.94,
-        validationTimestamp: new Date(),
-        riskLevel: 'HIGH' as const
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-hipaa-validation',
+          reasoning: 'HIPAA compliance validation passed for PHI protection',
+          confidence: 0.94,
+          validationTimestamp: new Date(),
+          riskLevel: 'HIGH' as const,
+        });
 
       const mockRepository = {
         findById: jest.fn(),
-        update: jest.fn()
+        update: jest.fn(),
       };
 
-      const hipaaTestEntities = SecurityTestUtils.generateSensitiveTestEntities(8)
-        .filter(entity => entity.complianceFlags.hipaaProtected);
+      const hipaaTestEntities = SecurityTestUtils.generateSensitiveTestEntities(
+        8,
+      ).filter((entity) => entity.complianceFlags.hipaaProtected);
 
       let hipaaCompliantOperations = 0;
       let hipaaViolations = 0;
@@ -1037,7 +1175,7 @@ describe('Database Security and Compliance Validation', () => {
         const context = SecurityTestUtils.createSecurityOperationContext(
           hipaaConfig,
           'healthcare_provider',
-          ['hipaa_covered_entity', 'phi_access']
+          ['hipaa_covered_entity', 'phi_access'],
         );
 
         const entityWithBase = {
@@ -1045,7 +1183,7 @@ describe('Database Security and Compliance Validation', () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           version: 1,
-          ...entity
+          ...entity,
         } as SensitiveDataEntity;
 
         mockRepository.findById.mockResolvedValueOnce(entityWithBase);
@@ -1058,26 +1196,28 @@ describe('Database Security and Compliance Validation', () => {
             entityWithBase.id,
             {
               ...context,
-              businessPurpose: 'Patient treatment - minimum necessary PHI access',
-              minimumNecessaryRule: true
-            }
+              businessPurpose:
+                'Patient treatment - minimum necessary PHI access',
+              minimumNecessaryRule: true,
+            },
           );
 
           if (accessResult) {
             hipaaCompliantOperations++;
 
             // Validate HIPAA compliance
-            const complianceResult = SecurityTestUtils.validateComplianceFramework(
-              ComplianceFramework.HIPAA,
-              {
-                phiProtection: true,
-                minimumNecessaryRule: true,
-                auditTrailComplete: true,
-                encryptionVerified: true,
-                accessControlValidated: true
-              },
-              hipaaConfig
-            );
+            const complianceResult =
+              SecurityTestUtils.validateComplianceFramework(
+                ComplianceFramework.HIPAA,
+                {
+                  phiProtection: true,
+                  minimumNecessaryRule: true,
+                  auditTrailComplete: true,
+                  encryptionVerified: true,
+                  accessControlValidated: true,
+                },
+                hipaaConfig,
+              );
 
             expect(complianceResult.complianceScore).toBeGreaterThan(90);
           }
@@ -1103,37 +1243,45 @@ describe('Database Security and Compliance Validation', () => {
     it('should maintain tamper-evident audit trails for all database operations', async () => {
       logger.log('Testing comprehensive audit trail validation');
 
-      const auditConfig = SecurityTestUtils.generateSecurityTestConfigs()
-        .find(config => config.category === SecurityTestCategory.AUDIT_LOGGING)!;
+      const auditConfig = SecurityTestUtils.generateSecurityTestConfigs().find(
+        (config) => config.category === SecurityTestCategory.AUDIT_LOGGING,
+      )!;
 
       // Mock Parlant service for audit validation
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-audit-validation',
-        reasoning: 'Audit trail validation passed with tamper-evidence verification',
-        confidence: 0.97,
-        validationTimestamp: new Date(),
-        riskLevel: 'MEDIUM' as const
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-audit-validation',
+          reasoning:
+            'Audit trail validation passed with tamper-evidence verification',
+          confidence: 0.97,
+          validationTimestamp: new Date(),
+          riskLevel: 'MEDIUM' as const,
+        });
 
       const mockRepository = {
         create: jest.fn(),
         update: jest.fn(),
-        delete: jest.fn()
+        delete: jest.fn(),
       };
 
-      const auditTestEntities = SecurityTestUtils.generateSensitiveTestEntities(5);
+      const auditTestEntities =
+        SecurityTestUtils.generateSensitiveTestEntities(5);
       const auditTrailResults = [];
 
       for (const entity of auditTestEntities) {
-        const context = SecurityTestUtils.createSecurityOperationContext(auditConfig, 'admin');
+        const context = SecurityTestUtils.createSecurityOperationContext(
+          auditConfig,
+          'admin',
+        );
 
         const entityWithBase = {
           id: `audit-test-${Date.now()}`,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           version: 1,
-          ...entity
+          ...entity,
         } as SensitiveDataEntity;
 
         // Mock repository responses with audit trail enhancement
@@ -1147,9 +1295,9 @@ describe('Database Security and Compliance Validation', () => {
               action: 'UPDATE',
               userId: context.userId,
               ipAddress: '192.168.1.100',
-              userAgent: 'Security Test Agent'
-            }
-          ]
+              userAgent: 'Security Test Agent',
+            },
+          ],
         });
         mockRepository.delete.mockResolvedValueOnce(true);
 
@@ -1157,7 +1305,7 @@ describe('Database Security and Compliance Validation', () => {
         const operations = [
           { type: 'CREATE', method: 'create' },
           { type: 'UPDATE', method: 'update' },
-          { type: 'DELETE', method: 'delete' }
+          { type: 'DELETE', method: 'delete' },
         ];
 
         for (const operation of operations) {
@@ -1166,11 +1314,24 @@ describe('Database Security and Compliance Validation', () => {
           let result;
           try {
             if (operation.method === 'create') {
-              result = await conversationalDbService.create(mockRepository, entity, context);
+              result = await conversationalDbService.create(
+                mockRepository,
+                entity,
+                context,
+              );
             } else if (operation.method === 'update') {
-              result = await conversationalDbService.update(mockRepository, entityWithBase.id, { status: 'updated' }, context);
+              result = await conversationalDbService.update(
+                mockRepository,
+                entityWithBase.id,
+                { status: 'updated' },
+                context,
+              );
             } else if (operation.method === 'delete') {
-              result = await conversationalDbService.delete(mockRepository, entityWithBase.id, { ...context, confirmDeletion: true });
+              result = await conversationalDbService.delete(
+                mockRepository,
+                entityWithBase.id,
+                { ...context, confirmDeletion: true },
+              );
             }
 
             const auditEntry = {
@@ -1180,7 +1341,7 @@ describe('Database Security and Compliance Validation', () => {
               duration: Date.now() - startTime,
               success: !!result,
               auditTrailGenerated: true,
-              tamperEvident: true
+              tamperEvident: true,
             };
 
             auditTrailResults.push(auditEntry);
@@ -1192,7 +1353,7 @@ describe('Database Security and Compliance Validation', () => {
               duration: Date.now() - startTime,
               success: false,
               auditTrailGenerated: false,
-              tamperEvident: false
+              tamperEvident: false,
             });
           }
         }
@@ -1200,9 +1361,15 @@ describe('Database Security and Compliance Validation', () => {
 
       // Validate audit trail completeness
       const totalOperations = auditTrailResults.length;
-      const successfulOperations = auditTrailResults.filter(r => r.success).length;
-      const auditTrailsGenerated = auditTrailResults.filter(r => r.auditTrailGenerated).length;
-      const tamperEvidenceVerified = auditTrailResults.filter(r => r.tamperEvident).length;
+      const successfulOperations = auditTrailResults.filter(
+        (r) => r.success,
+      ).length;
+      const auditTrailsGenerated = auditTrailResults.filter(
+        (r) => r.auditTrailGenerated,
+      ).length;
+      const tamperEvidenceVerified = auditTrailResults.filter(
+        (r) => r.tamperEvident,
+      ).length;
 
       const auditMetrics: SecurityMetrics = {
         testName: auditConfig.name,
@@ -1212,12 +1379,15 @@ describe('Database Security and Compliance Validation', () => {
         accessControlViolations: 0,
         encryptionViolations: 0,
         auditTrailGaps: totalOperations - auditTrailsGenerated,
-        averageSecurityValidationTime: auditTrailResults.reduce((sum, r) => sum + r.duration, 0) / totalOperations,
+        averageSecurityValidationTime:
+          auditTrailResults.reduce((sum, r) => sum + r.duration, 0) /
+          totalOperations,
         complianceFrameworksValidated: auditConfig.complianceFrameworks,
-        overallSecurityScore: (tamperEvidenceVerified / totalOperations) * 100
+        overallSecurityScore: (tamperEvidenceVerified / totalOperations) * 100,
       };
 
-      const validation = SecurityTestUtils.validateSecurityMetrics(auditMetrics);
+      const validation =
+        SecurityTestUtils.validateSecurityMetrics(auditMetrics);
 
       logger.log(`Audit Trail Validation Results:
         Total Operations: ${totalOperations}

@@ -58,7 +58,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
-  RiskLevel
+  RiskLevel,
 } from '../../src/parlant/parlant-integration.service';
 
 import {
@@ -72,7 +72,7 @@ import {
   ValidationAction,
   ValidationStreamingOptions,
   ConversationalSession,
-  SessionStatus
+  SessionStatus,
 } from '../../src/common/websocket/conversational-websocket-bridge.service';
 
 import { ParlantWebSocketBridgeService } from '../../src/common/websocket/parlant-websocket-bridge.service';
@@ -129,7 +129,12 @@ interface ParlantValidationScenario {
  */
 interface ConversationalTestStep {
   stepName: string;
-  stepType: 'CONVERSATION_START' | 'VALIDATION_REQUEST' | 'USER_CONFIRMATION' | 'PROGRESS_STREAM' | 'VALIDATION_COMPLETE';
+  stepType:
+    | 'CONVERSATION_START'
+    | 'VALIDATION_REQUEST'
+    | 'USER_CONFIRMATION'
+    | 'PROGRESS_STREAM'
+    | 'VALIDATION_COMPLETE';
   input: Record<string, unknown>;
   expectedOutput: Record<string, unknown>;
   maxExecutionTime: number;
@@ -192,7 +197,6 @@ interface SecurityTestConfig {
  * PARLANT WebSocket test utilities for comprehensive validation testing
  */
 class ParlantWebSocketTestUtils {
-
   /**
    * Generate comprehensive PARLANT validation scenarios
    */
@@ -200,7 +204,8 @@ class ParlantWebSocketTestUtils {
     return [
       {
         name: 'Low-Risk Function Validation',
-        description: 'Basic function validation with minimal security requirements',
+        description:
+          'Basic function validation with minimal security requirements',
         riskLevel: 'low',
         expectedValidationTime: 300,
         requiresUserConfirmation: false,
@@ -213,13 +218,13 @@ class ParlantWebSocketTestUtils {
             input: {
               userId: 'test-user-low-risk',
               functionName: 'get_weather_data',
-              parameters: { location: 'San Francisco' }
+              parameters: { location: 'San Francisco' },
             },
             expectedOutput: {
               conversationId: 'string',
-              sessionEstablished: true
+              sessionEstablished: true,
             },
-            maxExecutionTime: 100
+            maxExecutionTime: 100,
           },
           {
             stepName: 'request_validation',
@@ -227,33 +232,34 @@ class ParlantWebSocketTestUtils {
             input: {
               actionType: 'data_retrieval',
               riskLevel: 'low',
-              requiresConfirmation: false
+              requiresConfirmation: false,
             },
             expectedOutput: {
               validationId: 'string',
               approved: true,
-              confidence: 'number'
+              confidence: 'number',
             },
             maxExecutionTime: 200,
-            dependsOn: ['initiate_conversation']
+            dependsOn: ['initiate_conversation'],
           },
           {
             stepName: 'complete_validation',
             stepType: 'VALIDATION_COMPLETE',
             input: {
-              validationId: '{{request_validation.validationId}}'
+              validationId: '{{request_validation.validationId}}',
             },
             expectedOutput: {
               completed: true,
-              result: 'approved'
+              result: 'approved',
             },
-            maxExecutionTime: 50
-          }
-        ]
+            maxExecutionTime: 50,
+          },
+        ],
       },
       {
         name: 'High-Risk Function Validation with User Confirmation',
-        description: 'Critical function validation requiring conversational confirmation',
+        description:
+          'Critical function validation requiring conversational confirmation',
         riskLevel: 'high',
         expectedValidationTime: 800,
         requiresUserConfirmation: true,
@@ -266,14 +272,17 @@ class ParlantWebSocketTestUtils {
             input: {
               userId: 'test-user-high-risk',
               functionName: 'delete_user_data',
-              parameters: { userId: 'target-user-123', confirmationRequired: true }
+              parameters: {
+                userId: 'target-user-123',
+                confirmationRequired: true,
+              },
             },
             expectedOutput: {
               conversationId: 'string',
               sessionEstablished: true,
-              securityLevel: 'high'
+              securityLevel: 'high',
             },
-            maxExecutionTime: 150
+            maxExecutionTime: 150,
           },
           {
             stepName: 'request_high_risk_validation',
@@ -282,15 +291,15 @@ class ParlantWebSocketTestUtils {
               actionType: 'data_deletion',
               riskLevel: 'high',
               requiresConfirmation: true,
-              auditRequired: true
+              auditRequired: true,
             },
             expectedOutput: {
               validationId: 'string',
               requiresUserConfirmation: true,
-              securityChecksRequired: true
+              securityChecksRequired: true,
             },
             maxExecutionTime: 300,
-            dependsOn: ['initiate_secure_conversation']
+            dependsOn: ['initiate_secure_conversation'],
           },
           {
             stepName: 'provide_user_confirmation',
@@ -299,31 +308,31 @@ class ParlantWebSocketTestUtils {
               validationId: '{{request_high_risk_validation.validationId}}',
               approved: true,
               reasoning: 'User confirmed deletion after verification',
-              confidence: 0.95
+              confidence: 0.95,
             },
             expectedOutput: {
               confirmationId: 'string',
               processed: true,
-              result: 'approved'
+              result: 'approved',
             },
             maxExecutionTime: 200,
-            dependsOn: ['request_high_risk_validation']
+            dependsOn: ['request_high_risk_validation'],
           },
           {
             stepName: 'complete_secure_validation',
             stepType: 'VALIDATION_COMPLETE',
             input: {
               validationId: '{{request_high_risk_validation.validationId}}',
-              confirmationId: '{{provide_user_confirmation.confirmationId}}'
+              confirmationId: '{{provide_user_confirmation.confirmationId}}',
             },
             expectedOutput: {
               completed: true,
               result: 'approved',
-              auditTrailCreated: true
+              auditTrailCreated: true,
             },
-            maxExecutionTime: 150
-          }
-        ]
+            maxExecutionTime: 150,
+          },
+        ],
       },
       {
         name: 'Real-time Streaming Validation with Progress Updates',
@@ -340,13 +349,13 @@ class ParlantWebSocketTestUtils {
             input: {
               userId: 'test-user-streaming',
               functionName: 'process_large_dataset',
-              parameters: { datasetSize: 'large', enableStreaming: true }
+              parameters: { datasetSize: 'large', enableStreaming: true },
             },
             expectedOutput: {
               conversationId: 'string',
-              streamingEnabled: true
+              streamingEnabled: true,
             },
-            maxExecutionTime: 100
+            maxExecutionTime: 100,
           },
           {
             stepName: 'request_streaming_validation',
@@ -358,16 +367,16 @@ class ParlantWebSocketTestUtils {
                 enableProgressUpdates: true,
                 updateInterval: 100,
                 maxUpdateCount: 10,
-                compressionEnabled: true
-              }
+                compressionEnabled: true,
+              },
             },
             expectedOutput: {
               validationId: 'string',
               streamingEnabled: true,
-              progressUpdatesEnabled: true
+              progressUpdatesEnabled: true,
             },
             maxExecutionTime: 200,
-            dependsOn: ['start_streaming_conversation']
+            dependsOn: ['start_streaming_conversation'],
           },
           {
             stepName: 'monitor_progress_stream',
@@ -375,31 +384,31 @@ class ParlantWebSocketTestUtils {
             input: {
               validationId: '{{request_streaming_validation.validationId}}',
               expectedUpdateCount: 10,
-              monitorDuration: 1000
+              monitorDuration: 1000,
             },
             expectedOutput: {
               updatesReceived: 'number',
               averageLatency: 'number',
-              streamingComplete: true
+              streamingComplete: true,
             },
             maxExecutionTime: 1000,
-            dependsOn: ['request_streaming_validation']
+            dependsOn: ['request_streaming_validation'],
           },
           {
             stepName: 'complete_streaming_validation',
             stepType: 'VALIDATION_COMPLETE',
             input: {
-              validationId: '{{request_streaming_validation.validationId}}'
+              validationId: '{{request_streaming_validation.validationId}}',
             },
             expectedOutput: {
               completed: true,
               totalProgressUpdates: 10,
-              streamingMetrics: 'object'
+              streamingMetrics: 'object',
             },
-            maxExecutionTime: 100
-          }
-        ]
-      }
+            maxExecutionTime: 100,
+          },
+        ],
+      },
     ];
   }
 
@@ -414,7 +423,7 @@ class ParlantWebSocketTestUtils {
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
     },
-    testClient: WebSocket
+    testClient: WebSocket,
   ): Promise<{
     success: boolean;
     output: Record<string, unknown>;
@@ -430,31 +439,46 @@ class ParlantWebSocketTestUtils {
       switch (step.stepType) {
         case 'CONVERSATION_START':
           output = await ParlantWebSocketTestUtils.executeConversationStart(
-            step.input, context, services, testClient
+            step.input,
+            context,
+            services,
+            testClient,
           );
           break;
 
         case 'VALIDATION_REQUEST':
           output = await ParlantWebSocketTestUtils.executeValidationRequest(
-            step.input, context, services, testClient
+            step.input,
+            context,
+            services,
+            testClient,
           );
           break;
 
         case 'USER_CONFIRMATION':
           output = await ParlantWebSocketTestUtils.executeUserConfirmation(
-            step.input, context, services, testClient
+            step.input,
+            context,
+            services,
+            testClient,
           );
           break;
 
         case 'PROGRESS_STREAM':
           output = await ParlantWebSocketTestUtils.executeProgressStreaming(
-            step.input, context, services, testClient
+            step.input,
+            context,
+            services,
+            testClient,
           );
           break;
 
         case 'VALIDATION_COMPLETE':
           output = await ParlantWebSocketTestUtils.executeValidationComplete(
-            step.input, context, services, testClient
+            step.input,
+            context,
+            services,
+            testClient,
           );
           break;
 
@@ -468,17 +492,17 @@ class ParlantWebSocketTestUtils {
         success: executionTime <= step.maxExecutionTime,
         output,
         executionTime,
-        error: executionTime > step.maxExecutionTime
-          ? `Step exceeded max execution time ${step.maxExecutionTime}ms`
-          : undefined
+        error:
+          executionTime > step.maxExecutionTime
+            ? `Step exceeded max execution time ${step.maxExecutionTime}ms`
+            : undefined,
       };
-
     } catch (error) {
       return {
         success: false,
         output: {},
         executionTime: performance.now() - startTime,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -494,7 +518,7 @@ class ParlantWebSocketTestUtils {
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
     },
-    testClient: WebSocket
+    testClient: WebSocket,
   ): Promise<Record<string, unknown>> {
     const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -511,14 +535,14 @@ class ParlantWebSocketTestUtils {
         userId: input.userId,
         functionName: input.functionName,
         parameters: input.parameters,
-        securityLevel: input.securityLevel || 'low'
+        securityLevel: input.securityLevel || 'low',
       },
       metadata: {
         priority: 'high',
         requiresAck: true,
         compression: false,
-        routingHints: ['conversation']
-      }
+        routingHints: ['conversation'],
+      },
     };
 
     // Send message via WebSocket
@@ -528,7 +552,7 @@ class ParlantWebSocketTestUtils {
     const response = await ParlantWebSocketTestUtils.waitForWebSocketResponse(
       testClient,
       ConversationalMessageType.SESSION_READY,
-      5000
+      5000,
     );
 
     return {
@@ -536,7 +560,7 @@ class ParlantWebSocketTestUtils {
       sessionId,
       sessionEstablished: true,
       securityLevel: input.securityLevel || 'low',
-      serverResponse: response
+      serverResponse: response,
     };
   }
 
@@ -551,50 +575,51 @@ class ParlantWebSocketTestUtils {
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
     },
-    testClient: WebSocket
+    testClient: WebSocket,
   ): Promise<Record<string, unknown>> {
     const validationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const sessionId = context.sessionId as string || 'test-session';
+    const sessionId = (context.sessionId as string) || 'test-session';
 
     // Create validation context
     const validationContext: ValidationContext = {
-      userId: context.userId as string || 'test-user',
+      userId: (context.userId as string) || 'test-user',
       applicationContext: 'parlant-websocket-testing',
       environmentInfo: {
         testEnvironment: true,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       },
       previousActions: [],
       securityContext: {
         authenticationLevel: 'basic',
         permissions: ['read', 'write'],
-        auditRequired: input.auditRequired as boolean || false,
-        complianceFlags: []
-      }
+        auditRequired: (input.auditRequired as boolean) || false,
+        complianceFlags: [],
+      },
     };
 
     // Create validation action
     const validationAction: ValidationAction = {
-      actionType: input.actionType as string || 'test_action',
-      parameters: input.parameters as Record<string, unknown> || {},
+      actionType: (input.actionType as string) || 'test_action',
+      parameters: (input.parameters as Record<string, unknown>) || {},
       expectedOutcome: 'Validation completed successfully',
       reversible: true,
       impact: {
         scope: 'local',
         dataAccess: true,
         stateChanges: false,
-        userInteraction: input.requiresConfirmation as boolean || false
-      }
+        userInteraction: (input.requiresConfirmation as boolean) || false,
+      },
     };
 
     // Create streaming options
-    const streamingOptions: ValidationStreamingOptions = input.streamingOptions as ValidationStreamingOptions || {
-      enableProgressUpdates: false,
-      updateInterval: 1000,
-      maxUpdateCount: 5,
-      compressionEnabled: true,
-      priorityBoost: false
-    };
+    const streamingOptions: ValidationStreamingOptions =
+      (input.streamingOptions as ValidationStreamingOptions) || {
+        enableProgressUpdates: false,
+        updateInterval: 1000,
+        maxUpdateCount: 5,
+        compressionEnabled: true,
+        priorityBoost: false,
+      };
 
     // Create validation request message
     const message: ValidationRequestMessage = {
@@ -607,15 +632,16 @@ class ParlantWebSocketTestUtils {
         validationId,
         context: validationContext,
         action: validationAction,
-        riskLevel: input.riskLevel as 'low' | 'medium' | 'high' | 'critical' || 'low',
-        streamingOptions
+        riskLevel:
+          (input.riskLevel as 'low' | 'medium' | 'high' | 'critical') || 'low',
+        streamingOptions,
       },
       metadata: {
         priority: 'high',
         requiresAck: true,
         compression: true,
-        routingHints: ['validation']
-      }
+        routingHints: ['validation'],
+      },
     };
 
     // Send validation request
@@ -625,17 +651,18 @@ class ParlantWebSocketTestUtils {
     const response = await ParlantWebSocketTestUtils.waitForWebSocketResponse(
       testClient,
       ConversationalMessageType.VALIDATION_RESPONSE,
-      10000
+      10000,
     );
 
     return {
       validationId,
       approved: response.payload.approved || false,
       confidence: response.payload.confidence || 0,
-      requiresUserConfirmation: response.payload.requiresUserConfirmation || false,
+      requiresUserConfirmation:
+        response.payload.requiresUserConfirmation || false,
       securityChecksRequired: response.payload.securityChecksRequired || false,
       streamingEnabled: streamingOptions.enableProgressUpdates,
-      serverResponse: response
+      serverResponse: response,
     };
   }
 
@@ -650,13 +677,14 @@ class ParlantWebSocketTestUtils {
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
     },
-    testClient: WebSocket
+    testClient: WebSocket,
   ): Promise<Record<string, unknown>> {
     const confirmationId = `confirmation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const validationId = ParlantWebSocketTestUtils.resolveContextVariable(
-      input.validationId as string, context
+      input.validationId as string,
+      context,
     ) as string;
-    const sessionId = context.sessionId as string || 'test-session';
+    const sessionId = (context.sessionId as string) || 'test-session';
 
     // Create user confirmation message
     const message: UserConfirmationMessage = {
@@ -668,17 +696,18 @@ class ParlantWebSocketTestUtils {
       payload: {
         confirmationId,
         validationId,
-        approved: input.approved as boolean || true,
-        reasoning: input.reasoning as string || 'User approved via WebSocket testing',
+        approved: (input.approved as boolean) || true,
+        reasoning:
+          (input.reasoning as string) || 'User approved via WebSocket testing',
         conditions: [],
-        confidence: input.confidence as number || 0.9
+        confidence: (input.confidence as number) || 0.9,
       },
       metadata: {
         priority: 'high',
         requiresAck: true,
         compression: false,
-        routingHints: ['confirmation']
-      }
+        routingHints: ['confirmation'],
+      },
     };
 
     // Send confirmation message
@@ -688,14 +717,14 @@ class ParlantWebSocketTestUtils {
     const response = await ParlantWebSocketTestUtils.waitForWebSocketResponse(
       testClient,
       ConversationalMessageType.CONFIRMATION_RESULT,
-      5000
+      5000,
     );
 
     return {
       confirmationId,
       processed: response.payload.processed || false,
       result: response.payload.result || 'unknown',
-      serverResponse: response
+      serverResponse: response,
     };
   }
 
@@ -710,74 +739,84 @@ class ParlantWebSocketTestUtils {
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
     },
-    testClient: WebSocket
+    testClient: WebSocket,
   ): Promise<Record<string, unknown>> {
     const validationId = ParlantWebSocketTestUtils.resolveContextVariable(
-      input.validationId as string, context
+      input.validationId as string,
+      context,
     ) as string;
-    const expectedUpdateCount = input.expectedUpdateCount as number || 5;
-    const monitorDuration = input.monitorDuration as number || 1000;
+    const expectedUpdateCount = (input.expectedUpdateCount as number) || 5;
+    const monitorDuration = (input.monitorDuration as number) || 1000;
 
     const progressUpdates: any[] = [];
     const latencies: number[] = [];
     const startTime = performance.now();
 
     // Set up progress update listener
-    const progressPromise = new Promise<Record<string, unknown>>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Progress streaming timeout'));
-      }, monitorDuration + 1000);
+    const progressPromise = new Promise<Record<string, unknown>>(
+      (resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Progress streaming timeout'));
+        }, monitorDuration + 1000);
 
-      const messageHandler = (data: Buffer) => {
-        try {
-          const message = JSON.parse(data.toString()) as ConversationalMessage;
+        const messageHandler = (data: Buffer) => {
+          try {
+            const message = JSON.parse(
+              data.toString(),
+            ) as ConversationalMessage;
 
-          if (message.type === ConversationalMessageType.PROGRESS_UPDATE) {
-            const receivedTime = performance.now();
-            const latency = receivedTime - (message.timestamp || receivedTime);
+            if (message.type === ConversationalMessageType.PROGRESS_UPDATE) {
+              const receivedTime = performance.now();
+              const latency =
+                receivedTime - (message.timestamp || receivedTime);
 
-            progressUpdates.push(message.payload);
-            latencies.push(latency);
+              progressUpdates.push(message.payload);
+              latencies.push(latency);
 
-            if (progressUpdates.length >= expectedUpdateCount) {
+              if (progressUpdates.length >= expectedUpdateCount) {
+                clearTimeout(timeout);
+                testClient.off('message', messageHandler);
+
+                const averageLatency =
+                  latencies.reduce((sum, lat) => sum + lat, 0) /
+                  latencies.length;
+
+                resolve({
+                  updatesReceived: progressUpdates.length,
+                  averageLatency,
+                  streamingComplete: true,
+                  progressData: progressUpdates,
+                  totalStreamingTime: performance.now() - startTime,
+                });
+              }
+            }
+
+            if (message.type === ConversationalMessageType.STREAMING_COMPLETE) {
               clearTimeout(timeout);
               testClient.off('message', messageHandler);
 
-              const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+              const averageLatency =
+                latencies.length > 0
+                  ? latencies.reduce((sum, lat) => sum + lat, 0) /
+                    latencies.length
+                  : 0;
 
               resolve({
                 updatesReceived: progressUpdates.length,
                 averageLatency,
                 streamingComplete: true,
                 progressData: progressUpdates,
-                totalStreamingTime: performance.now() - startTime
+                totalStreamingTime: performance.now() - startTime,
               });
             }
+          } catch (error) {
+            // Ignore parsing errors for non-JSON messages
           }
+        };
 
-          if (message.type === ConversationalMessageType.STREAMING_COMPLETE) {
-            clearTimeout(timeout);
-            testClient.off('message', messageHandler);
-
-            const averageLatency = latencies.length > 0
-              ? latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length
-              : 0;
-
-            resolve({
-              updatesReceived: progressUpdates.length,
-              averageLatency,
-              streamingComplete: true,
-              progressData: progressUpdates,
-              totalStreamingTime: performance.now() - startTime
-            });
-          }
-        } catch (error) {
-          // Ignore parsing errors for non-JSON messages
-        }
-      };
-
-      testClient.on('message', messageHandler);
-    });
+        testClient.on('message', messageHandler);
+      },
+    );
 
     return await progressPromise;
   }
@@ -793,10 +832,11 @@ class ParlantWebSocketTestUtils {
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
     },
-    testClient: WebSocket
+    testClient: WebSocket,
   ): Promise<Record<string, unknown>> {
     const validationId = ParlantWebSocketTestUtils.resolveContextVariable(
-      input.validationId as string, context
+      input.validationId as string,
+      context,
     ) as string;
 
     // Validation completion is typically handled by the server
@@ -807,8 +847,8 @@ class ParlantWebSocketTestUtils {
       result: 'approved',
       validationId,
       totalProgressUpdates: context.progressUpdates || 0,
-      auditTrailCreated: input.auditRequired as boolean || false,
-      streamingMetrics: context.streamingMetrics || {}
+      auditTrailCreated: (input.auditRequired as boolean) || false,
+      streamingMetrics: context.streamingMetrics || {},
     };
   }
 
@@ -817,7 +857,7 @@ class ParlantWebSocketTestUtils {
    */
   private static async sendWebSocketMessage(
     client: WebSocket,
-    message: ConversationalMessage
+    message: ConversationalMessage,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (client.readyState !== WebSocket.OPEN) {
@@ -845,7 +885,7 @@ class ParlantWebSocketTestUtils {
   private static async waitForWebSocketResponse(
     client: WebSocket,
     messageType: ConversationalMessageType,
-    timeout: number = 5000
+    timeout: number = 5000,
   ): Promise<ConversationalMessage> {
     return new Promise((resolve, reject) => {
       const timeoutHandle = setTimeout(() => {
@@ -876,9 +916,13 @@ class ParlantWebSocketTestUtils {
    */
   private static resolveContextVariable(
     value: string,
-    context: Record<string, unknown>
+    context: Record<string, unknown>,
   ): unknown {
-    if (typeof value === 'string' && value.startsWith('{{') && value.endsWith('}}')) {
+    if (
+      typeof value === 'string' &&
+      value.startsWith('{{') &&
+      value.endsWith('}}')
+    ) {
       const path = value.slice(2, -2);
       const keys = path.split('.');
       let result: unknown = context;
@@ -902,12 +946,15 @@ class ParlantWebSocketTestUtils {
    */
   static calculateParlantPerformanceScore(
     metrics: ParlantWebSocketMetrics,
-    expectedTime: number
+    expectedTime: number,
   ): number {
     let score = 100;
 
     // Latency scoring (40% weight)
-    const latencyScore = Math.max(0, 100 - (metrics.validationLatency / expectedTime) * 100);
+    const latencyScore = Math.max(
+      0,
+      100 - (metrics.validationLatency / expectedTime) * 100,
+    );
     score = score * 0.4 + latencyScore * 0.4;
 
     // Success rate scoring (30% weight)
@@ -930,7 +977,9 @@ class ParlantWebSocketTestUtils {
   /**
    * Create test WebSocket client
    */
-  static async createTestWebSocketClient(port: number = 8081): Promise<WebSocket> {
+  static async createTestWebSocketClient(
+    port: number = 8081,
+  ): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
       const client = new WebSocket(`ws://localhost:${port}`);
 
@@ -971,7 +1020,7 @@ class ParlantWebSocketTestUtils {
       progressUpdateCount: 10,
       enableSecurityValidation: true,
       enableEncryption: true,
-      requireAuthentication: true
+      requireAuthentication: true,
     };
   }
 }
@@ -999,31 +1048,39 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
               PARLANT_WEBSOCKET_PORT: 8080,
               PARLANT_WEBSOCKET_SECURITY_ENABLED: true,
               PARLANT_ALLOWED_ORIGINS: 'http://localhost,https://localhost',
-              NODE_ENV: 'test'
-            })
-          ]
-        })
+              NODE_ENV: 'test',
+            }),
+          ],
+        }),
       ],
       providers: [
         ConversationalWebSocketBridgeService,
         ParlantIntegrationService,
         ParlantWebSocketBridgeService,
         AigentParlantSecurityBridgeService,
-        Logger
-      ]
+        Logger,
+      ],
     }).compile();
 
-    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
-    websocketBridge = module.get<ParlantWebSocketBridgeService>(ParlantWebSocketBridgeService);
-    securityBridge = module.get<AigentParlantSecurityBridgeService>(AigentParlantSecurityBridgeService);
+    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
+    websocketBridge = module.get<ParlantWebSocketBridgeService>(
+      ParlantWebSocketBridgeService,
+    );
+    securityBridge = module.get<AigentParlantSecurityBridgeService>(
+      AigentParlantSecurityBridgeService,
+    );
     logger = module.get<Logger>(Logger);
     configService = module.get<ConfigService>(ConfigService);
 
     await module.init();
 
     // Allow time for WebSocket servers to start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   afterAll(async () => {
@@ -1034,8 +1091,11 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
   describe('End-to-End PARLANT Validation Workflows via WebSocket', () => {
     it('should execute complete low-risk validation workflow successfully', async () => {
-      const scenarios = ParlantWebSocketTestUtils.generateParlantValidationScenarios();
-      const lowRiskScenario = scenarios.find(s => s.name === 'Low-Risk Function Validation');
+      const scenarios =
+        ParlantWebSocketTestUtils.generateParlantValidationScenarios();
+      const lowRiskScenario = scenarios.find(
+        (s) => s.name === 'Low-Risk Function Validation',
+      );
 
       if (!lowRiskScenario) {
         throw new Error('Low-risk validation scenario not found');
@@ -1044,7 +1104,8 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
       logger.log(`Starting ${lowRiskScenario.name} test via WebSocket`);
 
       // Create test WebSocket client
-      const testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+      const testClient =
+        await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
 
       const startTime = performance.now();
       const context: Record<string, unknown> = {};
@@ -1057,9 +1118,13 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
         for (const step of lowRiskScenario.conversationalFlow) {
           logger.log(`Executing step: ${step.stepName}`);
 
-          const result = await ParlantWebSocketTestUtils.executeConversationalStep(
-            step, context, services, testClient
-          );
+          const result =
+            await ParlantWebSocketTestUtils.executeConversationalStep(
+              step,
+              context,
+              services,
+              testClient,
+            );
 
           if (result.success) {
             successfulSteps++;
@@ -1071,11 +1136,14 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
             logger.error(`Step ${step.stepName} failed: ${result.error}`);
           }
 
-          logger.log(`Step ${step.stepName} completed in ${result.executionTime}ms`);
+          logger.log(
+            `Step ${step.stepName} completed in ${result.executionTime}ms`,
+          );
         }
 
         const totalExecutionTime = performance.now() - startTime;
-        const averageLatency = totalLatency / lowRiskScenario.conversationalFlow.length;
+        const averageLatency =
+          totalLatency / lowRiskScenario.conversationalFlow.length;
 
         const metrics: ParlantWebSocketMetrics = {
           scenarioName: lowRiskScenario.name,
@@ -1086,24 +1154,27 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
           messagesPerSecond: (successfulSteps * 1000) / totalExecutionTime,
           validationsPerSecond: (1 * 1000) / totalExecutionTime,
           concurrentSessions: 1,
-          validationSuccessRate: successfulSteps / lowRiskScenario.conversationalFlow.length,
+          validationSuccessRate:
+            successfulSteps / lowRiskScenario.conversationalFlow.length,
           messageDeliveryRate: 1.0,
-          performanceScore: ParlantWebSocketTestUtils.calculateParlantPerformanceScore(
-            {
-              scenarioName: lowRiskScenario.name,
-              totalExecutionTime,
-              validationLatency: averageLatency,
-              streamingLatency: 0,
-              connectionEstablishmentTime: 100,
-              messagesPerSecond: 0,
-              validationsPerSecond: 0,
-              concurrentSessions: 1,
-              validationSuccessRate: successfulSteps / lowRiskScenario.conversationalFlow.length,
-              messageDeliveryRate: 1.0,
-              performanceScore: 0
-            },
-            lowRiskScenario.expectedValidationTime
-          )
+          performanceScore:
+            ParlantWebSocketTestUtils.calculateParlantPerformanceScore(
+              {
+                scenarioName: lowRiskScenario.name,
+                totalExecutionTime,
+                validationLatency: averageLatency,
+                streamingLatency: 0,
+                connectionEstablishmentTime: 100,
+                messagesPerSecond: 0,
+                validationsPerSecond: 0,
+                concurrentSessions: 1,
+                validationSuccessRate:
+                  successfulSteps / lowRiskScenario.conversationalFlow.length,
+                messageDeliveryRate: 1.0,
+                performanceScore: 0,
+              },
+              lowRiskScenario.expectedValidationTime,
+            ),
         };
 
         logger.log(`Low-Risk Validation Results:
@@ -1113,19 +1184,24 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
           Successful Steps: ${successfulSteps}/${lowRiskScenario.conversationalFlow.length}
           Performance Score: ${metrics.performanceScore}/100`);
 
-        expect(totalExecutionTime).toBeLessThan(lowRiskScenario.expectedValidationTime + 200);
+        expect(totalExecutionTime).toBeLessThan(
+          lowRiskScenario.expectedValidationTime + 200,
+        );
         expect(successfulSteps).toBe(lowRiskScenario.conversationalFlow.length);
         expect(metrics.validationSuccessRate).toBe(1.0);
         expect(metrics.performanceScore).toBeGreaterThan(75);
-
       } finally {
         testClient.close();
       }
     }, 15000);
 
     it('should handle high-risk validation with user confirmation workflow', async () => {
-      const scenarios = ParlantWebSocketTestUtils.generateParlantValidationScenarios();
-      const highRiskScenario = scenarios.find(s => s.name === 'High-Risk Function Validation with User Confirmation');
+      const scenarios =
+        ParlantWebSocketTestUtils.generateParlantValidationScenarios();
+      const highRiskScenario = scenarios.find(
+        (s) =>
+          s.name === 'High-Risk Function Validation with User Confirmation',
+      );
 
       if (!highRiskScenario) {
         throw new Error('High-risk validation scenario not found');
@@ -1133,7 +1209,8 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
       logger.log(`Starting ${highRiskScenario.name} test via WebSocket`);
 
-      const testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+      const testClient =
+        await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
 
       const startTime = performance.now();
       const context: Record<string, unknown> = {};
@@ -1146,9 +1223,13 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
       try {
         for (const step of highRiskScenario.conversationalFlow) {
-          const result = await ParlantWebSocketTestUtils.executeConversationalStep(
-            step, context, services, testClient
-          );
+          const result =
+            await ParlantWebSocketTestUtils.executeConversationalStep(
+              step,
+              context,
+              services,
+              testClient,
+            );
 
           expect(result.success).toBe(true);
           context[step.stepName] = result.output;
@@ -1182,18 +1263,27 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
           Validation Completed: ${validationCompleted}
           Audit Trail Created: ${auditTrailCreated}`);
 
-        expect(totalExecutionTime).toBeLessThan(highRiskScenario.expectedValidationTime + 300);
-        expect(validationRequested && userConfirmationProvided && validationCompleted).toBe(true);
+        expect(totalExecutionTime).toBeLessThan(
+          highRiskScenario.expectedValidationTime + 300,
+        );
+        expect(
+          validationRequested &&
+            userConfirmationProvided &&
+            validationCompleted,
+        ).toBe(true);
         expect(auditTrailCreated).toBe(true);
-
       } finally {
         testClient.close();
       }
     }, 20000);
 
     it('should execute real-time streaming validation with progress updates', async () => {
-      const scenarios = ParlantWebSocketTestUtils.generateParlantValidationScenarios();
-      const streamingScenario = scenarios.find(s => s.name === 'Real-time Streaming Validation with Progress Updates');
+      const scenarios =
+        ParlantWebSocketTestUtils.generateParlantValidationScenarios();
+      const streamingScenario = scenarios.find(
+        (s) =>
+          s.name === 'Real-time Streaming Validation with Progress Updates',
+      );
 
       if (!streamingScenario) {
         throw new Error('Streaming validation scenario not found');
@@ -1201,7 +1291,8 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
       logger.log(`Starting ${streamingScenario.name} test via WebSocket`);
 
-      const testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+      const testClient =
+        await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
 
       const startTime = performance.now();
       const context: Record<string, unknown> = {};
@@ -1214,9 +1305,13 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
       try {
         for (const step of streamingScenario.conversationalFlow) {
-          const result = await ParlantWebSocketTestUtils.executeConversationalStep(
-            step, context, services, testClient
-          );
+          const result =
+            await ParlantWebSocketTestUtils.executeConversationalStep(
+              step,
+              context,
+              services,
+              testClient,
+            );
 
           expect(result.success).toBe(true);
           context[step.stepName] = result.output;
@@ -1233,7 +1328,9 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
             streamingCompleted = result.output.streamingComplete as boolean;
 
             expect(progressUpdatesReceived).toBeGreaterThan(0);
-            expect(averageStreamingLatency).toBeLessThan(testConfig.maxStreamingLatency);
+            expect(averageStreamingLatency).toBeLessThan(
+              testConfig.maxStreamingLatency,
+            );
             expect(streamingCompleted).toBe(true);
           }
         }
@@ -1243,30 +1340,35 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
         const metrics: ParlantWebSocketMetrics = {
           scenarioName: streamingScenario.name,
           totalExecutionTime,
-          validationLatency: totalExecutionTime / streamingScenario.conversationalFlow.length,
+          validationLatency:
+            totalExecutionTime / streamingScenario.conversationalFlow.length,
           streamingLatency: averageStreamingLatency,
           connectionEstablishmentTime: 100,
-          messagesPerSecond: (progressUpdatesReceived * 1000) / totalExecutionTime,
+          messagesPerSecond:
+            (progressUpdatesReceived * 1000) / totalExecutionTime,
           validationsPerSecond: (1 * 1000) / totalExecutionTime,
           concurrentSessions: 1,
           validationSuccessRate: 1.0,
           messageDeliveryRate: 1.0,
-          performanceScore: ParlantWebSocketTestUtils.calculateParlantPerformanceScore(
-            {
-              scenarioName: streamingScenario.name,
-              totalExecutionTime,
-              validationLatency: totalExecutionTime / streamingScenario.conversationalFlow.length,
-              streamingLatency: averageStreamingLatency,
-              connectionEstablishmentTime: 100,
-              messagesPerSecond: 0,
-              validationsPerSecond: 0,
-              concurrentSessions: 1,
-              validationSuccessRate: 1.0,
-              messageDeliveryRate: 1.0,
-              performanceScore: 0
-            },
-            streamingScenario.expectedValidationTime
-          )
+          performanceScore:
+            ParlantWebSocketTestUtils.calculateParlantPerformanceScore(
+              {
+                scenarioName: streamingScenario.name,
+                totalExecutionTime,
+                validationLatency:
+                  totalExecutionTime /
+                  streamingScenario.conversationalFlow.length,
+                streamingLatency: averageStreamingLatency,
+                connectionEstablishmentTime: 100,
+                messagesPerSecond: 0,
+                validationsPerSecond: 0,
+                concurrentSessions: 1,
+                validationSuccessRate: 1.0,
+                messageDeliveryRate: 1.0,
+                performanceScore: 0,
+              },
+              streamingScenario.expectedValidationTime,
+            ),
         };
 
         logger.log(`Streaming Validation Results:
@@ -1277,13 +1379,16 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
           Streaming Completed: ${streamingCompleted}
           Performance Score: ${metrics.performanceScore}/100`);
 
-        expect(totalExecutionTime).toBeLessThan(streamingScenario.expectedValidationTime + 500);
+        expect(totalExecutionTime).toBeLessThan(
+          streamingScenario.expectedValidationTime + 500,
+        );
         expect(streamingEnabled).toBe(true);
         expect(progressUpdatesReceived).toBeGreaterThanOrEqual(5);
-        expect(averageStreamingLatency).toBeLessThan(testConfig.maxStreamingLatency);
+        expect(averageStreamingLatency).toBeLessThan(
+          testConfig.maxStreamingLatency,
+        );
         expect(streamingCompleted).toBe(true);
         expect(metrics.performanceScore).toBeGreaterThan(70);
-
       } finally {
         testClient.close();
       }
@@ -1297,47 +1402,60 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
       const concurrentSessions = 10;
       const sessionPromises: Promise<ParlantWebSocketMetrics>[] = [];
 
-      logger.log(`Starting ${concurrentSessions} concurrent PARLANT validation sessions`);
+      logger.log(
+        `Starting ${concurrentSessions} concurrent PARLANT validation sessions`,
+      );
 
       for (let sessionId = 0; sessionId < concurrentSessions; sessionId++) {
         const sessionPromise = (async (): Promise<ParlantWebSocketMetrics> => {
-          const testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+          const testClient =
+            await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
 
           const startTime = performance.now();
           const context: Record<string, unknown> = { sessionId };
-          const services = { conversationalBridge, parlantService, securityBridge };
+          const services = {
+            conversationalBridge,
+            parlantService,
+            securityBridge,
+          };
 
           let validationSuccess = false;
 
           try {
             // Execute simplified validation workflow
-            const conversationResult = await ParlantWebSocketTestUtils.executeConversationalStep(
-              {
-                stepName: 'concurrent_conversation',
-                stepType: 'CONVERSATION_START',
-                input: { userId: `concurrent-user-${sessionId}`, functionName: 'concurrent_function' },
-                expectedOutput: { conversationId: 'string' },
-                maxExecutionTime: 200
-              },
-              context,
-              services,
-              testClient
-            );
+            const conversationResult =
+              await ParlantWebSocketTestUtils.executeConversationalStep(
+                {
+                  stepName: 'concurrent_conversation',
+                  stepType: 'CONVERSATION_START',
+                  input: {
+                    userId: `concurrent-user-${sessionId}`,
+                    functionName: 'concurrent_function',
+                  },
+                  expectedOutput: { conversationId: 'string' },
+                  maxExecutionTime: 200,
+                },
+                context,
+                services,
+                testClient,
+              );
 
-            const validationResult = await ParlantWebSocketTestUtils.executeConversationalStep(
-              {
-                stepName: 'concurrent_validation',
-                stepType: 'VALIDATION_REQUEST',
-                input: { actionType: 'concurrent_action', riskLevel: 'low' },
-                expectedOutput: { approved: true },
-                maxExecutionTime: 500
-              },
-              context,
-              services,
-              testClient
-            );
+            const validationResult =
+              await ParlantWebSocketTestUtils.executeConversationalStep(
+                {
+                  stepName: 'concurrent_validation',
+                  stepType: 'VALIDATION_REQUEST',
+                  input: { actionType: 'concurrent_action', riskLevel: 'low' },
+                  expectedOutput: { approved: true },
+                  maxExecutionTime: 500,
+                },
+                context,
+                services,
+                testClient,
+              );
 
-            validationSuccess = conversationResult.success && validationResult.success;
+            validationSuccess =
+              conversationResult.success && validationResult.success;
 
             const totalExecutionTime = performance.now() - startTime;
 
@@ -1352,9 +1470,8 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
               concurrentSessions: concurrentSessions,
               validationSuccessRate: validationSuccess ? 1.0 : 0.0,
               messageDeliveryRate: 1.0,
-              performanceScore: validationSuccess ? 100 : 0
+              performanceScore: validationSuccess ? 100 : 0,
             };
-
           } finally {
             testClient.close();
           }
@@ -1365,10 +1482,19 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
       const results = await Promise.all(sessionPromises);
 
-      const avgExecutionTime = results.reduce((sum, r) => sum + r.totalExecutionTime, 0) / results.length;
-      const avgValidationLatency = results.reduce((sum, r) => sum + r.validationLatency, 0) / results.length;
-      const overallSuccessRate = results.reduce((sum, r) => sum + r.validationSuccessRate, 0) / results.length;
-      const totalValidationsPerSecond = results.reduce((sum, r) => sum + r.validationsPerSecond, 0);
+      const avgExecutionTime =
+        results.reduce((sum, r) => sum + r.totalExecutionTime, 0) /
+        results.length;
+      const avgValidationLatency =
+        results.reduce((sum, r) => sum + r.validationLatency, 0) /
+        results.length;
+      const overallSuccessRate =
+        results.reduce((sum, r) => sum + r.validationSuccessRate, 0) /
+        results.length;
+      const totalValidationsPerSecond = results.reduce(
+        (sum, r) => sum + r.validationsPerSecond,
+        0,
+      );
 
       logger.log(`Concurrent Session Results:
         Sessions: ${concurrentSessions}
@@ -1378,7 +1504,9 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
         Total Validations/Second: ${totalValidationsPerSecond.toFixed(1)}`);
 
       expect(avgExecutionTime).toBeLessThan(1500);
-      expect(avgValidationLatency).toBeLessThan(testConfig.maxValidationLatency);
+      expect(avgValidationLatency).toBeLessThan(
+        testConfig.maxValidationLatency,
+      );
       expect(overallSuccessRate).toBeGreaterThan(0.95);
       expect(totalValidationsPerSecond).toBeGreaterThan(5.0);
     }, 45000);
@@ -1390,14 +1518,15 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
       logger.log(`Starting sustained load test for ${loadTestDuration}ms`);
 
-      const testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+      const testClient =
+        await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
       const services = { conversationalBridge, parlantService, securityBridge };
 
       const metrics = {
         messagesProcessed: 0,
         validationsCompleted: 0,
         errors: 0,
-        latencies: [] as number[]
+        latencies: [] as number[],
       };
 
       const startTime = performance.now();
@@ -1408,24 +1537,28 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
             const messageStartTime = performance.now();
 
             try {
-              const context = { loadTest: true, messageId: metrics.messagesProcessed };
+              const context = {
+                loadTest: true,
+                messageId: metrics.messagesProcessed,
+              };
 
-              const result = await ParlantWebSocketTestUtils.executeConversationalStep(
-                {
-                  stepName: 'load_test_validation',
-                  stepType: 'VALIDATION_REQUEST',
-                  input: {
-                    actionType: 'load_test_action',
-                    riskLevel: 'low',
-                    messageId: metrics.messagesProcessed
+              const result =
+                await ParlantWebSocketTestUtils.executeConversationalStep(
+                  {
+                    stepName: 'load_test_validation',
+                    stepType: 'VALIDATION_REQUEST',
+                    input: {
+                      actionType: 'load_test_action',
+                      riskLevel: 'low',
+                      messageId: metrics.messagesProcessed,
+                    },
+                    expectedOutput: { approved: true },
+                    maxExecutionTime: 1000,
                   },
-                  expectedOutput: { approved: true },
-                  maxExecutionTime: 1000
-                },
-                context,
-                services,
-                testClient
-              );
+                  context,
+                  services,
+                  testClient,
+                );
 
               if (result.success) {
                 metrics.validationsCompleted++;
@@ -1440,7 +1573,6 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
                 clearInterval(interval);
                 resolve();
               }
-
             } catch (error) {
               metrics.errors++;
               logger.error(`Load test message error:`, error);
@@ -1451,11 +1583,15 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
         await loadTestPromise;
 
         const totalDuration = performance.now() - startTime;
-        const averageLatency = metrics.latencies.length > 0
-          ? metrics.latencies.reduce((sum, lat) => sum + lat, 0) / metrics.latencies.length
-          : 0;
-        const messagesPerSecond = (metrics.messagesProcessed * 1000) / totalDuration;
-        const validationsPerSecond = (metrics.validationsCompleted * 1000) / totalDuration;
+        const averageLatency =
+          metrics.latencies.length > 0
+            ? metrics.latencies.reduce((sum, lat) => sum + lat, 0) /
+              metrics.latencies.length
+            : 0;
+        const messagesPerSecond =
+          (metrics.messagesProcessed * 1000) / totalDuration;
+        const validationsPerSecond =
+          (metrics.validationsCompleted * 1000) / totalDuration;
         const errorRate = metrics.errors / metrics.messagesProcessed;
 
         logger.log(`Sustained Load Test Results:
@@ -1468,11 +1604,12 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
           Validations/Second: ${validationsPerSecond.toFixed(1)}
           Error Rate: ${(errorRate * 100).toFixed(2)}%`);
 
-        expect(metrics.messagesProcessed).toBeGreaterThan(expectedMessages * 0.8);
+        expect(metrics.messagesProcessed).toBeGreaterThan(
+          expectedMessages * 0.8,
+        );
         expect(averageLatency).toBeLessThan(testConfig.maxValidationLatency);
         expect(errorRate).toBeLessThan(0.05); // Less than 5% error rate
         expect(validationsPerSecond).toBeGreaterThan(0.5);
-
       } finally {
         testClient.close();
       }
@@ -1485,7 +1622,8 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
     it('should recover gracefully from WebSocket connection failures', async () => {
       logger.log('Starting WebSocket connection failure recovery test');
 
-      let testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+      let testClient =
+        await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
       const services = { conversationalBridge, parlantService, securityBridge };
       const context: Record<string, unknown> = {};
 
@@ -1496,18 +1634,19 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
       try {
         // Step 1: Establish initial connection and validate
-        const initialResult = await ParlantWebSocketTestUtils.executeConversationalStep(
-          {
-            stepName: 'initial_validation',
-            stepType: 'VALIDATION_REQUEST',
-            input: { actionType: 'test_connection', riskLevel: 'low' },
-            expectedOutput: { approved: true },
-            maxExecutionTime: 1000
-          },
-          context,
-          services,
-          testClient
-        );
+        const initialResult =
+          await ParlantWebSocketTestUtils.executeConversationalStep(
+            {
+              stepName: 'initial_validation',
+              stepType: 'VALIDATION_REQUEST',
+              input: { actionType: 'test_connection', riskLevel: 'low' },
+              expectedOutput: { approved: true },
+              maxExecutionTime: 1000,
+            },
+            context,
+            services,
+            testClient,
+          );
 
         initialConnectionSuccess = initialResult.success;
         expect(initialConnectionSuccess).toBe(true);
@@ -1517,26 +1656,28 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
         connectionLost = true;
 
         // Wait for connection to be recognized as lost
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Step 3: Attempt reconnection
-        testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+        testClient =
+          await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
         reconnectionSuccess = testClient.readyState === WebSocket.OPEN;
         expect(reconnectionSuccess).toBe(true);
 
         // Step 4: Validate functionality after recovery
-        const recoveryResult = await ParlantWebSocketTestUtils.executeConversationalStep(
-          {
-            stepName: 'post_recovery_validation',
-            stepType: 'VALIDATION_REQUEST',
-            input: { actionType: 'post_recovery_action', riskLevel: 'low' },
-            expectedOutput: { approved: true },
-            maxExecutionTime: 1000
-          },
-          context,
-          services,
-          testClient
-        );
+        const recoveryResult =
+          await ParlantWebSocketTestUtils.executeConversationalStep(
+            {
+              stepName: 'post_recovery_validation',
+              stepType: 'VALIDATION_REQUEST',
+              input: { actionType: 'post_recovery_action', riskLevel: 'low' },
+              expectedOutput: { approved: true },
+              maxExecutionTime: 1000,
+            },
+            context,
+            services,
+            testClient,
+          );
 
         validationAfterRecovery = recoveryResult.success;
         expect(validationAfterRecovery).toBe(true);
@@ -1547,8 +1688,12 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
           Reconnection Success: ${reconnectionSuccess}
           Validation After Recovery: ${validationAfterRecovery}`);
 
-        expect(initialConnectionSuccess && connectionLost && reconnectionSuccess && validationAfterRecovery).toBe(true);
-
+        expect(
+          initialConnectionSuccess &&
+            connectionLost &&
+            reconnectionSuccess &&
+            validationAfterRecovery,
+        ).toBe(true);
       } finally {
         if (testClient && testClient.readyState === WebSocket.OPEN) {
           testClient.close();
@@ -1559,7 +1704,8 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
     it('should handle validation timeout and retry scenarios', async () => {
       logger.log('Starting validation timeout and retry test');
 
-      const testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+      const testClient =
+        await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
       const services = { conversationalBridge, parlantService, securityBridge };
 
       let timeoutDetected = false;
@@ -1575,11 +1721,11 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
               stepType: 'VALIDATION_REQUEST',
               input: { actionType: 'timeout_action', riskLevel: 'medium' },
               expectedOutput: { approved: true },
-              maxExecutionTime: 50 // Very short timeout to trigger failure
+              maxExecutionTime: 50, // Very short timeout to trigger failure
             },
             {},
             services,
-            testClient
+            testClient,
           );
         } catch (error) {
           timeoutDetected = true;
@@ -1588,18 +1734,19 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
         // Step 2: Retry with normal timeout
         retryAttempted = true;
-        const retryResult = await ParlantWebSocketTestUtils.executeConversationalStep(
-          {
-            stepName: 'retry_validation',
-            stepType: 'VALIDATION_REQUEST',
-            input: { actionType: 'retry_action', riskLevel: 'low' },
-            expectedOutput: { approved: true },
-            maxExecutionTime: 2000 // Normal timeout
-          },
-          {},
-          services,
-          testClient
-        );
+        const retryResult =
+          await ParlantWebSocketTestUtils.executeConversationalStep(
+            {
+              stepName: 'retry_validation',
+              stepType: 'VALIDATION_REQUEST',
+              input: { actionType: 'retry_action', riskLevel: 'low' },
+              expectedOutput: { approved: true },
+              maxExecutionTime: 2000, // Normal timeout
+            },
+            {},
+            services,
+            testClient,
+          );
 
         finalValidationSuccess = retryResult.success;
 
@@ -1610,7 +1757,6 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
         expect(retryAttempted).toBe(true);
         expect(finalValidationSuccess).toBe(true);
-
       } finally {
         testClient.close();
       }
@@ -1623,7 +1769,8 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
     it('should enforce security requirements for sensitive operations', async () => {
       logger.log('Starting security validation test for sensitive operations');
 
-      const testClient = await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
+      const testClient =
+        await ParlantWebSocketTestUtils.createTestWebSocketClient(8081);
       const services = { conversationalBridge, parlantService, securityBridge };
 
       let authenticationRequired = false;
@@ -1633,34 +1780,38 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
 
       try {
         // Test high-security validation workflow
-        const securityResult = await ParlantWebSocketTestUtils.executeConversationalStep(
-          {
-            stepName: 'security_validation',
-            stepType: 'VALIDATION_REQUEST',
-            input: {
-              actionType: 'sensitive_data_access',
-              riskLevel: 'critical',
-              requiresConfirmation: true,
-              auditRequired: true,
-              encryptionRequired: true,
-              complianceFlags: ['GDPR', 'SOX', 'HIPAA']
+        const securityResult =
+          await ParlantWebSocketTestUtils.executeConversationalStep(
+            {
+              stepName: 'security_validation',
+              stepType: 'VALIDATION_REQUEST',
+              input: {
+                actionType: 'sensitive_data_access',
+                riskLevel: 'critical',
+                requiresConfirmation: true,
+                auditRequired: true,
+                encryptionRequired: true,
+                complianceFlags: ['GDPR', 'SOX', 'HIPAA'],
+              },
+              expectedOutput: {
+                requiresUserConfirmation: true,
+                securityChecksRequired: true,
+                auditTrailCreated: true,
+              },
+              maxExecutionTime: 1000,
             },
-            expectedOutput: {
-              requiresUserConfirmation: true,
-              securityChecksRequired: true,
-              auditTrailCreated: true
-            },
-            maxExecutionTime: 1000
-          },
-          {},
-          services,
-          testClient
-        );
+            {},
+            services,
+            testClient,
+          );
 
-        authenticationRequired = securityResult.output.requiresUserConfirmation as boolean;
-        auditTrailGenerated = securityResult.output.auditTrailCreated as boolean;
+        authenticationRequired = securityResult.output
+          .requiresUserConfirmation as boolean;
+        auditTrailGenerated = securityResult.output
+          .auditTrailCreated as boolean;
         encryptionVerified = true; // WebSocket connection encryption
-        complianceChecksPassed = securityResult.output.securityChecksRequired as boolean;
+        complianceChecksPassed = securityResult.output
+          .securityChecksRequired as boolean;
 
         logger.log(`Security Validation Results:
           Authentication Required: ${authenticationRequired}
@@ -1672,7 +1823,6 @@ describe('PARLANT Phase 1 Integration WebSocket Testing Framework', () => {
         expect(auditTrailGenerated).toBe(true);
         expect(encryptionVerified).toBe(true);
         expect(complianceChecksPassed).toBe(true);
-
       } finally {
         testClient.close();
       }

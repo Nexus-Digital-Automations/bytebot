@@ -23,9 +23,12 @@
  *
  * @author Claude Code (PARLANT Phase 1 WebSocket Validation Specialist)
  * @version 1.0.0
- */;
-
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
+ */ import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnApplicationShutdown,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
@@ -37,7 +40,6 @@ import {
   ConversationalMessage,
   ConversationalMessageType,
   ConversationalMessageMetadata,
-
 } from './conversational-websocket-bridge.service';
 
 // ===== MESSAGE ORDERING AND DELIVERY TYPES =====
@@ -57,27 +59,20 @@ export interface MessageSequence {
   readonly priority: MessagePriority;
   readonly retryScheduled?: number;
   readonly maxRetries: number;
-
-
 }
 
 /**
  * Message priority levels for queue management
- */;
-
-export enum MessagePriority {
-  CRITICAL = 0,    // Security violations, emergency stops
-  HIGH = 1,        // User interactions, real-time validations
-  NORMAL = 2,      // Standard validations, status updates
-  LOW = 3,         // Logging, analytics, background tasks
-
+ */ export enum MessagePriority {
+  CRITICAL = 0, // Security violations, emergency stops
+  HIGH = 1, // User interactions, real-time validations
+  NORMAL = 2, // Standard validations, status updates
+  LOW = 3, // Logging, analytics, background tasks
 }
 
 /**
  * Delivery acknowledgment structure
- */;
-
-export interface DeliveryAcknowledgment {
+ */ export interface DeliveryAcknowledgment {
   readonly messageId: string;
   readonly sessionId: string;
   readonly deliveredAt: number;
@@ -85,90 +80,69 @@ export interface DeliveryAcknowledgment {
   readonly acknowlegmentId: string;
   readonly checksumVerified: boolean;
   readonly sequenceValid: boolean;
-
-
 }
 
 /**
  * Message integrity validation result
- */;
-
-export interface MessageIntegrityResult {
+ */ export interface MessageIntegrityResult {
   readonly messageId: string;
   readonly checksumValid: boolean;
   readonly sequenceValid: boolean;
   readonly isDuplicate: boolean;
   readonly deliveryGuaranteed: boolean;
   readonly validationErrors: MessageValidationError[];
-
-
 }
 
 /**
  * Message validation error
- */;
-
-export interface MessageValidationError {
+ */ export interface MessageValidationError {
   readonly errorCode: string;
   readonly message: string;
   readonly severity: 'warning' | 'error' | 'critical';
-readonly recoverable: boolean;
+  readonly recoverable: boolean;
   readonly timestamp: number;
-
-
 }
 
 /**
  * Priority queue configuration
- */;
-
-export interface PriorityQueueConfig {
+ */ export interface PriorityQueueConfig {
   readonly maxQueueSize: number;
   readonly flushInterval: number;
   readonly batchSize: number;
   readonly compressionEnabled: boolean;
   readonly priorityWeights: Record<MessagePriority, number>;
   readonly timeoutPerPriority: Record<MessagePriority, number>;
-
-
 }
 
 /**
  * Message buffer management
- */;
-
-export interface MessageBuffer {
+ */ export interface MessageBuffer {
   readonly sessionId: string;
   readonly messages: MessageSequence[];
   readonly capacity: number;
-  readonly overflowStrategy: 'drop_oldest' | 'drop_newest' | 'drop_lowest_priority';
-readonly currentSize: number;
+  readonly overflowStrategy:
+    | 'drop_oldest'
+    | 'drop_newest'
+    | 'drop_lowest_priority';
+  readonly currentSize: number;
   readonly highWaterMark: number;
   readonly lowWaterMark: number;
-
-
 }
 
 /**
  * Retry mechanism configuration
- */;
-
-export interface RetryMechanismConfig {
+ */ export interface RetryMechanismConfig {
   readonly exponentialBackoff: boolean;
   readonly baseDelay: number;
   readonly maxDelay: number;
   readonly backoffMultiplier: number;
   readonly jitterEnabled: boolean;
   readonly deadLetterQueueEnabled: boolean;
-
-
 }
 
 /**
  * Conversation flow validation
- */;
-
-export interface ConversationFlowValidation {
+ */ export interface ConversationFlowValidation {
   readonly conversationId: string;
   readonly messageSequence: MessageSequence[];
   readonly orderingValid: boolean;
@@ -177,15 +151,11 @@ export interface ConversationFlowValidation {
   readonly outOfOrderMessages: string[];
   readonly conversationComplete: boolean;
   readonly integrityScore: number; // 0.0 to 1.0
-
-
 }
 
 /**
  * Performance metrics for message processing
- */;
-
-export interface MessageProcessingMetrics {
+ */ export interface MessageProcessingMetrics {
   readonly totalMessages: number;
   readonly successfulDeliveries: number;
   readonly failedDeliveries: number;
@@ -197,8 +167,6 @@ export interface MessageProcessingMetrics {
   readonly outOfOrderDetected: number;
   readonly retryCount: number;
   readonly deadLetterCount: number;
-
-
 }
 
 // ===== MESSAGE ORDERING AND DELIVERY VALIDATION SERVICE =====
@@ -208,16 +176,24 @@ export class MessageOrderingDeliveryValidationService
   extends EventEmitter
   implements OnModuleInit, OnApplicationShutdown
 {
-  private readonly logger = new Logger(MessageOrderingDeliveryValidationService.name);
+  private readonly logger = new Logger(
+    MessageOrderingDeliveryValidationService.name,
+  );
 
   // Message tracking and validation
   private readonly messageSequences = new Map<string, MessageSequence>();
   private readonly sessionSequences = new Map<string, number>();
   private readonly messageBuffers = new Map<string, MessageBuffer>();
-  private readonly priorityQueues = new Map<MessagePriority, MessageSequence[]>();
+  private readonly priorityQueues = new Map<
+    MessagePriority,
+    MessageSequence[]
+  >();
   private readonly acknowledgments = new Map<string, DeliveryAcknowledgment>();
   private readonly duplicateDetection = new Set<string>();
-  private readonly conversationFlows = new Map<string, ConversationFlowValidation>();
+  private readonly conversationFlows = new Map<
+    string,
+    ConversationFlowValidation
+  >();
 
   // Configuration
   private readonly queueConfig: PriorityQueueConfig;
@@ -238,64 +214,85 @@ export class MessageOrderingDeliveryValidationService
     outOfOrderDetected: 0,
     retryCount: 0,
     deadLetterCount: 0,
-  
-};
+  };
 
   private readonly latencyMeasurements: number[] = [];
   private metricsInterval: NodeJS.Timeout | null = null;
   private validationStartTime: number = 0;
 
   constructor(private readonly configService: ConfigService) {
-  super();
+    super();
 
     // Initialize configuration
     this.queueConfig = {
-  maxQueueSize: this.configService.get<number>('MESSAGE_QUEUE_MAX_SIZE', 50000),flushInterval: this.configService.get<number>('MESSAGE_QUEUE_FLUSH_INTERVAL', 100),batchSize: this.configService.get<number>('MESSAGE_QUEUE_BATCH_SIZE', 100),compressionEnabled: this.configService.get<boolean>('MESSAGE_COMPRESSION_ENABLED', true),priorityWeights: {[MessagePriority.CRITICAL]: 1000,
+      maxQueueSize: this.configService.get<number>(
+        'MESSAGE_QUEUE_MAX_SIZE',
+        50000,
+      ),
+      flushInterval: this.configService.get<number>(
+        'MESSAGE_QUEUE_FLUSH_INTERVAL',
+        100,
+      ),
+      batchSize: this.configService.get<number>(
+        'MESSAGE_QUEUE_BATCH_SIZE',
+        100,
+      ),
+      compressionEnabled: this.configService.get<boolean>(
+        'MESSAGE_COMPRESSION_ENABLED',
+        true,
+      ),
+      priorityWeights: {
+        [MessagePriority.CRITICAL]: 1000,
         [MessagePriority.HIGH]: 100,
         [MessagePriority.NORMAL]: 10,
         [MessagePriority.LOW]: 1,
-      
-},
+      },
       timeoutPerPriority: {
-  [MessagePriority.CRITICAL]: 1000,  // 1 second
-        [MessagePriority.HIGH]: 5000,      // 5 seconds
-        [MessagePriority.NORMAL]: 15000,   // 15 seconds
-        [MessagePriority.LOW]: 60000,      // 60 seconds
-      
-},
+        [MessagePriority.CRITICAL]: 1000, // 1 second
+        [MessagePriority.HIGH]: 5000, // 5 seconds
+        [MessagePriority.NORMAL]: 15000, // 15 seconds
+        [MessagePriority.LOW]: 60000, // 60 seconds
+      },
     };
 
     this.retryConfig = {
-  exponentialBackoff: true,
+      exponentialBackoff: true,
       baseDelay: 1000,
       maxDelay: 30000,
       backoffMultiplier: 2,
       jitterEnabled: true,
       deadLetterQueueEnabled: true,
-    
-};
+    };
 
-    this.maxBufferSize = this.configService.get<number>('MESSAGE_BUFFER_MAX_SIZE', 10000);
-    this.validationEnabled = this.configService.get<boolean>('MESSAGE_VALIDATION_ENABLED', true);
+    this.maxBufferSize = this.configService.get<number>(
+      'MESSAGE_BUFFER_MAX_SIZE',
+      10000,
+    );
+    this.validationEnabled = this.configService.get<boolean>(
+      'MESSAGE_VALIDATION_ENABLED',
+      true,
+    );
 
     // Initialize priority queues
-    Object.values(MessagePriority).forEach(priority => {
+    Object.values(MessagePriority).forEach((priority) => {
       if (typeof priority === 'number') {
         this.priorityQueues.set(priority, []);
       }
     });
 
-    this.logger.log('MessageOrderingDeliveryValidationService initialized with configuration', {
-      queueConfig: this.queueConfig,
-      retryConfig: this.retryConfig,
-      maxBufferSize: this.maxBufferSize,
-      validationEnabled: this.validationEnabled,
-    
-});
+    this.logger.log(
+      'MessageOrderingDeliveryValidationService initialized with configuration',
+      {
+        queueConfig: this.queueConfig,
+        retryConfig: this.retryConfig,
+        maxBufferSize: this.maxBufferSize,
+        validationEnabled: this.validationEnabled,
+      },
+    );
   }
 
   onModuleInit(): void {
-  this.validationStartTime = performance.now();
+    this.validationStartTime = performance.now();
 
     // Start metrics collection
     this.startMetricsCollection();
@@ -304,18 +301,18 @@ export class MessageOrderingDeliveryValidationService
     this.startQueueProcessing();
 
     this.logger.log('Message ordering and delivery validation service started');
-}
+  }
 
   onApplicationShutdown(): void {
-  // Stop metrics collection
+    // Stop metrics collection
     if (this.metricsInterval) {
       clearInterval(this.metricsInterval);
-
-}
+    }
 
     // Generate final validation report
     const finalReport = this.generateValidationReport();
-    this.logger.log('Final message validation report', finalReport);this.logger.log('Message ordering and delivery validation service stopped');
+    this.logger.log('Final message validation report', finalReport);
+    this.logger.log('Message ordering and delivery validation service stopped');
   }
 
   // ===== MESSAGE SEQUENCE VALIDATION =====
@@ -323,8 +320,10 @@ export class MessageOrderingDeliveryValidationService
   /**
    * Validates message sequence ordering and detects gaps
    */
-  validateMessageSequence(message: ConversationalMessage): MessageIntegrityResult {
-  const messageId = message.messageId;
+  validateMessageSequence(
+    message: ConversationalMessage,
+  ): MessageIntegrityResult {
+    const messageId = message.messageId;
     const sessionId = message.sessionId;
     const currentSequence = message.sequence;
 
@@ -335,43 +334,43 @@ export class MessageOrderingDeliveryValidationService
     const checksum = this.calculateMessageChecksum(message);
 
     // Check for duplicates
-    const duplicateKey = `${sessionId
-}:${messageId}`;
+    const duplicateKey = `${sessionId}:${messageId}`;
     const isDuplicate = this.duplicateDetection.has(duplicateKey);
 
     if (!isDuplicate) {
-  this.duplicateDetection.add(duplicateKey);
-    
-} else {
-  this.metrics.duplicatesDetected++;
-      this.logger.warn('Duplicate message detected', {messageId,sessionId,
+      this.duplicateDetection.add(duplicateKey);
+    } else {
+      this.metrics.duplicatesDetected++;
+      this.logger.warn('Duplicate message detected', {
+        messageId,
+        sessionId,
         sequence: currentSequence,
-      
-});
+      });
     }
 
     // Validate sequence ordering
     const sequenceValid = currentSequence === expectedSequence;
 
     if (!sequenceValid) {
-  this.metrics.outOfOrderDetected++;
-      this.logger.warn('Out-of-order message detected', {messageId,sessionId,
+      this.metrics.outOfOrderDetected++;
+      this.logger.warn('Out-of-order message detected', {
+        messageId,
+        sessionId,
         expectedSequence,
         actualSequence: currentSequence,
         gap: currentSequence - expectedSequence,
-      
-});
+      });
     }
 
     // Update session sequence tracking
-    this.sessionSequences.set(sessionId, Math.max(
-      this.sessionSequences.get(sessionId) ?? 0,
-      currentSequence
-    ));
+    this.sessionSequences.set(
+      sessionId,
+      Math.max(this.sessionSequences.get(sessionId) ?? 0, currentSequence),
+    );
 
     // Create message sequence record
     const messageSequence: MessageSequence = {
-  messageId,
+      messageId,
       sessionId,
       sequenceNumber: currentSequence,
       timestamp: message.timestamp,
@@ -379,9 +378,10 @@ export class MessageOrderingDeliveryValidationService
       acknowledged: false,
       checksum,
       priority: this.mapPriorityFromMetadata(message.metadata),
-      maxRetries: this.getMaxRetriesForPriority(this.mapPriorityFromMetadata(message.metadata)),
-    
-};
+      maxRetries: this.getMaxRetriesForPriority(
+        this.mapPriorityFromMetadata(message.metadata),
+      ),
+    };
 
     this.messageSequences.set(messageId, messageSequence);
 
@@ -389,36 +389,35 @@ export class MessageOrderingDeliveryValidationService
     const validationErrors: MessageValidationError[] = [];
 
     if (isDuplicate) {
-  validationErrors.push({
-  errorCode: 'DUPLICATE_MESSAGE',
-        message: `Duplicate message detected: ${messageId
-}`,
+      validationErrors.push({
+        errorCode: 'DUPLICATE_MESSAGE',
+        message: `Duplicate message detected: ${messageId}`,
         severity: 'warning',
-      recoverable: true,
-      timestamp: Date.now(),
+        recoverable: true,
+        timestamp: Date.now(),
       });
     }
 
-  if(!sequenceValid) {
-  validationErrors.push({
-  errorCode: 'SEQUENCE_OUT_OF_ORDER',
-        message: `Message sequence out of order: expected ${expectedSequence
-}, got ${currentSequence}`,
+    if (!sequenceValid) {
+      validationErrors.push({
+        errorCode: 'SEQUENCE_OUT_OF_ORDER',
+        message: `Message sequence out of order: expected ${
+          expectedSequence
+        }, got ${currentSequence}`,
         severity: 'error',
-      recoverable: true,
-      timestamp: Date.now(),
+        recoverable: true,
+        timestamp: Date.now(),
       });
     }
 
     const result: MessageIntegrityResult = {
-  messageId,
+      messageId,
       checksumValid: true, // Checksum validation implementation
       sequenceValid,
       isDuplicate,
       deliveryGuaranteed: !isDuplicate && sequenceValid,
       validationErrors,
-    
-};
+    };
 
     this.emit('message_validated', result);
 
@@ -431,32 +430,31 @@ export class MessageOrderingDeliveryValidationService
   processDeliveryAcknowledgment(
     messageId: string,
     sessionId: string,
-    deliveryLatency: number
+    deliveryLatency: number,
   ): DeliveryAcknowledgment {
-  const messageSequence = this.messageSequences.get(messageId);
+    const messageSequence = this.messageSequences.get(messageId);
 
     if (!messageSequence) {
-      throw new Error(`Message sequence not found for acknowledgment: ${messageId
-}`);
+      throw new Error(
+        `Message sequence not found for acknowledgment: ${messageId}`,
+      );
     }
 
     const acknowledgment: DeliveryAcknowledgment = {
-  messageId,
+      messageId,
       sessionId,
       deliveredAt: Date.now(),
       deliveryLatency,
       acknowlegmentId: crypto.randomUUID(),
       checksumVerified: true,
       sequenceValid: true,
-    
-};
+    };
 
     // Update message sequence
     const updatedSequence: MessageSequence = {
-  ...messageSequence,
+      ...messageSequence,
       acknowledged: true,
-    
-};
+    };
 
     this.messageSequences.set(messageId, updatedSequence);
     this.acknowledgments.set(messageId, acknowledgment);
@@ -476,16 +474,15 @@ export class MessageOrderingDeliveryValidationService
    * Add message to priority queue
    */
   addMessageToPriorityQueue(message: ConversationalMessage): void {
-  const priority = this.mapPriorityFromMetadata(message.metadata);
+    const priority = this.mapPriorityFromMetadata(message.metadata);
     const queue = this.priorityQueues.get(priority);
 
     if (!queue) {
-      throw new Error(`Priority queue not found: ${priority
-}`);
+      throw new Error(`Priority queue not found: ${priority}`);
     }
 
     const messageSequence: MessageSequence = {
-  messageId: message.messageId,
+      messageId: message.messageId,
       sessionId: message.sessionId,
       sequenceNumber: message.sequence,
       timestamp: message.timestamp,
@@ -494,58 +491,56 @@ export class MessageOrderingDeliveryValidationService
       checksum: this.calculateMessageChecksum(message),
       priority,
       maxRetries: this.getMaxRetriesForPriority(priority),
-    
-};
+    };
 
     // Check queue capacity
     if (queue.length >= this.queueConfig.maxQueueSize / 4) {
-  // Distribute across priorities
+      // Distribute across priorities
       this.handleQueueOverflow(priority, messageSequence);
       return;
-    
-}
+    }
 
     // Insert message maintaining priority order
     this.insertMessageByPriority(queue, messageSequence);
 
     this.emit('message_queued', {
-  messageId: message.messageId,
+      messageId: message.messageId,
       priority,
       queueSize: queue.length,
-    
-});
+    });
   }
 
   /**
    * Process priority queues in weighted round-robin fashion
    */
-  private async processMessageQueues(): Promise<void>  {
-  for (const [priority, queue] of this.priorityQueues) {
+  private async processMessageQueues(): Promise<void> {
+    for (const [priority, queue] of this.priorityQueues) {
       if (queue.length === 0) continue;
 
       const weight = this.queueConfig.priorityWeights[priority];
       const batchSize = Math.min(
         Math.ceil(this.queueConfig.batchSize * (weight / 1000)),
-        queue.length
+        queue.length,
       );
 
       const batch = queue.splice(0, batchSize);
 
       // Process batch concurrently
-      const processPromises = batch.map(messageSeq =>
-        this.processMessageDelivery(messageSeq)
+      const processPromises = batch.map((messageSeq) =>
+        this.processMessageDelivery(messageSeq),
       );
 
       await Promise.allSettled(processPromises);
-    
-}
+    }
   }
 
   /**
    * Process individual message delivery with retry logic
    */
-  private async processMessageDelivery(messageSequence: MessageSequence): Promise<void>  {
-  try {
+  private async processMessageDelivery(
+    messageSequence: MessageSequence,
+  ): Promise<void> {
+    try {
       const startTime = performance.now();
 
       // Simulate message delivery processing
@@ -557,16 +552,16 @@ export class MessageOrderingDeliveryValidationService
       this.processDeliveryAcknowledgment(
         messageSequence.messageId,
         messageSequence.sessionId,
-        deliveryTime
+        deliveryTime,
       );
 
       this.metrics.totalMessages++;
-
-    
-} catch (error) {
-      this.logger.error('Message delivery failed', {messageId: messageSequence.messageId,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      deliveryAttempt: messageSequence.deliveryAttempts,});
+    } catch (error) {
+      this.logger.error('Message delivery failed', {
+        messageId: messageSequence.messageId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        deliveryAttempt: messageSequence.deliveryAttempts,
+      });
 
       this.handleDeliveryFailure(messageSequence);
     }
@@ -576,53 +571,52 @@ export class MessageOrderingDeliveryValidationService
    * Handle message delivery failure with retry mechanism
    */
   private handleDeliveryFailure(messageSequence: MessageSequence): void {
-  const updatedSequence: MessageSequence = {
+    const updatedSequence: MessageSequence = {
       ...messageSequence,
       deliveryAttempts: messageSequence.deliveryAttempts + 1,
-    
-};
+    };
 
     if (updatedSequence.deliveryAttempts >= messageSequence.maxRetries) {
-  // Move to dead letter queue
+      // Move to dead letter queue
       this.metrics.deadLetterCount++;
       this.metrics.failedDeliveries++;
 
-      this.emit('message_dead_letter', {messageId: messageSequence.messageId,
-      reason: 'max_retries_exceeded',
-      attempts: updatedSequence.deliveryAttempts,
-});
+      this.emit('message_dead_letter', {
+        messageId: messageSequence.messageId,
+        reason: 'max_retries_exceeded',
+        attempts: updatedSequence.deliveryAttempts,
+      });
 
       return;
     }
 
     // Calculate retry delay with exponential backoff and jitter
-    const retryDelay = this.calculateRetryDelay(updatedSequence.deliveryAttempts);
+    const retryDelay = this.calculateRetryDelay(
+      updatedSequence.deliveryAttempts,
+    );
     const retryScheduled = Date.now() + retryDelay;
 
     const retrySequence: MessageSequence = {
-  ...updatedSequence,
+      ...updatedSequence,
       retryScheduled,
-    
-};
+    };
 
     // Schedule retry
     setTimeout(() => {
-  const queue = this.priorityQueues.get(messageSequence.priority);
+      const queue = this.priorityQueues.get(messageSequence.priority);
       if (queue) {
         this.insertMessageByPriority(queue, retrySequence);
-      
-}
+      }
     }, retryDelay);
 
     this.metrics.retryCount++;
 
     this.emit('message_retry_scheduled', {
-  messageId: messageSequence.messageId,
+      messageId: messageSequence.messageId,
       attempt: updatedSequence.deliveryAttempts,
       retryDelay,
       retryScheduled,
-    
-});
+    });
   }
 
   // ===== MESSAGE BUFFERING AND OVERFLOW HANDLING =====
@@ -631,7 +625,7 @@ export class MessageOrderingDeliveryValidationService
    * Create or update message buffer for session
    */
   createMessageBuffer(sessionId: string): MessageBuffer {
-  const buffer: MessageBuffer = {
+    const buffer: MessageBuffer = {
       sessionId,
       messages: [],
       capacity: this.maxBufferSize,
@@ -639,8 +633,7 @@ export class MessageOrderingDeliveryValidationService
       currentSize: 0,
       highWaterMark: Math.floor(this.maxBufferSize * 0.8),
       lowWaterMark: Math.floor(this.maxBufferSize * 0.2),
-    
-};
+    };
 
     this.messageBuffers.set(sessionId, buffer);
 
@@ -650,41 +643,58 @@ export class MessageOrderingDeliveryValidationService
   /**
    * Handle queue overflow scenarios
    */
-  private handleQueueOverflow(priority: MessagePriority, messageSequence: MessageSequence): void {
-  this.logger.warn('Queue overflow detected', {priority,messageId: messageSequence.messageId,
+  private handleQueueOverflow(
+    priority: MessagePriority,
+    messageSequence: MessageSequence,
+  ): void {
+    this.logger.warn('Queue overflow detected', {
+      priority,
+      messageId: messageSequence.messageId,
       queueSize: this.priorityQueues.get(priority)?.length,
-    
-});
+    });
 
-    const buffer = this.messageBuffers.get(messageSequence.sessionId)
-      ?? this.createMessageBuffer(messageSequence.sessionId);
+    const buffer =
+      this.messageBuffers.get(messageSequence.sessionId) ??
+      this.createMessageBuffer(messageSequence.sessionId);
 
     // Apply overflow strategy
     switch (buffer.overflowStrategy) {
-
-  case 'drop_oldest':if (buffer.messages.length >= buffer.capacity) {const dropped = buffer.messages.shift();
+      case 'drop_oldest':
+        if (buffer.messages.length >= buffer.capacity) {
+          const dropped = buffer.messages.shift();
           if (dropped) {
-            this.emit('message_dropped', {messageId: dropped.messageId,
-      reason: 'buffer_overflow_oldest',
-
-    });}
+            this.emit('message_dropped', {
+              messageId: dropped.messageId,
+              reason: 'buffer_overflow_oldest',
+            });
+          }
         }
         break;
 
-      case 'drop_newest':if (buffer.messages.length >= buffer.capacity) {this.emit('message_dropped', {messageId: messageSequence.messageId,
-      reason: 'buffer_overflow_newest',});return;
+      case 'drop_newest':
+        if (buffer.messages.length >= buffer.capacity) {
+          this.emit('message_dropped', {
+            messageId: messageSequence.messageId,
+            reason: 'buffer_overflow_newest',
+          });
+          return;
         }
         break;
 
-      case 'drop_lowest_priority':if (buffer.messages.length >= buffer.capacity) {
-  // Find lowest priority message and drop it
-          const lowestPriorityIndex = this.findLowestPriorityMessage(buffer.messages);
+      case 'drop_lowest_priority':
+        if (buffer.messages.length >= buffer.capacity) {
+          // Find lowest priority message and drop it
+          const lowestPriorityIndex = this.findLowestPriorityMessage(
+            buffer.messages,
+          );
           if (lowestPriorityIndex >= 0) {
             const dropped = buffer.messages.splice(lowestPriorityIndex, 1)[0];
             if (dropped) {
-              this.emit('message_dropped', {messageId: dropped.messageId,
-      reason: 'buffer_overflow_priority',
-});}
+              this.emit('message_dropped', {
+                messageId: dropped.messageId,
+                reason: 'buffer_overflow_priority',
+              });
+            }
           }
         }
         break;
@@ -693,10 +703,9 @@ export class MessageOrderingDeliveryValidationService
     // Add message to buffer
     buffer.messages.push(messageSequence);
     const updatedBuffer: MessageBuffer = {
-  ...buffer,
+      ...buffer,
       currentSize: buffer.messages.length,
-    
-};
+    };
 
     this.messageBuffers.set(messageSequence.sessionId, updatedBuffer);
   }
@@ -707,8 +716,8 @@ export class MessageOrderingDeliveryValidationService
    * Validate conversation flow ordering and completeness
    */
   validateConversationFlow(conversationId: string): ConversationFlowValidation {
-  const conversationMessages = Array.from(this.messageSequences.values())
-      .filter(msg => this.getConversationId(msg.messageId) === conversationId)
+    const conversationMessages = Array.from(this.messageSequences.values())
+      .filter((msg) => this.getConversationId(msg.messageId) === conversationId)
       .sort((a, b) => a.sequenceNumber - b.sequenceNumber);
 
     const validation: ConversationFlowValidation = {
@@ -720,25 +729,27 @@ export class MessageOrderingDeliveryValidationService
       outOfOrderMessages: this.findOutOfOrderMessages(conversationMessages),
       conversationComplete: this.isConversationComplete(conversationMessages),
       integrityScore: this.calculateIntegrityScore(conversationMessages),
-    
-};
+    };
 
     this.conversationFlows.set(conversationId, validation);
 
-    this.emit('conversation_flow_validated', validation);return validation;}
+    this.emit('conversation_flow_validated', validation);
+    return validation;
+  }
 
   /**
    * Validate PARLANT integration message flow
    */
   validateParlantIntegrationFlow(
     sessionId: string,
-    validationId: string
+    validationId: string,
   ): ConversationFlowValidation {
-  // Get messages for specific PARLANT validation flow
+    // Get messages for specific PARLANT validation flow
     const parlantMessages = Array.from(this.messageSequences.values())
-      .filter(msg =>
-        msg.sessionId === sessionId &&
-        this.isParlantValidationMessage(msg.messageId, validationId)
+      .filter(
+        (msg) =>
+          msg.sessionId === sessionId &&
+          this.isParlantValidationMessage(msg.messageId, validationId),
       )
       .sort((a, b) => a.timestamp - b.timestamp);
 
@@ -751,18 +762,25 @@ export class MessageOrderingDeliveryValidationService
     ];
 
     const validation: ConversationFlowValidation = {
-  conversationId: validationId,
+      conversationId: validationId,
       messageSequence: parlantMessages,
-      orderingValid: this.validateParlantMessageOrdering(parlantMessages, expectedMessageTypes),
-      missingMessages: this.findMissingParlantMessages(parlantMessages, expectedMessageTypes),
+      orderingValid: this.validateParlantMessageOrdering(
+        parlantMessages,
+        expectedMessageTypes,
+      ),
+      missingMessages: this.findMissingParlantMessages(
+        parlantMessages,
+        expectedMessageTypes,
+      ),
       duplicateMessages: this.findDuplicateMessages(parlantMessages),
       outOfOrderMessages: this.findOutOfOrderMessages(parlantMessages),
       conversationComplete: this.isParlantValidationComplete(parlantMessages),
       integrityScore: this.calculateIntegrityScore(parlantMessages),
-    
-};
+    };
 
-    this.emit('parlant_flow_validated', validation);return validation;}
+    this.emit('parlant_flow_validated', validation);
+    return validation;
+  }
 
   // ===== MESSAGE INTEGRITY AND CHECKSUM VALIDATION =====
 
@@ -770,26 +788,25 @@ export class MessageOrderingDeliveryValidationService
    * Calculate message checksum for integrity validation
    */
   private calculateMessageChecksum(message: ConversationalMessage): string {
-  const messageData = JSON.stringify({
-  type: message.type,
+    const messageData = JSON.stringify({
+      type: message.type,
       messageId: message.messageId,
       sessionId: message.sessionId,
       sequence: message.sequence,
       payload: message.payload,
-    
-});
+    });
 
-    return crypto.createHash('sha256').update(messageData).digest('hex');}/**
+    return crypto.createHash('sha256').update(messageData).digest('hex');
+  } /**
    * Verify message integrity using checksum
    */
   verifyMessageIntegrity(
     message: ConversationalMessage,
-    expectedChecksum: string
+    expectedChecksum: string,
   ): boolean {
-  const actualChecksum = this.calculateMessageChecksum(message);
+    const actualChecksum = this.calculateMessageChecksum(message);
     return actualChecksum === expectedChecksum;
-  
-}
+  }
 
   // ===== PERFORMANCE METRICS AND MONITORING =====
 
@@ -797,7 +814,7 @@ export class MessageOrderingDeliveryValidationService
    * Start metrics collection interval
    */
   private startMetricsCollection(): void {
-  this.metricsInterval = setInterval(() => {
+    this.metricsInterval = setInterval(() => {
       this.updateMetrics();
       this.emit('metrics_updated', this.getPerformanceMetrics());
     }, 5000); // Update every 5 seconds
@@ -808,7 +825,7 @@ export class MessageOrderingDeliveryValidationService
    */
   private startQueueProcessing(): void {
     setInterval(() => {
-      this.processMessageQueues().catch(error => {
+      this.processMessageQueues().catch((error) => {
         this.logger.error('Queue processing error', error);
       });
     }, this.queueConfig.flushInterval);
@@ -818,19 +835,24 @@ export class MessageOrderingDeliveryValidationService
    * Update performance metrics
    */
   private updateMetrics(): void {
-  if (this.latencyMeasurements.length > 0) {
-      const sortedLatencies = [...this.latencyMeasurements].sort((a, b) => a - b);
+    if (this.latencyMeasurements.length > 0) {
+      const sortedLatencies = [...this.latencyMeasurements].sort(
+        (a, b) => a - b,
+      );
 
-      this.metrics.averageLatency = this.latencyMeasurements.reduce((sum, lat) => sum + lat, 0)
-        / this.latencyMeasurements.length;
+      this.metrics.averageLatency =
+        this.latencyMeasurements.reduce((sum, lat) => sum + lat, 0) /
+        this.latencyMeasurements.length;
 
-      this.metrics.p95Latency = sortedLatencies[Math.floor(sortedLatencies.length * 0.95)] ?? 0;
-      this.metrics.p99Latency = sortedLatencies[Math.floor(sortedLatencies.length * 0.99)] ?? 0;
+      this.metrics.p95Latency =
+        sortedLatencies[Math.floor(sortedLatencies.length * 0.95)] ?? 0;
+      this.metrics.p99Latency =
+        sortedLatencies[Math.floor(sortedLatencies.length * 0.99)] ?? 0;
 
       const timeWindow = (performance.now() - this.validationStartTime) / 1000;
-      this.metrics.throughputPerSecond = this.metrics.totalMessages / timeWindow;
-    
-}
+      this.metrics.throughputPerSecond =
+        this.metrics.totalMessages / timeWindow;
+    }
   }
 
   /**
@@ -844,35 +866,36 @@ export class MessageOrderingDeliveryValidationService
    * Generate comprehensive validation report
    */
   generateValidationReport(): {
-  totalSessions: number;
+    totalSessions: number;
     totalMessages: number;
     totalConversations: number;
     performanceMetrics: MessageProcessingMetrics;
     queueStatistics: Record<MessagePriority, number>;
-    bufferStatistics: { totalBuffers: number; totalBufferedMessages: number 
-};
+    bufferStatistics: { totalBuffers: number; totalBufferedMessages: number };
     conversationFlowResults: ConversationFlowValidation[];
   } {
-    const queueStatistics: Record<MessagePriority, number> = {} as Record<MessagePriority, number>;
+    const queueStatistics: Record<MessagePriority, number> = {} as Record<
+      MessagePriority,
+      number
+    >;
     for (const [priority, queue] of this.priorityQueues) {
-  queueStatistics[priority] = queue.length;
-    
-}
+      queueStatistics[priority] = queue.length;
+    }
 
-    const totalBufferedMessages = Array.from(this.messageBuffers.values())
-      .reduce((sum, buffer) => sum + buffer.currentSize, 0);
+    const totalBufferedMessages = Array.from(
+      this.messageBuffers.values(),
+    ).reduce((sum, buffer) => sum + buffer.currentSize, 0);
 
     return {
-  totalSessions: this.sessionSequences.size,
+      totalSessions: this.sessionSequences.size,
       totalMessages: this.messageSequences.size,
       totalConversations: this.conversationFlows.size,
       performanceMetrics: this.getPerformanceMetrics(),
       queueStatistics,
       bufferStatistics: {
-  totalBuffers: this.messageBuffers.size,
+        totalBuffers: this.messageBuffers.size,
         totalBufferedMessages,
-      
-},
+      },
       conversationFlowResults: Array.from(this.conversationFlows.values()),
     };
   }
@@ -880,122 +903,129 @@ export class MessageOrderingDeliveryValidationService
   // ===== UTILITY METHODS =====
 
   private getNextSequenceNumber(sessionId: string): number {
-  const current = this.sessionSequences.get(sessionId) ?? 0;
+    const current = this.sessionSequences.get(sessionId) ?? 0;
     return current + 1;
-  
-}
+  }
 
-  private mapPriorityFromMetadata(metadata?: ConversationalMessageMetadata): MessagePriority {
-  if (!metadata) return MessagePriority.NORMAL;
+  private mapPriorityFromMetadata(
+    metadata?: ConversationalMessageMetadata,
+  ): MessagePriority {
+    if (!metadata) return MessagePriority.NORMAL;
 
     switch (metadata.priority) {
-
       case 'critical':
         return MessagePriority.CRITICAL;
-        case 'high': return MessagePriority.HIGH;
-    case 'normal':
+      case 'high':
+        return MessagePriority.HIGH;
+      case 'normal':
         return MessagePriority.NORMAL;
-        case 'low': return MessagePriority.LOW;
-  default:
+      case 'low':
+        return MessagePriority.LOW;
+      default:
         return MessagePriority.NORMAL;
         break;
-
     }
   }
 
   private getMaxRetriesForPriority(priority: MessagePriority): number {
-  switch (priority) {
-
-      case MessagePriority.CRITICAL: return 5;
-      case MessagePriority.HIGH: return 3;
-      case MessagePriority.NORMAL: return 2;
-      case MessagePriority.LOW: return 1;
+    switch (priority) {
+      case MessagePriority.CRITICAL:
+        return 5;
+      case MessagePriority.HIGH:
+        return 3;
+      case MessagePriority.NORMAL:
+        return 2;
+      case MessagePriority.LOW:
+        return 1;
       default:
         return 2;
         break;
-    
-
     }
   }
 
-  private insertMessageByPriority(queue: MessageSequence[], messageSequence: MessageSequence): void {
-  // Insert maintaining timestamp order within same priority
-    const insertIndex = queue.findIndex(msg => msg.timestamp > messageSequence.timestamp);
+  private insertMessageByPriority(
+    queue: MessageSequence[],
+    messageSequence: MessageSequence,
+  ): void {
+    // Insert maintaining timestamp order within same priority
+    const insertIndex = queue.findIndex(
+      (msg) => msg.timestamp > messageSequence.timestamp,
+    );
     if (insertIndex === -1) {
       queue.push(messageSequence);
-    
-} else {
-  queue.splice(insertIndex, 0, messageSequence);
-    
-}
+    } else {
+      queue.splice(insertIndex, 0, messageSequence);
+    }
   }
 
   private calculateRetryDelay(attempt: number): number {
-  if (!this.retryConfig.exponentialBackoff) {
+    if (!this.retryConfig.exponentialBackoff) {
       return this.retryConfig.baseDelay;
-    
-}
+    }
 
-    let delay = this.retryConfig.baseDelay * Math.pow(this.retryConfig.backoffMultiplier, attempt - 1);
+    let delay =
+      this.retryConfig.baseDelay *
+      Math.pow(this.retryConfig.backoffMultiplier, attempt - 1);
     delay = Math.min(delay, this.retryConfig.maxDelay);
 
     if (this.retryConfig.jitterEnabled) {
-  delay = delay * (0.8 + Math.random() * 0.4); // ±20% jitter
-    
-}
+      delay = delay * (0.8 + Math.random() * 0.4); // ±20% jitter
+    }
 
     return Math.floor(delay);
   }
 
   private findLowestPriorityMessage(messages: MessageSequence[]): number {
-  let lowestIndex = -1;
+    let lowestIndex = -1;
     let lowestPriority = -1;
 
     messages.forEach((msg, index) => {
       if (msg.priority > lowestPriority) {
         lowestPriority = msg.priority;
         lowestIndex = index;
-      
-}
+      }
     });
 
     return lowestIndex;
   }
 
-  private async simulateMessageDelivery(messageSequence: MessageSequence): Promise<void>  {
-  // Simulate variable delivery time based on priority
-    const baseDelay = this.queueConfig.timeoutPerPriority[messageSequence.priority] / 100;
+  private async simulateMessageDelivery(
+    messageSequence: MessageSequence,
+  ): Promise<void> {
+    // Simulate variable delivery time based on priority
+    const baseDelay =
+      this.queueConfig.timeoutPerPriority[messageSequence.priority] / 100;
     const deliveryTime = baseDelay + Math.random() * baseDelay;
 
-    await new Promise(resolve => setTimeout(resolve, deliveryTime));
+    await new Promise((resolve) => setTimeout(resolve, deliveryTime));
 
     // Simulate occasional failures
-    if (Math.random() < 0.05) { // 5% failure rate
+    if (Math.random() < 0.05) {
+      // 5% failure rate
       throw new Error('Simulated delivery failure');
-    
-}
+    }
   }
 
   private validateMessageOrdering(messages: MessageSequence[]): boolean {
-  for (let i = 1; i < messages.length; i++) {
+    for (let i = 1; i < messages.length; i++) {
       if (messages[i].sequenceNumber <= messages[i - 1].sequenceNumber) {
         return false;
-      
-}
+      }
     }
     return true;
   }
 
   private findMissingMessages(messages: MessageSequence[]): string[] {
-  if (messages.length === 0) return [];
+    if (messages.length === 0) return [];
 
     const missing: string[] = [];
     let expectedSequence = messages[0].sequenceNumber;
 
     for (const message of messages) {
       while (expectedSequence < message.sequenceNumber) {
-        missing.push(`${message.sessionId
-}:${expectedSequence}`);expectedSequence++;}
+        missing.push(`${message.sessionId}:${expectedSequence}`);
+        expectedSequence++;
+      }
       expectedSequence = message.sequenceNumber + 1;
     }
 
@@ -1003,77 +1033,78 @@ export class MessageOrderingDeliveryValidationService
   }
 
   private findDuplicateMessages(messages: MessageSequence[]): string[] {
-  const seen = new Set<string>();
+    const seen = new Set<string>();
     const duplicates: string[] = [];
 
     for (const message of messages) {
-      const key = `${message.sessionId
-}:${message.sequenceNumber}`;
+      const key = `${message.sessionId}:${message.sequenceNumber}`;
       if (seen.has(key)) {
-  duplicates.push(message.messageId);
-      
-} else {
-  seen.add(key);
-      
-}
+        duplicates.push(message.messageId);
+      } else {
+        seen.add(key);
+      }
     }
 
     return duplicates;
   }
 
   private findOutOfOrderMessages(messages: MessageSequence[]): string[] {
-  const outOfOrder: string[] = [];
+    const outOfOrder: string[] = [];
 
     for (let i = 1; i < messages.length; i++) {
       if (messages[i].sequenceNumber <= messages[i - 1].sequenceNumber) {
         outOfOrder.push(messages[i].messageId);
-      
-}
+      }
     }
 
     return outOfOrder;
   }
 
   private isConversationComplete(messages: MessageSequence[]): boolean {
-  // Simple heuristic: conversation is complete if last message is older than 30 seconds
+    // Simple heuristic: conversation is complete if last message is older than 30 seconds
     if (messages.length === 0) return false;
 
     const lastMessage = messages[messages.length - 1];
     return Date.now() - lastMessage.timestamp > 30000;
-  
-}
+  }
 
   private calculateIntegrityScore(messages: MessageSequence[]): number {
-  if (messages.length === 0) return 1.0;
+    if (messages.length === 0) return 1.0;
 
-    const acknowledgedCount = messages.filter(msg => msg.acknowledged).length;
+    const acknowledgedCount = messages.filter((msg) => msg.acknowledged).length;
     const duplicateCount = this.findDuplicateMessages(messages).length;
     const outOfOrderCount = this.findOutOfOrderMessages(messages).length;
 
-    const score = (acknowledgedCount - duplicateCount - outOfOrderCount) / messages.length;
+    const score =
+      (acknowledgedCount - duplicateCount - outOfOrderCount) / messages.length;
     return Math.max(0, Math.min(1, score));
-  
-}
+  }
 
   private getConversationId(messageId: string): string {
-  // Extract conversation ID from message ID pattern
+    // Extract conversation ID from message ID pattern
     const match = messageId.match(/conv_([^_]+)/);
     return match ? match[1] : 'default';
-}private isParlantValidationMessage(messageId: string, validationId: string): boolean {
-    return messageId.includes(validationId) || messageId.includes('validation');}
-private validateParlantMessageOrdering(
-    messages: MessageSequence[],
-    expectedTypes: ConversationalMessageType[]
+  }
+  private isParlantValidationMessage(
+    messageId: string,
+    validationId: string,
   ): boolean {
-  // Validate that messages follow PARLANT validation flow order
-    const messageTypes = messages.map(msg => this.getMessageType(msg.messageId));
+    return messageId.includes(validationId) || messageId.includes('validation');
+  }
+  private validateParlantMessageOrdering(
+    messages: MessageSequence[],
+    expectedTypes: ConversationalMessageType[],
+  ): boolean {
+    // Validate that messages follow PARLANT validation flow order
+    const messageTypes = messages.map((msg) =>
+      this.getMessageType(msg.messageId),
+    );
 
     let expectedIndex = 0;
     for (const messageType of messageTypes) {
       if (messageType === expectedTypes[expectedIndex]) {
         expectedIndex++;
-      
-}
+      }
     }
 
     return expectedIndex === expectedTypes.length;
@@ -1081,38 +1112,46 @@ private validateParlantMessageOrdering(
 
   private findMissingParlantMessages(
     messages: MessageSequence[],
-    expectedTypes: ConversationalMessageType[]
+    expectedTypes: ConversationalMessageType[],
   ): string[] {
-  const messageTypes = messages.map(msg => this.getMessageType(msg.messageId));
+    const messageTypes = messages.map((msg) =>
+      this.getMessageType(msg.messageId),
+    );
     const missing: string[] = [];
 
     for (const expectedType of expectedTypes) {
       if (!messageTypes.includes(expectedType)) {
         missing.push(expectedType);
-      
-}
+      }
     }
 
     return missing;
   }
 
   private isParlantValidationComplete(messages: MessageSequence[]): boolean {
-  const messageTypes = messages.map(msg => this.getMessageType(msg.messageId));
+    const messageTypes = messages.map((msg) =>
+      this.getMessageType(msg.messageId),
+    );
 
-    return messageTypes.includes(ConversationalMessageType.CONFIRMATION_RESULT) ||
-           messageTypes.includes(ConversationalMessageType.STREAMING_COMPLETE);
-  
-}
+    return (
+      messageTypes.includes(ConversationalMessageType.CONFIRMATION_RESULT) ||
+      messageTypes.includes(ConversationalMessageType.STREAMING_COMPLETE)
+    );
+  }
 
   private getMessageType(messageId: string): ConversationalMessageType {
-  // Extract message type from message ID pattern
-    if (messageId.includes('validation_request')) return ConversationalMessageType.VALIDATION_REQUEST;
-    if (messageId.includes('validation_response')) return ConversationalMessageType.VALIDATION_RESPONSE;
-    if (messageId.includes('user_confirmation')) return ConversationalMessageType.USER_CONFIRMATION;
-    if (messageId.includes('confirmation_result')) return ConversationalMessageType.CONFIRMATION_RESULT;
-    if (messageId.includes('progress_update')) return ConversationalMessageType.PROGRESS_UPDATE;
+    // Extract message type from message ID pattern
+    if (messageId.includes('validation_request'))
+      return ConversationalMessageType.VALIDATION_REQUEST;
+    if (messageId.includes('validation_response'))
+      return ConversationalMessageType.VALIDATION_RESPONSE;
+    if (messageId.includes('user_confirmation'))
+      return ConversationalMessageType.USER_CONFIRMATION;
+    if (messageId.includes('confirmation_result'))
+      return ConversationalMessageType.CONFIRMATION_RESULT;
+    if (messageId.includes('progress_update'))
+      return ConversationalMessageType.PROGRESS_UPDATE;
 
     return ConversationalMessageType.HEARTBEAT; // Default
-  
-}
+  }
 }

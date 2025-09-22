@@ -635,7 +635,10 @@ export interface StorageConfig {
 // ===== RESOURCE MONITORING SERVICE =====
 
 @Injectable()
-export class ResourceMonitoringService extends EventEmitter implements OnApplicationShutdown {
+export class ResourceMonitoringService
+  extends EventEmitter
+  implements OnApplicationShutdown
+{
   private readonly logger = new Logger(ResourceMonitoringService.name);
   private readonly metricsHistory: SystemResourceMetrics[] = [];
   private readonly alertHistory: ResourceAlert[] = [];
@@ -649,7 +652,8 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
   private readonly networkMetricsCollector = new NetworkMetricsCollector();
   private readonly databaseMetricsCollector = new DatabaseMetricsCollector();
   private readonly cacheMetricsCollector = new CacheMetricsCollector();
-  private readonly applicationMetricsCollector = new ApplicationMetricsCollector();
+  private readonly applicationMetricsCollector =
+    new ApplicationMetricsCollector();
   private readonly parlantMetricsCollector = new ParlantMetricsCollector();
 
   // Performance tracking
@@ -711,7 +715,7 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
     // Start periodic metrics collection
     this.monitoringInterval = setInterval(
       () => this.collectMetrics(),
-      this.config.interval
+      this.config.interval,
     );
 
     // Collect initial baseline
@@ -748,23 +752,16 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
 
     try {
       // Collect all metrics in parallel for efficiency
-      const [
-        system,
-        process,
-        network,
-        database,
-        cache,
-        application,
-        parlant,
-      ] = await Promise.all([
-        this.systemMetricsCollector.collect(),
-        this.processMetricsCollector.collect(),
-        this.networkMetricsCollector.collect(),
-        this.databaseMetricsCollector.collect(),
-        this.cacheMetricsCollector.collect(),
-        this.applicationMetricsCollector.collect(),
-        this.parlantMetricsCollector.collect(),
-      ]);
+      const [system, process, network, database, cache, application, parlant] =
+        await Promise.all([
+          this.systemMetricsCollector.collect(),
+          this.processMetricsCollector.collect(),
+          this.networkMetricsCollector.collect(),
+          this.databaseMetricsCollector.collect(),
+          this.cacheMetricsCollector.collect(),
+          this.applicationMetricsCollector.collect(),
+          this.parlantMetricsCollector.collect(),
+        ]);
 
       const metrics: SystemResourceMetrics = {
         timestamp: new Date(),
@@ -802,12 +799,14 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
       this.emit('metricsCollected', metrics);
 
       return metrics;
-
     } catch (error) {
-      this.logger.error(`❌ [RESOURCE] Failed to collect metrics: ${error instanceof Error ? error.message : String(error)}`, {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      this.logger.error(
+        `❌ [RESOURCE] Failed to collect metrics: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+      );
 
       throw error;
     }
@@ -859,7 +858,8 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
     this.collectionCount++;
     this.lastCollectionTime = collectionTime;
     this.averageCollectionTime =
-      (this.averageCollectionTime * (this.collectionCount - 1) + collectionTime) /
+      (this.averageCollectionTime * (this.collectionCount - 1) +
+        collectionTime) /
       this.collectionCount;
   }
 

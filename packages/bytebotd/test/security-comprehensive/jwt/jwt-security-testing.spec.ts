@@ -28,7 +28,7 @@ import {
   SecurityTestType,
   SecurityTestStatus,
   SecurityRiskLevel,
-  SecurityTestUtils
+  SecurityTestUtils,
 } from '../framework/security-test-framework';
 
 // Type-safe interfaces for JWT testing
@@ -91,13 +91,15 @@ describe('JWT Security Testing Suite', () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [AppModule],
-      providers: [SecurityTestFramework]
+      providers: [SecurityTestFramework],
     }).compile();
 
     app = module.createNestApplication();
     await app.init();
 
-    securityFramework = module.get<SecurityTestFramework>(SecurityTestFramework);
+    securityFramework = module.get<SecurityTestFramework>(
+      SecurityTestFramework,
+    );
     await securityFramework.initialize(module);
 
     configService = module.get<ConfigService>(ConfigService);
@@ -110,7 +112,6 @@ describe('JWT Security Testing Suite', () => {
   });
 
   describe('JWT Token Lifecycle Testing', () => {
-
     it('should validate proper JWT token creation and structure', async () => {
       await securityFramework.executeSecurityTest(
         'JWT Token Creation Validation',
@@ -120,7 +121,7 @@ describe('JWT Security Testing Suite', () => {
             userId: SecurityTestUtils.generateRandomData(8),
             username: 'testuser',
             role: 'user',
-            permissions: ['read']
+            permissions: ['read'],
           };
 
           const token = securityFramework.generateTestJWT(payload);
@@ -136,7 +137,7 @@ describe('JWT Security Testing Suite', () => {
           expect(decoded.username).toBe(payload.username);
           expect(decoded.role).toBe(payload.role);
           expect(decoded.iss).toBe('security-test-framework');
-        }
+        },
       );
     });
 
@@ -148,7 +149,10 @@ describe('JWT Security Testing Suite', () => {
           const payload = { userId: '123', username: 'testuser' };
 
           // Test expired token
-          const expiredToken = securityFramework.generateMaliciousJWT(payload, 'expired');
+          const expiredToken = securityFramework.generateMaliciousJWT(
+            payload,
+            'expired',
+          );
 
           const response = await request(app.getHttpServer())
             .get('/api/protected')
@@ -158,7 +162,7 @@ describe('JWT Security Testing Suite', () => {
           expect(isAPIErrorResponse(response.body)).toBe(true);
           const responseBody = response.body as APIErrorResponse;
           expect(responseBody.message).toContain('expired');
-        }
+        },
       );
     });
 
@@ -168,10 +172,12 @@ describe('JWT Security Testing Suite', () => {
         SecurityTestType.AUTHENTICATION,
         async () => {
           const payload = { userId: '123', username: 'testuser' };
-          const shortLivedToken = securityFramework.generateTestJWT(payload, { expiresIn: '1s' });
+          const shortLivedToken = securityFramework.generateTestJWT(payload, {
+            expiresIn: '1s',
+          });
 
           // Wait for token to expire
-          await new Promise(resolve => setTimeout(resolve, 1100));
+          await new Promise((resolve) => setTimeout(resolve, 1100));
 
           // Attempt to refresh token
           const refreshResponse = await request(app.getHttpServer())
@@ -179,14 +185,17 @@ describe('JWT Security Testing Suite', () => {
             .send({ token: shortLivedToken });
 
           if (refreshResponse.status === 200) {
-            const responseBody = refreshResponse.body as { accessToken?: string; refreshToken?: string };
+            const responseBody = refreshResponse.body as {
+              accessToken?: string;
+              refreshToken?: string;
+            };
             expect(responseBody.accessToken).toBeDefined();
             expect(responseBody.refreshToken).toBeDefined();
           } else {
             // If refresh endpoint doesn't exist, that's also a valid security finding
             expect(refreshResponse.status).toBe(404);
           }
-        }
+        },
       );
     });
 
@@ -215,20 +224,22 @@ describe('JWT Security Testing Suite', () => {
               .set('Authorization', `Bearer ${token}`)
               .expect(401);
           }
-        }
+        },
       );
     });
   });
 
   describe('JWT Token Manipulation Attacks', () => {
-
     it('should prevent JWT signature tampering attacks', async () => {
       await securityFramework.executeSecurityTest(
         'JWT Signature Tampering Prevention',
         SecurityTestType.AUTHENTICATION,
         async () => {
           const payload = { userId: '123', username: 'testuser' };
-          const invalidSignatureToken = securityFramework.generateMaliciousJWT(payload, 'invalid-signature');
+          const invalidSignatureToken = securityFramework.generateMaliciousJWT(
+            payload,
+            'invalid-signature',
+          );
 
           const response = await request(app.getHttpServer())
             .get('/api/protected')
@@ -237,8 +248,10 @@ describe('JWT Security Testing Suite', () => {
 
           expect(isAPIErrorResponse(response.body)).toBe(true);
           const responseBody = response.body as APIErrorResponse;
-          expect(responseBody.message).toMatch(/invalid|unauthorized|signature/i);
-        }
+          expect(responseBody.message).toMatch(
+            /invalid|unauthorized|signature/i,
+          );
+        },
       );
     });
 
@@ -247,8 +260,15 @@ describe('JWT Security Testing Suite', () => {
         'JWT None Algorithm Attack Prevention',
         SecurityTestType.AUTHENTICATION,
         async () => {
-          const payload = { userId: '123', username: 'testuser', role: 'admin' };
-          const noneAlgorithmToken = securityFramework.generateMaliciousJWT(payload, 'none-algorithm');
+          const payload = {
+            userId: '123',
+            username: 'testuser',
+            role: 'admin',
+          };
+          const noneAlgorithmToken = securityFramework.generateMaliciousJWT(
+            payload,
+            'none-algorithm',
+          );
 
           const response = await request(app.getHttpServer())
             .get('/api/protected')
@@ -257,8 +277,10 @@ describe('JWT Security Testing Suite', () => {
 
           expect(isAPIErrorResponse(response.body)).toBe(true);
           const responseBody = response.body as APIErrorResponse;
-          expect(responseBody.message).toMatch(/invalid|unauthorized|algorithm/i);
-        }
+          expect(responseBody.message).toMatch(
+            /invalid|unauthorized|algorithm/i,
+          );
+        },
       );
     });
 
@@ -268,7 +290,10 @@ describe('JWT Security Testing Suite', () => {
         SecurityTestType.AUTHENTICATION,
         async () => {
           const payload = { userId: '123', username: 'testuser', role: 'user' };
-          const tamperedToken = securityFramework.generateMaliciousJWT(payload, 'tampered-payload');
+          const tamperedToken = securityFramework.generateMaliciousJWT(
+            payload,
+            'tampered-payload',
+          );
 
           const response = await request(app.getHttpServer())
             .get('/api/admin')
@@ -277,8 +302,10 @@ describe('JWT Security Testing Suite', () => {
 
           expect(isAPIErrorResponse(response.body)).toBe(true);
           const responseBody = response.body as APIErrorResponse;
-          expect(responseBody.message).toMatch(/invalid|unauthorized|signature/i);
-        }
+          expect(responseBody.message).toMatch(
+            /invalid|unauthorized|signature/i,
+          );
+        },
       );
     });
 
@@ -287,7 +314,11 @@ describe('JWT Security Testing Suite', () => {
         'JWT Algorithm Confusion Attack Prevention',
         SecurityTestType.AUTHENTICATION,
         async () => {
-          const payload = { userId: '123', username: 'testuser', role: 'admin' };
+          const payload = {
+            userId: '123',
+            username: 'testuser',
+            role: 'admin',
+          };
 
           // Create token with different algorithm
           const rsaToken = jwt.sign(payload, jwtSecret, { algorithm: 'HS256' });
@@ -299,13 +330,12 @@ describe('JWT Security Testing Suite', () => {
 
           // Should either work with proper validation or reject with clear error
           expect([200, 401, 403]).toContain(response.status);
-        }
+        },
       );
     });
   });
 
   describe('JWT Session Management Testing', () => {
-
     it('should handle concurrent session validation', async () => {
       await securityFramework.executeSecurityTest(
         'JWT Concurrent Session Handling',
@@ -330,7 +360,7 @@ describe('JWT Security Testing Suite', () => {
           // Validate concurrent session handling
           expect([200, 401]).toContain(response1.status);
           expect([200, 401]).toContain(response2.status);
-        }
+        },
       );
     });
 
@@ -340,7 +370,9 @@ describe('JWT Security Testing Suite', () => {
         SecurityTestType.AUTHENTICATION,
         async () => {
           const payload = { userId: '123', username: 'testuser' };
-          const shortToken = securityFramework.generateTestJWT(payload, { expiresIn: '2s' });
+          const shortToken = securityFramework.generateTestJWT(payload, {
+            expiresIn: '2s',
+          });
 
           // Token should work initially
           const initialResponse = await request(app.getHttpServer())
@@ -348,7 +380,7 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${shortToken}`);
 
           // Wait for expiration
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          await new Promise((resolve) => setTimeout(resolve, 3000));
 
           // Token should be expired
           const expiredResponse = await request(app.getHttpServer())
@@ -359,13 +391,12 @@ describe('JWT Security Testing Suite', () => {
           expect(isAPIErrorResponse(expiredResponse.body)).toBe(true);
           const responseBody = expiredResponse.body as APIErrorResponse;
           expect(responseBody.message).toMatch(/expired|invalid/i);
-        }
+        },
       );
     });
   });
 
   describe('JWT Security Best Practices Validation', () => {
-
     it('should validate JWT secret strength and security', async () => {
       await securityFramework.executeSecurityTest(
         'JWT Secret Strength Validation',
@@ -377,7 +408,7 @@ describe('JWT Security Testing Suite', () => {
           expect(jwtSecret).not.toBe('secret');
           expect(jwtSecret).not.toBe('test');
           expect(jwtSecret).not.toBe('password');
-        }
+        },
       );
     });
 
@@ -391,7 +422,7 @@ describe('JWT Security Testing Suite', () => {
             username: 'testuser',
             role: 'user',
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 3600
+            exp: Math.floor(Date.now() / 1000) + 3600,
           };
 
           const token = securityFramework.generateTestJWT(payload);
@@ -409,7 +440,7 @@ describe('JWT Security Testing Suite', () => {
           expect(decoded.password).toBeUndefined();
           expect(decoded.secret).toBeUndefined();
           expect(decoded.apiKey).toBeUndefined();
-        }
+        },
       );
     });
 
@@ -421,7 +452,9 @@ describe('JWT Security Testing Suite', () => {
           const payload = { userId: '123', username: 'testuser' };
           const token = securityFramework.generateTestJWT(payload);
 
-          const headerData = JSON.parse(Buffer.from(token.split('.')[0], 'base64url').toString());
+          const headerData = JSON.parse(
+            Buffer.from(token.split('.')[0], 'base64url').toString(),
+          );
           expect(isJWTHeader(headerData)).toBe(true);
 
           const header = headerData as JWTHeader;
@@ -434,13 +467,12 @@ describe('JWT Security Testing Suite', () => {
           // Validate no sensitive information in header
           expect(header.secret).toBeUndefined();
           expect(header.key).toBeUndefined();
-        }
+        },
       );
     });
   });
 
   describe('JWT Compliance and Audit Trail', () => {
-
     it('should validate JWT audit trail generation', async () => {
       await securityFramework.executeSecurityTest(
         'JWT Audit Trail Validation',
@@ -457,7 +489,7 @@ describe('JWT Security Testing Suite', () => {
           // Validate audit trail is generated (implementation dependent)
           // This would typically check logs or audit database
           expect(response.status).toBeDefined();
-        }
+        },
       );
     });
 
@@ -474,24 +506,27 @@ describe('JWT Security Testing Suite', () => {
           expect(parts.length).toBe(3);
 
           // Validate base64url encoding
-          parts.forEach(part => {
+          parts.forEach((part) => {
             expect(() => Buffer.from(part, 'base64url')).not.toThrow();
           });
 
           // Validate header compliance
-          const headerData = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
+          const headerData = JSON.parse(
+            Buffer.from(parts[0], 'base64url').toString(),
+          );
           expect(isJWTHeader(headerData)).toBe(true);
 
           const header = headerData as JWTHeader;
           expect(header.typ).toBe('JWT');
-          expect(header.alg).toMatch(/^(HS256|HS384|HS512|RS256|RS384|RS512|ES256|ES384|ES512)$/);
-        }
+          expect(header.alg).toMatch(
+            /^(HS256|HS384|HS512|RS256|RS384|RS512|ES256|ES384|ES512)$/,
+          );
+        },
       );
     });
   });
 
   describe('JWT Emergency Override Testing', () => {
-
     it('should validate emergency override mechanisms', async () => {
       await securityFramework.executeSecurityTest(
         'JWT Emergency Override Validation',
@@ -503,10 +538,11 @@ describe('JWT Security Testing Suite', () => {
             username: 'emergency_user',
             role: 'emergency_admin',
             emergency: true,
-            reason: 'security_testing'
+            reason: 'security_testing',
           };
 
-          const emergencyToken = securityFramework.generateTestJWT(emergencyPayload);
+          const emergencyToken =
+            securityFramework.generateTestJWT(emergencyPayload);
 
           const response = await request(app.getHttpServer())
             .get('/api/emergency')
@@ -515,7 +551,7 @@ describe('JWT Security Testing Suite', () => {
 
           // Emergency override should either work or be properly rejected
           expect([200, 401, 403, 404]).toContain(response.status);
-        }
+        },
       );
     });
   });

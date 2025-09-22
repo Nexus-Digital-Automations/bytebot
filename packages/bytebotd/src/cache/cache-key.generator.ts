@@ -343,7 +343,9 @@ export class CacheKeyGenerator {
    * Hash long keys for performance and storage efficiency
    */
   private hashKey(key: string, namespace: string): string {
-    const hash = createHash('sha256').update(key).digest('hex')
+    const hash = createHash('sha256')
+      .update(key)
+      .digest('hex')
       .substring(0, 16);
     return `${namespace}${this.KEY_SEPARATOR}hash${hash}`;
   }

@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common';import { FormAutomationController } from './form-automation.controller';import { FormAutomationService } from './form-automation.service';import { BrowserUseModule } from '../browser-use/browser-use.module';
+import { Module } from '@nestjs/common';
+import { FormAutomationController } from './form-automation.controller';
+import { FormAutomationService } from './form-automation.service';
+import { BrowserUseModule } from '../browser-use/browser-use.module';
 
 /**
  * Form Automation Module

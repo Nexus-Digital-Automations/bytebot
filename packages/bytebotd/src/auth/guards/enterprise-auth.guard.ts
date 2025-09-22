@@ -129,7 +129,10 @@ export class EnterpriseAuthGuard implements CanActivate {
   private readonly sessionStore = new Map<string, SecurityContext['session']>();
   private readonly securityEvents: SecurityEvent[] = [];
   private readonly deviceFingerprints = new Map<string, Set<string>>();
-  private readonly rateLimitCache = new Map<string, { count: number; resetTime: number }>();
+  private readonly rateLimitCache = new Map<
+    string,
+    { count: number; resetTime: number }
+  >();
 
   constructor(
     private readonly jwtService: JwtService,
@@ -141,7 +144,9 @@ export class EnterpriseAuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<EnterpriseAuthenticatedRequest>();
+    const request = context
+      .switchToHttp()
+      .getRequest<EnterpriseAuthenticatedRequest>();
     const startTime = performance.now();
 
     try {
@@ -149,7 +154,10 @@ export class EnterpriseAuthGuard implements CanActivate {
       request.requestId = this.generateRequestId();
 
       // Check if route is marked as public
-      const isPublic = this.reflector.get<boolean>('_isPublic', context.getHandler());
+      const isPublic = this.reflector.get<boolean>(
+        '_isPublic',
+        context.getHandler(),
+      );
       if (isPublic) {
         this.logger.debug(`Public route accessed: ${request.url}`);
         return true;
@@ -174,7 +182,10 @@ export class EnterpriseAuthGuard implements CanActivate {
       await this.validateSession(payload, request);
 
       // Create security context
-      const securityContext = await this.createSecurityContext(payload, request);
+      const securityContext = await this.createSecurityContext(
+        payload,
+        request,
+      );
       request.securityContext = securityContext;
 
       // Create user object for request
@@ -183,8 +194,8 @@ export class EnterpriseAuthGuard implements CanActivate {
       const executionTime = performance.now() - startTime;
       this.logger.debug(
         `Enterprise authentication successful: ${payload.username} ` +
-        `[sessionId: ${payload.sessionId}, requestId: ${request.requestId}, ` +
-        `executionTime: ${executionTime.toFixed(2)}ms]`
+          `[sessionId: ${payload.sessionId}, requestId: ${request.requestId}, ` +
+          `executionTime: ${executionTime.toFixed(2)}ms]`,
       );
 
       return true;
@@ -209,10 +220,18 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Validate JWT token with comprehensive security checks
    */
-  private async validateJwtToken(token: string, request: Request): Promise<EnhancedJwtPayload> {
+  private async validateJwtToken(
+    token: string,
+    request: Request,
+  ): Promise<EnhancedJwtPayload> {
     try {
       // Multi-algorithm validation
-      const algorithms = ['HS256', 'RS256', 'ES256', 'EdDSA'] as jwt.Algorithm[];
+      const algorithms = [
+        'HS256',
+        'RS256',
+        'ES256',
+        'EdDSA',
+      ] as jwt.Algorithm[];
       let payload: EnhancedJwtPayload | null = null;
       let validationError: Error | null = null;
 
@@ -235,7 +254,10 @@ export class EnterpriseAuthGuard implements CanActivate {
       }
 
       if (!payload) {
-        throw validationError || new Error('Token validation failed for all algorithms');
+        throw (
+          validationError ||
+          new Error('Token validation failed for all algorithms')
+        );
       }
 
       // Additional security validations
@@ -254,21 +276,33 @@ export class EnterpriseAuthGuard implements CanActivate {
   private getSecretForAlgorithm(algorithm: jwt.Algorithm): string | Buffer {
     switch (algorithm) {
       case 'HS256':
-        return this.configService.get<string>('JWT_SECRET_HS256', 'default-secret');
+        return this.configService.get<string>(
+          'JWT_SECRET_HS256',
+          'default-secret',
+        );
       case 'RS256':
       case 'ES256':
       case 'EdDSA':
         // For public key algorithms, return the public key
-        return this.configService.get<string>(`JWT_PUBLIC_KEY_${algorithm}`, 'default-public-key');
+        return this.configService.get<string>(
+          `JWT_PUBLIC_KEY_${algorithm}`,
+          'default-public-key',
+        );
       default:
-        return this.configService.get<string>('JWT_SECRET_HS256', 'default-secret');
+        return this.configService.get<string>(
+          'JWT_SECRET_HS256',
+          'default-secret',
+        );
     }
   }
 
   /**
    * Validate token claims for security compliance
    */
-  private validateTokenClaims(payload: EnhancedJwtPayload, request: Request): void {
+  private validateTokenClaims(
+    payload: EnhancedJwtPayload,
+    request: Request,
+  ): void {
     const now = Math.floor(Date.now() / 1000);
 
     // Check token expiration
@@ -288,7 +322,10 @@ export class EnterpriseAuthGuard implements CanActivate {
 
     // Check token age (additional security measure)
     const tokenAge = now - (payload.iat || 0);
-    const maxTokenAge = this.configService.get<number>('JWT_MAX_AGE_SECONDS', 86400); // 24 hours
+    const maxTokenAge = this.configService.get<number>(
+      'JWT_MAX_AGE_SECONDS',
+      86400,
+    ); // 24 hours
     if (tokenAge > maxTokenAge) {
       throw new UnauthorizedException('Token too old');
     }
@@ -297,7 +334,10 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Validate device fingerprint for session security
    */
-  private async validateDeviceFingerprint(payload: EnhancedJwtPayload, request: Request): Promise<void> {
+  private async validateDeviceFingerprint(
+    payload: EnhancedJwtPayload,
+    request: Request,
+  ): Promise<void> {
     const currentFingerprint = this.generateDeviceFingerprint(request);
     const storedFingerprints = this.deviceFingerprints.get(payload.sub);
 
@@ -351,7 +391,10 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Validate session and manage concurrent sessions
    */
-  private async validateSession(payload: EnhancedJwtPayload, request: Request): Promise<void> {
+  private async validateSession(
+    payload: EnhancedJwtPayload,
+    request: Request,
+  ): Promise<void> {
     const sessionId = payload.sessionId;
     const currentSession = this.sessionStore.get(sessionId);
     const clientIp = this.getClientIp(request);
@@ -402,7 +445,10 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Calculate risk score based on various factors
    */
-  private calculateRiskScore(payload: EnhancedJwtPayload, request: Request): number {
+  private calculateRiskScore(
+    payload: EnhancedJwtPayload,
+    request: Request,
+  ): number {
     let riskScore = 0;
 
     // Base risk from user roles
@@ -443,7 +489,10 @@ export class EnterpriseAuthGuard implements CanActivate {
 
     const clientData = this.rateLimitCache.get(rateLimitKey);
     if (!clientData || now > clientData.resetTime) {
-      this.rateLimitCache.set(rateLimitKey, { count: 1, resetTime: now + windowMs });
+      this.rateLimitCache.set(rateLimitKey, {
+        count: 1,
+        resetTime: now + windowMs,
+      });
       return;
     }
 
@@ -544,9 +593,9 @@ export class EnterpriseAuthGuard implements CanActivate {
     // Log to application logger
     this.logger.warn(
       `Security Event: ${event.type} - User: ${event.userId}, ` +
-      `IP: ${event.ipAddress}, Endpoint: ${event.endpoint}, ` +
-      `Severity: ${event.severity}`,
-      { event }
+        `IP: ${event.ipAddress}, Endpoint: ${event.endpoint}, ` +
+        `Severity: ${event.severity}`,
+      { event },
     );
 
     // Keep only last 1000 events in memory
@@ -558,14 +607,18 @@ export class EnterpriseAuthGuard implements CanActivate {
   /**
    * Handle security violations with appropriate response
    */
-  private handleSecurityViolation(error: Error, request: Request, executionTime: number): void {
+  private handleSecurityViolation(
+    error: Error,
+    request: Request,
+    executionTime: number,
+  ): void {
     const clientIp = this.getClientIp(request);
 
     this.logger.error(
       `Enterprise authentication failed: ${error.message} ` +
-      `[IP: ${clientIp}, endpoint: ${request.url}, ` +
-      `executionTime: ${executionTime.toFixed(2)}ms]`,
-      error.stack
+        `[IP: ${clientIp}, endpoint: ${request.url}, ` +
+        `executionTime: ${executionTime.toFixed(2)}ms]`,
+      error.stack,
     );
 
     // Log security event based on error type
@@ -578,7 +631,10 @@ export class EnterpriseAuthGuard implements CanActivate {
     } else if (error.message.includes('Rate limit')) {
       violationType = SecurityViolationType.RATE_LIMIT_EXCEEDED;
       severity = 'medium';
-    } else if (error.message.includes('device') || error.message.includes('IP')) {
+    } else if (
+      error.message.includes('device') ||
+      error.message.includes('IP')
+    ) {
       violationType = SecurityViolationType.SUSPICIOUS_ACTIVITY;
       severity = 'high';
     }
@@ -620,6 +676,8 @@ export class EnterpriseAuthGuard implements CanActivate {
       }
     }
 
-    this.logger.debug(`Session cleanup completed. Active sessions: ${this.sessionStore.size}`);
+    this.logger.debug(
+      `Session cleanup completed. Active sessions: ${this.sessionStore.size}`,
+    );
   }
 }

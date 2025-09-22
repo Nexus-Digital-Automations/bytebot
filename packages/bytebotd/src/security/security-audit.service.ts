@@ -1,28 +1,29 @@
 /**
  * Security Audit Service - MAXIMUM Parlant Integration
- * 
+ *
  * Provides comprehensive security auditing system with conversational AI validation
- * for all audit operations and compliance tracking. Implements enterprise-grade 
+ * for all audit operations and compliance tracking. Implements enterprise-grade
  * security auditing with Parlant-powered intent verification and audit trails.
- * 
+ *
  * Features:
  * - Comprehensive security event auditing with conversational validation
  * - Real-time compliance monitoring and reporting with AI analysis
  * - Automated audit trail generation and forensic analysis capabilities
  * - Integration with compliance frameworks (SOX, GDPR, HIPAA, PCI-DSS)
  * - Advanced audit analytics and anomaly detection through conversational AI
- * 
+ *
  * Architecture: Parlant conversational validation for CRITICAL audit operations
  * Security: CRITICAL level validation for all audit configurations and data access
  * Performance: Sub-200ms audit logging with enterprise-scale retention
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ParlantIntegrationService,
+import {
+  ParlantIntegrationService,
   ParlantValidationRequest,
   ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError
+  ConversationalValidationError,
 } from '../parlant/parlant-integration.service';
 
 // ===== SECURITY AUDIT INTERFACES =====
@@ -39,7 +40,7 @@ export enum AuditEventType {
   PRIVILEGE_ESCALATION_EVENT = 'PRIVILEGE_ESCALATION_EVENT',
   SECURITY_INCIDENT_RESPONSE = 'SECURITY_INCIDENT_RESPONSE',
   COMPLIANCE_VIOLATION = 'COMPLIANCE_VIOLATION',
-  ADMINISTRATIVE_ACTION = 'ADMINISTRATIVE_ACTION'
+  ADMINISTRATIVE_ACTION = 'ADMINISTRATIVE_ACTION',
 }
 
 /**
@@ -50,20 +51,20 @@ export enum AuditSeverity {
   HIGH = 'HIGH',
   MEDIUM = 'MEDIUM',
   LOW = 'LOW',
-  INFORMATIONAL = 'INFORMATIONAL'
+  INFORMATIONAL = 'INFORMATIONAL',
 }
 
 /**
  * Compliance frameworks supported
  */
 export enum ComplianceFramework {
-  SOX = 'SOX',               // Sarbanes-Oxley
-  GDPR = 'GDPR',             // General Data Protection Regulation
-  HIPAA = 'HIPAA',           // Health Insurance Portability and Accountability Act
-  PCI_DSS = 'PCI_DSS',       // Payment Card Industry Data Security Standard
-  ISO_27001 = 'ISO_27001',   // ISO 27001 Information Security Management
-  NIST_CSF = 'NIST_CSF',     // NIST Cybersecurity Framework
-  CIS_CONTROLS = 'CIS_CONTROLS' // CIS Critical Security Controls
+  SOX = 'SOX', // Sarbanes-Oxley
+  GDPR = 'GDPR', // General Data Protection Regulation
+  HIPAA = 'HIPAA', // Health Insurance Portability and Accountability Act
+  PCI_DSS = 'PCI_DSS', // Payment Card Industry Data Security Standard
+  ISO_27001 = 'ISO_27001', // ISO 27001 Information Security Management
+  NIST_CSF = 'NIST_CSF', // NIST Cybersecurity Framework
+  CIS_CONTROLS = 'CIS_CONTROLS', // CIS Critical Security Controls
 }
 
 /**
@@ -173,7 +174,8 @@ export interface ComplianceStatus {
   readonly violations: ComplianceViolation[];
   readonly lastAuditDate: Date;
   readonly nextAuditDue: Date;
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';}/**
+  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+} /**
  * Compliance violation details
  */
 export interface ComplianceViolation {
@@ -192,7 +194,11 @@ export interface ComplianceViolation {
  */
 export interface AuditAnomaly {
   readonly anomalyId: string;
-  readonly type: 'UNUSUAL_ACCESS_PATTERN' | 'PRIVILEGE_ABUSE' | 'DATA_EXFILTRATION' | 'SYSTEM_COMPROMISE';
+  readonly type:
+    | 'UNUSUAL_ACCESS_PATTERN'
+    | 'PRIVILEGE_ABUSE'
+    | 'DATA_EXFILTRATION'
+    | 'SYSTEM_COMPROMISE';
   readonly confidence: number;
   readonly description: string;
   readonly affectedEntries: string[];
@@ -205,8 +211,19 @@ export interface AuditAnomaly {
  */
 export interface AuditReportRequest {
   readonly operationId: string;
-  readonly reportType: 'COMPLIANCE' | 'SECURITY_INCIDENTS' | 'USER_ACTIVITY' | 'SYSTEM_CHANGES' | 'FORENSIC';
-  readonly timeframe: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUAL' | 'CUSTOM';
+  readonly reportType:
+    | 'COMPLIANCE'
+    | 'SECURITY_INCIDENTS'
+    | 'USER_ACTIVITY'
+    | 'SYSTEM_CHANGES'
+    | 'FORENSIC';
+  readonly timeframe:
+    | 'DAILY'
+    | 'WEEKLY'
+    | 'MONTHLY'
+    | 'QUARTERLY'
+    | 'ANNUAL'
+    | 'CUSTOM';
   readonly startDate?: Date;
   readonly endDate?: Date;
   readonly complianceFrameworks?: ComplianceFramework[];
@@ -271,16 +288,20 @@ export class SecurityAuditService {
   private averageQueryTime = 0;
   private complianceChecksPerformed = 0;
 
-  constructor(
-    private readonly parlantService: ParlantIntegrationService
-  ) {
-    const operationId = `security_audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Security Audit Service with Parlant integration`, {
-      parlantIntegrationEnabled: true,
-      auditEnabled: this.getAuditConfig().auditEnabled,
-      complianceTrackingEnabled: this.getAuditConfig().complianceTrackingEnabled,
-      conversationalValidationRequired: this.getAuditConfig().conversationalValidationRequired,
-      supportedFrameworks: this.getAuditConfig().supportedFrameworks,
-    });
+  constructor(private readonly parlantService: ParlantIntegrationService) {
+    const operationId = `security_audit_init${Date.now()}${Math.random().toString(36).substring(7)}`;
+    this.logger.log(
+      `[${operationId}] Initializing Security Audit Service with Parlant integration`,
+      {
+        parlantIntegrationEnabled: true,
+        auditEnabled: this.getAuditConfig().auditEnabled,
+        complianceTrackingEnabled:
+          this.getAuditConfig().complianceTrackingEnabled,
+        conversationalValidationRequired:
+          this.getAuditConfig().conversationalValidationRequired,
+        supportedFrameworks: this.getAuditConfig().supportedFrameworks,
+      },
+    );
 
     // Initialize audit processing
     this.initializeAuditProcessing();
@@ -288,19 +309,25 @@ export class SecurityAuditService {
 
   /**
    * Create comprehensive audit entry with Parlant validation
-   * 
+   *
    * MEDIUM RISK LEVEL: Audit entry creation requires validation for sensitive
    * operations while maintaining performance for high-volume logging.
-   * 
+   *
    * @param entry - Audit entry to record
    * @param context - User context for validation
    * @returns Promise with audit entry ID and validation status
    */
   async createAuditEntry(
-    entry: Omit<SecurityAuditEntry, 'auditId' | 'timestamp' | 'validated' | 'conversationId'>,
-    context: ParlantConversationContext
+    entry: Omit<
+      SecurityAuditEntry,
+      'auditId' | 'timestamp' | 'validated' | 'conversationId'
+    >,
+    context: ParlantConversationContext,
   ): Promise<{ auditId: string; validated: boolean; conversationId?: string }> {
-    const operationId = `create_audit${Date.now()}${Math.random().toString(36).substring(7)}`;const auditId = `audit${Date.now()}${Math.random().toString(36).substring(7)}`;try {let validated = false;
+    const operationId = `create_audit${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const auditId = `audit${Date.now()}${Math.random().toString(36).substring(7)}`;
+    try {
+      let validated = false;
       let conversationId: string | undefined;
 
       // Apply validation based on sensitivity
@@ -313,7 +340,7 @@ export class SecurityAuditService {
             severity: entry.severity,
             resource: entry.resource,
             userId: entry.userId,
-          }
+          },
         );
 
         // MEDIUM RISK: Validate sensitive audit operations
@@ -326,29 +353,35 @@ export class SecurityAuditService {
             action: entry.action,
             outcome: entry.outcome,
           },
-          actionDescription: `Create ${entry.severity} audit entry for ${entry.eventType}: ${entry.action} on ${entry.resource}`,context,riskLevel: this.getAuditRiskLevel(entry),
+          actionDescription: `Create ${entry.severity} audit entry for ${entry.eventType}: ${entry.action} on ${entry.resource}`,
+          context,
+          riskLevel: this.getAuditRiskLevel(entry),
           operationId,
         };
 
         try {
-          const validation = await this.parlantService.validateFunctionExecution(validationRequest);
-          
+          const validation =
+            await this.parlantService.validateFunctionExecution(
+              validationRequest,
+            );
+
           if (validation.approved) {
             validated = true;
             conversationId = validation.conversationId;
-            
+
             this.logger.log(
-              `[${operationId}] Audit entry creation approved by Parlant`,{operationId,
+              `[${operationId}] Audit entry creation approved by Parlant`,
+              {
+                operationId,
                 auditId,
                 conversationId: validation.conversationId,
                 confidence: validation.confidence,
-              }
+              },
             );
           } else {
             this.logger.warn(
-              `[${operationId}] Audit entry creation blocked by Parlant - recording as unvalidated`,{operationId,
-                reason: validation.reasoning,
-              }
+              `[${operationId}] Audit entry creation blocked by Parlant - recording as unvalidated`,
+              { operationId, reason: validation.reasoning },
             );
             conversationId = validation.conversationId;
           }
@@ -358,7 +391,7 @@ export class SecurityAuditService {
             {
               operationId,
               error: error instanceof Error ? error.message : String(error),
-            }
+            },
           );
         }
       } else {
@@ -386,22 +419,22 @@ export class SecurityAuditService {
         await this.detectAuditAnomalies(auditEntry);
       }
 
-      this.logger.debug(
-        `[${operationId}] Audit entry created successfully`,{operationId,
-          auditId,
-          eventType: entry.eventType,
-          validated,
-        }
-      );
+      this.logger.debug(`[${operationId}] Audit entry created successfully`, {
+        operationId,
+        auditId,
+        eventType: entry.eventType,
+        validated,
+      });
 
       return { auditId, validated, conversationId };
-
     } catch (error) {
       this.logger.error(
-        `[${operationId}] Audit entry creation failed: ${error instanceof Error ? error.message : String(error)}`,{operationId,
+        `[${operationId}] Audit entry creation failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          operationId,
           eventType: entry.eventType,
           error: error instanceof Error ? error.message : String(error),
-        }
+        },
       );
 
       throw error;
@@ -410,18 +443,18 @@ export class SecurityAuditService {
 
   /**
    * Query audit entries with conversational validation
-   * 
+   *
    * HIGH RISK LEVEL: Audit data queries require validation to ensure appropriate
    * access controls and prevent unauthorized data access.
-   * 
+   *
    * @param request - Audit query request with filters
    * @returns Promise with query results
    */
   async queryAuditEntries(
-    request: AuditQueryRequest
+    request: AuditQueryRequest,
   ): Promise<AuditQueryResult> {
     const startTime = Date.now();
-    
+
     this.logger.log(
       `[${request.operationId}] Querying audit entries with Parlant validation`,
       {
@@ -430,7 +463,7 @@ export class SecurityAuditService {
         endDate: request.endDate,
         eventTypes: request.eventTypes?.length,
         userId: request.context.userId,
-      }
+      },
     );
 
     try {
@@ -445,60 +478,73 @@ export class SecurityAuditService {
           userIds: request.userIds,
           resources: request.resources,
         },
-        actionDescription: `Query audit entries from ${request.startDate.toISOString()} to ${request.endDate.toISOString()} with filters: ${request.eventTypes?.length ?? 0} event types, ${request.severities?.length ?? 0} severities`,context: request.context,riskLevel: RiskLevel._HIGH, // Audit queries are HIGH risk
+        actionDescription: `Query audit entries from ${request.startDate.toISOString()} to ${request.endDate.toISOString()} with filters: ${request.eventTypes?.length ?? 0} event types, ${request.severities?.length ?? 0} severities`,
+        context: request.context,
+        riskLevel: RiskLevel._HIGH, // Audit queries are HIGH risk
         operationId: request.operationId,
       };
 
-      const validation = await this.parlantService.validateFunctionExecution(validationRequest);
+      const validation =
+        await this.parlantService.validateFunctionExecution(validationRequest);
 
       if (!validation.approved) {
         this.logger.warn(
-          `[${request.operationId}] Audit query blocked by Parlant validation`,{operationId: request.operationId,
+          `[${request.operationId}] Audit query blocked by Parlant validation`,
+          {
+            operationId: request.operationId,
             reason: validation.reasoning,
             confidence: validation.confidence,
-          }
+          },
         );
 
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives ?? []
+          validation.suggestedAlternatives ?? [],
         );
       }
 
       this.logger.log(
-        `[${request.operationId}] Audit query approved by Parlant`,{operationId: request.operationId,
+        `[${request.operationId}] Audit query approved by Parlant`,
+        {
+          operationId: request.operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
-        }
+        },
       );
 
       // Execute audit query
-      const queryResult = await this.executeAuditQuery(request, validation.conversationId);
+      const queryResult = await this.executeAuditQuery(
+        request,
+        validation.conversationId,
+      );
 
       // Update performance metrics
       const duration = Date.now() - startTime;
       this.updateQueryMetrics(duration);
 
       this.logger.log(
-        `[${request.operationId}] Audit query completed successfully`,{operationId: request.operationId,
+        `[${request.operationId}] Audit query completed successfully`,
+        {
+          operationId: request.operationId,
           totalResults: queryResult.totalResults,
           anomaliesDetected: queryResult.anomaliesDetected.length,
           conversationId: validation.conversationId,
           executionTime: duration,
-        }
+        },
       );
 
       return queryResult;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       this.logger.error(
-        `[${request.operationId}] Audit query failed: ${error instanceof Error ? error.message : String(error)}`,{operationId: request.operationId,
+        `[${request.operationId}] Audit query failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          operationId: request.operationId,
           error: error instanceof Error ? error.message : String(error),
           executionTime: duration,
-        }
+        },
       );
 
       throw error;
@@ -507,18 +553,16 @@ export class SecurityAuditService {
 
   /**
    * Generate comprehensive audit report with conversational validation
-   * 
+   *
    * CRITICAL RISK LEVEL: Audit report generation requires critical validation
    * as reports may contain sensitive compliance and security information.
-   * 
+   *
    * @param request - Audit report generation request
    * @returns Promise with generated report
    */
-  async generateAuditReport(
-    request: AuditReportRequest
-  ): Promise<AuditReport> {
+  async generateAuditReport(request: AuditReportRequest): Promise<AuditReport> {
     const operationId = request.operationId;
-    
+
     this.logger.log(
       `[${operationId}] Generating audit report with Parlant validation`,
       {
@@ -527,7 +571,7 @@ export class SecurityAuditService {
         timeframe: request.timeframe,
         complianceFrameworks: request.complianceFrameworks?.length,
         userId: request.context.userId,
-      }
+      },
     );
 
     try {
@@ -540,50 +584,56 @@ export class SecurityAuditService {
           complianceFrameworks: request.complianceFrameworks,
           includeForensicData: request.includeForensicData,
         },
-        actionDescription: `Generate ${request.reportType} audit report for ${request.timeframe} timeframe with ${request.includeForensicData ? 'forensic data included' : 'standard data only'}`,context: request.context,riskLevel: RiskLevel._CRITICAL, // Report generation is CRITICAL risk
+        actionDescription: `Generate ${request.reportType} audit report for ${request.timeframe} timeframe with ${request.includeForensicData ? 'forensic data included' : 'standard data only'}`,
+        context: request.context,
+        riskLevel: RiskLevel._CRITICAL, // Report generation is CRITICAL risk
         operationId,
       };
 
-      const validation = await this.parlantService.validateFunctionExecution(validationRequest);
+      const validation =
+        await this.parlantService.validateFunctionExecution(validationRequest);
 
       if (!validation.approved) {
         throw new ConversationalValidationError(
           validation.conversationId,
           validation.reasoning,
-          validation.suggestedAlternatives ?? []
+          validation.suggestedAlternatives ?? [],
         );
       }
 
       this.logger.log(
-        `[${operationId}] Audit report generation approved by Parlant`,{operationId,
+        `[${operationId}] Audit report generation approved by Parlant`,
+        {
+          operationId,
           conversationId: validation.conversationId,
           confidence: validation.confidence,
-        }
+        },
       );
 
       // Generate comprehensive audit report
-      const report = await this.executeReportGeneration(request, validation.conversationId);
+      const report = await this.executeReportGeneration(
+        request,
+        validation.conversationId,
+      );
 
       this.auditReports.push(report);
 
-      this.logger.log(
-        `[${operationId}] Audit report generated successfully`,{operationId,
-          reportId: report.reportId,
-          totalEvents: report.totalEvents,
-          complianceFrameworks: Object.keys(report.complianceAssessment).length,
-          conversationId: validation.conversationId,
-        }
-      );
+      this.logger.log(`[${operationId}] Audit report generated successfully`, {
+        operationId,
+        reportId: report.reportId,
+        totalEvents: report.totalEvents,
+        complianceFrameworks: Object.keys(report.complianceAssessment).length,
+        conversationId: validation.conversationId,
+      });
 
       return report;
-
     } catch (error) {
       this.logger.error(
         `[${operationId}] Audit report generation failed: ${error instanceof Error ? error.message : String(error)}`,
         {
           operationId,
           error: error instanceof Error ? error.message : String(error),
-        }
+        },
       );
 
       throw error;
@@ -592,14 +642,17 @@ export class SecurityAuditService {
 
   /**
    * Get comprehensive audit statistics
-   * 
+   *
    * @returns Audit statistics and performance metrics
    */
   async getAuditStatistics(): Promise<{
     totalAuditEntries: number;
     entriesByType: Record<AuditEventType, number>;
     entriesBySeverity: Record<AuditSeverity, number>;
-    complianceStatus: Record<ComplianceFramework, { compliant: boolean; violations: number }>;
+    complianceStatus: Record<
+      ComplianceFramework,
+      { compliant: boolean; violations: number }
+    >;
     totalQueries: number;
     averageQueryTime: number;
     complianceChecksPerformed: number;
@@ -607,18 +660,25 @@ export class SecurityAuditService {
   }> {
     const entriesByType = {} as Record<AuditEventType, number>;
     const entriesBySeverity = {} as Record<AuditSeverity, number>;
-    const complianceStatus = {} as Record<ComplianceFramework, { compliant: boolean; violations: number }>;
+    const complianceStatus = {} as Record<
+      ComplianceFramework,
+      { compliant: boolean; violations: number }
+    >;
 
     // Initialize counters
-    Object.values(AuditEventType).forEach(type => entriesByType[type] = 0);
-    Object.values(AuditSeverity).forEach(severity => entriesBySeverity[severity] = 0);
-    Object.values(ComplianceFramework).forEach(framework => {
-      const violations = this.complianceViolations.filter(v => v.framework === framework && !v.resolved).length;
+    Object.values(AuditEventType).forEach((type) => (entriesByType[type] = 0));
+    Object.values(AuditSeverity).forEach(
+      (severity) => (entriesBySeverity[severity] = 0),
+    );
+    Object.values(ComplianceFramework).forEach((framework) => {
+      const violations = this.complianceViolations.filter(
+        (v) => v.framework === framework && !v.resolved,
+      ).length;
       complianceStatus[framework] = { compliant: violations === 0, violations };
     });
 
     // Count entries
-    this.auditEntries.forEach(entry => {
+    this.auditEntries.forEach((entry) => {
       entriesByType[entry.eventType]++;
       entriesBySeverity[entry.severity]++;
     });
@@ -637,14 +697,25 @@ export class SecurityAuditService {
 
   // ===== PRIVATE HELPER METHODS =====
 
-  private requiresValidation(entry: Omit<SecurityAuditEntry, 'auditId' | 'timestamp' | 'validated' | 'conversationId'>): boolean {// Require validation for sensitive operationsreturn entry.severity === AuditSeverity.CRITICAL ||
-           entry.severity === AuditSeverity.HIGH ||
-           entry.eventType === AuditEventType.PRIVILEGE_ESCALATION_EVENT ||
-           entry.eventType === AuditEventType.SECURITY_POLICY_CHANGE ||
-           entry.eventType === AuditEventType.SYSTEM_CONFIGURATION_CHANGE;
+  private requiresValidation(
+    entry: Omit<
+      SecurityAuditEntry,
+      'auditId' | 'timestamp' | 'validated' | 'conversationId'
+    >,
+  ): boolean {
+    // Require validation for sensitive operationsreturn entry.severity === AuditSeverity.CRITICAL ||
+    entry.severity === AuditSeverity.HIGH ||
+      entry.eventType === AuditEventType.PRIVILEGE_ESCALATION_EVENT ||
+      entry.eventType === AuditEventType.SECURITY_POLICY_CHANGE ||
+      entry.eventType === AuditEventType.SYSTEM_CONFIGURATION_CHANGE;
   }
 
-  private getAuditRiskLevel(entry: Omit<SecurityAuditEntry, 'auditId' | 'timestamp' | 'validated' | 'conversationId'>): RiskLevel {
+  private getAuditRiskLevel(
+    entry: Omit<
+      SecurityAuditEntry,
+      'auditId' | 'timestamp' | 'validated' | 'conversationId'
+    >,
+  ): RiskLevel {
     switch (entry.severity) {
       case AuditSeverity.CRITICAL:
         return RiskLevel._CRITICAL;
@@ -659,34 +730,41 @@ export class SecurityAuditService {
 
   private async executeAuditQuery(
     request: AuditQueryRequest,
-    conversationId: string
+    conversationId: string,
   ): Promise<AuditQueryResult> {
-    const queryId = `query${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();// Filter audit entries based on request criteria
-    let filteredEntries = this.auditEntries.filter(entry => {
-      return entry.timestamp >= request.startDate && entry.timestamp <= request.endDate;
+    const queryId = `query${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now(); // Filter audit entries based on request criteria
+    let filteredEntries = this.auditEntries.filter((entry) => {
+      return (
+        entry.timestamp >= request.startDate &&
+        entry.timestamp <= request.endDate
+      );
     });
 
     if (request.eventTypes?.length) {
-      filteredEntries = filteredEntries.filter(entry => 
-        request.eventTypes?.includes(entry.eventType) ?? false
+      filteredEntries = filteredEntries.filter(
+        (entry) => request.eventTypes?.includes(entry.eventType) ?? false,
       );
     }
 
     if (request.severities?.length) {
-      filteredEntries = filteredEntries.filter(entry => 
-        request.severities?.includes(entry.severity) ?? false
+      filteredEntries = filteredEntries.filter(
+        (entry) => request.severities?.includes(entry.severity) ?? false,
       );
     }
 
     if (request.userIds?.length) {
-      filteredEntries = filteredEntries.filter(entry => 
-        request.userIds?.includes(entry.userId) ?? false
+      filteredEntries = filteredEntries.filter(
+        (entry) => request.userIds?.includes(entry.userId) ?? false,
       );
     }
 
     if (request.resources?.length) {
-      filteredEntries = filteredEntries.filter(entry => 
-        request.resources?.some(resource => entry.resource.includes(resource)) ?? false
+      filteredEntries = filteredEntries.filter(
+        (entry) =>
+          request.resources?.some((resource) =>
+            entry.resource.includes(resource),
+          ) ?? false,
       );
     }
 
@@ -711,16 +789,17 @@ export class SecurityAuditService {
 
   private async executeReportGeneration(
     request: AuditReportRequest,
-    conversationId: string
+    conversationId: string,
   ): Promise<AuditReport> {
     const reportId = `report${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
+
     // Determine time frame
     const timeframe = this.calculateTimeframe(request);
-    
+
     // Filter entries for report
-    const reportEntries = this.auditEntries.filter(entry => 
-      entry.timestamp >= timeframe.start && entry.timestamp <= timeframe.end
+    const reportEntries = this.auditEntries.filter(
+      (entry) =>
+        entry.timestamp >= timeframe.start && entry.timestamp <= timeframe.end,
     );
 
     // Generate summary statistics
@@ -728,15 +807,18 @@ export class SecurityAuditService {
 
     // Generate compliance assessment
     const complianceAssessment = this.generateComplianceAssessment(
-      reportEntries, 
-      request.complianceFrameworks
+      reportEntries,
+      request.complianceFrameworks,
     );
 
     // Generate security insights
     const securityInsights = await this.generateSecurityInsights(reportEntries);
 
     // Generate recommendations
-    const recommendations = this.generateRecommendations(reportEntries, complianceAssessment);
+    const recommendations = this.generateRecommendations(
+      reportEntries,
+      complianceAssessment,
+    );
 
     return {
       reportId,
@@ -752,7 +834,9 @@ export class SecurityAuditService {
     };
   }
 
-  private async checkComplianceViolations(entry: SecurityAuditEntry): Promise<void> {
+  private async checkComplianceViolations(
+    entry: SecurityAuditEntry,
+  ): Promise<void> {
     // Check each supported compliance framework
     for (const framework of entry.complianceFrameworks) {
       const violation = this.assessComplianceViolation(entry, framework);
@@ -764,17 +848,27 @@ export class SecurityAuditService {
   }
 
   private assessComplianceViolation(
-    entry: SecurityAuditEntry, 
-    framework: ComplianceFramework
+    entry: SecurityAuditEntry,
+    framework: ComplianceFramework,
   ): ComplianceViolation | null {
     // Mock compliance violation assessment - would implement actual framework rules
-    if (entry.outcome === 'FAILURE' && entry.severity === AuditSeverity.CRITICAL) {
+    if (
+      entry.outcome === 'FAILURE' &&
+      entry.severity === AuditSeverity.CRITICAL
+    ) {
       return {
-        violationId: `violation${Date.now()}${Math.random().toString(36).substring(7)}`,framework,requirement: `${framework} Security Control`,description: `Critical security failure detected in ${entry.resource}`,
+        violationId: `violation${Date.now()}${Math.random().toString(36).substring(7)}`,
+        framework,
+        requirement: `${framework} Security Control`,
+        description: `Critical security failure detected in ${entry.resource}`,
         severity: entry.severity,
         detectedAt: entry.timestamp,
         resolved: false,
-        remediationSteps: ['Investigate root cause', 'Implement corrective measures', 'Review controls'],
+        remediationSteps: [
+          'Investigate root cause',
+          'Implement corrective measures',
+          'Review controls',
+        ],
       };
     }
     return null;
@@ -785,79 +879,112 @@ export class SecurityAuditService {
     // Implementation would use ML models for pattern analysis
   }
 
-  private async detectQueryAnomalies(entries: SecurityAuditEntry[]): Promise<AuditAnomaly[]> {
+  private async detectQueryAnomalies(
+    entries: SecurityAuditEntry[],
+  ): Promise<AuditAnomaly[]> {
     // Mock anomaly detection for query results
     const anomalies: AuditAnomaly[] = [];
-    
+
     // Check for unusual access patterns
     const userAccess = new Map<string, number>();
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const count = userAccess.get(entry.userId) ?? 0;
       userAccess.set(entry.userId, count + 1);
     });
 
     for (const [userId, count] of userAccess.entries()) {
-      if (count > 100) { // Threshold for unusual activity
+      if (count > 100) {
+        // Threshold for unusual activity
         anomalies.push({
           anomalyId: `anomaly${Date.now()}${Math.random().toString(36).substring(7)}`,
           type: 'UNUSUAL_ACCESS_PATTERN',
           confidence: 0.85,
           description: `User ${userId} has ${count} audit events, indicating unusual activity`,
-          affectedEntries: entries.filter(e => e.userId === userId).map(e => e.auditId),
+          affectedEntries: entries
+            .filter((e) => e.userId === userId)
+            .map((e) => e.auditId),
           riskScore: Math.min(100, count / 10),
-          recommendedActions: ['Investigate user activity', 'Review access permissions', 'Consider account review'],});}
+          recommendedActions: [
+            'Investigate user activity',
+            'Review access permissions',
+            'Consider account review',
+          ],
+        });
+      }
     }
 
     return anomalies;
   }
 
-  private generateComplianceSummary(entries: SecurityAuditEntry[]): Record<ComplianceFramework, ComplianceStatus> {
+  private generateComplianceSummary(
+    entries: SecurityAuditEntry[],
+  ): Record<ComplianceFramework, ComplianceStatus> {
     const summary = {} as Record<ComplianceFramework, ComplianceStatus>;
-    
-    Object.values(ComplianceFramework).forEach(framework => {
-      const frameworkViolations = this.complianceViolations.filter(v => v.framework === framework && !v.resolved);
-      
+
+    Object.values(ComplianceFramework).forEach((framework) => {
+      const frameworkViolations = this.complianceViolations.filter(
+        (v) => v.framework === framework && !v.resolved,
+      );
+
       summary[framework] = {
         framework,
         compliant: frameworkViolations.length === 0,
         violations: frameworkViolations,
         lastAuditDate: new Date(), // Would be actual last audit date
         nextAuditDue: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // One year from now
-        riskLevel: frameworkViolations.length === 0 ? 'LOW' : frameworkViolations.some(v => v.severity === AuditSeverity.CRITICAL) ? 'CRITICAL' : 'MEDIUM',};});
+        riskLevel:
+          frameworkViolations.length === 0
+            ? 'LOW'
+            : frameworkViolations.some(
+                  (v) => v.severity === AuditSeverity.CRITICAL,
+                )
+              ? 'CRITICAL'
+              : 'MEDIUM',
+      };
+    });
 
     return summary;
   }
 
-  private generateReportSummary(entries: SecurityAuditEntry[]): AuditReportSummary {
+  private generateReportSummary(
+    entries: SecurityAuditEntry[],
+  ): AuditReportSummary {
     const eventsByType = {} as Record<AuditEventType, number>;
     const eventsBySeverity = {} as Record<AuditSeverity, number>;
     const userCounts = new Map<string, number>();
     const resourceCounts = new Map<string, number>();
 
     // Initialize counters
-    Object.values(AuditEventType).forEach(type => eventsByType[type] = 0);
-    Object.values(AuditSeverity).forEach(severity => eventsBySeverity[severity] = 0);
+    Object.values(AuditEventType).forEach((type) => (eventsByType[type] = 0));
+    Object.values(AuditSeverity).forEach(
+      (severity) => (eventsBySeverity[severity] = 0),
+    );
 
     let successCount = 0;
     let totalCount = 0;
 
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       eventsByType[entry.eventType]++;
       eventsBySeverity[entry.severity]++;
-      
+
       userCounts.set(entry.userId, (userCounts.get(entry.userId) ?? 0) + 1);
-      resourceCounts.set(entry.resource, (resourceCounts.get(entry.resource) ?? 0) + 1);
-      
-      if (entry.outcome === 'SUCCESS') successCount++;totalCount++;});
+      resourceCounts.set(
+        entry.resource,
+        (resourceCounts.get(entry.resource) ?? 0) + 1,
+      );
+
+      if (entry.outcome === 'SUCCESS') successCount++;
+      totalCount++;
+    });
 
     // Get top users and resources
     const topUsers = Array.from(userCounts.entries())
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
       .map(([userId, eventCount]) => ({ userId, eventCount }));
 
     const topResources = Array.from(resourceCounts.entries())
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 10)
       .map(([resource, accessCount]) => ({ resource, accessCount }));
 
@@ -868,39 +995,55 @@ export class SecurityAuditService {
       topUsers,
       topResources,
       anomaliesDetected: 0, // Would be calculated from actual anomaly detection
-      complianceViolations: this.complianceViolations.filter(v => !v.resolved).length,
+      complianceViolations: this.complianceViolations.filter((v) => !v.resolved)
+        .length,
     };
   }
 
   private generateComplianceAssessment(
     entries: SecurityAuditEntry[],
-    frameworks?: ComplianceFramework[]
+    frameworks?: ComplianceFramework[],
   ): Record<ComplianceFramework, ComplianceStatus> {
-    const targetFrameworks = frameworks ?? this.getAuditConfig().supportedFrameworks;
+    const targetFrameworks =
+      frameworks ?? this.getAuditConfig().supportedFrameworks;
     const assessment = {} as Record<ComplianceFramework, ComplianceStatus>;
 
-    targetFrameworks.forEach(framework => {
-      const violations = this.complianceViolations.filter(v => v.framework === framework && !v.resolved);
+    targetFrameworks.forEach((framework) => {
+      const violations = this.complianceViolations.filter(
+        (v) => v.framework === framework && !v.resolved,
+      );
       assessment[framework] = {
         framework,
         compliant: violations.length === 0,
         violations,
         lastAuditDate: new Date(),
         nextAuditDue: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        riskLevel: violations.length === 0 ? 'LOW' : violations.some(v => v.severity === AuditSeverity.CRITICAL) ? 'CRITICAL' : 'MEDIUM',};});
+        riskLevel:
+          violations.length === 0
+            ? 'LOW'
+            : violations.some((v) => v.severity === AuditSeverity.CRITICAL)
+              ? 'CRITICAL'
+              : 'MEDIUM',
+      };
+    });
 
     return assessment;
   }
 
-  private async generateSecurityInsights(entries: SecurityAuditEntry[]): Promise<SecurityInsight[]> {
+  private async generateSecurityInsights(
+    entries: SecurityAuditEntry[],
+  ): Promise<SecurityInsight[]> {
     const insights: SecurityInsight[] = [];
 
     // Example insight: High failure rate
-    const failureRate = entries.filter(e => e.outcome === 'FAILURE').length / entries.length;
-    if (failureRate > 0.1) { // 10% threshold
+    const failureRate =
+      entries.filter((e) => e.outcome === 'FAILURE').length / entries.length;
+    if (failureRate > 0.1) {
+      // 10% threshold
       insights.push({
         insightId: `insight${Date.now()}_1`,
-        category: 'RISK',title: 'High Authentication Failure Rate',
+        category: 'RISK',
+        title: 'High Authentication Failure Rate',
         description: `${(failureRate * 100).toFixed(1)}% of audit events indicate failures, which may indicate security issues or system problems`,
         impact: failureRate > 0.2 ? 'HIGH' : 'MEDIUM',
         confidence: 0.9,
@@ -913,27 +1056,42 @@ export class SecurityAuditService {
 
   private generateRecommendations(
     entries: SecurityAuditEntry[],
-    compliance: Record<ComplianceFramework, ComplianceStatus>
+    compliance: Record<ComplianceFramework, ComplianceStatus>,
   ): string[] {
     const recommendations: string[] = [];
 
     // Check for compliance violations
-    Object.values(compliance).forEach(status => {
+    Object.values(compliance).forEach((status) => {
       if (!status.compliant) {
-        recommendations.push(`Address ${status.framework} compliance violations immediately`);}});
+        recommendations.push(
+          `Address ${status.framework} compliance violations immediately`,
+        );
+      }
+    });
 
     // Check for high-severity events
-    const criticalEvents = entries.filter(e => e.severity === AuditSeverity.CRITICAL);
+    const criticalEvents = entries.filter(
+      (e) => e.severity === AuditSeverity.CRITICAL,
+    );
     if (criticalEvents.length > 0) {
-      recommendations.push(`Investigate ${criticalEvents.length} critical security events`);
+      recommendations.push(
+        `Investigate ${criticalEvents.length} critical security events`,
+      );
     }
 
     // Default recommendations
     if (recommendations.length === 0) {
-      recommendations.push('Continue monitoring security events and maintaining compliance standards');}return recommendations;
+      recommendations.push(
+        'Continue monitoring security events and maintaining compliance standards',
+      );
+    }
+    return recommendations;
   }
 
-  private calculateTimeframe(request: AuditReportRequest): { start: Date; end: Date } {
+  private calculateTimeframe(request: AuditReportRequest): {
+    start: Date;
+    end: Date;
+  } {
     if (request.startDate && request.endDate) {
       return { start: request.startDate, end: request.endDate };
     }
@@ -942,10 +1100,18 @@ export class SecurityAuditService {
     const start = new Date();
 
     switch (request.timeframe) {
-      case 'DAILY':start.setDate(now.getDate() - 1);break;
-      case 'WEEKLY':start.setDate(now.getDate() - 7);break;
-      case 'MONTHLY':start.setMonth(now.getMonth() - 1);break;
-      case 'QUARTERLY':start.setMonth(now.getMonth() - 3);break;
+      case 'DAILY':
+        start.setDate(now.getDate() - 1);
+        break;
+      case 'WEEKLY':
+        start.setDate(now.getDate() - 7);
+        break;
+      case 'MONTHLY':
+        start.setMonth(now.getMonth() - 1);
+        break;
+      case 'QUARTERLY':
+        start.setMonth(now.getMonth() - 3);
+        break;
       case 'ANNUAL':
         start.setFullYear(now.getFullYear() - 1);
         break;
@@ -964,10 +1130,15 @@ export class SecurityAuditService {
 
   private performAuditMaintenance(): void {
     const retentionYears = this.getAuditConfig().auditRetentionYears;
-    const cutoffTime = Date.now() - (retentionYears * 365 * 24 * 60 * 60 * 1000);
+    const cutoffTime = Date.now() - retentionYears * 365 * 24 * 60 * 60 * 1000;
 
     const beforeCount = this.auditEntries.length;
-    this.auditEntries.splice(0, this.auditEntries.findIndex(entry => entry.timestamp.getTime() > cutoffTime));
+    this.auditEntries.splice(
+      0,
+      this.auditEntries.findIndex(
+        (entry) => entry.timestamp.getTime() > cutoffTime,
+      ),
+    );
     const afterCount = this.auditEntries.length;
 
     if (beforeCount > afterCount) {
@@ -976,22 +1147,54 @@ export class SecurityAuditService {
   }
 
   private checkComplianceStatus(): void {
-    this.logger.debug('Performing periodic compliance status check');this.complianceChecksPerformed++;}
+    this.logger.debug('Performing periodic compliance status check');
+    this.complianceChecksPerformed++;
+  }
 
   private updateQueryMetrics(duration: number): void {
     this.totalQueries++;
-    this.averageQueryTime = (this.averageQueryTime * (this.totalQueries - 1) + duration) / this.totalQueries;
+    this.averageQueryTime =
+      (this.averageQueryTime * (this.totalQueries - 1) + duration) /
+      this.totalQueries;
   }
 
   private getAuditConfig(): SecurityAuditConfig {
     return {
-      auditEnabled: this.configService.get<boolean>('SECURITY_AUDIT_ENABLED', true),realTimeAuditingEnabled: this.configService.get<boolean>('REAL_TIME_AUDITING_ENABLED', true),complianceTrackingEnabled: this.configService.get<boolean>('COMPLIANCE_TRACKING_ENABLED', true),forensicModeEnabled: this.configService.get<boolean>('FORENSIC_MODE_ENABLED', false),auditRetentionYears: this.configService.get<number>('AUDIT_RETENTION_YEARS', 7),conversationalValidationRequired: this.configService.get<boolean>('AUDIT_CONVERSATIONAL_VALIDATION', true),supportedFrameworks: [ComplianceFramework.SOX,
+      auditEnabled: this.configService.get<boolean>(
+        'SECURITY_AUDIT_ENABLED',
+        true,
+      ),
+      realTimeAuditingEnabled: this.configService.get<boolean>(
+        'REAL_TIME_AUDITING_ENABLED',
+        true,
+      ),
+      complianceTrackingEnabled: this.configService.get<boolean>(
+        'COMPLIANCE_TRACKING_ENABLED',
+        true,
+      ),
+      forensicModeEnabled: this.configService.get<boolean>(
+        'FORENSIC_MODE_ENABLED',
+        false,
+      ),
+      auditRetentionYears: this.configService.get<number>(
+        'AUDIT_RETENTION_YEARS',
+        7,
+      ),
+      conversationalValidationRequired: this.configService.get<boolean>(
+        'AUDIT_CONVERSATIONAL_VALIDATION',
+        true,
+      ),
+      supportedFrameworks: [
+        ComplianceFramework.SOX,
         ComplianceFramework.GDPR,
         ComplianceFramework.HIPAA,
         ComplianceFramework.PCI_DSS,
         ComplianceFramework.ISO_27001,
       ],
-      maxAuditEventsPerHour: this.configService.get<number>('MAX_AUDIT_EVENTS_PER_HOUR', 10000),
+      maxAuditEventsPerHour: this.configService.get<number>(
+        'MAX_AUDIT_EVENTS_PER_HOUR',
+        10000,
+      ),
     };
   }
 }

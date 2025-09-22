@@ -34,7 +34,9 @@ describe('Browser Python Integration E2E Tests', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    pythonIntegrationService = moduleFixture.get<PythonIntegrationService>(PythonIntegrationService);
+    pythonIntegrationService = moduleFixture.get<PythonIntegrationService>(
+      PythonIntegrationService,
+    );
   });
 
   afterAll(async () => {
@@ -54,24 +56,24 @@ describe('Browser Python Integration E2E Tests', () => {
           framework: expect.objectContaining({
             browserUse: expect.objectContaining({
               version: expect.any(String),
-              installed: true
+              installed: true,
             }),
             playwright: expect.objectContaining({
               version: expect.any(String),
-              installed: true
-            })
-          })
+              installed: true,
+            }),
+          }),
         }),
         communication: expect.objectContaining({
           protocol: expect.any(String),
           latency: expect.any(Number),
-          lastPing: expect.any(String)
+          lastPing: expect.any(String),
         }),
         capabilities: expect.arrayContaining([
           'browser_automation',
           'session_management',
-          'advanced_interactions'
-        ])
+          'advanced_interactions',
+        ]),
       });
     });
 
@@ -83,7 +85,7 @@ describe('Browser Python Integration E2E Tests', () => {
 
       expect(response.body).toMatchObject({
         success: true,
-        status: 'disconnected'
+        status: 'disconnected',
       });
 
       // Verify API still functions with fallback
@@ -91,14 +93,14 @@ describe('Browser Python Integration E2E Tests', () => {
         .post('/browser-use/sessions')
         .send({
           options: { headless: true },
-          fallback: 'nodejs'
+          fallback: 'nodejs',
         })
         .expect(201);
 
       expect(sessionResponse.body).toMatchObject({
         sessionId: expect.any(String),
         backend: 'nodejs',
-        warning: expect.stringContaining('Python framework unavailable')
+        warning: expect.stringContaining('Python framework unavailable'),
       });
 
       // Cleanup session
@@ -121,24 +123,24 @@ describe('Browser Python Integration E2E Tests', () => {
         environment: expect.objectContaining({
           pythonPath: expect.any(String),
           virtualEnv: expect.any(String),
-          workingDirectory: expect.any(String)
+          workingDirectory: expect.any(String),
         }),
         dependencies: expect.objectContaining({
           browserUse: expect.objectContaining({
             version: expect.any(String),
-            path: expect.any(String)
+            path: expect.any(String),
           }),
           playwright: expect.objectContaining({
             version: expect.any(String),
-            browsers: expect.arrayContaining(['chromium'])
-          })
+            browsers: expect.arrayContaining(['chromium']),
+          }),
         }),
         performance: expect.objectContaining({
           startupTime: expect.any(Number),
           memoryUsage: expect.any(Number),
-          activeProcesses: expect.any(Number)
+          activeProcesses: expect.any(Number),
         }),
-        errors: expect.any(Array)
+        errors: expect.any(Array),
       });
     });
   });
@@ -151,8 +153,8 @@ describe('Browser Python Integration E2E Tests', () => {
         .send({
           options: {
             headless: true,
-            backend: 'python'
-          }
+            backend: 'python',
+          },
         })
         .expect(201);
 
@@ -161,8 +163,8 @@ describe('Browser Python Integration E2E Tests', () => {
         backend: 'python',
         pythonProcess: expect.objectContaining({
           pid: expect.any(Number),
-          status: 'active'
-        })
+          status: 'active',
+        }),
       });
 
       const sessionId = createResponse.body.sessionId;
@@ -178,8 +180,8 @@ describe('Browser Python Integration E2E Tests', () => {
         status: 'active',
         pythonIntegration: expect.objectContaining({
           connected: true,
-          processId: expect.any(Number)
-        })
+          processId: expect.any(Number),
+        }),
       });
 
       // Test cross-platform navigation
@@ -189,8 +191,8 @@ describe('Browser Python Integration E2E Tests', () => {
           url: 'https://example.com',
           pythonOptions: {
             waitFor: 'networkidle',
-            timeout: 30000
-          }
+            timeout: 30000,
+          },
         })
         .expect(200);
 
@@ -200,9 +202,9 @@ describe('Browser Python Integration E2E Tests', () => {
         .send({
           queries: [
             { name: 'title', selector: 'title', attribute: 'textContent' },
-            { name: 'url', selector: null, attribute: 'url' }
+            { name: 'url', selector: null, attribute: 'url' },
           ],
-          backend: 'python'
+          backend: 'python',
         })
         .expect(200);
 
@@ -211,8 +213,8 @@ describe('Browser Python Integration E2E Tests', () => {
         backend: 'python',
         data: expect.objectContaining({
           title: expect.any(String),
-          url: expect.stringContaining('example.com')
-        })
+          url: expect.stringContaining('example.com'),
+        }),
       });
 
       // Cleanup
@@ -225,7 +227,7 @@ describe('Browser Python Integration E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true, backend: 'python' }
+          options: { headless: true, backend: 'python' },
         })
         .expect(201);
 
@@ -249,8 +251,8 @@ describe('Browser Python Integration E2E Tests', () => {
           currentUrl: 'https://example.com',
           synchronization: expect.objectContaining({
             lastSync: expect.any(String),
-            status: 'synced'
-          })
+            status: 'synced',
+          }),
         });
 
         // Force synchronization and verify consistency
@@ -261,7 +263,7 @@ describe('Browser Python Integration E2E Tests', () => {
         expect(syncResponse.body).toMatchObject({
           success: true,
           changes: expect.any(Array),
-          timestamp: expect.any(String)
+          timestamp: expect.any(String),
         });
       } finally {
         await request(app.getHttpServer())
@@ -275,7 +277,7 @@ describe('Browser Python Integration E2E Tests', () => {
       const nodeSessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true, backend: 'nodejs' }
+          options: { headless: true, backend: 'nodejs' },
         })
         .expect(201);
 
@@ -293,7 +295,7 @@ describe('Browser Python Integration E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/migrate`)
           .send({
             targetBackend: 'python',
-            preserveState: true
+            preserveState: true,
           })
           .expect(200);
 
@@ -302,7 +304,7 @@ describe('Browser Python Integration E2E Tests', () => {
           sessionId,
           previousBackend: 'nodejs',
           currentBackend: 'python',
-          migrationTime: expect.any(Number)
+          migrationTime: expect.any(Number),
         });
 
         // Verify session still functions with Python backend
@@ -314,7 +316,7 @@ describe('Browser Python Integration E2E Tests', () => {
           sessionId,
           backend: 'python',
           currentUrl: 'https://example.com',
-          status: 'active'
+          status: 'active',
         });
       } finally {
         await request(app.getHttpServer())
@@ -331,7 +333,7 @@ describe('Browser Python Integration E2E Tests', () => {
       const response = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true, backend: 'python' }
+          options: { headless: true, backend: 'python' },
         })
         .expect(201);
       sessionId = response.body.sessionId;
@@ -371,7 +373,7 @@ describe('Browser Python Integration E2E Tests', () => {
                 'userAgent': await page.evaluate('navigator.userAgent')
             }
           `,
-          timeout: 10000
+          timeout: 10000,
         })
         .expect(200);
 
@@ -380,10 +382,10 @@ describe('Browser Python Integration E2E Tests', () => {
         result: expect.objectContaining({
           title: expect.any(String),
           elementCount: expect.any(Number),
-          userAgent: expect.any(String)
+          userAgent: expect.any(String),
         }),
         executionTime: expect.any(Number),
-        backend: 'python'
+        backend: 'python',
       });
     });
 
@@ -402,8 +404,8 @@ describe('Browser Python Integration E2E Tests', () => {
           options: {
             useAI: true,
             fallbackStrategies: ['xpath', 'text_content', 'position'],
-            timeout: 15000
-          }
+            timeout: 15000,
+          },
         })
         .expect(200);
 
@@ -413,9 +415,9 @@ describe('Browser Python Integration E2E Tests', () => {
         strategy: expect.any(String),
         element: expect.objectContaining({
           tagName: expect.any(String),
-          selector: expect.any(String)
+          selector: expect.any(String),
         }),
-        executionTime: expect.any(Number)
+        executionTime: expect.any(Number),
       });
     });
 
@@ -424,7 +426,7 @@ describe('Browser Python Integration E2E Tests', () => {
       const importErrorResponse = await request(app.getHttpServer())
         .post(`/browser-use/sessions/${sessionId}/python/execute`)
         .send({
-          script: 'import non_existent_module'
+          script: 'import non_existent_module',
         })
         .expect(400);
 
@@ -433,15 +435,15 @@ describe('Browser Python Integration E2E Tests', () => {
           type: 'PythonExecutionError',
           subtype: 'ImportError',
           message: expect.stringContaining('non_existent_module'),
-          traceback: expect.any(String)
-        })
+          traceback: expect.any(String),
+        }),
       });
 
       // Test Python syntax error handling
       const syntaxErrorResponse = await request(app.getHttpServer())
         .post(`/browser-use/sessions/${sessionId}/python/execute`)
         .send({
-          script: 'invalid python syntax @@#'
+          script: 'invalid python syntax @@#',
         })
         .expect(400);
 
@@ -450,8 +452,8 @@ describe('Browser Python Integration E2E Tests', () => {
           type: 'PythonExecutionError',
           subtype: 'SyntaxError',
           message: expect.any(String),
-          line: expect.any(Number)
-        })
+          line: expect.any(Number),
+        }),
       });
     });
 
@@ -468,10 +470,10 @@ describe('Browser Python Integration E2E Tests', () => {
           operations: [
             { type: 'extract', selector: 'title' },
             { type: 'click', selector: 'body' },
-            { type: 'execute', script: 'return document.readyState;' }
+            { type: 'execute', script: 'return document.readyState;' },
           ],
           iterations: 10,
-          backends: ['python', 'nodejs']
+          backends: ['python', 'nodejs'],
         })
         .expect(200);
 
@@ -480,19 +482,19 @@ describe('Browser Python Integration E2E Tests', () => {
           python: expect.objectContaining({
             averageTime: expect.any(Number),
             totalTime: expect.any(Number),
-            successRate: expect.any(Number)
+            successRate: expect.any(Number),
           }),
           nodejs: expect.objectContaining({
             averageTime: expect.any(Number),
             totalTime: expect.any(Number),
-            successRate: expect.any(Number)
-          })
+            successRate: expect.any(Number),
+          }),
         }),
         comparison: expect.objectContaining({
           faster: expect.stringMatching(/^(python|nodejs|comparable)$/),
           speedDifference: expect.any(Number),
-          recommendation: expect.any(String)
-        })
+          recommendation: expect.any(String),
+        }),
       });
     });
   });
@@ -502,7 +504,7 @@ describe('Browser Python Integration E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true, backend: 'python' }
+          options: { headless: true, backend: 'python' },
         })
         .expect(201);
 
@@ -515,16 +517,18 @@ describe('Browser Python Integration E2E Tests', () => {
           .expect(200);
 
         // Transfer large data set
-        const largeData = Array(1000).fill().map((_, i) => ({
-          id: i,
-          data: `test-data-${i}`.repeat(100)
-        }));
+        const largeData = Array(1000)
+          .fill()
+          .map((_, i) => ({
+            id: i,
+            data: `test-data-${i}`.repeat(100),
+          }));
 
         const response = await request(app.getHttpServer())
           .post(`/browser-use/sessions/${sessionId}/python/process-data`)
           .send({
             data: largeData,
-            operation: 'validate_and_count'
+            operation: 'validate_and_count',
           })
           .expect(200);
 
@@ -533,7 +537,7 @@ describe('Browser Python Integration E2E Tests', () => {
           processedCount: 1000,
           dataSize: expect.any(Number),
           transferTime: expect.any(Number),
-          validationResult: 'passed'
+          validationResult: 'passed',
         });
       } finally {
         await request(app.getHttpServer())
@@ -550,18 +554,18 @@ describe('Browser Python Integration E2E Tests', () => {
       expect(compatibilityResponse.body).toMatchObject({
         protocolVersion: expect.objectContaining({
           current: expect.any(String),
-          supported: expect.arrayContaining([expect.any(String)])
+          supported: expect.arrayContaining([expect.any(String)]),
         }),
         compatibility: expect.objectContaining({
           status: expect.stringMatching(/^(compatible|warning|incompatible)$/),
           issues: expect.any(Array),
-          recommendations: expect.any(Array)
+          recommendations: expect.any(Array),
         }),
         features: expect.objectContaining({
           supported: expect.arrayContaining([expect.any(String)]),
           deprecated: expect.any(Array),
-          experimental: expect.any(Array)
-        })
+          experimental: expect.any(Array),
+        }),
       });
     });
 
@@ -569,7 +573,7 @@ describe('Browser Python Integration E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true, backend: 'python' }
+          options: { headless: true, backend: 'python' },
         })
         .expect(201);
 
@@ -584,7 +588,7 @@ describe('Browser Python Integration E2E Tests', () => {
 
         expect(failureResponse.body).toMatchObject({
           success: true,
-          simulation: 'communication_timeout'
+          simulation: 'communication_timeout',
         });
 
         // Attempt operation that should trigger recovery
@@ -592,7 +596,7 @@ describe('Browser Python Integration E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/navigate`)
           .send({
             url: 'https://example.com',
-            recovery: true
+            recovery: true,
           })
           .expect(200);
 
@@ -601,8 +605,8 @@ describe('Browser Python Integration E2E Tests', () => {
           recovery: expect.objectContaining({
             attempted: true,
             successful: true,
-            method: expect.any(String)
-          })
+            method: expect.any(String),
+          }),
         });
       } finally {
         await request(app.getHttpServer())
@@ -626,7 +630,7 @@ describe('Browser Python Integration E2E Tests', () => {
         const response = await request(app.getHttpServer())
           .post('/browser-use/sessions')
           .send({
-            options: { headless: true, backend: 'python' }
+            options: { headless: true, backend: 'python' },
           })
           .expect(201);
         sessionIds.push(response.body.sessionId);
@@ -637,7 +641,9 @@ describe('Browser Python Integration E2E Tests', () => {
         .get('/browser-use/python/processes')
         .expect(200);
 
-      expect(activeProcesses.body.processes.length).toBeGreaterThan(initialCount);
+      expect(activeProcesses.body.processes.length).toBeGreaterThan(
+        initialCount,
+      );
 
       // Clean up sessions
       for (const sessionId of sessionIds) {
@@ -647,14 +653,16 @@ describe('Browser Python Integration E2E Tests', () => {
       }
 
       // Wait for cleanup
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Verify processes were cleaned up
       const finalProcesses = await request(app.getHttpServer())
         .get('/browser-use/python/processes')
         .expect(200);
 
-      expect(finalProcesses.body.processes.length).toBeLessThanOrEqual(initialCount + 1);
+      expect(finalProcesses.body.processes.length).toBeLessThanOrEqual(
+        initialCount + 1,
+      );
     });
 
     it('should monitor Python framework resource usage', async () => {
@@ -666,23 +674,23 @@ describe('Browser Python Integration E2E Tests', () => {
         memory: expect.objectContaining({
           used: expect.any(Number),
           available: expect.any(Number),
-          percentage: expect.any(Number)
+          percentage: expect.any(Number),
         }),
         cpu: expect.objectContaining({
           usage: expect.any(Number),
-          loadAverage: expect.any(Array)
+          loadAverage: expect.any(Array),
         }),
         processes: expect.objectContaining({
           active: expect.any(Number),
           idle: expect.any(Number),
-          zombie: expect.any(Number)
+          zombie: expect.any(Number),
         }),
         limits: expect.objectContaining({
           maxProcesses: expect.any(Number),
           maxMemory: expect.any(Number),
-          enforced: expect.any(Boolean)
+          enforced: expect.any(Boolean),
         }),
-        timestamp: expect.any(String)
+        timestamp: expect.any(String),
       });
     });
   });

@@ -48,7 +48,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
-  RiskLevel
+  RiskLevel,
 } from '../../src/parlant/parlant-integration.service';
 
 import {
@@ -56,7 +56,7 @@ import {
   ConversationalMessage,
   ConversationalMessageType,
   ValidationContext,
-  ValidationAction
+  ValidationAction,
 } from '../../src/common/websocket/conversational-websocket-bridge.service';
 
 import { AigentParlantSecurityBridgeService } from '../../src/auth/services/aigent-parlant-security-bridge.service';
@@ -90,7 +90,12 @@ interface FunctionTestCase {
   functionName: string;
   description: string;
   language: 'typescript' | 'python' | 'cross-service';
-  category: 'data-access' | 'computation' | 'external-api' | 'database' | 'validation';
+  category:
+    | 'data-access'
+    | 'computation'
+    | 'external-api'
+    | 'database'
+    | 'validation';
   riskLevel: RiskLevel;
   parameters: Record<string, unknown>;
   expectedResult: unknown;
@@ -164,7 +169,6 @@ interface BatchProcessingConfig {
  * Function integration test utilities
  */
 class FunctionIntegrationTestUtils {
-
   /**
    * Generate function test cases
    */
@@ -177,10 +181,14 @@ class FunctionIntegrationTestUtils {
         category: 'data-access',
         riskLevel: RiskLevel.LOW,
         parameters: { userId: 'test-user-123' },
-        expectedResult: { id: 'test-user-123', name: 'Test User', role: 'user' },
+        expectedResult: {
+          id: 'test-user-123',
+          name: 'Test User',
+          role: 'user',
+        },
         validationRequired: true,
         streamingSupported: false,
-        performanceTarget: 50
+        performanceTarget: 50,
       },
       {
         functionName: 'calculateRiskScore',
@@ -191,12 +199,12 @@ class FunctionIntegrationTestUtils {
         parameters: {
           transactionAmount: 1000,
           userHistory: ['positive', 'neutral', 'positive'],
-          accountAge: 365
+          accountAge: 365,
         },
         expectedResult: { riskScore: 0.25, recommendation: 'approve' },
         validationRequired: true,
         streamingSupported: false,
-        performanceTarget: 100
+        performanceTarget: 100,
       },
       {
         functionName: 'processLargeDataset',
@@ -206,12 +214,16 @@ class FunctionIntegrationTestUtils {
         riskLevel: RiskLevel.HIGH,
         parameters: {
           datasetId: 'large-dataset-001',
-          processingOptions: { parallel: true, chunkSize: 1000 }
+          processingOptions: { parallel: true, chunkSize: 1000 },
         },
-        expectedResult: { processed: true, recordCount: 50000, duration: 'number' },
+        expectedResult: {
+          processed: true,
+          recordCount: 50000,
+          duration: 'number',
+        },
         validationRequired: true,
         streamingSupported: true,
-        performanceTarget: 2000
+        performanceTarget: 2000,
       },
       {
         functionName: 'updateCriticalDatabase',
@@ -223,12 +235,16 @@ class FunctionIntegrationTestUtils {
           table: 'critical_data',
           operation: 'update',
           conditions: { id: 'critical-record-001' },
-          updates: { status: 'processed', timestamp: 'current' }
+          updates: { status: 'processed', timestamp: 'current' },
         },
-        expectedResult: { updated: true, recordsAffected: 1, backupCreated: true },
+        expectedResult: {
+          updated: true,
+          recordsAffected: 1,
+          backupCreated: true,
+        },
         validationRequired: true,
         streamingSupported: false,
-        performanceTarget: 200
+        performanceTarget: 200,
       },
       {
         functionName: 'callExternalAPI',
@@ -239,14 +255,14 @@ class FunctionIntegrationTestUtils {
         parameters: {
           endpoint: 'https://api.example.com/data',
           method: 'GET',
-          headers: { 'Authorization': 'Bearer token' },
-          timeout: 5000
+          headers: { Authorization: 'Bearer token' },
+          timeout: 5000,
         },
         expectedResult: { status: 200, data: 'object', responseTime: 'number' },
         validationRequired: true,
         streamingSupported: false,
-        performanceTarget: 1000
-      }
+        performanceTarget: 1000,
+      },
     ];
   }
 
@@ -266,31 +282,35 @@ class FunctionIntegrationTestUtils {
             serviceName: 'user-service',
             functionName: 'getUserBasicData',
             inputMapping: { userId: 'input.userId' },
-            outputMapping: { userData: 'output' }
+            outputMapping: { userData: 'output' },
           },
           {
             serviceName: 'validation-service',
             functionName: 'validateUserData',
             inputMapping: { userData: 'getUserBasicData.userData' },
             outputMapping: { validationResult: 'output' },
-            dependsOn: ['getUserBasicData']
+            dependsOn: ['getUserBasicData'],
           },
           {
             serviceName: 'enrichment-service',
             functionName: 'enrichUserProfile',
             inputMapping: {
               userData: 'getUserBasicData.userData',
-              validation: 'validateUserData.validationResult'
+              validation: 'validateUserData.validationResult',
             },
             outputMapping: { enrichedProfile: 'output' },
-            dependsOn: ['getUserBasicData', 'validateUserData']
-          }
-        ]
+            dependsOn: ['getUserBasicData', 'validateUserData'],
+          },
+        ],
       },
       {
         name: 'Parallel Risk Assessment',
         description: 'Concurrent risk assessment across multiple services',
-        services: ['financial-service', 'behavioral-service', 'compliance-service'],
+        services: [
+          'financial-service',
+          'behavioral-service',
+          'compliance-service',
+        ],
         expectedTotalTime: 300,
         dataFlowValidation: true,
         functionChain: [
@@ -299,27 +319,27 @@ class FunctionIntegrationTestUtils {
             functionName: 'calculateFinancialRisk',
             inputMapping: { transactionData: 'input.transaction' },
             outputMapping: { financialRisk: 'output' },
-            parallel: true
+            parallel: true,
           },
           {
             serviceName: 'behavioral-service',
             functionName: 'analyzeBehavioralPatterns',
             inputMapping: { userHistory: 'input.history' },
             outputMapping: { behavioralRisk: 'output' },
-            parallel: true
+            parallel: true,
           },
           {
             serviceName: 'compliance-service',
             functionName: 'checkComplianceRules',
             inputMapping: {
               transaction: 'input.transaction',
-              userProfile: 'input.profile'
+              userProfile: 'input.profile',
             },
             outputMapping: { complianceStatus: 'output' },
-            parallel: true
-          }
-        ]
-      }
+            parallel: true,
+          },
+        ],
+      },
     ];
   }
 
@@ -333,7 +353,7 @@ class FunctionIntegrationTestUtils {
       parlantService: ParlantIntegrationService;
       conversationalBridge: ConversationalWebSocketBridgeService;
       securityBridge: AigentParlantSecurityBridgeService;
-    }
+    },
   ): Promise<{
     success: boolean;
     metrics: FunctionExecutionMetrics;
@@ -356,15 +376,16 @@ class FunctionIntegrationTestUtils {
         environmentInfo: {
           language: testCase.language,
           category: testCase.category,
-          testCase: testCase.functionName
+          testCase: testCase.functionName,
         },
         previousActions: [],
         securityContext: {
           authenticationLevel: 'basic',
           permissions: ['function-execute'],
           auditRequired: testCase.riskLevel === RiskLevel.CRITICAL,
-          complianceFlags: testCase.riskLevel === RiskLevel.CRITICAL ? ['audit-required'] : []
-        }
+          complianceFlags:
+            testCase.riskLevel === RiskLevel.CRITICAL ? ['audit-required'] : [],
+        },
       };
 
       // Step 3: Create validation action
@@ -374,16 +395,18 @@ class FunctionIntegrationTestUtils {
           functionName: testCase.functionName,
           language: testCase.language,
           category: testCase.category,
-          parameters: testCase.parameters
+          parameters: testCase.parameters,
         },
         expectedOutcome: `Execute ${testCase.functionName} and return result`,
         reversible: testCase.category !== 'database',
         impact: {
           scope: testCase.language === 'cross-service' ? 'network' : 'local',
-          dataAccess: testCase.category === 'data-access' || testCase.category === 'database',
+          dataAccess:
+            testCase.category === 'data-access' ||
+            testCase.category === 'database',
           stateChanges: testCase.category === 'database',
-          userInteraction: false
-        }
+          userInteraction: false,
+        },
       };
 
       // Step 4: Send function validation request via WebSocket
@@ -405,37 +428,41 @@ class FunctionIntegrationTestUtils {
             updateInterval: 100,
             maxUpdateCount: 10,
             compressionEnabled: true,
-            priorityBoost: testCase.riskLevel === RiskLevel.CRITICAL
-          }
+            priorityBoost: testCase.riskLevel === RiskLevel.CRITICAL,
+          },
         },
         metadata: {
           priority: 'high',
           requiresAck: true,
           compression: true,
-          routingHints: ['function-validation']
-        }
+          routingHints: ['function-validation'],
+        },
       };
 
       // Send validation request
       await FunctionIntegrationTestUtils.sendMessage(client, validationRequest);
 
       // Wait for validation response
-      const validationResponse = await FunctionIntegrationTestUtils.waitForResponse(
-        client,
-        ConversationalMessageType.VALIDATION_RESPONSE,
-        5000
-      );
+      const validationResponse =
+        await FunctionIntegrationTestUtils.waitForResponse(
+          client,
+          ConversationalMessageType.VALIDATION_RESPONSE,
+          5000,
+        );
 
       const validationTime = performance.now() - validationStartTime;
 
       // Check if validation approved
       if (!validationResponse.payload.approved) {
-        throw new Error(`Function validation rejected: ${validationResponse.payload.reason}`);
+        throw new Error(
+          `Function validation rejected: ${validationResponse.payload.reason}`,
+        );
       }
 
       // Step 5: Execute function (simulate execution)
       const functionStartTime = performance.now();
-      const functionResult = await FunctionIntegrationTestUtils.simulateFunctionExecution(testCase);
+      const functionResult =
+        await FunctionIntegrationTestUtils.simulateFunctionExecution(testCase);
       const functionExecutionTime = performance.now() - functionStartTime;
 
       // Step 6: Deserialize result
@@ -456,20 +483,25 @@ class FunctionIntegrationTestUtils {
           status: 'completed',
           result: functionResult,
           executionTime: functionExecutionTime,
-          success: true
+          success: true,
         },
         metadata: {
           priority: 'normal',
           requiresAck: false,
           compression: true,
-          routingHints: ['function-completion']
-        }
+          routingHints: ['function-completion'],
+        },
       };
 
       await FunctionIntegrationTestUtils.sendMessage(client, completionMessage);
 
       const totalExecutionTime = performance.now() - startTime;
-      const callOverhead = totalExecutionTime - functionExecutionTime - serializationTime - deserializationTime - validationTime;
+      const callOverhead =
+        totalExecutionTime -
+        functionExecutionTime -
+        serializationTime -
+        deserializationTime -
+        validationTime;
 
       // Calculate metrics
       const metrics: FunctionExecutionMetrics = {
@@ -481,19 +513,23 @@ class FunctionIntegrationTestUtils {
         deserializationTime,
         executionSuccess: true,
         validationSuccess: validationResponse.payload.approved as boolean,
-        resultCorrectness: FunctionIntegrationTestUtils.validateResult(functionResult, testCase.expectedResult),
+        resultCorrectness: FunctionIntegrationTestUtils.validateResult(
+          functionResult,
+          testCase.expectedResult,
+        ),
         errorHandling: true,
         throughput: 1000 / totalExecutionTime,
         memoryUsage: process.memoryUsage().heapUsed,
-        networkLatency: validationTime + callOverhead
+        networkLatency: validationTime + callOverhead,
       };
 
       return {
-        success: totalExecutionTime <= testCase.performanceTarget && metrics.resultCorrectness,
+        success:
+          totalExecutionTime <= testCase.performanceTarget &&
+          metrics.resultCorrectness,
         metrics,
-        result: functionResult
+        result: functionResult,
       };
-
     } catch (error) {
       const totalExecutionTime = performance.now() - startTime;
 
@@ -512,10 +548,10 @@ class FunctionIntegrationTestUtils {
           errorHandling: true,
           throughput: 0,
           memoryUsage: process.memoryUsage().heapUsed,
-          networkLatency: 0
+          networkLatency: 0,
         },
         result: null,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -530,7 +566,7 @@ class FunctionIntegrationTestUtils {
       parlantService: ParlantIntegrationService;
       conversationalBridge: ConversationalWebSocketBridgeService;
       securityBridge: AigentParlantSecurityBridgeService;
-    }
+    },
   ): Promise<{
     success: boolean;
     totalExecutionTime: number;
@@ -555,8 +591,8 @@ class FunctionIntegrationTestUtils {
             userId: 'cross-service-test-user',
             transaction: { amount: 1000, type: 'transfer' },
             history: ['login', 'transfer', 'logout'],
-            profile: { verified: true, riskLevel: 'low' }
-          }
+            profile: { verified: true, riskLevel: 'low' },
+          },
         );
 
         // Create validation request for cross-service function
@@ -574,22 +610,22 @@ class FunctionIntegrationTestUtils {
               environmentInfo: {
                 scenario: scenario.name,
                 serviceName: func.serviceName,
-                functionName: func.functionName
+                functionName: func.functionName,
               },
               previousActions: Object.keys(functionResults),
               securityContext: {
                 authenticationLevel: 'basic',
                 permissions: ['cross-service-execute'],
                 auditRequired: true,
-                complianceFlags: ['cross-service']
-              }
+                complianceFlags: ['cross-service'],
+              },
             },
             action: {
               actionType: 'cross_service_function_execution',
               parameters: {
                 serviceName: func.serviceName,
                 functionName: func.functionName,
-                inputs: resolvedInputs
+                inputs: resolvedInputs,
               },
               expectedOutcome: `Execute ${func.functionName} on ${func.serviceName}`,
               reversible: func.serviceName !== 'database-service',
@@ -597,8 +633,8 @@ class FunctionIntegrationTestUtils {
                 scope: 'network',
                 dataAccess: true,
                 stateChanges: func.serviceName.includes('database'),
-                userInteraction: false
-              }
+                userInteraction: false,
+              },
             },
             riskLevel: RiskLevel.MEDIUM,
             streamingOptions: {
@@ -606,42 +642,54 @@ class FunctionIntegrationTestUtils {
               updateInterval: 1000,
               maxUpdateCount: 5,
               compressionEnabled: true,
-              priorityBoost: false
-            }
+              priorityBoost: false,
+            },
           },
           metadata: {
             priority: 'high',
             requiresAck: true,
             compression: true,
-            routingHints: ['cross-service']
-          }
+            routingHints: ['cross-service'],
+          },
         };
 
         // Send validation request
-        await FunctionIntegrationTestUtils.sendMessage(client, validationRequest);
-
-        // Wait for validation response
-        const validationResponse = await FunctionIntegrationTestUtils.waitForResponse(
+        await FunctionIntegrationTestUtils.sendMessage(
           client,
-          ConversationalMessageType.VALIDATION_RESPONSE,
-          5000
+          validationRequest,
         );
 
+        // Wait for validation response
+        const validationResponse =
+          await FunctionIntegrationTestUtils.waitForResponse(
+            client,
+            ConversationalMessageType.VALIDATION_RESPONSE,
+            5000,
+          );
+
         if (!validationResponse.payload.approved) {
-          throw new Error(`Cross-service validation rejected for ${func.serviceName}.${func.functionName}`);
+          throw new Error(
+            `Cross-service validation rejected for ${func.serviceName}.${func.functionName}`,
+          );
         }
 
         // Simulate function execution
-        const mockResult = await FunctionIntegrationTestUtils.simulateCrossServiceFunction(func, resolvedInputs);
+        const mockResult =
+          await FunctionIntegrationTestUtils.simulateCrossServiceFunction(
+            func,
+            resolvedInputs,
+          );
 
         // Apply output mapping
         const mappedResults = FunctionIntegrationTestUtils.applyOutputMapping(
           func.outputMapping,
-          mockResult
+          mockResult,
         );
 
         // Store results
-        Object.assign(functionResults, { [`${func.serviceName}.${func.functionName}`]: mappedResults });
+        Object.assign(functionResults, {
+          [`${func.serviceName}.${func.functionName}`]: mappedResults,
+        });
 
         const functionExecutionTime = performance.now() - functionStartTime;
       }
@@ -650,23 +698,26 @@ class FunctionIntegrationTestUtils {
 
       // Validate data flow
       const dataFlowValid = scenario.dataFlowValidation
-        ? FunctionIntegrationTestUtils.validateDataFlow(scenario, functionResults)
+        ? FunctionIntegrationTestUtils.validateDataFlow(
+            scenario,
+            functionResults,
+          )
         : true;
 
       return {
-        success: totalExecutionTime <= scenario.expectedTotalTime && dataFlowValid,
+        success:
+          totalExecutionTime <= scenario.expectedTotalTime && dataFlowValid,
         totalExecutionTime,
         functionResults,
-        dataFlowValid
+        dataFlowValid,
       };
-
     } catch (error) {
       return {
         success: false,
         totalExecutionTime: performance.now() - startTime,
         functionResults,
         dataFlowValid: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -681,7 +732,7 @@ class FunctionIntegrationTestUtils {
       parlantService: ParlantIntegrationService;
       conversationalBridge: ConversationalWebSocketBridgeService;
       securityBridge: AigentParlantSecurityBridgeService;
-    }
+    },
   ): Promise<{
     success: boolean;
     totalProcessed: number;
@@ -721,22 +772,22 @@ class FunctionIntegrationTestUtils {
                 environmentInfo: {
                   batchId,
                   batchSize: config.batchSize,
-                  functionType: config.functionType
+                  functionType: config.functionType,
                 },
                 previousActions: [],
                 securityContext: {
                   authenticationLevel: 'basic',
                   permissions: ['batch-execute'],
                   auditRequired: false,
-                  complianceFlags: []
-                }
+                  complianceFlags: [],
+                },
               },
               action: {
                 actionType: 'batch_function_execution',
                 parameters: {
                   batchId,
                   batchSize: config.batchSize,
-                  functionType: config.functionType
+                  functionType: config.functionType,
                 },
                 expectedOutcome: `Process batch ${batchId} with ${config.batchSize} functions`,
                 reversible: true,
@@ -744,8 +795,8 @@ class FunctionIntegrationTestUtils {
                   scope: 'local',
                   dataAccess: true,
                   stateChanges: false,
-                  userInteraction: false
-                }
+                  userInteraction: false,
+                },
               },
               riskLevel: RiskLevel.LOW,
               streamingOptions: {
@@ -753,26 +804,30 @@ class FunctionIntegrationTestUtils {
                 updateInterval: 100,
                 maxUpdateCount: config.batchSize,
                 compressionEnabled: true,
-                priorityBoost: false
-              }
+                priorityBoost: false,
+              },
             },
             metadata: {
               priority: 'normal',
               requiresAck: true,
               compression: true,
-              routingHints: ['batch-processing']
-            }
+              routingHints: ['batch-processing'],
+            },
           };
 
           // Send batch validation request
-          await FunctionIntegrationTestUtils.sendMessage(client, batchValidationRequest);
+          await FunctionIntegrationTestUtils.sendMessage(
+            client,
+            batchValidationRequest,
+          );
 
           // Wait for validation response
-          const validationResponse = await FunctionIntegrationTestUtils.waitForResponse(
-            client,
-            ConversationalMessageType.VALIDATION_RESPONSE,
-            10000
-          );
+          const validationResponse =
+            await FunctionIntegrationTestUtils.waitForResponse(
+              client,
+              ConversationalMessageType.VALIDATION_RESPONSE,
+              10000,
+            );
 
           if (!validationResponse.payload.approved) {
             throw new Error(`Batch validation rejected for batch ${batchId}`);
@@ -782,7 +837,7 @@ class FunctionIntegrationTestUtils {
           let processed = 0;
           for (let i = 0; i < config.batchSize; i++) {
             // Simulate function execution
-            await new Promise(resolve => setTimeout(resolve, 1));
+            await new Promise((resolve) => setTimeout(resolve, 1));
             processed++;
           }
 
@@ -791,7 +846,7 @@ class FunctionIntegrationTestUtils {
           return {
             batchId,
             processed,
-            latency: batchLatency
+            latency: batchLatency,
           };
         })();
 
@@ -802,22 +857,27 @@ class FunctionIntegrationTestUtils {
       const batchResults = await Promise.all(batchPromises);
 
       const totalExecutionTime = performance.now() - startTime;
-      const totalProcessed = batchResults.reduce((sum, batch) => sum + batch.processed, 0);
-      const averageLatency = batchResults.reduce((sum, batch) => sum + batch.latency, 0) / batchResults.length;
+      const totalProcessed = batchResults.reduce(
+        (sum, batch) => sum + batch.processed,
+        0,
+      );
+      const averageLatency =
+        batchResults.reduce((sum, batch) => sum + batch.latency, 0) /
+        batchResults.length;
       const throughput = (totalProcessed * 1000) / totalExecutionTime;
 
       // Calculate memory efficiency
       const memoryUsed = process.memoryUsage().heapUsed;
-      const memoryEfficiency = Math.max(0, 1 - (memoryUsed / config.memoryLimit));
+      const memoryEfficiency = Math.max(0, 1 - memoryUsed / config.memoryLimit);
 
       return {
-        success: throughput >= config.expectedThroughput && memoryEfficiency > 0.7,
+        success:
+          throughput >= config.expectedThroughput && memoryEfficiency > 0.7,
         totalProcessed,
         averageLatency,
         throughput,
-        memoryEfficiency
+        memoryEfficiency,
       };
-
     } catch (error) {
       return {
         success: false,
@@ -825,7 +885,7 @@ class FunctionIntegrationTestUtils {
         averageLatency: 0,
         throughput: 0,
         memoryEfficiency: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -833,10 +893,12 @@ class FunctionIntegrationTestUtils {
   /**
    * Simulate function execution
    */
-  private static async simulateFunctionExecution(testCase: FunctionTestCase): Promise<unknown> {
+  private static async simulateFunctionExecution(
+    testCase: FunctionTestCase,
+  ): Promise<unknown> {
     // Simulate processing time based on function type
     const processingTime = testCase.performanceTarget * 0.1; // 10% of target time
-    await new Promise(resolve => setTimeout(resolve, processingTime));
+    await new Promise((resolve) => setTimeout(resolve, processingTime));
 
     // Return mock result based on test case
     switch (testCase.functionName) {
@@ -848,8 +910,8 @@ class FunctionIntegrationTestUtils {
 
       case 'processLargeDataset':
         return {
-          ...testCase.expectedResult as object,
-          duration: processingTime
+          ...(testCase.expectedResult as object),
+          duration: processingTime,
         };
 
       case 'updateCriticalDatabase':
@@ -857,8 +919,8 @@ class FunctionIntegrationTestUtils {
 
       case 'callExternalAPI':
         return {
-          ...testCase.expectedResult as object,
-          responseTime: processingTime
+          ...(testCase.expectedResult as object),
+          responseTime: processingTime,
         };
 
       default:
@@ -871,10 +933,10 @@ class FunctionIntegrationTestUtils {
    */
   private static async simulateCrossServiceFunction(
     func: CrossServiceFunction,
-    inputs: Record<string, unknown>
+    inputs: Record<string, unknown>,
   ): Promise<unknown> {
     // Simulate network latency for cross-service call
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     // Generate mock response based on service and function
     switch (func.serviceName) {
@@ -883,44 +945,44 @@ class FunctionIntegrationTestUtils {
           id: inputs.userId,
           name: 'Test User',
           email: 'test@example.com',
-          verified: true
+          verified: true,
         };
 
       case 'validation-service':
         return {
           valid: true,
           confidence: 0.95,
-          issues: []
+          issues: [],
         };
 
       case 'enrichment-service':
         return {
-          ...inputs.userData as object,
+          ...(inputs.userData as object),
           enrichedData: {
             preferences: ['setting1', 'setting2'],
-            history: ['action1', 'action2']
-          }
+            history: ['action1', 'action2'],
+          },
         };
 
       case 'financial-service':
         return {
           riskScore: 0.2,
           recommendation: 'approve',
-          factors: ['income_stable', 'credit_good']
+          factors: ['income_stable', 'credit_good'],
         };
 
       case 'behavioral-service':
         return {
           behaviorScore: 0.8,
           patterns: ['consistent_login', 'normal_usage'],
-          alerts: []
+          alerts: [],
         };
 
       case 'compliance-service':
         return {
           compliant: true,
           checkedRules: ['AML', 'KYC', 'PCI'],
-          violations: []
+          violations: [],
         };
 
       default:
@@ -942,10 +1004,14 @@ class FunctionIntegrationTestUtils {
         const expectedValue = expectedObj[key];
         const actualValue = actualObj[key];
 
-        if (expectedValue === 'string' && typeof actualValue !== 'string') return false;
-        if (expectedValue === 'number' && typeof actualValue !== 'number') return false;
-        if (expectedValue === 'object' && typeof actualValue !== 'object') return false;
-        if (typeof expectedValue !== 'string' && expectedValue !== actualValue) return false;
+        if (expectedValue === 'string' && typeof actualValue !== 'string')
+          return false;
+        if (expectedValue === 'number' && typeof actualValue !== 'number')
+          return false;
+        if (expectedValue === 'object' && typeof actualValue !== 'object')
+          return false;
+        if (typeof expectedValue !== 'string' && expectedValue !== actualValue)
+          return false;
       }
 
       return true;
@@ -960,22 +1026,26 @@ class FunctionIntegrationTestUtils {
   private static resolveInputMapping(
     inputMapping: Record<string, string>,
     functionResults: Record<string, unknown>,
-    defaultInputs: Record<string, unknown>
+    defaultInputs: Record<string, unknown>,
   ): Record<string, unknown> {
     const resolvedInputs: Record<string, unknown> = {};
 
     for (const [inputKey, mappingPath] of Object.entries(inputMapping)) {
       if (mappingPath.startsWith('input.')) {
         const inputPath = mappingPath.substring(6);
-        resolvedInputs[inputKey] = FunctionIntegrationTestUtils.getNestedValue(defaultInputs, inputPath);
+        resolvedInputs[inputKey] = FunctionIntegrationTestUtils.getNestedValue(
+          defaultInputs,
+          inputPath,
+        );
       } else if (mappingPath.includes('.')) {
         const [functionName, outputPath] = mappingPath.split('.', 2);
         const functionResult = functionResults[functionName];
         if (functionResult && typeof functionResult === 'object') {
-          resolvedInputs[inputKey] = FunctionIntegrationTestUtils.getNestedValue(
-            functionResult as Record<string, unknown>,
-            outputPath
-          );
+          resolvedInputs[inputKey] =
+            FunctionIntegrationTestUtils.getNestedValue(
+              functionResult as Record<string, unknown>,
+              outputPath,
+            );
         }
       } else {
         resolvedInputs[inputKey] = functionResults[mappingPath];
@@ -990,7 +1060,7 @@ class FunctionIntegrationTestUtils {
    */
   private static applyOutputMapping(
     outputMapping: Record<string, string>,
-    result: unknown
+    result: unknown,
   ): Record<string, unknown> {
     const mappedResults: Record<string, unknown> = {};
 
@@ -1000,7 +1070,7 @@ class FunctionIntegrationTestUtils {
       } else if (typeof result === 'object' && result !== null) {
         mappedResults[outputKey] = FunctionIntegrationTestUtils.getNestedValue(
           result as Record<string, unknown>,
-          resultPath
+          resultPath,
         );
       }
     }
@@ -1013,7 +1083,7 @@ class FunctionIntegrationTestUtils {
    */
   private static validateDataFlow(
     scenario: CrossServiceScenario,
-    functionResults: Record<string, unknown>
+    functionResults: Record<string, unknown>,
   ): boolean {
     // Check that all functions in the chain produced results
     for (const func of scenario.functionChain) {
@@ -1027,9 +1097,11 @@ class FunctionIntegrationTestUtils {
     for (const func of scenario.functionChain) {
       if (func.dependsOn) {
         for (const dependency of func.dependsOn) {
-          const dependencyKey = scenario.functionChain
-            .find(f => f.functionName === dependency)
-            ?.serviceName + '.' + dependency;
+          const dependencyKey =
+            scenario.functionChain.find((f) => f.functionName === dependency)
+              ?.serviceName +
+            '.' +
+            dependency;
 
           if (!dependencyKey || !functionResults[dependencyKey]) {
             return false;
@@ -1044,16 +1116,24 @@ class FunctionIntegrationTestUtils {
   /**
    * Get nested value from object using dot notation
    */
-  private static getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+  private static getNestedValue(
+    obj: Record<string, unknown>,
+    path: string,
+  ): unknown {
     return path.split('.').reduce((current, key) => {
-      return current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : undefined;
+      return current && typeof current === 'object'
+        ? (current as Record<string, unknown>)[key]
+        : undefined;
     }, obj);
   }
 
   /**
    * Send WebSocket message
    */
-  private static async sendMessage(client: WebSocket, message: ConversationalMessage): Promise<void> {
+  private static async sendMessage(
+    client: WebSocket,
+    message: ConversationalMessage,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (client.readyState !== WebSocket.OPEN) {
         reject(new Error('WebSocket not open'));
@@ -1076,7 +1156,7 @@ class FunctionIntegrationTestUtils {
   private static async waitForResponse(
     client: WebSocket,
     messageType: ConversationalMessageType,
-    timeout: number = 5000
+    timeout: number = 5000,
   ): Promise<ConversationalMessage> {
     return new Promise((resolve, reject) => {
       const timeoutHandle = setTimeout(() => {
@@ -1134,7 +1214,13 @@ class FunctionIntegrationTestUtils {
       batchSize: 100,
       concurrentCalls: 50,
       supportedLanguages: ['typescript', 'python', 'cross-service'],
-      functionCategories: ['data-access', 'computation', 'external-api', 'database', 'validation']
+      functionCategories: [
+        'data-access',
+        'computation',
+        'external-api',
+        'database',
+        'validation',
+      ],
     };
   }
 }
@@ -1148,7 +1234,8 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
   let securityBridge: AigentParlantSecurityBridgeService;
   let logger: Logger;
 
-  const integrationConfig = FunctionIntegrationTestUtils.generateFunctionIntegrationConfig();
+  const integrationConfig =
+    FunctionIntegrationTestUtils.generateFunctionIntegrationConfig();
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -1157,28 +1244,34 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
           load: [
             () => ({
               CONVERSATIONAL_WEBSOCKET_PORT: 8081,
-              NODE_ENV: 'test'
-            })
-          ]
-        })
+              NODE_ENV: 'test',
+            }),
+          ],
+        }),
       ],
       providers: [
         ParlantIntegrationService,
         ConversationalWebSocketBridgeService,
         AigentParlantSecurityBridgeService,
-        Logger
-      ]
+        Logger,
+      ],
     }).compile();
 
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
-    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    securityBridge = module.get<AigentParlantSecurityBridgeService>(AigentParlantSecurityBridgeService);
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
+    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    securityBridge = module.get<AigentParlantSecurityBridgeService>(
+      AigentParlantSecurityBridgeService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
 
     // Allow time for WebSocket server to start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   afterAll(async () => {
@@ -1189,14 +1282,19 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
 
   describe('Individual Function Integration', () => {
     it('should execute low-risk data access function with validation', async () => {
-      const testCases = FunctionIntegrationTestUtils.generateFunctionTestCases();
-      const getUserDataCase = testCases.find(c => c.functionName === 'getUserData');
+      const testCases =
+        FunctionIntegrationTestUtils.generateFunctionTestCases();
+      const getUserDataCase = testCases.find(
+        (c) => c.functionName === 'getUserData',
+      );
 
       if (!getUserDataCase) {
         throw new Error('getUserData test case not found');
       }
 
-      logger.log(`Starting ${getUserDataCase.functionName} function integration test`);
+      logger.log(
+        `Starting ${getUserDataCase.functionName} function integration test`,
+      );
 
       const client = await FunctionIntegrationTestUtils.createTestClient();
       const services = { parlantService, conversationalBridge, securityBridge };
@@ -1205,7 +1303,7 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
         const result = await FunctionIntegrationTestUtils.executeFunctionTest(
           getUserDataCase,
           client,
-          services
+          services,
         );
 
         logger.log(`getUserData Function Results:
@@ -1218,12 +1316,17 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
           Throughput: ${result.metrics.throughput.toFixed(1)} calls/sec`);
 
         expect(result.success).toBe(true);
-        expect(result.metrics.totalExecutionTime).toBeLessThan(getUserDataCase.performanceTarget);
-        expect(result.metrics.callOverhead).toBeLessThan(integrationConfig.maxCallOverhead);
-        expect(result.metrics.validationTime).toBeLessThan(integrationConfig.maxValidationTime);
+        expect(result.metrics.totalExecutionTime).toBeLessThan(
+          getUserDataCase.performanceTarget,
+        );
+        expect(result.metrics.callOverhead).toBeLessThan(
+          integrationConfig.maxCallOverhead,
+        );
+        expect(result.metrics.validationTime).toBeLessThan(
+          integrationConfig.maxValidationTime,
+        );
         expect(result.metrics.resultCorrectness).toBe(true);
         expect(result.metrics.validationSuccess).toBe(true);
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -1232,14 +1335,19 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
     }, 15000);
 
     it('should execute medium-risk computation function with streaming', async () => {
-      const testCases = FunctionIntegrationTestUtils.generateFunctionTestCases();
-      const calculateRiskCase = testCases.find(c => c.functionName === 'calculateRiskScore');
+      const testCases =
+        FunctionIntegrationTestUtils.generateFunctionTestCases();
+      const calculateRiskCase = testCases.find(
+        (c) => c.functionName === 'calculateRiskScore',
+      );
 
       if (!calculateRiskCase) {
         throw new Error('calculateRiskScore test case not found');
       }
 
-      logger.log(`Starting ${calculateRiskCase.functionName} function integration test`);
+      logger.log(
+        `Starting ${calculateRiskCase.functionName} function integration test`,
+      );
 
       const client = await FunctionIntegrationTestUtils.createTestClient();
       const services = { parlantService, conversationalBridge, securityBridge };
@@ -1248,7 +1356,7 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
         const result = await FunctionIntegrationTestUtils.executeFunctionTest(
           calculateRiskCase,
           client,
-          services
+          services,
         );
 
         logger.log(`calculateRiskScore Function Results:
@@ -1260,11 +1368,16 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
           Memory Usage: ${(result.metrics.memoryUsage / 1024 / 1024).toFixed(1)} MB`);
 
         expect(result.success).toBe(true);
-        expect(result.metrics.totalExecutionTime).toBeLessThan(calculateRiskCase.performanceTarget);
-        expect(result.metrics.serializationTime).toBeLessThan(integrationConfig.maxSerializationTime);
-        expect(result.metrics.networkLatency).toBeLessThan(integrationConfig.maxCrossServiceLatency);
+        expect(result.metrics.totalExecutionTime).toBeLessThan(
+          calculateRiskCase.performanceTarget,
+        );
+        expect(result.metrics.serializationTime).toBeLessThan(
+          integrationConfig.maxSerializationTime,
+        );
+        expect(result.metrics.networkLatency).toBeLessThan(
+          integrationConfig.maxCrossServiceLatency,
+        );
         expect(result.metrics.executionSuccess).toBe(true);
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -1273,14 +1386,19 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
     }, 20000);
 
     it('should execute critical database function with security validation', async () => {
-      const testCases = FunctionIntegrationTestUtils.generateFunctionTestCases();
-      const updateDbCase = testCases.find(c => c.functionName === 'updateCriticalDatabase');
+      const testCases =
+        FunctionIntegrationTestUtils.generateFunctionTestCases();
+      const updateDbCase = testCases.find(
+        (c) => c.functionName === 'updateCriticalDatabase',
+      );
 
       if (!updateDbCase) {
         throw new Error('updateCriticalDatabase test case not found');
       }
 
-      logger.log(`Starting ${updateDbCase.functionName} function integration test`);
+      logger.log(
+        `Starting ${updateDbCase.functionName} function integration test`,
+      );
 
       const client = await FunctionIntegrationTestUtils.createTestClient();
       const services = { parlantService, conversationalBridge, securityBridge };
@@ -1289,7 +1407,7 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
         const result = await FunctionIntegrationTestUtils.executeFunctionTest(
           updateDbCase,
           client,
-          services
+          services,
         );
 
         logger.log(`updateCriticalDatabase Function Results:
@@ -1304,7 +1422,6 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
         expect(result.metrics.errorHandling).toBe(true);
         expect(result.metrics.executionSuccess).toBe(true);
         expect(result.result).toHaveProperty('backupCreated', true);
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -1317,8 +1434,11 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
 
   describe('Cross-Service Orchestration', () => {
     it('should execute user data enrichment pipeline', async () => {
-      const scenarios = FunctionIntegrationTestUtils.generateCrossServiceScenarios();
-      const enrichmentScenario = scenarios.find(s => s.name === 'User Data Enrichment Pipeline');
+      const scenarios =
+        FunctionIntegrationTestUtils.generateCrossServiceScenarios();
+      const enrichmentScenario = scenarios.find(
+        (s) => s.name === 'User Data Enrichment Pipeline',
+      );
 
       if (!enrichmentScenario) {
         throw new Error('User data enrichment scenario not found');
@@ -1330,11 +1450,12 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
       const services = { parlantService, conversationalBridge, securityBridge };
 
       try {
-        const result = await FunctionIntegrationTestUtils.executeCrossServiceTest(
-          enrichmentScenario,
-          client,
-          services
-        );
+        const result =
+          await FunctionIntegrationTestUtils.executeCrossServiceTest(
+            enrichmentScenario,
+            client,
+            services,
+          );
 
         logger.log(`User Data Enrichment Results:
           Success: ${result.success}
@@ -1344,10 +1465,13 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
           Functions Executed: ${Object.keys(result.functionResults).length}`);
 
         expect(result.success).toBe(true);
-        expect(result.totalExecutionTime).toBeLessThan(enrichmentScenario.expectedTotalTime + 100);
+        expect(result.totalExecutionTime).toBeLessThan(
+          enrichmentScenario.expectedTotalTime + 100,
+        );
         expect(result.dataFlowValid).toBe(true);
-        expect(Object.keys(result.functionResults)).toHaveLength(enrichmentScenario.functionChain.length);
-
+        expect(Object.keys(result.functionResults)).toHaveLength(
+          enrichmentScenario.functionChain.length,
+        );
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -1356,8 +1480,11 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
     }, 30000);
 
     it('should execute parallel risk assessment', async () => {
-      const scenarios = FunctionIntegrationTestUtils.generateCrossServiceScenarios();
-      const riskScenario = scenarios.find(s => s.name === 'Parallel Risk Assessment');
+      const scenarios =
+        FunctionIntegrationTestUtils.generateCrossServiceScenarios();
+      const riskScenario = scenarios.find(
+        (s) => s.name === 'Parallel Risk Assessment',
+      );
 
       if (!riskScenario) {
         throw new Error('Parallel risk assessment scenario not found');
@@ -1369,26 +1496,27 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
       const services = { parlantService, conversationalBridge, securityBridge };
 
       try {
-        const result = await FunctionIntegrationTestUtils.executeCrossServiceTest(
-          riskScenario,
-          client,
-          services
-        );
+        const result =
+          await FunctionIntegrationTestUtils.executeCrossServiceTest(
+            riskScenario,
+            client,
+            services,
+          );
 
         // Validate parallel execution efficiency
-        const parallelEfficiency = result.totalExecutionTime < (riskScenario.expectedTotalTime * 1.2);
+        const parallelEfficiency =
+          result.totalExecutionTime < riskScenario.expectedTotalTime * 1.2;
 
         logger.log(`Parallel Risk Assessment Results:
           Success: ${result.success}
           Total Execution Time: ${result.totalExecutionTime.toFixed(1)}ms
           Parallel Efficiency: ${parallelEfficiency}
           Services Used: ${riskScenario.services.length}
-          Parallel Functions: ${riskScenario.functionChain.filter(f => f.parallel).length}`);
+          Parallel Functions: ${riskScenario.functionChain.filter((f) => f.parallel).length}`);
 
         expect(result.success).toBe(true);
         expect(parallelEfficiency).toBe(true);
         expect(result.dataFlowValid).toBe(true);
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -1406,20 +1534,23 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
         functionType: 'data-processing',
         concurrentBatches: 5,
         expectedThroughput: 200,
-        memoryLimit: 100 * 1024 * 1024 // 100MB
+        memoryLimit: 100 * 1024 * 1024, // 100MB
       };
 
-      logger.log(`Starting batch processing test with ${batchConfig.concurrentBatches} concurrent batches`);
+      logger.log(
+        `Starting batch processing test with ${batchConfig.concurrentBatches} concurrent batches`,
+      );
 
       const client = await FunctionIntegrationTestUtils.createTestClient();
       const services = { parlantService, conversationalBridge, securityBridge };
 
       try {
-        const result = await FunctionIntegrationTestUtils.executeBatchProcessingTest(
-          batchConfig,
-          client,
-          services
-        );
+        const result =
+          await FunctionIntegrationTestUtils.executeBatchProcessingTest(
+            batchConfig,
+            client,
+            services,
+          );
 
         logger.log(`Batch Processing Results:
           Success: ${result.success}
@@ -1429,10 +1560,13 @@ describe('PARLANT Function Integration WebSocket Test Suite', () => {
           Memory Efficiency: ${(result.memoryEfficiency * 100).toFixed(1)}%`);
 
         expect(result.success).toBe(true);
-        expect(result.totalProcessed).toBe(batchConfig.batchSize * batchConfig.concurrentBatches);
-        expect(result.throughput).toBeGreaterThan(batchConfig.expectedThroughput);
+        expect(result.totalProcessed).toBe(
+          batchConfig.batchSize * batchConfig.concurrentBatches,
+        );
+        expect(result.throughput).toBeGreaterThan(
+          batchConfig.expectedThroughput,
+        );
         expect(result.memoryEfficiency).toBeGreaterThan(0.7);
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();

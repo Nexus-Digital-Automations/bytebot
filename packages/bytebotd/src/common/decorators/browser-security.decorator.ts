@@ -15,7 +15,11 @@
  * @since ByteBotd Browser Security Implementation
  */
 
-import { SetMetadata, createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  SetMetadata,
+  createParamDecorator,
+  ExecutionContext,
+} from '@nestjs/common';
 import { UserRole, Permission } from '@bytebot/shared';
 
 /**
@@ -156,7 +160,9 @@ export const SecureBrowserNavigation = (allowedDomains?: string[]) =>
  * }
  * ```
  */
-export const BrowserInteraction = (securityLevel: BrowserSecurityLevel = BrowserSecurityLevel.MEDIUM) =>
+export const BrowserInteraction = (
+  securityLevel: BrowserSecurityLevel = BrowserSecurityLevel.MEDIUM,
+) =>
   BrowserOperation({
     operationType: BrowserOperationType.INTERACTION,
     securityLevel,
@@ -185,7 +191,9 @@ export const BrowserInteraction = (securityLevel: BrowserSecurityLevel = Browser
 export const BrowserDataExtraction = (requireApproval: boolean = false) =>
   BrowserOperation({
     operationType: BrowserOperationType.EXTRACTION,
-    securityLevel: requireApproval ? BrowserSecurityLevel.CRITICAL : BrowserSecurityLevel.HIGH,
+    securityLevel: requireApproval
+      ? BrowserSecurityLevel.CRITICAL
+      : BrowserSecurityLevel.HIGH,
     requireMFA: requireApproval,
     auditLevel: 'comprehensive',
     rateLimits: {
@@ -209,7 +217,9 @@ export const BrowserDataExtraction = (requireApproval: boolean = false) =>
  * }
  * ```
  */
-export const BrowserScreenshot = (securityLevel: BrowserSecurityLevel = BrowserSecurityLevel.MEDIUM) =>
+export const BrowserScreenshot = (
+  securityLevel: BrowserSecurityLevel = BrowserSecurityLevel.MEDIUM,
+) =>
   BrowserOperation({
     operationType: BrowserOperationType.SCREENSHOT,
     securityLevel,
@@ -348,8 +358,7 @@ export const ScriptProtection = (strictMode: boolean = true) =>
 export const AuditLogging = (
   level: 'basic' | 'detailed' | 'comprehensive' = 'basic',
   includeScreenshots: boolean = false,
-) =>
-  SetMetadata(AUDIT_LOGGING_KEY, { level, includeScreenshots });
+) => SetMetadata(AUDIT_LOGGING_KEY, { level, includeScreenshots });
 
 /**
  * Decorator for admin-only browser operations
@@ -397,7 +406,11 @@ export const AdminOnlyBrowserOperation = () => {
 export const OperatorBrowserOperation = () => {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     // Apply role restriction
-    SetMetadata('roles', [UserRole._ADMIN, UserRole._OPERATOR])(target, propertyKey, descriptor);
+    SetMetadata('roles', [UserRole._ADMIN, UserRole._OPERATOR])(
+      target,
+      propertyKey,
+      descriptor,
+    );
 
     // Apply browser operation config
     BrowserOperation({
@@ -534,7 +547,11 @@ export const SecureNavigation = () => {
  */
 export const SafeInteraction = () => {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    BrowserInteraction(BrowserSecurityLevel.MEDIUM)(target, propertyKey, descriptor);
+    BrowserInteraction(BrowserSecurityLevel.MEDIUM)(
+      target,
+      propertyKey,
+      descriptor,
+    );
     XSSProtection({
       enableInputSanitization: true,
       enableOutputEncoding: true,

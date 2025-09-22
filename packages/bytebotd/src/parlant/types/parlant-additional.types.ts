@@ -231,7 +231,13 @@ export interface PreventionMeasure {
 }
 
 export interface ViolationStatus {
-  readonly status: 'DISCOVERED' | 'REPORTED' | 'INVESTIGATING' | 'REMEDIATING' | 'RESOLVED' | 'CLOSED';
+  readonly status:
+    | 'DISCOVERED'
+    | 'REPORTED'
+    | 'INVESTIGATING'
+    | 'REMEDIATING'
+    | 'RESOLVED'
+    | 'CLOSED';
   readonly lastUpdated: Date;
   readonly updatedBy: string;
   readonly nextAction: string;
@@ -329,7 +335,11 @@ export interface ActionDependency {
   readonly dependencyId: string;
   readonly predecessor: string;
   readonly successor: string;
-  readonly type: 'FINISH_TO_START' | 'START_TO_START' | 'FINISH_TO_FINISH' | 'START_TO_FINISH';
+  readonly type:
+    | 'FINISH_TO_START'
+    | 'START_TO_START'
+    | 'FINISH_TO_FINISH'
+    | 'START_TO_FINISH';
   readonly lag: number;
 }
 
@@ -352,7 +362,12 @@ export interface ValidationRequirement {
 }
 
 export interface ActionStatus {
-  readonly status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
+  readonly status:
+    | 'NOT_STARTED'
+    | 'IN_PROGRESS'
+    | 'COMPLETED'
+    | 'CANCELLED'
+    | 'FAILED';
   readonly progress: number;
   readonly lastUpdated: Date;
   readonly nextMilestone: Date;
@@ -787,7 +802,11 @@ export interface ConfigurationBranch {
 
 export interface BranchProtection {
   readonly protectionId: string;
-  readonly type: 'READ_ONLY' | 'APPROVAL_REQUIRED' | 'TESTING_REQUIRED' | 'REVIEW_REQUIRED';
+  readonly type:
+    | 'READ_ONLY'
+    | 'APPROVAL_REQUIRED'
+    | 'TESTING_REQUIRED'
+    | 'REVIEW_REQUIRED';
   readonly conditions: string[];
   readonly exceptions: string[];
   readonly enforcement: string[];
@@ -1818,7 +1837,12 @@ export interface MigrationPlan {
 }
 
 export interface ConfidentialityLevel {
-  readonly level: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET';
+  readonly level:
+    | 'PUBLIC'
+    | 'INTERNAL'
+    | 'CONFIDENTIAL'
+    | 'SECRET'
+    | 'TOP_SECRET';
   readonly description: string;
   readonly handling: string[];
   readonly access: string[];

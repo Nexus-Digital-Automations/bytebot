@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsObject, IsBoolean, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsObject,
+  IsBoolean,
+  IsNumber,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
@@ -68,7 +74,8 @@ export class BrowserScreenshotResponseDto {
 
   @ApiPropertyOptional({
     description: 'Base64 encoded image data (if returnBase64 was true)',
-    example: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+    example:
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
   })
   base64Data?: string;
 
@@ -104,7 +111,11 @@ export class BrowserScreenshotResponseDto {
 
   @ApiPropertyOptional({
     description: 'Screenshot timing information',
-    example: { startTime: 1695123456789, endTime: 1695123459123, duration: 2334 },
+    example: {
+      startTime: 1695123456789,
+      endTime: 1695123459123,
+      duration: 2334,
+    },
   })
   timing?: {
     startTime: number;

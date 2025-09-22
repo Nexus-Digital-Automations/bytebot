@@ -105,8 +105,12 @@ export class BrowserUseController {
     private readonly browserInteractionService: BrowserInteractionService,
     private readonly browserSessionService: BrowserSessionService,
   ) {
-    this.logger.log('Browser-Use Controller initialized with Python framework integration');
-    this.logger.log('BYTEBOT INTEGRATION: Browser automation API endpoints active with task-based execution');
+    this.logger.log(
+      'Browser-Use Controller initialized with Python framework integration',
+    );
+    this.logger.log(
+      'BYTEBOT INTEGRATION: Browser automation API endpoints active with task-based execution',
+    );
   }
 
   /**
@@ -121,7 +125,8 @@ export class BrowserUseController {
   @Authenticated()
   @ApiOperation({
     summary: 'Execute browser automation script',
-    description: 'Execute custom browser automation scripts using Python browser-use framework',
+    description:
+      'Execute custom browser automation scripts using Python browser-use framework',
   })
   @ApiBody({ type: BrowserExecuteDto })
   @ApiResponse({
@@ -144,20 +149,23 @@ export class BrowserUseController {
     const operationId = `execute_${Date.now()}`;
     const startTime = Date.now();
 
-    this.logger.log(`[${operationId}] Browser script execution requested via Python framework`, {
-      operationId,
-      userId: user.id,
-      script: executeDto.script.substring(0, 100) + '...',
-      sessionId: executeDto.sessionId,
-      captureScreenshots: executeDto.captureScreenshots,
-    });
+    this.logger.log(
+      `[${operationId}] Browser script execution requested via Python framework`,
+      {
+        operationId,
+        userId: user.id,
+        script: executeDto.script.substring(0, 100) + '...',
+        sessionId: executeDto.sessionId,
+        captureScreenshots: executeDto.captureScreenshots,
+      },
+    );
 
     try {
       // Create session if not provided
       let sessionId = executeDto.sessionId;
       if (!sessionId) {
         const sessionResponse = await this.browserSessionService.createSession({
-          options: executeDto.parameters || {}
+          config: executeDto.parameters || {},
         });
         sessionId = sessionResponse.sessionId;
       }
@@ -186,11 +194,14 @@ export class BrowserUseController {
       let attempts = 0;
       const maxAttempts = 60; // 60 seconds timeout
 
-      while (task.success && task.data && task.data.status === 'pending' || task.data?.status === 'running') {
+      while (
+        (task.success && task.data && task.data.status === 'pending') ||
+        task.data?.status === 'running'
+      ) {
         if (attempts >= maxAttempts) {
           throw new Error('Task execution timeout');
         }
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         task = await this.browserUseService.getTask(taskResponse.taskId);
         attempts++;
       }
@@ -202,41 +213,52 @@ export class BrowserUseController {
         throw new Error(task.error?.message || 'Task execution failed');
       }
 
-      this.logger.log(`[${operationId}] Script execution completed successfully`, {
-        operationId,
-        userId: user.id,
-        duration,
-        sessionId,
-        taskId: taskResponse.taskId,
-        status: task.data.status,
-      });
+      this.logger.log(
+        `[${operationId}] Script execution completed successfully`,
+        {
+          operationId,
+          userId: user.id,
+          duration,
+          sessionId,
+          taskId: taskResponse.taskId,
+          status: task.data.status,
+        },
+      );
 
       return {
         success: task.data.status === 'completed',
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        result: task.data.result?.data as any || null,
+        result: (task.data.result?.data as any) || null,
         timing: {
           startTime,
           endTime,
           duration,
         },
         sessionId,
-        screenshots: executeDto.captureScreenshots ? [task.data.result?.screenshot].filter(Boolean) : undefined,
-        error: task.data.status === 'failed' ? task.data.error?.message : undefined,
+        screenshots: executeDto.captureScreenshots
+          ? [task.data.result?.screenshot].filter(
+              (screenshot): screenshot is string => Boolean(screenshot),
+            )
+          : undefined,
+        error:
+          task.data.status === 'failed' ? task.data.error?.message : undefined,
       };
-
     } catch (error: unknown) {
       const endTime = Date.now();
       const duration = endTime - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown execution error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown execution error';
 
-      this.logger.error(`[${operationId}] Script execution failed: ${errorMessage}`, {
-        operationId,
-        userId: user.id,
-        duration,
-        error: errorMessage,
-        script: executeDto.script.substring(0, 100) + '...',
-      });
+      this.logger.error(
+        `[${operationId}] Script execution failed: ${errorMessage}`,
+        {
+          operationId,
+          userId: user.id,
+          duration,
+          error: errorMessage,
+          script: executeDto.script.substring(0, 100) + '...',
+        },
+      );
 
       return {
         success: false,
@@ -299,7 +321,9 @@ export class BrowserUseController {
       // Create session if not provided
       let sessionId = navigateDto.sessionId;
       if (!sessionId) {
-        const sessionResponse = await this.browserSessionService.createSession({});
+        const sessionResponse = await this.browserSessionService.createSession(
+          {},
+        );
         sessionId = sessionResponse.sessionId;
       }
 
@@ -311,7 +335,10 @@ export class BrowserUseController {
         timeout: navigateDto.options?.timeout,
       };
 
-      const result = await this.browserUseService.executeInteraction(sessionId, interactionRequest);
+      const result = await this.browserUseService.executeInteraction(
+        sessionId,
+        interactionRequest,
+      );
 
       const endTime = Date.now();
       const duration = endTime - startTime;
@@ -338,13 +365,15 @@ export class BrowserUseController {
         },
         sessionId,
         pageTitle: undefined, // Would need additional extraction
-        screenshot: navigateDto.captureScreenshot ? result.screenshot : undefined,
+        screenshot: navigateDto.captureScreenshot
+          ? result.screenshot
+          : undefined,
       };
-
     } catch (error: unknown) {
       const endTime = Date.now();
       const duration = endTime - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown navigation error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown navigation error';
 
       this.logger.error(`[${operationId}] Navigation failed: ${errorMessage}`, {
         operationId,
@@ -381,7 +410,8 @@ export class BrowserUseController {
   @Authenticated()
   @ApiOperation({
     summary: 'Wait for conditions',
-    description: 'Wait for elements, network idle, page load, or custom conditions using Python framework',
+    description:
+      'Wait for elements, network idle, page load, or custom conditions using Python framework',
   })
   @ApiBody({ type: BrowserWaitDto })
   @ApiResponse({
@@ -417,7 +447,9 @@ export class BrowserUseController {
       // Create session if not provided
       let sessionId = waitDto.sessionId;
       if (!sessionId) {
-        const sessionResponse = await this.browserSessionService.createSession({});
+        const sessionResponse = await this.browserSessionService.createSession(
+          {},
+        );
         sessionId = sessionResponse.sessionId;
       }
 
@@ -430,7 +462,10 @@ export class BrowserUseController {
         options: waitDto.options,
       };
 
-      const result = await this.browserUseService.executeInteraction(sessionId, interactionRequest);
+      const result = await this.browserUseService.executeInteraction(
+        sessionId,
+        interactionRequest,
+      );
 
       const endTime = Date.now();
       const duration = endTime - startTime;
@@ -440,13 +475,16 @@ export class BrowserUseController {
         throw new Error(result.error?.message || 'Wait operation failed');
       }
 
-      this.logger.log(`[${operationId}] Wait operation completed successfully`, {
-        operationId,
-        userId: user.id,
-        duration,
-        waitType: waitDto.type,
-        actualWaitTime,
-      });
+      this.logger.log(
+        `[${operationId}] Wait operation completed successfully`,
+        {
+          operationId,
+          userId: user.id,
+          duration,
+          waitType: waitDto.type,
+          actualWaitTime,
+        },
+      );
 
       return {
         success: true,
@@ -461,19 +499,22 @@ export class BrowserUseController {
         },
         sessionId,
       };
-
     } catch (error: unknown) {
       const endTime = Date.now();
       const duration = endTime - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown wait error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown wait error';
 
-      this.logger.error(`[${operationId}] Wait operation failed: ${errorMessage}`, {
-        operationId,
-        userId: user.id,
-        duration,
-        error: errorMessage,
-        waitType: waitDto.type,
-      });
+      this.logger.error(
+        `[${operationId}] Wait operation failed: ${errorMessage}`,
+        {
+          operationId,
+          userId: user.id,
+          duration,
+          error: errorMessage,
+          waitType: waitDto.type,
+        },
+      );
 
       return {
         success: false,
@@ -502,7 +543,8 @@ export class BrowserUseController {
   @Authenticated()
   @ApiOperation({
     summary: 'Get browser status',
-    description: 'Get Python framework service health and session status information',
+    description:
+      'Get Python framework service health and session status information',
   })
   @ApiQuery({ type: BrowserStatusDto })
   @ApiResponse({
@@ -543,10 +585,18 @@ export class BrowserUseController {
 
       if (statusDto.sessionId) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        sessionStatus = await this.browserSessionService.getSessionStatus(statusDto.sessionId) as any;
+        sessionStatus = (await this.browserSessionService.getSessions({
+          status: undefined,
+          limit: 1,
+          offset: 0
+        })) as any;
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        allSessions = await this.browserSessionService.getAllSessions() as any;
+        allSessions = (await this.browserSessionService.getSessions({
+          status: undefined,
+          limit: 100,
+          offset: 0
+        })) as any;
       }
 
       const response: BrowserStatusResponseDto = {
@@ -577,15 +627,18 @@ export class BrowserUseController {
       });
 
       return response;
-
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown status error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown status error';
 
-      this.logger.error(`[${operationId}] Status retrieval failed: ${errorMessage}`, {
-        operationId,
-        userId: user.id,
-        error: errorMessage,
-      });
+      this.logger.error(
+        `[${operationId}] Status retrieval failed: ${errorMessage}`,
+        {
+          operationId,
+          userId: user.id,
+          error: errorMessage,
+        },
+      );
 
       throw new HttpException(
         `Status retrieval failed: ${errorMessage}`,
@@ -606,7 +659,8 @@ export class BrowserUseController {
   @Authenticated()
   @ApiOperation({
     summary: 'Capture screenshot',
-    description: 'Capture full page or element screenshots using Python framework',
+    description:
+      'Capture full page or element screenshots using Python framework',
   })
   @ApiBody({ type: BrowserScreenshotDto })
   @ApiResponse({
@@ -641,7 +695,9 @@ export class BrowserUseController {
       // Create session if not provided
       let sessionId = screenshotDto.sessionId;
       if (!sessionId) {
-        const sessionResponse = await this.browserSessionService.createSession({});
+        const sessionResponse = await this.browserSessionService.createSession(
+          {},
+        );
         sessionId = sessionResponse.sessionId;
       }
 
@@ -668,11 +724,15 @@ export class BrowserUseController {
       let attempts = 0;
       const maxAttempts = 30; // 30 seconds timeout for screenshots
 
-      while (task.success && task.data && (task.data.status === 'pending' || task.data.status === 'running')) {
+      while (
+        task.success &&
+        task.data &&
+        (task.data.status === 'pending' || task.data.status === 'running')
+      ) {
         if (attempts >= maxAttempts) {
           throw new Error('Screenshot task timeout');
         }
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         task = await this.browserUseService.getTask(taskResponse.taskId);
         attempts++;
       }
@@ -709,18 +769,21 @@ export class BrowserUseController {
           duration,
         },
       };
-
     } catch (error: unknown) {
       const endTime = Date.now();
       const duration = endTime - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown screenshot error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown screenshot error';
 
-      this.logger.error(`[${operationId}] Screenshot capture failed: ${errorMessage}`, {
-        operationId,
-        userId: user.id,
-        duration,
-        error: errorMessage,
-      });
+      this.logger.error(
+        `[${operationId}] Screenshot capture failed: ${errorMessage}`,
+        {
+          operationId,
+          userId: user.id,
+          duration,
+          error: errorMessage,
+        },
+      );
 
       return {
         success: false,
@@ -747,7 +810,8 @@ export class BrowserUseController {
   @Authenticated()
   @ApiOperation({
     summary: 'Perform DOM interaction',
-    description: 'Interact with page elements through Python framework automation',
+    description:
+      'Interact with page elements through Python framework automation',
   })
   @ApiBody({ type: OriginalBrowserInteractionDto })
   @ApiResponse({
@@ -787,13 +851,22 @@ export class BrowserUseController {
       // Create session if not provided
       let sessionId = interactionDto.sessionId;
       if (!sessionId) {
-        const sessionResponse = await this.browserSessionService.createSession({});
+        const sessionResponse = await this.browserSessionService.createSession(
+          {},
+        );
         sessionId = sessionResponse.sessionId;
       }
 
       // Map original interaction to service interaction
       const serviceInteraction: ServiceBrowserInteractionDto = {
-        type: interactionDto.type as 'click' | 'type' | 'select' | 'hover' | 'scroll' | 'wait' | 'navigate',
+        type: interactionDto.type as
+          | 'click'
+          | 'type'
+          | 'select'
+          | 'hover'
+          | 'scroll'
+          | 'wait'
+          | 'navigate',
         selector: interactionDto.selector,
         value: interactionDto.value,
         coordinates: interactionDto.options?.coordinates,
@@ -801,7 +874,10 @@ export class BrowserUseController {
         options: interactionDto.options,
       };
 
-      const result = await this.browserUseService.executeInteraction(sessionId, serviceInteraction);
+      const result = await this.browserUseService.executeInteraction(
+        sessionId,
+        serviceInteraction,
+      );
 
       const endTime = Date.now();
       const duration = endTime - startTime;
@@ -828,23 +904,28 @@ export class BrowserUseController {
           endTime,
           duration,
         },
-        screenshot: interactionDto.captureScreenshot ? result.screenshot : undefined,
+        screenshot: interactionDto.captureScreenshot
+          ? result.screenshot
+          : undefined,
         sessionId,
       };
-
     } catch (error: unknown) {
       const endTime = Date.now();
       const duration = endTime - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown interaction error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown interaction error';
 
-      this.logger.error(`[${operationId}] Interaction failed: ${errorMessage}`, {
-        operationId,
-        userId: user.id,
-        duration,
-        error: errorMessage,
-        interactionType: interactionDto.type,
-        selector: interactionDto.selector,
-      });
+      this.logger.error(
+        `[${operationId}] Interaction failed: ${errorMessage}`,
+        {
+          operationId,
+          userId: user.id,
+          duration,
+          error: errorMessage,
+          interactionType: interactionDto.type,
+          selector: interactionDto.selector,
+        },
+      );
 
       return {
         success: false,
@@ -929,7 +1010,13 @@ export class BrowserUseController {
     @Query() query: GetTasksQueryDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<ServiceResponseDto> {
-    this.logger.log(`Getting tasks for session ${sessionId} for user ${user.id}`);
-    return await this.browserUseService.getSessionTasks(sessionId, query.status, query.type);
+    this.logger.log(
+      `Getting tasks for session ${sessionId} for user ${user.id}`,
+    );
+    return await this.browserUseService.getSessionTasks(
+      sessionId,
+      query.status,
+      query.type,
+    );
   }
 }

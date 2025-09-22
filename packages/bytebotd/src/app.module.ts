@@ -25,7 +25,10 @@ import { ErrorHandlingModule } from './common/error-handling/error-handling.modu
 import { AutomationTestingModule } from './automation-testing/automation-testing.module';
 import { BrowserUseModule } from './browser-use/browser-use.module';
 import { BrowserModule } from './browser/browser.module';
-import { ParlantAuthModule, createEnvironmentConfig } from '../../shared/src/modules/parlant-auth.module';
+import {
+  ParlantAuthModule,
+  createEnvironmentConfig,
+} from '../../shared/src/modules/parlant-auth.module';
 import { HighPerformanceParlantModule } from '../../../../src/modules/high-performance-parlant.module';
 
 @Module({
@@ -46,29 +49,62 @@ import { HighPerformanceParlantModule } from '../../../../src/modules/high-perfo
         return {
           ...envConfig,
           // Override with specific configurations for AIgent integration
-          enableConversationalAuth: configService.get<boolean>('PARLANT_AUTH_ENABLED', true),
-          enableConversationalAuthz: configService.get<boolean>('PARLANT_AUTHZ_ENABLED', true),
-          enableConversationalMFA: configService.get<boolean>('PARLANT_MFA_ENABLED', true),
+          enableConversationalAuth: configService.get<boolean>(
+            'PARLANT_AUTH_ENABLED',
+            true,
+          ),
+          enableConversationalAuthz: configService.get<boolean>(
+            'PARLANT_AUTHZ_ENABLED',
+            true,
+          ),
+          enableConversationalMFA: configService.get<boolean>(
+            'PARLANT_MFA_ENABLED',
+            true,
+          ),
 
           security: {
-            jwtSecret: configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production'),
+            jwtSecret: configService.get<string>(
+              'JWT_SECRET_HS256',
+              'bytebot-default-secret-change-in-production',
+            ),
             jwtExpiresIn: configService.get<string>('JWT_EXPIRES_IN', '1h'),
-            auditLogging: configService.get<boolean>('PARLANT_AUDIT_LOGGING_ENABLED', true),
+            auditLogging: configService.get<boolean>(
+              'PARLANT_AUDIT_LOGGING_ENABLED',
+              true,
+            ),
           },
 
           performance: {
-            caching: configService.get<boolean>('PARLANT_CACHING_ENABLED', true),
+            caching: configService.get<boolean>(
+              'PARLANT_CACHING_ENABLED',
+              true,
+            ),
             cacheTTL: configService.get<number>('PARLANT_CACHE_TTL', 300000),
-            targetResponseTime: configService.get<number>('PARLANT_TARGET_RESPONSE_TIME', 500),
+            targetResponseTime: configService.get<number>(
+              'PARLANT_TARGET_RESPONSE_TIME',
+              500,
+            ),
           },
 
           riskAssessment: {
-            enabled: configService.get<boolean>('PARLANT_RISK_ASSESSMENT_ENABLED', true),
+            enabled: configService.get<boolean>(
+              'PARLANT_RISK_ASSESSMENT_ENABLED',
+              true,
+            ),
             thresholds: {
               low: configService.get<number>('PARLANT_RISK_LOW_THRESHOLD', 25),
-              medium: configService.get<number>('PARLANT_RISK_MEDIUM_THRESHOLD', 50),
-              high: configService.get<number>('PARLANT_RISK_HIGH_THRESHOLD', 75),
-              critical: configService.get<number>('PARLANT_RISK_CRITICAL_THRESHOLD', 90),
+              medium: configService.get<number>(
+                'PARLANT_RISK_MEDIUM_THRESHOLD',
+                50,
+              ),
+              high: configService.get<number>(
+                'PARLANT_RISK_HIGH_THRESHOLD',
+                75,
+              ),
+              critical: configService.get<number>(
+                'PARLANT_RISK_CRITICAL_THRESHOLD',
+                90,
+              ),
             },
           },
         };

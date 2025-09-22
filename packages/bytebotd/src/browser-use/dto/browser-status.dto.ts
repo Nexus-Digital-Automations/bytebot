@@ -6,7 +6,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
  */
 export class BrowserStatusDto {
   @ApiPropertyOptional({
-    description: 'Session ID to check status for (if not provided, returns all sessions)',
+    description:
+      'Session ID to check status for (if not provided, returns all sessions)',
     example: 'session_123456789',
   })
   @IsOptional()
@@ -83,7 +84,8 @@ export class BrowserStatusResponseDto {
   session?: SessionStatus;
 
   @ApiPropertyOptional({
-    description: 'List of all active sessions (if no specific sessionId provided)',
+    description:
+      'List of all active sessions (if no specific sessionId provided)',
     example: [
       {
         sessionId: 'session_123456789',

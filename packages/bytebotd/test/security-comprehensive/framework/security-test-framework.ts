@@ -73,7 +73,7 @@ export enum SecurityTestType {
   DATA_ENCRYPTION = 'DATA_ENCRYPTION',
   COMPLIANCE_VALIDATION = 'COMPLIANCE_VALIDATION',
   THREAT_SIMULATION = 'THREAT_SIMULATION',
-  PENETRATION_TEST = 'PENETRATION_TEST'
+  PENETRATION_TEST = 'PENETRATION_TEST',
 }
 
 /**
@@ -85,7 +85,7 @@ export enum SecurityTestStatus {
   WARNING = 'WARNING',
   CRITICAL = 'CRITICAL',
   BLOCKED = 'BLOCKED',
-  SKIPPED = 'SKIPPED'
+  SKIPPED = 'SKIPPED',
 }
 
 /**
@@ -96,7 +96,7 @@ export enum SecurityRiskLevel {
   MEDIUM = 'MEDIUM',
   HIGH = 'HIGH',
   CRITICAL = 'CRITICAL',
-  EMERGENCY = 'EMERGENCY'
+  EMERGENCY = 'EMERGENCY',
 }
 
 /**
@@ -138,7 +138,7 @@ export enum ComplianceStandard {
   HIPAA = 'HIPAA',
   PCI_DSS = 'PCI_DSS',
   ISO_27001 = 'ISO_27001',
-  NIST_CSF = 'NIST_CSF'
+  NIST_CSF = 'NIST_CSF',
 }
 
 /**
@@ -229,18 +229,28 @@ export class SecurityTestFramework {
   private testResults: SecurityTestResult[] = [];
   private config: SecurityTestConfig;
 
-  constructor(
-    private readonly configService: ConfigService
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.config = {
-      baseUrl: this.configService.get<string>('BASE_URL', 'http://localhost:3000'),
+      baseUrl: this.configService.get<string>(
+        'BASE_URL',
+        'http://localhost:3000',
+      ),
       timeout: this.configService.get<number>('SECURITY_TEST_TIMEOUT', 30000),
       retries: this.configService.get<number>('SECURITY_TEST_RETRIES', 3),
-      parallelExecution: this.configService.get<boolean>('PARALLEL_SECURITY_TESTS', true),
-      threatSimulation: this.configService.get<boolean>('THREAT_SIMULATION', true),
+      parallelExecution: this.configService.get<boolean>(
+        'PARALLEL_SECURITY_TESTS',
+        true,
+      ),
+      threatSimulation: this.configService.get<boolean>(
+        'THREAT_SIMULATION',
+        true,
+      ),
       complianceMode: this.configService.get<boolean>('COMPLIANCE_MODE', true),
       auditTrail: this.configService.get<boolean>('AUDIT_TRAIL', true),
-      emergencyOverride: this.configService.get<boolean>('EMERGENCY_OVERRIDE', false)
+      emergencyOverride: this.configService.get<boolean>(
+        'EMERGENCY_OVERRIDE',
+        false,
+      ),
     };
   }
 
@@ -262,7 +272,7 @@ export class SecurityTestFramework {
   async executeSecurityTest(
     testName: string,
     testType: SecurityTestType,
-    testFunction: () => Promise<SecurityTestExecutionResult>
+    testFunction: () => Promise<SecurityTestExecutionResult>,
   ): Promise<SecurityTestResult> {
     const testId = this.generateTestId();
     const startTime = Date.now();
@@ -284,12 +294,11 @@ export class SecurityTestFramework {
         executionTime,
         timestamp: new Date(),
         riskLevel: SecurityRiskLevel.LOW,
-        recommendations: []
+        recommendations: [],
       };
 
       this.testResults.push(testResult);
       return testResult;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
@@ -304,7 +313,7 @@ export class SecurityTestFramework {
         executionTime,
         timestamp: new Date(),
         riskLevel: SecurityRiskLevel.HIGH,
-        recommendations: this.generateRecommendations(error)
+        recommendations: this.generateRecommendations(error),
       };
 
       this.testResults.push(testResult);
@@ -316,19 +325,29 @@ export class SecurityTestFramework {
   /**
    * Generate secure JWT token for testing
    */
-  generateTestJWT(payload: Record<string, unknown>, options?: jwt.SignOptions): string {
+  generateTestJWT(
+    payload: Record<string, unknown>,
+    options?: jwt.SignOptions,
+  ): string {
     const secret = this.configService.get<string>('JWT_SECRET', 'test-secret');
     return jwt.sign(payload, secret, {
       expiresIn: '1h',
       issuer: 'security-test-framework',
-      ...options
+      ...options,
     });
   }
 
   /**
    * Generate malicious JWT token for security testing
    */
-  generateMaliciousJWT(payload: Record<string, unknown>, manipulation: 'expired' | 'invalid-signature' | 'none-algorithm' | 'tampered-payload'): string {
+  generateMaliciousJWT(
+    payload: Record<string, unknown>,
+    manipulation:
+      | 'expired'
+      | 'invalid-signature'
+      | 'none-algorithm'
+      | 'tampered-payload',
+  ): string {
     const secret = this.configService.get<string>('JWT_SECRET', 'test-secret');
 
     switch (manipulation) {
@@ -344,7 +363,9 @@ export class SecurityTestFramework {
       case 'tampered-payload':
         const token = jwt.sign(payload, secret);
         const parts = token.split('.');
-        const tamperedPayload = Buffer.from(JSON.stringify({ ...payload, role: 'admin' })).toString('base64url');
+        const tamperedPayload = Buffer.from(
+          JSON.stringify({ ...payload, role: 'admin' }),
+        ).toString('base64url');
         return `${parts[0]}.${tamperedPayload}.${parts[2]}`;
 
       default:
@@ -362,43 +383,41 @@ export class SecurityTestFramework {
         "' OR '1'='1",
         "'; INSERT INTO users (username, password) VALUES ('hacker', 'password'); --",
         "' UNION SELECT username, password FROM users --",
-        "'; UPDATE users SET role='admin' WHERE id=1; --"
+        "'; UPDATE users SET role='admin' WHERE id=1; --",
       ],
       xss: [
         '<script>alert("XSS")</script>',
         '<img src="x" onerror="alert(\'XSS\')">',
         '<svg onload="alert(\'XSS\')">',
         'javascript:alert("XSS")',
-        '<iframe src="javascript:alert(\'XSS\')"></iframe>'
+        '<iframe src="javascript:alert(\'XSS\')"></iframe>',
       ],
       commandInjection: [
         '; cat /etc/passwd',
         '| ls -la',
         '&& rm -rf /',
         '`whoami`',
-        '$(cat /etc/shadow)'
+        '$(cat /etc/shadow)',
       ],
       pathTraversal: [
         '../../../etc/passwd',
         '..\\..\\..\\windows\\system32\\config\\sam',
         '/etc/shadow',
         '....//....//....//etc/passwd',
-        '%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd'
+        '%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd',
       ],
-      ldapInjection: [
-        '*',
-        '*)(&',
-        '*)(cn=*',
-        '*))(|(cn=*',
-        '*))%00'
-      ]
+      ldapInjection: ['*', '*)(&', '*)(cn=*', '*))(|(cn=*', '*))%00'],
     };
   }
 
   /**
    * Perform HTTP security testing
    */
-  async performHttpSecurityTest(endpoint: string, method: string = 'GET', payload?: Record<string, unknown>): Promise<SecurityTestResponse> {
+  async performHttpSecurityTest(
+    endpoint: string,
+    method: string = 'GET',
+    payload?: Record<string, unknown>,
+  ): Promise<SecurityTestResponse> {
     const req = request(this.app.getHttpServer());
 
     switch (method.toUpperCase()) {
@@ -420,16 +439,19 @@ export class SecurityTestFramework {
   /**
    * Validate security headers
    */
-  validateSecurityHeaders(response: SecurityTestResponse): SecurityVulnerability[] {
+  validateSecurityHeaders(
+    response: SecurityTestResponse,
+  ): SecurityVulnerability[] {
     const vulnerabilities: SecurityVulnerability[] = [];
-    const headers = (response as { headers?: Record<string, string> }).headers ?? {};
+    const headers =
+      (response as { headers?: Record<string, string> }).headers ?? {};
 
     const requiredHeaders = {
       'x-frame-options': 'Missing X-Frame-Options header',
       'x-content-type-options': 'Missing X-Content-Type-Options header',
       'x-xss-protection': 'Missing X-XSS-Protection header',
       'strict-transport-security': 'Missing Strict-Transport-Security header',
-      'content-security-policy': 'Missing Content-Security-Policy header'
+      'content-security-policy': 'Missing Content-Security-Policy header',
     };
 
     for (const [header, description] of Object.entries(requiredHeaders)) {
@@ -442,7 +464,7 @@ export class SecurityTestFramework {
           location: 'HTTP Headers',
           impact: 'Potential security vulnerability exposure',
           recommendation: `Add ${header} header to HTTP responses`,
-          owaspCategory: 'A6:2017-Security Misconfiguration'
+          owaspCategory: 'A6:2017-Security Misconfiguration',
         });
       }
     }
@@ -459,25 +481,42 @@ export class SecurityTestFramework {
     compliance: ComplianceViolation[];
     recommendations: SecurityRecommendation[];
   } {
-    const allVulnerabilities = this.testResults.flatMap(result => result.vulnerabilities);
-    const allCompliance = this.testResults.flatMap(result => result.complianceViolations);
-    const allRecommendations = this.testResults.flatMap(result => result.recommendations);
+    const allVulnerabilities = this.testResults.flatMap(
+      (result) => result.vulnerabilities,
+    );
+    const allCompliance = this.testResults.flatMap(
+      (result) => result.complianceViolations,
+    );
+    const allRecommendations = this.testResults.flatMap(
+      (result) => result.recommendations,
+    );
 
     const summary = {
       totalTests: this.testResults.length,
-      passedTests: this.testResults.filter(r => r.result === SecurityTestStatus.PASSED).length,
-      failedTests: this.testResults.filter(r => r.result === SecurityTestStatus.FAILED).length,
-      criticalVulnerabilities: allVulnerabilities.filter(v => v.severity === SecurityRiskLevel.CRITICAL).length,
-      highVulnerabilities: allVulnerabilities.filter(v => v.severity === SecurityRiskLevel.HIGH).length,
-      totalExecutionTime: this.testResults.reduce((sum, result) => sum + result.executionTime, 0),
-      overallRiskLevel: this.calculateOverallRiskLevel()
+      passedTests: this.testResults.filter(
+        (r) => r.result === SecurityTestStatus.PASSED,
+      ).length,
+      failedTests: this.testResults.filter(
+        (r) => r.result === SecurityTestStatus.FAILED,
+      ).length,
+      criticalVulnerabilities: allVulnerabilities.filter(
+        (v) => v.severity === SecurityRiskLevel.CRITICAL,
+      ).length,
+      highVulnerabilities: allVulnerabilities.filter(
+        (v) => v.severity === SecurityRiskLevel.HIGH,
+      ).length,
+      totalExecutionTime: this.testResults.reduce(
+        (sum, result) => sum + result.executionTime,
+        0,
+      ),
+      overallRiskLevel: this.calculateOverallRiskLevel(),
     };
 
     return {
       summary,
       vulnerabilities: allVulnerabilities,
       compliance: allCompliance,
-      recommendations: allRecommendations
+      recommendations: allRecommendations,
     };
   }
 
@@ -513,7 +552,8 @@ export class SecurityTestFramework {
         description: 'Authentication bypass attempt detected',
         location: 'Authentication Layer',
         impact: 'Potential unauthorized access',
-        recommendation: 'Review authentication mechanisms and implement additional security controls'
+        recommendation:
+          'Review authentication mechanisms and implement additional security controls',
       });
     }
 
@@ -529,13 +569,13 @@ export class SecurityTestFramework {
         description: 'Implement comprehensive input validation',
         implementation: 'Add validation middleware to all API endpoints',
         estimatedEffort: '2-3 days',
-        businessImpact: 'Reduces security risk and improves compliance'
-      }
+        businessImpact: 'Reduces security risk and improves compliance',
+      },
     ];
   }
 
   private calculateOverallRiskLevel(): SecurityRiskLevel {
-    const riskLevels = this.testResults.map(result => result.riskLevel);
+    const riskLevels = this.testResults.map((result) => result.riskLevel);
 
     if (riskLevels.includes(SecurityRiskLevel.CRITICAL)) {
       return SecurityRiskLevel.CRITICAL;
@@ -575,7 +615,7 @@ export class SecurityTestUtils {
       role: 'user',
       permissions,
       createdAt: new Date(),
-      lastLogin: new Date()
+      lastLogin: new Date(),
     };
   }
 
@@ -585,7 +625,7 @@ export class SecurityTestUtils {
   static createAdminUser(): TestUser {
     return {
       ...this.createTestUser(['read', 'write', 'admin', 'delete']),
-      role: 'admin'
+      role: 'admin',
     };
   }
 
@@ -613,7 +653,10 @@ export class SecurityTestUtils {
   /**
    * Validate response structure
    */
-  static validateResponseStructure(response: unknown, expectedStructure: Record<string, unknown>): boolean {
+  static validateResponseStructure(
+    response: unknown,
+    expectedStructure: Record<string, unknown>,
+  ): boolean {
     const responseObj = response as Record<string, unknown>;
     for (const [key, type] of Object.entries(expectedStructure)) {
       if (typeof responseObj[key] !== type) {

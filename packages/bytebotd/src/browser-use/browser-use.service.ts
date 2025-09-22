@@ -3,7 +3,12 @@
  * Service Layer Implementation for Browser-Use API Endpoints
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { spawn, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
@@ -28,7 +33,10 @@ import {
 } from './dto/browser-automation.dto';
 
 @Injectable()
-export class BrowserUseService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class BrowserUseService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(BrowserUseService.name);
   private tasks: Map<string, IBrowserTask> = new Map();
   private runningProcesses: Map<string, ChildProcess> = new Map();
@@ -39,7 +47,9 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
   constructor() {
     super();
     this.initializeConfig();
-    this.logger.log('Enhanced BrowserUseService initialized with Python integration');
+    this.logger.log(
+      'Enhanced BrowserUseService initialized with Python integration',
+    );
   }
 
   async onModuleInit() {
@@ -49,7 +59,9 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
   }
 
   async onModuleDestroy() {
-    this.logger.log('BrowserUseService module destroying - cleaning up resources');
+    this.logger.log(
+      'BrowserUseService module destroying - cleaning up resources',
+    );
     await this.cleanup();
   }
 
@@ -59,8 +71,12 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
   private initializeConfig(): void {
     this.config = {
       pythonPath: process.env.PYTHON_PATH || 'python3',
-      browserUsePath: process.env.BROWSER_USE_PATH || '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use',
-      maxConcurrentSessions: parseInt(process.env.MAX_CONCURRENT_SESSIONS || '5'),
+      browserUsePath:
+        process.env.BROWSER_USE_PATH ||
+        '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use',
+      maxConcurrentSessions: parseInt(
+        process.env.MAX_CONCURRENT_SESSIONS || '5',
+      ),
       sessionTimeout: parseInt(process.env.SESSION_TIMEOUT || '300000'), // 5 minutes
       taskTimeout: parseInt(process.env.TASK_TIMEOUT || '60000'), // 1 minute
       retryAttempts: parseInt(process.env.RETRY_ATTEMPTS || '3'),
@@ -77,15 +93,22 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
     try {
       const result = await this.executePythonCommand({
         command: this.config.pythonPath,
-        args: ['-c', 'import browser_use; print("Browser-use framework available")'],
+        args: [
+          '-c',
+          'import browser_use; print("Browser-use framework available")',
+        ],
         timeout: 10000,
       });
 
       if (!result.success) {
-        throw new Error(`Python environment validation failed: ${result.stderr}`);
+        throw new Error(
+          `Python environment validation failed: ${result.stderr}`,
+        );
       }
 
-      this.logger.log('Python environment and browser-use framework validated successfully');
+      this.logger.log(
+        'Python environment and browser-use framework validated successfully',
+      );
     } catch (error) {
       this.logger.error('Failed to validate Python environment', error);
       throw error;
@@ -95,7 +118,9 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
   /**
    * Create and queue a browser automation task
    */
-  async createTask(taskDto: CreateBrowserTaskDto): Promise<BrowserTaskResponseDto> {
+  async createTask(
+    taskDto: CreateBrowserTaskDto,
+  ): Promise<BrowserTaskResponseDto> {
     const taskId = uuidv4();
     const timestamp = new Date();
 
@@ -113,7 +138,9 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
     this.tasks.set(taskId, task);
     this.queueTask(task);
 
-    this.logger.log(`Created browser task ${taskId} for session ${taskDto.sessionId}`);
+    this.logger.log(
+      `Created browser task ${taskId} for session ${taskDto.sessionId}`,
+    );
 
     return {
       success: true,
@@ -130,14 +157,19 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
    */
   async executeInteraction(
     sessionId: string,
-    interaction: BrowserInteractionDto
+    interaction: BrowserInteractionDto,
   ): Promise<BrowserInteractionResponseDto> {
     const startTime = Date.now();
 
     try {
-      this.logger.log(`Executing ${interaction.type} interaction for session ${sessionId}`);
+      this.logger.log(
+        `Executing ${interaction.type} interaction for session ${sessionId}`,
+      );
 
-      const pythonScript = this.generateInteractionScript(sessionId, interaction);
+      const pythonScript = this.generateInteractionScript(
+        sessionId,
+        interaction,
+      );
 
       const result = await this.executePythonCommand({
         command: this.config.pythonPath,
@@ -186,10 +218,9 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
     if (!task) {
       return {
         success: false,
-        error: this.createBrowserError(
-          new Error(`Task ${taskId} not found`),
-          { context: { taskId } }
-        ),
+        error: this.createBrowserError(new Error(`Task ${taskId} not found`), {
+          context: { taskId },
+        }),
       };
     }
 
@@ -211,10 +242,9 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
     if (!task) {
       return {
         success: false,
-        error: this.createBrowserError(
-          new Error(`Task ${taskId} not found`),
-          { context: { taskId } }
-        ),
+        error: this.createBrowserError(new Error(`Task ${taskId} not found`), {
+          context: { taskId },
+        }),
       };
     }
 
@@ -246,10 +276,10 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
   async getSessionTasks(
     sessionId: string,
     status?: string,
-    type?: string
+    type?: string,
   ): Promise<ServiceResponseDto<IBrowserTask[]>> {
     const sessionTasks = Array.from(this.tasks.values())
-      .filter(task => {
+      .filter((task) => {
         if (task.sessionId !== sessionId) return false;
         if (status && task.status !== status) return false;
         if (type && task.type !== type) return false;
@@ -272,7 +302,9 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
   private queueTask(task: IBrowserTask): void {
     const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
     const insertIndex = this.taskQueue.findIndex(
-      t => priorityOrder[t.priority || 'medium'] > priorityOrder[task.priority || 'medium']
+      (t) =>
+        priorityOrder[t.priority || 'medium'] >
+        priorityOrder[task.priority || 'medium'],
     );
 
     if (insertIndex === -1) {
@@ -293,7 +325,10 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
     this.isProcessingQueue = true;
 
     const processNextTask = async () => {
-      if (this.taskQueue.length === 0 || this.runningProcesses.size >= this.config.maxConcurrentSessions) {
+      if (
+        this.taskQueue.length === 0 ||
+        this.runningProcesses.size >= this.config.maxConcurrentSessions
+      ) {
         setTimeout(processNextTask, 100);
         return;
       }
@@ -340,21 +375,19 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
         task.status = 'failed';
         task.error = this.createBrowserError(
           new Error(result.stderr || 'Task execution failed'),
-          { context: { taskId: task.taskId, sessionId: task.sessionId } }
+          { context: { taskId: task.taskId, sessionId: task.sessionId } },
         );
         this.logger.error(`Task ${task.taskId} failed`, task.error);
       }
 
       this.tasks.set(task.taskId, task);
       this.emit('taskCompleted', task);
-
     } catch (error) {
       task.status = 'failed';
       task.completedAt = new Date();
-      task.error = this.createBrowserError(
-        error,
-        { context: { taskId: task.taskId, sessionId: task.sessionId } }
-      );
+      task.error = this.createBrowserError(error, {
+        context: { taskId: task.taskId, sessionId: task.sessionId },
+      });
 
       this.tasks.set(task.taskId, task);
       this.logger.error(`Task ${task.taskId} failed with exception`, error);
@@ -365,7 +398,9 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
   /**
    * Execute Python command with browser-use framework
    */
-  private async executePythonCommand(command: IPythonBrowserUseCommand): Promise<IPythonProcessResult> {
+  private async executePythonCommand(
+    command: IPythonBrowserUseCommand,
+  ): Promise<IPythonProcessResult> {
     return new Promise((resolve) => {
       const startTime = Date.now();
       const process = spawn(command.command, command.args, {
@@ -421,7 +456,10 @@ export class BrowserUseService extends EventEmitter implements OnModuleInit, OnM
   /**
    * Generate Python script for browser interaction
    */
-  private generateInteractionScript(sessionId: string, interaction: BrowserInteractionDto): string {
+  private generateInteractionScript(
+    sessionId: string,
+    interaction: BrowserInteractionDto,
+  ): string {
     const scriptTemplate = `
 import asyncio
 import json
@@ -560,7 +598,10 @@ if __name__ == "__main__":
    */
   private createBrowserError(
     error: any,
-    options: { context?: any; severity?: 'info' | 'warning' | 'error' | 'critical' } = {}
+    options: {
+      context?: any;
+      severity?: 'info' | 'warning' | 'error' | 'critical';
+    } = {},
   ): IBrowserError {
     return {
       code: error.code || 'BROWSER_ERROR',
@@ -582,7 +623,10 @@ if __name__ == "__main__":
         process.kill('SIGTERM');
         this.logger.log(`Terminated process for session ${sessionId}`);
       } catch (error) {
-        this.logger.error(`Failed to terminate process for session ${sessionId}`, error);
+        this.logger.error(
+          `Failed to terminate process for session ${sessionId}`,
+          error,
+        );
       }
     }
 

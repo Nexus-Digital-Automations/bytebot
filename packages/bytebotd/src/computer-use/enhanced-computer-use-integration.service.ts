@@ -31,21 +31,26 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { EnhancedComputerControlValidationService,
-  ComputerControlValidationContext
+import {
+  EnhancedComputerControlValidationService,
+  ComputerControlValidationContext,
 } from './enhanced-computer-control-validation.service';
-import { EnhancedScreenCaptureValidationService,
-  ScreenCaptureValidationContext
+import {
+  EnhancedScreenCaptureValidationService,
+  ScreenCaptureValidationContext,
 } from './enhanced-screen-capture-validation.service';
-import { EnhancedFileSystemValidationService,
-  FileSystemValidationContext
+import {
+  EnhancedFileSystemValidationService,
+  FileSystemValidationContext,
 } from './enhanced-file-system-validation.service';
-import { EnhancedApplicationControlValidationService,
-  ApplicationControlValidationContext
+import {
+  EnhancedApplicationControlValidationService,
+  ApplicationControlValidationContext,
 } from './enhanced-application-control-validation.service';
-import { ParlantIntegrationService,
+import {
+  ParlantIntegrationService,
   ParlantConversationContext,
-  RiskLevel
+  RiskLevel,
 } from '../parlant/parlant-integration.service';
 import {
   ComputerAction,
@@ -63,7 +68,8 @@ import {
 /**
  * Unified computer-use validation context
  */
-export interface ComputerUseValidationContext extends ParlantConversationContext {
+export interface ComputerUseValidationContext
+  extends ParlantConversationContext {
   readonly systemContext: {
     screenResolution: { width: number; height: number };
     activeApplication?: string;
@@ -117,7 +123,11 @@ export interface ComputerUseValidationResult {
   readonly conversationId: string;
   readonly reasoning: string;
   readonly confidence: number;
-  readonly serviceUsed: 'COMPUTER_CONTROL' | 'SCREEN_CAPTURE' | 'FILE_SYSTEM' | 'APPLICATION_CONTROL';
+  readonly serviceUsed:
+    | 'COMPUTER_CONTROL'
+    | 'SCREEN_CAPTURE'
+    | 'FILE_SYSTEM'
+    | 'APPLICATION_CONTROL';
   readonly fromCache: boolean;
   readonly safeguards: string[];
   readonly monitoringRequired: boolean;
@@ -166,7 +176,9 @@ export interface SystemPerformanceMetrics {
 
 @Injectable()
 export class EnhancedComputerUseIntegrationService {
-  private readonly logger = new Logger(EnhancedComputerUseIntegrationService.name);
+  private readonly logger = new Logger(
+    EnhancedComputerUseIntegrationService.name,
+  );
 
   // Master performance metrics
   private readonly systemMetrics = {
@@ -194,28 +206,34 @@ export class EnhancedComputerUseIntegrationService {
   };
 
   // Cross-service cache for optimization
-  private readonly masterCache = new Map<string, {
-    result: ComputerUseValidationResult;
-    timestamp: Date;
-    expiryMs: number;
-    hitCount: number;
-  }>();
+  private readonly masterCache = new Map<
+    string,
+    {
+      result: ComputerUseValidationResult;
+      timestamp: Date;
+      expiryMs: number;
+      hitCount: number;
+    }
+  >();
 
   // Active operation tracking
-  private readonly activeOperations = new Map<string, {
-    operationId: string;
-    startTime: Date;
-    operationType: string;
-    userId: string;
-    riskLevel: RiskLevel;
-  }>();
+  private readonly activeOperations = new Map<
+    string,
+    {
+      operationId: string;
+      startTime: Date;
+      operationType: string;
+      userId: string;
+      riskLevel: RiskLevel;
+    }
+  >();
 
   constructor(
     private readonly computerControlService: EnhancedComputerControlValidationService,
     private readonly screenCaptureService: EnhancedScreenCaptureValidationService,
     private readonly fileSystemService: EnhancedFileSystemValidationService,
     private readonly applicationControlService: EnhancedApplicationControlValidationService,
-    private readonly parlantIntegrationService: ParlantIntegrationService
+    private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enhanced Computer-Use Integration Service initialized');
 
@@ -239,43 +257,73 @@ export class EnhancedComputerUseIntegrationService {
    */
   async validateComputerAction(
     action: ComputerAction,
-    context: ComputerUseValidationContext
+    context: ComputerUseValidationContext,
   ): Promise<ComputerUseValidationResult> {
     const operationId = `master_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
-    this.logger.log(`[${operationId}] Starting computer action validation: ${action.action}`, {
-      operationId,
-      actionType: action.action,
-      userId: context.userId,
-      riskLevel: 'ASSESSING',
-    });
+    this.logger.log(
+      `[${operationId}] Starting computer action validation: ${action.action}`,
+      {
+        operationId,
+        actionType: action.action,
+        userId: context.userId,
+        riskLevel: 'ASSESSING',
+      },
+    );
 
     try {
       this.systemMetrics.totalOperations++;
       this.trackOperationType(action.action);
-      this.trackActiveOperation(operationId, action.action, context.userId, startTime);
+      this.trackActiveOperation(
+        operationId,
+        action.action,
+        context.userId,
+        startTime,
+      );
 
       // Check master cache first
       const cacheKey = this.generateMasterCacheKey(action, context);
       const cachedResult = this.getMasterCachedResult(cacheKey);
       if (cachedResult) {
-        this.updateSystemMetrics(Date.now() - startTime, true, cachedResult.riskLevel);
+        this.updateSystemMetrics(
+          Date.now() - startTime,
+          true,
+          cachedResult.riskLevel,
+        );
         this.completeActiveOperation(operationId, 'CACHE_HIT');
         return cachedResult;
       }
 
       // Route to appropriate validation service
-      const validationResult = await this.routeToValidationService(action, context, operationId);
+      const validationResult = await this.routeToValidationService(
+        action,
+        context,
+        operationId,
+      );
 
       // Cache successful validations
-      if (validationResult.approved && validationResult.riskLevel <= RiskLevel._MODERATE) {
-        this.setMasterCachedResult(cacheKey, validationResult, this.calculateCacheExpiry(validationResult.riskLevel));
+      if (
+        validationResult.approved &&
+        validationResult.riskLevel <= RiskLevel._MODERATE
+      ) {
+        this.setMasterCachedResult(
+          cacheKey,
+          validationResult,
+          this.calculateCacheExpiry(validationResult.riskLevel),
+        );
       }
 
       // Update metrics and complete operation
-      this.updateSystemMetrics(Date.now() - startTime, false, validationResult.riskLevel);
-      this.completeActiveOperation(operationId, validationResult.approved ? 'APPROVED' : 'DENIED');
+      this.updateSystemMetrics(
+        Date.now() - startTime,
+        false,
+        validationResult.riskLevel,
+      );
+      this.completeActiveOperation(
+        operationId,
+        validationResult.approved ? 'APPROVED' : 'DENIED',
+      );
 
       this.logger.log(`[${operationId}] Computer action validation completed`, {
         operationId,
@@ -288,7 +336,6 @@ export class EnhancedComputerUseIntegrationService {
       });
 
       return validationResult;
-
     } catch (error) {
       this.systemMetrics.errorOperations++;
       this.completeActiveOperation(operationId, 'ERROR');
@@ -312,29 +359,49 @@ export class EnhancedComputerUseIntegrationService {
   private async routeToValidationService(
     action: ComputerAction,
     context: ComputerUseValidationContext,
-    operationId: string
+    operationId: string,
   ): Promise<ComputerUseValidationResult> {
     const startTime = Date.now();
 
     switch (action.action) {
       // Computer Control Operations
       case 'move_mouse':
-        return await this.validateMouseMovement(action as MoveMouseAction, context, operationId, startTime);
+        return await this.validateMouseMovement(
+          action as MoveMouseAction,
+          context,
+          operationId,
+          startTime,
+        );
 
       case 'click_mouse':
       case 'press_mouse':
-        return await this.validateMouseClick(action as ClickMouseAction, context, operationId, startTime);
+        return await this.validateMouseClick(
+          action as ClickMouseAction,
+          context,
+          operationId,
+          startTime,
+        );
 
       case 'drag_mouse':
       case 'trace_mouse':
       case 'scroll':
-        return await this.validateComplexMouseOperation(action, context, operationId, startTime);
+        return await this.validateComplexMouseOperation(
+          action,
+          context,
+          operationId,
+          startTime,
+        );
 
       case 'type_text':
       case 'type_keys':
       case 'press_keys':
       case 'paste_text':
-        return await this.validateKeyboardInput(action, context, operationId, startTime);
+        return await this.validateKeyboardInput(
+          action,
+          context,
+          operationId,
+          startTime,
+        );
 
       // Screen Capture Operations
       case 'screenshot':
@@ -342,14 +409,29 @@ export class EnhancedComputerUseIntegrationService {
 
       // File System Operations
       case 'read_file':
-        return await this.validateFileRead(action as ReadFileAction, context, operationId, startTime);
+        return await this.validateFileRead(
+          action as ReadFileAction,
+          context,
+          operationId,
+          startTime,
+        );
 
       case 'write_file':
-        return await this.validateFileWrite(action as WriteFileAction, context, operationId, startTime);
+        return await this.validateFileWrite(
+          action as WriteFileAction,
+          context,
+          operationId,
+          startTime,
+        );
 
       // Application Control Operations
       case 'application':
-        return await this.validateApplicationControl(action as ApplicationAction, context, operationId, startTime);
+        return await this.validateApplicationControl(
+          action as ApplicationAction,
+          context,
+          operationId,
+          startTime,
+        );
 
       default:
         throw new Error(`Unsupported computer action: ${action.action}`);
@@ -362,10 +444,13 @@ export class EnhancedComputerUseIntegrationService {
     action: MoveMouseAction,
     context: ComputerUseValidationContext,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ComputerUseValidationResult> {
     const controlContext = this.mapToComputerControlContext(context);
-    const approved = await this.computerControlService.validateMouseMovement(action, controlContext);
+    const approved = await this.computerControlService.validateMouseMovement(
+      action,
+      controlContext,
+    );
 
     return this.createValidationResult({
       approved,
@@ -382,10 +467,13 @@ export class EnhancedComputerUseIntegrationService {
     action: ClickMouseAction,
     context: ComputerUseValidationContext,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ComputerUseValidationResult> {
     const controlContext = this.mapToComputerControlContext(context);
-    const approved = await this.computerControlService.validateMouseClick(action, controlContext);
+    const approved = await this.computerControlService.validateMouseClick(
+      action,
+      controlContext,
+    );
 
     return this.createValidationResult({
       approved,
@@ -402,10 +490,14 @@ export class EnhancedComputerUseIntegrationService {
     action: ComputerAction,
     context: ComputerUseValidationContext,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ComputerUseValidationResult> {
     const controlContext = this.mapToComputerControlContext(context);
-    const approved = await this.computerControlService.validateComplexMouseOperation(action as any, controlContext);
+    const approved =
+      await this.computerControlService.validateComplexMouseOperation(
+        action as any,
+        controlContext,
+      );
 
     return this.createValidationResult({
       approved,
@@ -422,10 +514,13 @@ export class EnhancedComputerUseIntegrationService {
     action: ComputerAction,
     context: ComputerUseValidationContext,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ComputerUseValidationResult> {
     const controlContext = this.mapToComputerControlContext(context);
-    const approved = await this.computerControlService.validateKeyboardInput(action as any, controlContext);
+    const approved = await this.computerControlService.validateKeyboardInput(
+      action as any,
+      controlContext,
+    );
 
     return this.createValidationResult({
       approved,
@@ -443,10 +538,11 @@ export class EnhancedComputerUseIntegrationService {
   private async validateScreenshot(
     context: ComputerUseValidationContext,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ComputerUseValidationResult> {
     const captureContext = this.mapToScreenCaptureContext(context);
-    const approved = await this.screenCaptureService.validateScreenshotCapture(captureContext);
+    const approved =
+      await this.screenCaptureService.validateScreenshotCapture(captureContext);
 
     return this.createValidationResult({
       approved,
@@ -465,10 +561,13 @@ export class EnhancedComputerUseIntegrationService {
     action: ReadFileAction,
     context: ComputerUseValidationContext,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ComputerUseValidationResult> {
     const fileContext = this.mapToFileSystemContext(context);
-    const approved = await this.fileSystemService.validateFileRead(action.path!, fileContext);
+    const approved = await this.fileSystemService.validateFileRead(
+      action.path!,
+      fileContext,
+    );
 
     return this.createValidationResult({
       approved,
@@ -485,13 +584,13 @@ export class EnhancedComputerUseIntegrationService {
     action: WriteFileAction,
     context: ComputerUseValidationContext,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ComputerUseValidationResult> {
     const fileContext = this.mapToFileSystemContext(context);
     const approved = await this.fileSystemService.validateFileWrite(
       action.path!,
       action.content!,
-      fileContext
+      fileContext,
     );
 
     return this.createValidationResult({
@@ -511,15 +610,16 @@ export class EnhancedComputerUseIntegrationService {
     action: ApplicationAction,
     context: ComputerUseValidationContext,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ComputerUseValidationResult> {
     const appContext = this.mapToApplicationControlContext(context);
-    const approved = await this.applicationControlService.validateApplicationLaunch(
-      action.application!,
-      `/Applications/${action.application}.app`,
-      [],
-      appContext
-    );
+    const approved =
+      await this.applicationControlService.validateApplicationLaunch(
+        action.application!,
+        `/Applications/${action.application}.app`,
+        [],
+        appContext,
+      );
 
     return this.createValidationResult({
       approved,
@@ -534,13 +634,16 @@ export class EnhancedComputerUseIntegrationService {
 
   // ===== CONTEXT MAPPING =====
 
-  private mapToComputerControlContext(context: ComputerUseValidationContext): ComputerControlValidationContext {
+  private mapToComputerControlContext(
+    context: ComputerUseValidationContext,
+  ): ComputerControlValidationContext {
     return {
       ...context,
       screenResolution: context.systemContext.screenResolution,
       activeApplication: context.systemContext.activeApplication,
       currentWindowTitle: context.systemContext.windowTitle,
-      userAccessibilityNeeds: context.accessibilitySettings.userAccessibilityNeeds,
+      userAccessibilityNeeds:
+        context.accessibilitySettings.userAccessibilityNeeds,
       performanceRequirements: context.performanceRequirements,
       privacyContext: {
         screenRecordingAllowed: context.privacySettings.allowScreenRecording,
@@ -549,7 +652,9 @@ export class EnhancedComputerUseIntegrationService {
     };
   }
 
-  private mapToScreenCaptureContext(context: ComputerUseValidationContext): ScreenCaptureValidationContext {
+  private mapToScreenCaptureContext(
+    context: ComputerUseValidationContext,
+  ): ScreenCaptureValidationContext {
     return {
       ...context,
       screenResolution: context.systemContext.screenResolution,
@@ -561,7 +666,9 @@ export class EnhancedComputerUseIntegrationService {
     };
   }
 
-  private mapToFileSystemContext(context: ComputerUseValidationContext): FileSystemValidationContext {
+  private mapToFileSystemContext(
+    context: ComputerUseValidationContext,
+  ): FileSystemValidationContext {
     return {
       ...context,
       userHomeDirectory: context.systemContext.userHomeDirectory,
@@ -572,14 +679,17 @@ export class EnhancedComputerUseIntegrationService {
         allowSystemFileAccess: context.securitySettings.allowSystemOperations,
         allowExecutableFileAccess: false,
         allowConfigFileModification: false,
-        requireBackupForDestrictiveOps: context.securitySettings.requireBackupsForDestructiveOps,
+        requireBackupForDestrictiveOps:
+          context.securitySettings.requireBackupsForDestructiveOps,
         maxFileSizeBytes: 100 * 1024 * 1024, // 100MB
       },
       performanceRequirements: context.performanceRequirements,
     };
   }
 
-  private mapToApplicationControlContext(context: ComputerUseValidationContext): ApplicationControlValidationContext {
+  private mapToApplicationControlContext(
+    context: ComputerUseValidationContext,
+  ): ApplicationControlValidationContext {
     return {
       ...context,
       systemResources: {
@@ -595,13 +705,15 @@ export class EnhancedComputerUseIntegrationService {
         allowNetworkApplications: true,
         maxConcurrentApps: 10,
       },
-      currentApplications: context.systemContext.currentProcesses.map(proc => ({
-        processId: proc.processId,
-        name: proc.name,
-        status: proc.status as 'running' | 'stopped' | 'suspended',
-        memoryUsage: proc.memoryUsage,
-        cpuUsage: 0,
-      })),
+      currentApplications: context.systemContext.currentProcesses.map(
+        (proc) => ({
+          processId: proc.processId,
+          name: proc.name,
+          status: proc.status as 'running' | 'stopped' | 'suspended',
+          memoryUsage: proc.memoryUsage,
+          cpuUsage: 0,
+        }),
+      ),
       performanceRequirements: context.performanceRequirements,
     };
   }
@@ -629,7 +741,9 @@ export class EnhancedComputerUseIntegrationService {
       validationDurationMs,
       riskLevel: params.riskLevel,
       conversationId: params.conversationId || `conv_${params.operationId}`,
-      reasoning: params.reasoning || `${params.action} operation ${params.approved ? 'approved' : 'denied'} through ${params.serviceUsed} validation`,
+      reasoning:
+        params.reasoning ||
+        `${params.action} operation ${params.approved ? 'approved' : 'denied'} through ${params.serviceUsed} validation`,
       confidence: params.confidence || 0.9,
       serviceUsed: params.serviceUsed,
       fromCache: false,
@@ -657,7 +771,11 @@ export class EnhancedComputerUseIntegrationService {
   private generateSafeguards(riskLevel: RiskLevel): string[] {
     switch (riskLevel) {
       case RiskLevel._CRITICAL:
-        return ['comprehensive_monitoring', 'multi_step_approval', 'rollback_capability'];
+        return [
+          'comprehensive_monitoring',
+          'multi_step_approval',
+          'rollback_capability',
+        ];
       case RiskLevel._HIGH:
         return ['enhanced_monitoring', 'approval_required', 'audit_logging'];
       case RiskLevel._MODERATE:
@@ -669,16 +787,23 @@ export class EnhancedComputerUseIntegrationService {
 
   private calculateCacheExpiry(riskLevel: RiskLevel): number {
     switch (riskLevel) {
-      case RiskLevel._MINIMAL: return 300000; // 5 minutes
-      case RiskLevel._LOW: return 60000; // 1 minute
-      case RiskLevel._MODERATE: return 30000; // 30 seconds
-      default: return 0; // No caching for high/critical risk
+      case RiskLevel._MINIMAL:
+        return 300000; // 5 minutes
+      case RiskLevel._LOW:
+        return 60000; // 1 minute
+      case RiskLevel._MODERATE:
+        return 30000; // 30 seconds
+      default:
+        return 0; // No caching for high/critical risk
     }
   }
 
   // ===== CACHE MANAGEMENT =====
 
-  private generateMasterCacheKey(action: ComputerAction, context: ComputerUseValidationContext): string {
+  private generateMasterCacheKey(
+    action: ComputerAction,
+    context: ComputerUseValidationContext,
+  ): string {
     const baseKey = `${action.action}_${context.userId}`;
 
     if ('coordinates' in action && action.coordinates) {
@@ -696,7 +821,9 @@ export class EnhancedComputerUseIntegrationService {
     return baseKey;
   }
 
-  private getMasterCachedResult(key: string): ComputerUseValidationResult | null {
+  private getMasterCachedResult(
+    key: string,
+  ): ComputerUseValidationResult | null {
     const cached = this.masterCache.get(key);
     if (!cached) return null;
 
@@ -711,7 +838,11 @@ export class EnhancedComputerUseIntegrationService {
     return result;
   }
 
-  private setMasterCachedResult(key: string, result: ComputerUseValidationResult, expiryMs: number): void {
+  private setMasterCachedResult(
+    key: string,
+    result: ComputerUseValidationResult,
+    expiryMs: number,
+  ): void {
     this.masterCache.set(key, {
       result: { ...result },
       timestamp: new Date(),
@@ -736,7 +867,12 @@ export class EnhancedComputerUseIntegrationService {
     this.systemMetrics.operationsByType.set(actionType, current + 1);
   }
 
-  private trackActiveOperation(operationId: string, operationType: string, userId: string, startTime: Date): void {
+  private trackActiveOperation(
+    operationId: string,
+    operationType: string,
+    userId: string,
+    startTime: Date,
+  ): void {
     this.activeOperations.set(operationId, {
       operationId,
       startTime,
@@ -772,16 +908,24 @@ export class EnhancedComputerUseIntegrationService {
     }
   }
 
-  private updateSystemMetrics(durationMs: number, fromCache: boolean, riskLevel: RiskLevel): void {
+  private updateSystemMetrics(
+    durationMs: number,
+    fromCache: boolean,
+    riskLevel: RiskLevel,
+  ): void {
     // Update average validation time
     this.systemMetrics.averageValidationTime =
-      (this.systemMetrics.averageValidationTime * (this.systemMetrics.totalOperations - 1) + durationMs) /
+      (this.systemMetrics.averageValidationTime *
+        (this.systemMetrics.totalOperations - 1) +
+        durationMs) /
       this.systemMetrics.totalOperations;
 
     // Update cache hit rate
     if (fromCache) {
       this.systemMetrics.cacheHitRate =
-        (this.systemMetrics.cacheHitRate * (this.systemMetrics.totalOperations - 1) + 1) /
+        (this.systemMetrics.cacheHitRate *
+          (this.systemMetrics.totalOperations - 1) +
+          1) /
         this.systemMetrics.totalOperations;
     }
 
@@ -792,7 +936,8 @@ export class EnhancedComputerUseIntegrationService {
     if (durationMs < 500) this.systemMetrics.performanceTargets.sub500ms++;
 
     // Update risk level tracking
-    const current = this.systemMetrics.operationsByRiskLevel.get(riskLevel) || 0;
+    const current =
+      this.systemMetrics.operationsByRiskLevel.get(riskLevel) || 0;
     this.systemMetrics.operationsByRiskLevel.set(riskLevel, current + 1);
   }
 
@@ -801,16 +946,23 @@ export class EnhancedComputerUseIntegrationService {
   private async performHealthCheck(): Promise<void> {
     try {
       // Check individual service health
-      const computerControlMetrics = this.computerControlService.getPerformanceMetrics();
-      const screenCaptureMetrics = this.screenCaptureService.getPerformanceMetrics();
+      const computerControlMetrics =
+        this.computerControlService.getPerformanceMetrics();
+      const screenCaptureMetrics =
+        this.screenCaptureService.getPerformanceMetrics();
       const fileSystemMetrics = this.fileSystemService.getPerformanceMetrics();
-      const applicationControlMetrics = this.applicationControlService.getPerformanceMetrics();
+      const applicationControlMetrics =
+        this.applicationControlService.getPerformanceMetrics();
 
       // Update service health status
-      this.systemMetrics.serviceHealth.computerControl = this.assessServiceHealth(computerControlMetrics);
-      this.systemMetrics.serviceHealth.screenCapture = this.assessServiceHealth(screenCaptureMetrics);
-      this.systemMetrics.serviceHealth.fileSystem = this.assessServiceHealth(fileSystemMetrics);
-      this.systemMetrics.serviceHealth.applicationControl = this.assessServiceHealth(applicationControlMetrics);
+      this.systemMetrics.serviceHealth.computerControl =
+        this.assessServiceHealth(computerControlMetrics);
+      this.systemMetrics.serviceHealth.screenCapture =
+        this.assessServiceHealth(screenCaptureMetrics);
+      this.systemMetrics.serviceHealth.fileSystem =
+        this.assessServiceHealth(fileSystemMetrics);
+      this.systemMetrics.serviceHealth.applicationControl =
+        this.assessServiceHealth(applicationControlMetrics);
 
       // Log health status
       this.logger.debug('System health check completed', {
@@ -818,7 +970,6 @@ export class EnhancedComputerUseIntegrationService {
         activeOperations: this.activeOperations.size,
         cacheSize: this.masterCache.size,
       });
-
     } catch (error) {
       this.logger.error('Health check failed', {
         error: error instanceof Error ? error.message : String(error),
@@ -826,7 +977,9 @@ export class EnhancedComputerUseIntegrationService {
     }
   }
 
-  private assessServiceHealth(metrics: any): 'HEALTHY' | 'DEGRADED' | 'CRITICAL' {
+  private assessServiceHealth(
+    metrics: any,
+  ): 'HEALTHY' | 'DEGRADED' | 'CRITICAL' {
     if (!metrics) return 'CRITICAL';
 
     // Check average response time
@@ -834,7 +987,11 @@ export class EnhancedComputerUseIntegrationService {
     if (metrics.averageValidationTime > 500) return 'DEGRADED';
 
     // Check error rate
-    const totalOps = metrics.totalOperations || metrics.totalApplicationLaunches || metrics.totalScreenCaptures || metrics.totalFileOperations;
+    const totalOps =
+      metrics.totalOperations ||
+      metrics.totalApplicationLaunches ||
+      metrics.totalScreenCaptures ||
+      metrics.totalFileOperations;
     if (totalOps > 0) {
       const errorRate = (metrics.securityViolations || 0) / totalOps;
       if (errorRate > 0.1) return 'CRITICAL';
@@ -852,7 +1009,10 @@ export class EnhancedComputerUseIntegrationService {
       approvedOperations: this.systemMetrics.approvedOperations,
       deniedOperations: this.systemMetrics.deniedOperations,
       errorOperations: this.systemMetrics.errorOperations,
-      approvalRate: totalOps > 0 ? `${((this.systemMetrics.approvedOperations / totalOps) * 100).toFixed(1)}%` : '0%',
+      approvalRate:
+        totalOps > 0
+          ? `${((this.systemMetrics.approvedOperations / totalOps) * 100).toFixed(1)}%`
+          : '0%',
       averageValidationTime: `${this.systemMetrics.averageValidationTime.toFixed(2)}ms`,
       cacheHitRate: `${(this.systemMetrics.cacheHitRate * 100).toFixed(1)}%`,
       performanceTargets: {
@@ -877,11 +1037,16 @@ export class EnhancedComputerUseIntegrationService {
 
     return {
       totalOperations: totalOps,
-      operationsByType: Object.fromEntries(this.systemMetrics.operationsByType.entries()),
-      operationsByRiskLevel: Object.fromEntries(this.systemMetrics.operationsByRiskLevel.entries()),
+      operationsByType: Object.fromEntries(
+        this.systemMetrics.operationsByType.entries(),
+      ),
+      operationsByRiskLevel: Object.fromEntries(
+        this.systemMetrics.operationsByRiskLevel.entries(),
+      ),
       averageValidationTime: this.systemMetrics.averageValidationTime,
       cacheHitRate: this.systemMetrics.cacheHitRate,
-      approvalRate: totalOps > 0 ? (this.systemMetrics.approvedOperations / totalOps) : 0,
+      approvalRate:
+        totalOps > 0 ? this.systemMetrics.approvedOperations / totalOps : 0,
       systemLoad: {
         cpuUsage: 0, // Would be retrieved from system monitoring
         memoryUsage: 0,

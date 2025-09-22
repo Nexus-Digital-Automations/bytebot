@@ -26,9 +26,19 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 // Import our stress testing components
-import { StressTestingFramework, StressTestConfig, StressTestResult } from './stress-testing-framework';
-import ChaosEngineeringService, { ChaosExperiment, ChaosExperimentResult } from './chaos-engineering.service';
-import ResourceMonitoringService, { SystemResourceMetrics, ResourceMonitoringConfig } from './resource-monitoring.service';
+import {
+  StressTestingFramework,
+  StressTestConfig,
+  StressTestResult,
+} from './stress-testing-framework';
+import ChaosEngineeringService, {
+  ChaosExperiment,
+  ChaosExperimentResult,
+} from './chaos-engineering.service';
+import ResourceMonitoringService, {
+  SystemResourceMetrics,
+  ResourceMonitoringConfig,
+} from './resource-monitoring.service';
 
 // ===== PARLANT STRESS TEST INTERFACES =====
 
@@ -51,7 +61,12 @@ export interface ParlantStressScenario {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly category: 'LOAD' | 'RESILIENCE' | 'CHAOS' | 'RECOVERY' | 'PERFORMANCE';
+  readonly category:
+    | 'LOAD'
+    | 'RESILIENCE'
+    | 'CHAOS'
+    | 'RECOVERY'
+    | 'PERFORMANCE';
   readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';
   readonly dependencies: string[];
   readonly stressConfig: StressTestConfig;
@@ -372,7 +387,12 @@ export interface CriticalIssue {
  * Stress test recommendation
  */
 export interface StressTestRecommendation {
-  readonly category: 'PERFORMANCE' | 'SCALABILITY' | 'RESILIENCE' | 'ARCHITECTURE' | 'CONFIGURATION';
+  readonly category:
+    | 'PERFORMANCE'
+    | 'SCALABILITY'
+    | 'RESILIENCE'
+    | 'ARCHITECTURE'
+    | 'CONFIGURATION';
   readonly priority: 'HIGH' | 'MEDIUM' | 'LOW';
   readonly title: string;
   readonly description: string;
@@ -400,18 +420,22 @@ export interface GeneratedReport {
  */
 export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
   name: 'PARLANT Phase 1 Comprehensive Stress Test Suite',
-  description: 'Enterprise-grade stress testing suite for PARLANT conversational AI validation system',
+  description:
+    'Enterprise-grade stress testing suite for PARLANT conversational AI validation system',
   version: '1.0.0',
-  scenarios: [{
+  scenarios: [
+    {
       id: 'parlant-massive-conversation-load',
       name: 'Massive Conversation Load Test',
-      description: 'Test system behavior under 10,000+ concurrent conversational sessions',
+      description:
+        'Test system behavior under 10,000+ concurrent conversational sessions',
       category: 'LOAD',
       priority: 'HIGH',
       dependencies: [],
       stressConfig: {
         name: 'PARLANT_MASSIVE_CONVERSATIONS',
-        description: 'Test 10,000+ concurrent conversational validation sessions',
+        description:
+          'Test 10,000+ concurrent conversational validation sessions',
         duration: 600000, // 10 minutes
         targetConcurrency: 10000,
         rampUpDuration: 120000, // 2 minutes
@@ -500,7 +524,12 @@ export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
         network: { warning: 80, critical: 95, duration: 30000, enabled: true },
         database: { warning: 80, critical: 90, duration: 30000, enabled: true },
         cache: { warning: 70, critical: 85, duration: 30000, enabled: true },
-        application: { warning: 75, critical: 90, duration: 30000, enabled: true },
+        application: {
+          warning: 75,
+          critical: 90,
+          duration: 30000,
+          enabled: true,
+        },
       },
       alerting: {
         enabled: true,
@@ -606,55 +635,85 @@ export const PARLANT_STRESS_TEST_SUITE: ParlantStressTestSuite = {
 @Injectable()
 export class ParlantStressTestRunner extends EventEmitter {
   private readonly logger = new Logger(ParlantStressTestRunner.name);
-  private readonly activeExecutions = new Map<string, ParlantStressTestExecution>();
+  private readonly activeExecutions = new Map<
+    string,
+    ParlantStressTestExecution
+  >();
 
   constructor(
     private readonly configService: ConfigService,
     private readonly stressTestingFramework: StressTestingFramework,
     private readonly chaosEngineeringService: ChaosEngineeringService,
-    private readonly resourceMonitoringService: ResourceMonitoringService
+    private readonly resourceMonitoringService: ResourceMonitoringService,
   ) {
     super();
 
-    this.logger.log(`🚀 [PARLANT-STRESS] PARLANT Stress Test Runner initialized`);
+    this.logger.log(
+      `🚀 [PARLANT-STRESS] PARLANT Stress Test Runner initialized`,
+    );
   }
 
   /**
    * Execute complete PARLANT stress test suite
    */
   async executeParlantStressTestSuite(
-    suite = PARLANT_STRESS_TEST_SUITE
+    suite = PARLANT_STRESS_TEST_SUITE,
   ): Promise<ParlantStressTestResult> {
     const executionId = `parlant_stress_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = new Date();
-    this.logger.log(`🚀 [PARLANT-STRESS] Starting PARLANT Phase 1 stress test suite`, {
-      executionId,
-      totalScenarios: suite.scenarios.length,
-      estimatedDuration: suite.globalConfig.globalTimeoutMs,
-    });
+    this.logger.log(
+      `🚀 [PARLANT-STRESS] Starting PARLANT Phase 1 stress test suite`,
+      {
+        executionId,
+        totalScenarios: suite.scenarios.length,
+        estimatedDuration: suite.globalConfig.globalTimeoutMs,
+      },
+    );
 
-    const execution = new ParlantStressTestExecution(suite, executionId, this.logger);
+    const execution = new ParlantStressTestExecution(
+      suite,
+      executionId,
+      this.logger,
+    );
     this.activeExecutions.set(executionId, execution);
 
     try {
       // Phase 1: Initialize monitoring and safety systems
-      this.logger.log(`📊 [PARLANT-STRESS] Phase 1: Initialize monitoring and safety systems`, { executionId });
+      this.logger.log(
+        `📊 [PARLANT-STRESS] Phase 1: Initialize monitoring and safety systems`,
+        { executionId },
+      );
       await this.initializeStressTestEnvironment(suite, execution);
 
       // Phase 2: Execute stress test scenarios
-      this.logger.log(`💪 [PARLANT-STRESS] Phase 2: Execute stress test scenarios`, { executionId });
-      const scenarioResults = await this.executeStressTestScenarios(suite, execution);
+      this.logger.log(
+        `💪 [PARLANT-STRESS] Phase 2: Execute stress test scenarios`,
+        { executionId },
+      );
+      const scenarioResults = await this.executeStressTestScenarios(
+        suite,
+        execution,
+      );
 
       // Phase 3: Execute chaos engineering experiments
-      this.logger.log(`🔥 [PARLANT-STRESS] Phase 3: Execute chaos engineering experiments`, { executionId });
+      this.logger.log(
+        `🔥 [PARLANT-STRESS] Phase 3: Execute chaos engineering experiments`,
+        { executionId },
+      );
       const chaosResults = await this.executeChaosExperiments(suite, execution);
 
       // Phase 4: Validate system recovery and resilience
-      this.logger.log(`🔄 [PARLANT-STRESS] Phase 4: Validate system recovery and resilience`, { executionId });
+      this.logger.log(
+        `🔄 [PARLANT-STRESS] Phase 4: Validate system recovery and resilience`,
+        { executionId },
+      );
       await this.validateSystemRecovery(suite, execution);
 
       // Phase 5: Analyze results and generate recommendations
-      this.logger.log(`📊 [PARLANT-STRESS] Phase 5: Analyze results and generate recommendations`, { executionId });
+      this.logger.log(
+        `📊 [PARLANT-STRESS] Phase 5: Analyze results and generate recommendations`,
+        { executionId },
+      );
       const endTime = new Date();
       const result = await this.generateStressTestResult({
         suite,
@@ -667,29 +726,37 @@ export class ParlantStressTestRunner extends EventEmitter {
       });
 
       // Phase 6: Generate comprehensive reports
-      this.logger.log(`📋 [PARLANT-STRESS] Phase 6: Generate comprehensive reports`, { executionId });
+      this.logger.log(
+        `📋 [PARLANT-STRESS] Phase 6: Generate comprehensive reports`,
+        { executionId },
+      );
       const reports = await this.generateStressTestReports(result);
       result.reports = reports;
 
-      this.logger.log(`✅ [PARLANT-STRESS] PARLANT stress test suite completed: ${result.passed ? 'PASSED' : 'FAILED'}`, {
-        executionId,
-        totalDuration: result.totalDuration,
-        successRate: result.summary.successRate,
-        resilienceScore: result.summary.resilienceScore,
-        performanceGrade: result.summary.performanceGrade,
-        totalScenarios: result.summary.totalScenarios,
-        passedScenarios: result.summary.passedScenarios,
-      });
+      this.logger.log(
+        `✅ [PARLANT-STRESS] PARLANT stress test suite completed: ${result.passed ? 'PASSED' : 'FAILED'}`,
+        {
+          executionId,
+          totalDuration: result.totalDuration,
+          successRate: result.summary.successRate,
+          resilienceScore: result.summary.resilienceScore,
+          performanceGrade: result.summary.performanceGrade,
+          totalScenarios: result.summary.totalScenarios,
+          passedScenarios: result.summary.passedScenarios,
+        },
+      );
 
       this.emit('stressTestCompleted', result);
       return result;
-
     } catch (error) {
-      this.logger.error(`❌ [PARLANT-STRESS] Stress test suite failed: ${error instanceof Error ? error.message : String(error)}`, {
-        executionId,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      this.logger.error(
+        `❌ [PARLANT-STRESS] Stress test suite failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          executionId,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+      );
 
       // Execute emergency procedures
       await this.executeEmergencyProcedures(suite, execution);
@@ -705,7 +772,10 @@ export class ParlantStressTestRunner extends EventEmitter {
   /**
    * Initialize stress test environment
    */
-  private async initializeStressTestEnvironment(suite: ParlantStressTestSuite, execution: ParlantStressTestExecution): Promise<void> {
+  private async initializeStressTestEnvironment(
+    suite: ParlantStressTestSuite,
+    execution: ParlantStressTestExecution,
+  ): Promise<void> {
     // Placeholder implementation
     this.logger.log(`🚀 [PARLANT-STRESS] Initializing stress test environment`);
   }
@@ -713,7 +783,10 @@ export class ParlantStressTestRunner extends EventEmitter {
   /**
    * Execute stress test scenarios
    */
-  private async executeStressTestScenarios(suite: ParlantStressTestSuite, execution: ParlantStressTestExecution): Promise<ParlantScenarioResult[]> {
+  private async executeStressTestScenarios(
+    suite: ParlantStressTestSuite,
+    execution: ParlantStressTestExecution,
+  ): Promise<ParlantScenarioResult[]> {
     // Placeholder implementation
     this.logger.log(`💪 [PARLANT-STRESS] Executing stress test scenarios`);
     return [];
@@ -722,7 +795,10 @@ export class ParlantStressTestRunner extends EventEmitter {
   /**
    * Execute chaos experiments
    */
-  private async executeChaosExperiments(suite: ParlantStressTestSuite, execution: ParlantStressTestExecution): Promise<ChaosExperimentResult[]> {
+  private async executeChaosExperiments(
+    suite: ParlantStressTestSuite,
+    execution: ParlantStressTestExecution,
+  ): Promise<ChaosExperimentResult[]> {
     // Placeholder implementation
     this.logger.log(`🔥 [PARLANT-STRESS] Executing chaos experiments`);
     return [];
@@ -731,7 +807,10 @@ export class ParlantStressTestRunner extends EventEmitter {
   /**
    * Validate system recovery
    */
-  private async validateSystemRecovery(suite: ParlantStressTestSuite, execution: ParlantStressTestExecution): Promise<void> {
+  private async validateSystemRecovery(
+    suite: ParlantStressTestSuite,
+    execution: ParlantStressTestExecution,
+  ): Promise<void> {
     // Placeholder implementation
     this.logger.log(`🔄 [PARLANT-STRESS] Validating system recovery`);
   }
@@ -794,7 +873,9 @@ export class ParlantStressTestRunner extends EventEmitter {
   /**
    * Generate stress test reports
    */
-  private async generateStressTestReports(result: ParlantStressTestResult): Promise<GeneratedReport[]> {
+  private async generateStressTestReports(
+    result: ParlantStressTestResult,
+  ): Promise<GeneratedReport[]> {
     // Placeholder implementation
     this.logger.log(`📋 [PARLANT-STRESS] Generating stress test reports`);
     return [];
@@ -803,7 +884,10 @@ export class ParlantStressTestRunner extends EventEmitter {
   /**
    * Execute emergency procedures
    */
-  private async executeEmergencyProcedures(suite: ParlantStressTestSuite, execution: ParlantStressTestExecution): Promise<void> {
+  private async executeEmergencyProcedures(
+    suite: ParlantStressTestSuite,
+    execution: ParlantStressTestExecution,
+  ): Promise<void> {
     // Placeholder implementation
     this.logger.log(`🚨 [PARLANT-STRESS] Executing emergency procedures`);
   }
@@ -811,8 +895,12 @@ export class ParlantStressTestRunner extends EventEmitter {
   /**
    * Cleanup stress test environment
    */
-  private async cleanupStressTestEnvironment(executionId: string): Promise<void> {
-    this.logger.log(`🧹 [PARLANT-STRESS] Cleaning up stress test environment for ${executionId}`);
+  private async cleanupStressTestEnvironment(
+    executionId: string,
+  ): Promise<void> {
+    this.logger.log(
+      `🧹 [PARLANT-STRESS] Cleaning up stress test environment for ${executionId}`,
+    );
 
     // Stop resource monitoring
     await this.resourceMonitoringService.stopMonitoring();
@@ -838,7 +926,7 @@ class ParlantStressTestExecution {
   constructor(
     public readonly suite: ParlantStressTestSuite,
     public readonly executionId: string,
-    public readonly logger: Logger
+    public readonly logger: Logger,
   ) {}
 
   addScenarioResult(result: ParlantScenarioResult): void {

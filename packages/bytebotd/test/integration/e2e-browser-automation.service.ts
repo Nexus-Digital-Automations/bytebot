@@ -22,7 +22,12 @@
 
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import puppeteer, { Browser, Page, ElementHandle, PuppeteerLaunchOptions } from 'puppeteer';
+import puppeteer, {
+  Browser,
+  Page,
+  ElementHandle,
+  PuppeteerLaunchOptions,
+} from 'puppeteer';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
@@ -62,7 +67,15 @@ interface E2EBrowserConfig {
  * Browser interaction action
  */
 interface E2EBrowserAction {
-  type: 'NAVIGATE' | 'CLICK' | 'TYPE' | 'SCROLL' | 'WAIT' | 'SCREENSHOT' | 'EXTRACT_DATA' | 'VALIDATE';
+  type:
+    | 'NAVIGATE'
+    | 'CLICK'
+    | 'TYPE'
+    | 'SCROLL'
+    | 'WAIT'
+    | 'SCREENSHOT'
+    | 'EXTRACT_DATA'
+    | 'VALIDATE';
   target?: string; // CSS selector or URL
   value?: string | number;
   options?: Record<string, unknown>;
@@ -112,7 +125,12 @@ interface E2EPerformanceMetric {
  * Browser error tracking
  */
 interface E2EBrowserError {
-  type: 'CONSOLE_ERROR' | 'NETWORK_ERROR' | 'TIMEOUT' | 'ELEMENT_NOT_FOUND' | 'SCRIPT_ERROR';
+  type:
+    | 'CONSOLE_ERROR'
+    | 'NETWORK_ERROR'
+    | 'TIMEOUT'
+    | 'ELEMENT_NOT_FOUND'
+    | 'SCRIPT_ERROR';
   message: string;
   stack?: string;
   timestamp: Date;
@@ -182,7 +200,11 @@ interface E2EParlantValidation {
   required: boolean;
   prompt: string;
   confidenceThreshold: number;
-  validationType: 'USER_INTENT' | 'DATA_ACCESS' | 'NAVIGATION' | 'FORM_SUBMISSION';
+  validationType:
+    | 'USER_INTENT'
+    | 'DATA_ACCESS'
+    | 'NAVIGATION'
+    | 'FORM_SUBMISSION';
   contextData: Record<string, unknown>;
 }
 
@@ -236,8 +258,14 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
   private videoDirectory: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.screenshotDirectory = this.configService.get('E2E_SCREENSHOT_DIR', './test-screenshots');
-    this.videoDirectory = this.configService.get('E2E_VIDEO_DIR', './test-videos');
+    this.screenshotDirectory = this.configService.get(
+      'E2E_SCREENSHOT_DIR',
+      './test-screenshots',
+    );
+    this.videoDirectory = this.configService.get(
+      'E2E_VIDEO_DIR',
+      './test-videos',
+    );
     this.initializeDirectories();
   }
 
@@ -269,11 +297,11 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
           networkRequests: [],
           performanceMetrics: [],
           errors: [],
-          resourceUsage: []
+          resourceUsage: [],
         },
         screenshots: [],
         startTime: new Date(),
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       };
 
       this.activeSessions.set(sessionId, session);
@@ -285,9 +313,11 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
 
       this.logger.log(`Browser session created successfully: ${sessionId}`);
       return sessionId;
-
     } catch (error) {
-      this.logger.error(`Failed to create browser session: ${sessionId}`, error);
+      this.logger.error(
+        `Failed to create browser session: ${sessionId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -297,7 +327,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
    */
   async executeUserWorkflow(
     sessionId: string,
-    workflow: E2EUserWorkflow
+    workflow: E2EUserWorkflow,
   ): Promise<{
     success: boolean;
     totalDuration: number;
@@ -328,11 +358,13 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
           if (step.parlantValidation?.required) {
             const validationResult = await this.executeParlantValidation(
               sessionId,
-              step.parlantValidation
+              step.parlantValidation,
             );
 
             if (!validationResult.approved) {
-              throw new Error(`PARLANT validation failed for step: ${step.name}`);
+              throw new Error(
+                `PARLANT validation failed for step: ${step.name}`,
+              );
             }
 
             stepResults[`${step.name}_validation`] = validationResult;
@@ -342,7 +374,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
           const actionResult = await this.executeBrowserAction(
             sessionId,
             'main',
-            step.action
+            step.action,
           );
 
           stepResults[step.name] = actionResult;
@@ -351,7 +383,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
           const outcomeValid = await this.validateStepOutcome(
             sessionId,
             'main',
-            step.expectedOutcome
+            step.expectedOutcome,
           );
 
           if (!outcomeValid) {
@@ -361,10 +393,12 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
           const stepDuration = Date.now() - stepStartTime;
           session.metrics.interactionLatencies.push(stepDuration);
 
-          this.logger.log(`Step completed successfully: ${step.name} (${stepDuration}ms)`);
-
+          this.logger.log(
+            `Step completed successfully: ${step.name} (${stepDuration}ms)`,
+          );
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
           errors.push(`Step ${step.name}: ${errorMessage}`);
 
           // Take screenshot on failure
@@ -373,8 +407,8 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
           }
 
           // Check if error is retryable
-          const isRetryable = workflow.retryPolicy.retryableErrors.some(retryableError =>
-            errorMessage.includes(retryableError)
+          const isRetryable = workflow.retryPolicy.retryableErrors.some(
+            (retryableError) => errorMessage.includes(retryableError),
           );
 
           if (isRetryable && workflow.retryPolicy.maxRetries > 0) {
@@ -384,12 +418,14 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
             this.logger.error(`Step failed: ${step.name} - ${errorMessage}`);
 
             // Check if this is a critical step
-            const isCritical = workflow.validationCriteria.requiredPages.some(page =>
-              step.action.target?.includes(page)
+            const isCritical = workflow.validationCriteria.requiredPages.some(
+              (page) => step.action.target?.includes(page),
             );
 
             if (isCritical) {
-              this.logger.error(`Critical step failed, aborting workflow: ${step.name}`);
+              this.logger.error(
+                `Critical step failed, aborting workflow: ${step.name}`,
+              );
               break;
             }
           }
@@ -402,10 +438,12 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
       const workflowValid = await this.validateWorkflowCompletion(
         sessionId,
         workflow.validationCriteria,
-        errors.length
+        errors.length,
       );
 
-      this.logger.log(`Workflow completed: ${workflow.name} - Duration: ${totalDuration}ms, Success: ${workflowValid}`);
+      this.logger.log(
+        `Workflow completed: ${workflow.name} - Duration: ${totalDuration}ms, Success: ${workflowValid}`,
+      );
 
       return {
         success: workflowValid,
@@ -413,12 +451,12 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
         stepResults,
         metrics: session.metrics,
         screenshots: session.screenshots,
-        errors
+        errors,
       };
-
     } catch (error) {
       const totalDuration = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       errors.push(`Workflow execution failed: ${errorMessage}`);
 
       this.logger.error(`Workflow failed: ${workflow.name} - ${errorMessage}`);
@@ -429,7 +467,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
         stepResults,
         metrics: session.metrics,
         screenshots: session.screenshots,
-        errors
+        errors,
       };
     }
   }
@@ -440,7 +478,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
   async executeBrowserAction(
     sessionId: string,
     pageId: string,
-    action: E2EBrowserAction
+    action: E2EBrowserAction,
   ): Promise<Record<string, unknown>> {
     const session = this.activeSessions.get(sessionId);
     if (!session) {
@@ -474,7 +512,11 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
           result = await this.executeWaitAction(page, action);
           break;
         case 'SCREENSHOT':
-          result = await this.executeScreenshotAction(sessionId, pageId, action);
+          result = await this.executeScreenshotAction(
+            sessionId,
+            pageId,
+            action,
+          );
           break;
         case 'EXTRACT_DATA':
           result = await this.executeExtractDataAction(page, action);
@@ -490,27 +532,33 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
       result.executionTime = duration;
 
       return result;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
 
       session.metrics.errors.push({
         type: 'SCRIPT_ERROR',
         message: errorMessage,
         timestamp: new Date(),
         pageUrl: page.url(),
-        elementSelector: action.target
+        elementSelector: action.target,
       });
 
-      throw new Error(`Browser action failed: ${action.type} - ${errorMessage}`);
+      throw new Error(
+        `Browser action failed: ${action.type} - ${errorMessage}`,
+      );
     }
   }
 
   /**
    * Take screenshot with automatic naming and storage
    */
-  async takeScreenshot(sessionId: string, pageId: string, name?: string): Promise<string> {
+  async takeScreenshot(
+    sessionId: string,
+    pageId: string,
+    name?: string,
+  ): Promise<string> {
     const session = this.activeSessions.get(sessionId);
     if (!session) {
       throw new Error(`Browser session not found: ${sessionId}`);
@@ -522,12 +570,14 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const screenshotName = name ? `${name}-${timestamp}.png` : `screenshot-${timestamp}.png`;
+    const screenshotName = name
+      ? `${name}-${timestamp}.png`
+      : `screenshot-${timestamp}.png`;
     const screenshotPath = join(this.screenshotDirectory, screenshotName);
 
     await page.screenshot({
       path: screenshotPath,
-      fullPage: true
+      fullPage: true,
     });
 
     session.screenshots.push(screenshotPath);
@@ -542,7 +592,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
   async performAccessibilityTest(
     sessionId: string,
     pageId: string,
-    standards: string[] = ['WCAG2A', 'WCAG2AA']
+    standards: string[] = ['WCAG2A', 'WCAG2AA'],
   ): Promise<E2EAccessibilityResult> {
     const session = this.activeSessions.get(sessionId);
     if (!session) {
@@ -562,7 +612,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
       warnings: [],
       passes: 0,
       score: 95,
-      standards
+      standards,
     };
 
     return mockResult;
@@ -586,7 +636,6 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
       this.activeSessions.delete(sessionId);
 
       this.logger.log(`Browser session closed successfully: ${sessionId}`);
-
     } catch (error) {
       this.logger.error(`Error closing browser session: ${sessionId}`, error);
       throw error;
@@ -620,8 +669,8 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
-        '--disable-gpu'
-      ]
+        '--disable-gpu',
+      ],
     };
 
     if (config.viewport) {
@@ -631,7 +680,10 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
     return options;
   }
 
-  private async setupPageMonitoring(page: Page, session: E2EBrowserSession): Promise<void> {
+  private async setupPageMonitoring(
+    page: Page,
+    session: E2EBrowserSession,
+  ): Promise<void> {
     // Monitor console errors
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
@@ -639,7 +691,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
           type: 'CONSOLE_ERROR',
           message: msg.text(),
           timestamp: new Date(),
-          pageUrl: page.url()
+          pageUrl: page.url(),
         });
       }
     });
@@ -653,7 +705,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
         responseTime: 0, // Would need to calculate actual response time
         size: 0, // Would need to get actual response size
         timestamp: new Date(),
-        resourceType: response.request().resourceType()
+        resourceType: response.request().resourceType(),
       });
     });
 
@@ -664,7 +716,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
         message: error.message,
         stack: error.stack,
         timestamp: new Date(),
-        pageUrl: page.url()
+        pageUrl: page.url(),
       });
     });
 
@@ -681,23 +733,28 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
 
   private async executeParlantValidation(
     sessionId: string,
-    validation: E2EParlantValidation
+    validation: E2EParlantValidation,
   ): Promise<{ approved: boolean; confidence: number; reasoning: string }> {
-    this.logger.log(`Executing PARLANT validation: ${validation.validationType}`);
+    this.logger.log(
+      `Executing PARLANT validation: ${validation.validationType}`,
+    );
 
     // Simulate PARLANT validation (replace with actual integration)
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     const mockResult = {
       approved: Math.random() > 0.1, // 90% approval rate
       confidence: Math.random() * 0.3 + 0.7, // 0.7-1.0 confidence
-      reasoning: `Validation completed for ${validation.validationType}`
+      reasoning: `Validation completed for ${validation.validationType}`,
     };
 
     return mockResult;
   }
 
-  private async executeNavigateAction(page: Page, action: E2EBrowserAction): Promise<Record<string, unknown>> {
+  private async executeNavigateAction(
+    page: Page,
+    action: E2EBrowserAction,
+  ): Promise<Record<string, unknown>> {
     const url = action.target;
     if (!url) {
       throw new Error('Navigate action requires target URL');
@@ -707,7 +764,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
 
     const response = await page.goto(url, {
       waitUntil: 'networkidle0',
-      timeout: action.timeout || 30000
+      timeout: action.timeout || 30000,
     });
 
     const loadTime = Date.now() - startTime;
@@ -716,11 +773,14 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
       url: page.url(),
       status: response?.status(),
       loadTime,
-      title: await page.title()
+      title: await page.title(),
     };
   }
 
-  private async executeClickAction(page: Page, action: E2EBrowserAction): Promise<Record<string, unknown>> {
+  private async executeClickAction(
+    page: Page,
+    action: E2EBrowserAction,
+  ): Promise<Record<string, unknown>> {
     const selector = action.target;
     if (!selector) {
       throw new Error('Click action requires target selector');
@@ -738,11 +798,14 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
     return {
       selector,
       clicked: true,
-      elementText: await element.evaluate(el => el.textContent)
+      elementText: await element.evaluate((el) => el.textContent),
     };
   }
 
-  private async executeTypeAction(page: Page, action: E2EBrowserAction): Promise<Record<string, unknown>> {
+  private async executeTypeAction(
+    page: Page,
+    action: E2EBrowserAction,
+  ): Promise<Record<string, unknown>> {
     const selector = action.target;
     const text = action.value as string;
 
@@ -756,12 +819,15 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
     return {
       selector,
       text,
-      typed: true
+      typed: true,
     };
   }
 
-  private async executeScrollAction(page: Page, action: E2EBrowserAction): Promise<Record<string, unknown>> {
-    const scrollY = action.value as number || 500;
+  private async executeScrollAction(
+    page: Page,
+    action: E2EBrowserAction,
+  ): Promise<Record<string, unknown>> {
+    const scrollY = (action.value as number) || 500;
 
     await page.evaluate((y) => {
       window.scrollBy(0, y);
@@ -769,35 +835,45 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
 
     return {
       scrolled: true,
-      scrollY
+      scrollY,
     };
   }
 
-  private async executeWaitAction(page: Page, action: E2EBrowserAction): Promise<Record<string, unknown>> {
-    const waitTime = action.value as number || 1000;
+  private async executeWaitAction(
+    page: Page,
+    action: E2EBrowserAction,
+  ): Promise<Record<string, unknown>> {
+    const waitTime = (action.value as number) || 1000;
 
-    await new Promise(resolve => setTimeout(resolve, waitTime));
+    await new Promise((resolve) => setTimeout(resolve, waitTime));
 
     return {
       waited: true,
-      duration: waitTime
+      duration: waitTime,
     };
   }
 
   private async executeScreenshotAction(
     sessionId: string,
     pageId: string,
-    action: E2EBrowserAction
+    action: E2EBrowserAction,
   ): Promise<Record<string, unknown>> {
-    const screenshotPath = await this.takeScreenshot(sessionId, pageId, action.value as string);
+    const screenshotPath = await this.takeScreenshot(
+      sessionId,
+      pageId,
+      action.value as string,
+    );
 
     return {
       screenshot: true,
-      path: screenshotPath
+      path: screenshotPath,
     };
   }
 
-  private async executeExtractDataAction(page: Page, action: E2EBrowserAction): Promise<Record<string, unknown>> {
+  private async executeExtractDataAction(
+    page: Page,
+    action: E2EBrowserAction,
+  ): Promise<Record<string, unknown>> {
     const selector = action.target;
     if (!selector) {
       throw new Error('Extract data action requires target selector');
@@ -808,23 +884,29 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
       throw new Error(`Element not found: ${selector}`);
     }
 
-    const data = await element.evaluate(el => ({
+    const data = await element.evaluate((el) => ({
       text: el.textContent,
       html: el.innerHTML,
-      attributes: Array.from(el.attributes).reduce((acc, attr) => {
-        acc[attr.name] = attr.value;
-        return acc;
-      }, {} as Record<string, string>)
+      attributes: Array.from(el.attributes).reduce(
+        (acc, attr) => {
+          acc[attr.name] = attr.value;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
     }));
 
     return {
       selector,
       extracted: true,
-      data
+      data,
     };
   }
 
-  private async executeValidateAction(page: Page, action: E2EBrowserAction): Promise<Record<string, unknown>> {
+  private async executeValidateAction(
+    page: Page,
+    action: E2EBrowserAction,
+  ): Promise<Record<string, unknown>> {
     const selector = action.target;
     if (!selector) {
       throw new Error('Validate action requires target selector');
@@ -836,14 +918,14 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
     return {
       selector,
       exists,
-      validated: true
+      validated: true,
     };
   }
 
   private async validateStepOutcome(
     sessionId: string,
     pageId: string,
-    outcome: E2EStepOutcome
+    outcome: E2EStepOutcome,
   ): Promise<boolean> {
     const session = this.activeSessions.get(sessionId);
     if (!session) return false;
@@ -877,7 +959,6 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
       }
 
       return true;
-
     } catch (error) {
       this.logger.error('Step outcome validation failed', error);
       return false;
@@ -887,7 +968,7 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
   private async validateWorkflowCompletion(
     sessionId: string,
     criteria: E2EWorkflowValidation,
-    errorCount: number
+    errorCount: number,
   ): Promise<boolean> {
     const session = this.activeSessions.get(sessionId);
     if (!session) return false;
@@ -899,7 +980,9 @@ export class E2EBrowserAutomationService implements OnModuleDestroy {
     }
 
     // Check performance thresholds
-    for (const [metric, threshold] of Object.entries(criteria.performanceThresholds)) {
+    for (const [metric, threshold] of Object.entries(
+      criteria.performanceThresholds,
+    )) {
       // Implementation would check actual performance metrics
     }
 

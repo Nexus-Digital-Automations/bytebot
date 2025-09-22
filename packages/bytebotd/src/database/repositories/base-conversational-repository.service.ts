@@ -53,7 +53,9 @@ export interface BusinessValidationResult {
  * Abstract base repository with conversational validation
  */
 @Injectable()
-export abstract class BaseConversationalRepositoryService<T extends BaseEntity> {
+export abstract class BaseConversationalRepositoryService<
+  T extends BaseEntity,
+> {
   protected readonly logger = new Logger(this.constructor.name);
 
   constructor(
@@ -80,7 +82,10 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   /**
    * Transform entity before returning to caller
    */
-  protected abstract transformEntity(entity: T, context?: RepositoryOperationContext): Promise<T>;
+  protected abstract transformEntity(
+    entity: T,
+    context?: RepositoryOperationContext,
+  ): Promise<T>;
 
   // ===== PUBLIC REPOSITORY METHODS =====
 
@@ -93,7 +98,9 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   ): Promise<Optional<T>> {
     const operationContext = this.buildContext('findById', context);
 
-    this.logger.debug(`[${operationContext.correlationId}] Finding ${this.getEntityType()} by ID: ${id}`);
+    this.logger.debug(
+      `[${operationContext.correlationId}] Finding ${this.getEntityType()} by ID: ${id}`,
+    );
 
     try {
       const entity = await this.conversationalDbService.findById(
@@ -108,21 +115,33 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         return transformedEntity;
       }
 
-      this.logOperation('findById', { id }, false, operationContext, 'Entity not found');
+      this.logOperation(
+        'findById',
+        { id },
+        false,
+        operationContext,
+        'Entity not found',
+      );
       return null;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationContext.correlationId}] Failed to find ${this.getEntityType()} by ID: ${errorMessage}`, {
-        id,
-        error: errorMessage,
-        context: operationContext,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationContext.correlationId}] Failed to find ${this.getEntityType()} by ID: ${errorMessage}`,
+        {
+          id,
+          error: errorMessage,
+          context: operationContext,
+        },
+      );
 
       // Ensure we only throw Error objects
       if (error instanceof Error) {
         throw error;
       } else {
-        throw new Error(`Failed to find ${this.getEntityType()} by ID: ${errorMessage}`);
+        throw new Error(
+          `Failed to find ${this.getEntityType()} by ID: ${errorMessage}`,
+        );
       }
     }
   }
@@ -136,10 +155,13 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   ): Promise<readonly T[]> {
     const operationContext = this.buildContext('findAll', context);
 
-    this.logger.debug(`[${operationContext.correlationId}] Finding all ${this.getEntityType()} entities`, {
-      options,
-      context: operationContext,
-    });
+    this.logger.debug(
+      `[${operationContext.correlationId}] Finding all ${this.getEntityType()} entities`,
+      {
+        options,
+        context: operationContext,
+      },
+    );
 
     try {
       const entities = await this.conversationalDbService.findAll(
@@ -149,25 +171,36 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
       );
 
       const transformedEntities = await Promise.all(
-        entities.map(entity => this.transformEntity(entity, context))
+        entities.map((entity) => this.transformEntity(entity, context)),
       );
 
-      this.logOperation('findAll', { options }, true, operationContext, `Found ${entities.length} entities`);
+      this.logOperation(
+        'findAll',
+        { options },
+        true,
+        operationContext,
+        `Found ${entities.length} entities`,
+      );
       return transformedEntities;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationContext.correlationId}] Failed to find all ${this.getEntityType()} entities: ${errorMessage}`, {
-        options,
-        error: errorMessage,
-        context: operationContext,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationContext.correlationId}] Failed to find all ${this.getEntityType()} entities: ${errorMessage}`,
+        {
+          options,
+          error: errorMessage,
+          context: operationContext,
+        },
+      );
 
       // Ensure we only throw Error objects
       if (error instanceof Error) {
         throw error;
       } else {
-        throw new Error(`Failed to find all ${this.getEntityType()} entities: ${errorMessage}`);
+        throw new Error(
+          `Failed to find all ${this.getEntityType()} entities: ${errorMessage}`,
+        );
       }
     }
   }
@@ -181,23 +214,34 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   ): Promise<T> {
     const operationContext = this.buildContext('create', context);
 
-    this.logger.debug(`[${operationContext.correlationId}] Creating ${this.getEntityType()} entity`, {
-      data: this.sanitizeLogData(data),
-      context: operationContext,
-    });
+    this.logger.debug(
+      `[${operationContext.correlationId}] Creating ${this.getEntityType()} entity`,
+      {
+        data: this.sanitizeLogData(data),
+        context: operationContext,
+      },
+    );
 
     try {
       // Validate business rules first
-      const businessValidation = await this.validateBusinessRules('create', data, context);
+      const businessValidation = await this.validateBusinessRules(
+        'create',
+        data,
+        context,
+      );
       if (!businessValidation.valid) {
         const errors = businessValidation.errors.join(', ');
-        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} creation: ${errors}`);
+        this.logger.warn(
+          `[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} creation: ${errors}`,
+        );
         throw new Error(`Business validation failed: ${errors}`);
       }
 
       // Log warnings if any
       if (businessValidation.warnings.length > 0) {
-        this.logger.warn(`[${operationContext.correlationId}] Business validation warnings for ${this.getEntityType()}: ${businessValidation.warnings.join(', ')}`);
+        this.logger.warn(
+          `[${operationContext.correlationId}] Business validation warnings for ${this.getEntityType()}: ${businessValidation.warnings.join(', ')}`,
+        );
       }
 
       // Execute conversational database operation
@@ -206,27 +250,40 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         data,
         {
           ...operationContext,
-          businessPurpose: operationContext.businessPurpose ?? `Create new ${this.getEntityType()}`,
+          businessPurpose:
+            operationContext.businessPurpose ??
+            `Create new ${this.getEntityType()}`,
         },
       );
 
       const transformedEntity = await this.transformEntity(entity, context);
 
-      this.logOperation('create', { entityId: entity.id }, true, operationContext);
+      this.logOperation(
+        'create',
+        { entityId: entity.id },
+        true,
+        operationContext,
+      );
       return transformedEntity;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationContext.correlationId}] Failed to create ${this.getEntityType()} entity: ${errorMessage}`, {
-        data: this.sanitizeLogData(data),
-        error: errorMessage,
-        context: operationContext,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationContext.correlationId}] Failed to create ${this.getEntityType()} entity: ${errorMessage}`,
+        {
+          data: this.sanitizeLogData(data),
+          error: errorMessage,
+          context: operationContext,
+        },
+      );
 
       // Ensure we only throw Error objects
       if (error instanceof Error) {
         throw error;
       } else {
-        throw new Error(`Failed to create ${this.getEntityType()} entity: ${errorMessage}`);
+        throw new Error(
+          `Failed to create ${this.getEntityType()} entity: ${errorMessage}`,
+        );
       }
     }
   }
@@ -241,23 +298,34 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   ): Promise<Optional<T>> {
     const operationContext = this.buildContext('update', context);
 
-    this.logger.debug(`[${operationContext.correlationId}] Updating ${this.getEntityType()} entity: ${id}`, {
-      data: this.sanitizeLogData(data),
-      context: operationContext,
-    });
+    this.logger.debug(
+      `[${operationContext.correlationId}] Updating ${this.getEntityType()} entity: ${id}`,
+      {
+        data: this.sanitizeLogData(data),
+        context: operationContext,
+      },
+    );
 
     try {
       // Validate business rules first
-      const businessValidation = await this.validateBusinessRules('update', data, context);
+      const businessValidation = await this.validateBusinessRules(
+        'update',
+        data,
+        context,
+      );
       if (!businessValidation.valid) {
         const errors = businessValidation.errors.join(', ');
-        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} update: ${errors}`);
+        this.logger.warn(
+          `[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} update: ${errors}`,
+        );
         throw new Error(`Business validation failed: ${errors}`);
       }
 
       // Log warnings if any
       if (businessValidation.warnings.length > 0) {
-        this.logger.warn(`[${operationContext.correlationId}] Business validation warnings for ${this.getEntityType()}: ${businessValidation.warnings.join(', ')}`);
+        this.logger.warn(
+          `[${operationContext.correlationId}] Business validation warnings for ${this.getEntityType()}: ${businessValidation.warnings.join(', ')}`,
+        );
       }
 
       // Execute conversational database operation
@@ -267,26 +335,43 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         data,
         {
           ...operationContext,
-          businessPurpose: operationContext.businessPurpose ?? `Update ${this.getEntityType()} (${id})`,
+          businessPurpose:
+            operationContext.businessPurpose ??
+            `Update ${this.getEntityType()} (${id})`,
         },
       );
 
       if (entity) {
         const transformedEntity = await this.transformEntity(entity, context);
-        this.logOperation('update', { id, changes: Object.keys(data) }, true, operationContext);
+        this.logOperation(
+          'update',
+          { id, changes: Object.keys(data) },
+          true,
+          operationContext,
+        );
         return transformedEntity;
       }
 
-      this.logOperation('update', { id }, false, operationContext, 'Entity not found for update');
+      this.logOperation(
+        'update',
+        { id },
+        false,
+        operationContext,
+        'Entity not found for update',
+      );
       return null;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationContext.correlationId}] Failed to update ${this.getEntityType()} entity: ${errorMessage}`, {
-        id,
-        data: this.sanitizeLogData(data),
-        error: errorMessage,
-        context: operationContext,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationContext.correlationId}] Failed to update ${this.getEntityType()} entity: ${errorMessage}`,
+        {
+          id,
+          data: this.sanitizeLogData(data),
+          error: errorMessage,
+          context: operationContext,
+        },
+      );
       throw error;
     }
   }
@@ -300,17 +385,26 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   ): Promise<boolean> {
     const operationContext = this.buildContext('delete', context);
 
-    this.logger.debug(`[${operationContext.correlationId}] Deleting ${this.getEntityType()} entity: ${id}`, {
-      confirmDeletion: context?.confirmDeletion,
-      context: operationContext,
-    });
+    this.logger.debug(
+      `[${operationContext.correlationId}] Deleting ${this.getEntityType()} entity: ${id}`,
+      {
+        confirmDeletion: context?.confirmDeletion,
+        context: operationContext,
+      },
+    );
 
     try {
       // Additional validation for delete operations
-      const businessValidation = await this.validateBusinessRules('delete', { id } as Partial<T>, context);
+      const businessValidation = await this.validateBusinessRules(
+        'delete',
+        { id } as Partial<T>,
+        context,
+      );
       if (!businessValidation.valid) {
         const errors = businessValidation.errors.join(', ');
-        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} deletion: ${errors}`);
+        this.logger.warn(
+          `[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} deletion: ${errors}`,
+        );
         throw new Error(`Business validation failed: ${errors}`);
       }
 
@@ -320,7 +414,9 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         id,
         {
           ...operationContext,
-          businessPurpose: operationContext.businessPurpose ?? `Delete ${this.getEntityType()} (${id})`,
+          businessPurpose:
+            operationContext.businessPurpose ??
+            `Delete ${this.getEntityType()} (${id})`,
           confirmDeletion: context?.confirmDeletion,
         },
       );
@@ -328,12 +424,16 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
       this.logOperation('delete', { id }, success, operationContext);
       return success;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationContext.correlationId}] Failed to delete ${this.getEntityType()} entity: ${errorMessage}`, {
-        id,
-        error: errorMessage,
-        context: operationContext,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationContext.correlationId}] Failed to delete ${this.getEntityType()} entity: ${errorMessage}`,
+        {
+          id,
+          error: errorMessage,
+          context: operationContext,
+        },
+      );
       throw error;
     }
   }
@@ -347,10 +447,13 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   ): Promise<number> {
     const operationContext = this.buildContext('count', context);
 
-    this.logger.debug(`[${operationContext.correlationId}] Counting ${this.getEntityType()} entities`, {
-      filter: this.sanitizeLogData(filter),
-      context: operationContext,
-    });
+    this.logger.debug(
+      `[${operationContext.correlationId}] Counting ${this.getEntityType()} entities`,
+      {
+        filter: this.sanitizeLogData(filter),
+        context: operationContext,
+      },
+    );
 
     try {
       const count = await this.conversationalDbService.count(
@@ -359,16 +462,25 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         operationContext,
       );
 
-      this.logOperation('count', { filter }, true, operationContext, `Count: ${count}`);
+      this.logOperation(
+        'count',
+        { filter },
+        true,
+        operationContext,
+        `Count: ${count}`,
+      );
       return count;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationContext.correlationId}] Failed to count ${this.getEntityType()} entities: ${errorMessage}`, {
-        filter: this.sanitizeLogData(filter),
-        error: errorMessage,
-        context: operationContext,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationContext.correlationId}] Failed to count ${this.getEntityType()} entities: ${errorMessage}`,
+        {
+          filter: this.sanitizeLogData(filter),
+          error: errorMessage,
+          context: operationContext,
+        },
+      );
       throw error;
     }
   }
@@ -384,18 +496,27 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   ): Promise<T[]> {
     const operationContext = this.buildContext('bulkCreate', context);
 
-    this.logger.debug(`[${operationContext.correlationId}] Bulk creating ${dataArray.length} ${this.getEntityType()} entities`, {
-      count: dataArray.length,
-      context: operationContext,
-    });
+    this.logger.debug(
+      `[${operationContext.correlationId}] Bulk creating ${dataArray.length} ${this.getEntityType()} entities`,
+      {
+        count: dataArray.length,
+        context: operationContext,
+      },
+    );
 
     try {
       // Validate business rules for each entity
       for (let i = 0; i < dataArray.length; i++) {
-        const businessValidation = await this.validateBusinessRules('create', dataArray[i], context);
+        const businessValidation = await this.validateBusinessRules(
+          'create',
+          dataArray[i],
+          context,
+        );
         if (!businessValidation.valid) {
           const errors = businessValidation.errors.join(', ');
-          throw new Error(`Business validation failed for entity ${i + 1}: ${errors}`);
+          throw new Error(
+            `Business validation failed for entity ${i + 1}: ${errors}`,
+          );
         }
       }
 
@@ -405,24 +526,35 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         dataArray,
         {
           ...operationContext,
-          businessPurpose: operationContext.businessPurpose ?? `Bulk create ${dataArray.length} ${this.getEntityType()} entities`,
+          businessPurpose:
+            operationContext.businessPurpose ??
+            `Bulk create ${dataArray.length} ${this.getEntityType()} entities`,
         },
       );
 
       const transformedEntities = await Promise.all(
-        entities.map(entity => this.transformEntity(entity, context))
+        entities.map((entity) => this.transformEntity(entity, context)),
       );
 
-      this.logOperation('bulkCreate', { count: dataArray.length }, true, operationContext, `Created ${entities.length} entities`);
+      this.logOperation(
+        'bulkCreate',
+        { count: dataArray.length },
+        true,
+        operationContext,
+        `Created ${entities.length} entities`,
+      );
       return transformedEntities;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationContext.correlationId}] Failed to bulk create ${this.getEntityType()} entities: ${errorMessage}`, {
-        count: dataArray.length,
-        error: errorMessage,
-        context: operationContext,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationContext.correlationId}] Failed to bulk create ${this.getEntityType()} entities: ${errorMessage}`,
+        {
+          count: dataArray.length,
+          error: errorMessage,
+          context: operationContext,
+        },
+      );
       throw error;
     }
   }
@@ -436,18 +568,27 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   ): Promise<number> {
     const operationContext = this.buildContext('bulkDelete', context);
 
-    this.logger.debug(`[${operationContext.correlationId}] Bulk deleting ${this.getEntityType()} entities`, {
-      filter: this.sanitizeLogData(filter),
-      confirmBulkDeletion: context?.confirmBulkDeletion,
-      context: operationContext,
-    });
+    this.logger.debug(
+      `[${operationContext.correlationId}] Bulk deleting ${this.getEntityType()} entities`,
+      {
+        filter: this.sanitizeLogData(filter),
+        confirmBulkDeletion: context?.confirmBulkDeletion,
+        context: operationContext,
+      },
+    );
 
     try {
       // Additional validation for bulk delete operations
-      const businessValidation = await this.validateBusinessRules('bulkDelete', filter, context);
+      const businessValidation = await this.validateBusinessRules(
+        'bulkDelete',
+        filter,
+        context,
+      );
       if (!businessValidation.valid) {
         const errors = businessValidation.errors.join(', ');
-        this.logger.warn(`[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} bulk deletion: ${errors}`);
+        this.logger.warn(
+          `[${operationContext.correlationId}] Business validation failed for ${this.getEntityType()} bulk deletion: ${errors}`,
+        );
         throw new Error(`Business validation failed: ${errors}`);
       }
 
@@ -457,21 +598,32 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         filter,
         {
           ...operationContext,
-          businessPurpose: operationContext.businessPurpose ?? `Bulk delete ${this.getEntityType()} entities`,
+          businessPurpose:
+            operationContext.businessPurpose ??
+            `Bulk delete ${this.getEntityType()} entities`,
           confirmBulkDeletion: context?.confirmBulkDeletion,
         },
       );
 
-      this.logOperation('bulkDelete', { filter, deletedCount }, true, operationContext, `Deleted ${deletedCount} entities`);
+      this.logOperation(
+        'bulkDelete',
+        { filter, deletedCount },
+        true,
+        operationContext,
+        `Deleted ${deletedCount} entities`,
+      );
       return deletedCount;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationContext.correlationId}] Failed to bulk delete ${this.getEntityType()} entities: ${errorMessage}`, {
-        filter: this.sanitizeLogData(filter),
-        error: errorMessage,
-        context: operationContext,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationContext.correlationId}] Failed to bulk delete ${this.getEntityType()} entities: ${errorMessage}`,
+        {
+          filter: this.sanitizeLogData(filter),
+          error: errorMessage,
+          context: operationContext,
+        },
+      );
       throw error;
     }
   }
@@ -490,7 +642,9 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
       userRole: context?.userRole ?? 'service',
       businessPurpose: context?.businessPurpose,
       sessionId: context?.sessionId,
-      correlationId: context?.correlationId ?? `${operation}_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      correlationId:
+        context?.correlationId ??
+        `${operation}_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       metadata: context?.metadata ?? {},
     };
   }
@@ -517,9 +671,15 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
     };
 
     if (success) {
-      this.logger.debug(`[${context.correlationId}] ${this.getEntityType()} ${operation} completed`, logData);
+      this.logger.debug(
+        `[${context.correlationId}] ${this.getEntityType()} ${operation} completed`,
+        logData,
+      );
     } else {
-      this.logger.warn(`[${context.correlationId}] ${this.getEntityType()} ${operation} failed`, logData);
+      this.logger.warn(
+        `[${context.correlationId}] ${this.getEntityType()} ${operation} failed`,
+        logData,
+      );
     }
   }
 
@@ -532,10 +692,10 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
     }
 
     const sensitiveFields = ['password', 'token', 'secret', 'key', 'hash'];
-    const sanitized = { ...data as StrictRecord<unknown> };
+    const sanitized = { ...(data as StrictRecord<unknown>) };
 
-    Object.keys(sanitized).forEach(key => {
-      if (sensitiveFields.some(field => key.toLowerCase().includes(field))) {
+    Object.keys(sanitized).forEach((key) => {
+      if (sensitiveFields.some((field) => key.toLowerCase().includes(field))) {
         sanitized[key] = '[REDACTED]';
       }
     });
@@ -555,12 +715,18 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
   /**
    * Check if entity exists
    */
-  async exists(id: string, context?: RepositoryOperationContext): Promise<boolean> {
+  async exists(
+    id: string,
+    context?: RepositoryOperationContext,
+  ): Promise<boolean> {
     try {
       const entity = await this.findById(id, context);
       return entity !== null;
     } catch (error) {
-      this.logger.error(`Failed to check existence of ${this.getEntityType()} ${id}`, { error });
+      this.logger.error(
+        `Failed to check existence of ${this.getEntityType()} ${id}`,
+        { error },
+      );
       return false;
     }
   }

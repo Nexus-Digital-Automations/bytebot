@@ -77,62 +77,101 @@ export class BrowserRateLimitingService {
   constructor(private readonly configService: ConfigService) {
     // Initialize default rate limit configurations for each operation type
     this.defaultConfigs = new Map([
-      [BrowserOperationType.NAVIGATION, {
-        windowMs: 60000, // 1 minute
-        maxRequests: 10,
-        skipSuccessfulRequests: false,
-        skipFailedRequests: true,
-      }],
-      [BrowserOperationType.INTERACTION, {
-        windowMs: 60000, // 1 minute
-        maxRequests: 30,
-        skipSuccessfulRequests: false,
-        skipFailedRequests: true,
-      }],
-      [BrowserOperationType.EXTRACTION, {
-        windowMs: 60000, // 1 minute
-        maxRequests: 5,
-        skipSuccessfulRequests: false,
-        skipFailedRequests: false,
-      }],
-      [BrowserOperationType.SCREENSHOT, {
-        windowMs: 60000, // 1 minute
-        maxRequests: 20,
-        skipSuccessfulRequests: false,
-        skipFailedRequests: true,
-      }],
-      [BrowserOperationType.SCRIPT_EXECUTION, {
-        windowMs: 60000, // 1 minute
-        maxRequests: 2,
-        skipSuccessfulRequests: false,
-        skipFailedRequests: false,
-      }],
-      [BrowserOperationType.SESSION_MANAGEMENT, {
-        windowMs: 60000, // 1 minute
-        maxRequests: 5,
-        skipSuccessfulRequests: false,
-        skipFailedRequests: false,
-      }],
-      [BrowserOperationType.UPLOAD, {
-        windowMs: 60000, // 1 minute
-        maxRequests: 3,
-        skipSuccessfulRequests: false,
-        skipFailedRequests: true,
-      }],
+      [
+        BrowserOperationType.NAVIGATION,
+        {
+          windowMs: 60000, // 1 minute
+          maxRequests: 10,
+          skipSuccessfulRequests: false,
+          skipFailedRequests: true,
+        },
+      ],
+      [
+        BrowserOperationType.INTERACTION,
+        {
+          windowMs: 60000, // 1 minute
+          maxRequests: 30,
+          skipSuccessfulRequests: false,
+          skipFailedRequests: true,
+        },
+      ],
+      [
+        BrowserOperationType.EXTRACTION,
+        {
+          windowMs: 60000, // 1 minute
+          maxRequests: 5,
+          skipSuccessfulRequests: false,
+          skipFailedRequests: false,
+        },
+      ],
+      [
+        BrowserOperationType.SCREENSHOT,
+        {
+          windowMs: 60000, // 1 minute
+          maxRequests: 20,
+          skipSuccessfulRequests: false,
+          skipFailedRequests: true,
+        },
+      ],
+      [
+        BrowserOperationType.SCRIPT_EXECUTION,
+        {
+          windowMs: 60000, // 1 minute
+          maxRequests: 2,
+          skipSuccessfulRequests: false,
+          skipFailedRequests: false,
+        },
+      ],
+      [
+        BrowserOperationType.SESSION_MANAGEMENT,
+        {
+          windowMs: 60000, // 1 minute
+          maxRequests: 5,
+          skipSuccessfulRequests: false,
+          skipFailedRequests: false,
+        },
+      ],
+      [
+        BrowserOperationType.UPLOAD,
+        {
+          windowMs: 60000, // 1 minute
+          maxRequests: 3,
+          skipSuccessfulRequests: false,
+          skipFailedRequests: true,
+        },
+      ],
     ]);
 
     // Global rate limiting configuration
     this.globalConfig = {
-      windowMs: this.configService.get<number>('BROWSER_RATE_LIMIT_WINDOW', 60000),
-      maxRequests: this.configService.get<number>('BROWSER_RATE_LIMIT_MAX', 100),
+      windowMs: this.configService.get<number>(
+        'BROWSER_RATE_LIMIT_WINDOW',
+        60000,
+      ),
+      maxRequests: this.configService.get<number>(
+        'BROWSER_RATE_LIMIT_MAX',
+        100,
+      ),
     };
 
     // Dynamic rate adjustment configuration
     this.dynamicConfig = {
-      cpuThreshold: this.configService.get<number>('BROWSER_RATE_CPU_THRESHOLD', 80),
-      memoryThreshold: this.configService.get<number>('BROWSER_RATE_MEMORY_THRESHOLD', 85),
-      activeSessionsThreshold: this.configService.get<number>('BROWSER_RATE_SESSIONS_THRESHOLD', 50),
-      adjustmentFactor: this.configService.get<number>('BROWSER_RATE_ADJUSTMENT_FACTOR', 0.5),
+      cpuThreshold: this.configService.get<number>(
+        'BROWSER_RATE_CPU_THRESHOLD',
+        80,
+      ),
+      memoryThreshold: this.configService.get<number>(
+        'BROWSER_RATE_MEMORY_THRESHOLD',
+        85,
+      ),
+      activeSessionsThreshold: this.configService.get<number>(
+        'BROWSER_RATE_SESSIONS_THRESHOLD',
+        50,
+      ),
+      adjustmentFactor: this.configService.get<number>(
+        'BROWSER_RATE_ADJUSTMENT_FACTOR',
+        0.5,
+      ),
     };
 
     this.logger.log('Browser Rate Limiting Service initialized');
@@ -150,14 +189,18 @@ export class BrowserRateLimitingService {
     userId: string,
     operationType: BrowserOperationType,
     sessionId?: string,
-    customConfig?: Partial<RateLimitConfig>
+    customConfig?: Partial<RateLimitConfig>,
   ): Promise<RateLimitInfo> {
     // Get configuration for this operation type
-    const baseConfig = this.defaultConfigs.get(operationType) || this.globalConfig;
+    const baseConfig =
+      this.defaultConfigs.get(operationType) || this.globalConfig;
     const config = { ...baseConfig, ...customConfig };
 
     // Apply dynamic rate adjustments
-    const adjustedConfig = await this.applyDynamicAdjustments(config, operationType);
+    const adjustedConfig = await this.applyDynamicAdjustments(
+      config,
+      operationType,
+    );
 
     // Generate rate limit key
     const key = this.generateRateLimitKey(userId, operationType, sessionId);
@@ -199,7 +242,7 @@ export class BrowserRateLimitingService {
 
         this.logger.warn(
           `Rate limit violations threshold reached for ${key}. ` +
-          `Blocking for ${blockDuration}ms (violation #${entry.violations})`
+            `Blocking for ${blockDuration}ms (violation #${entry.violations})`,
         );
       }
 
@@ -248,7 +291,7 @@ export class BrowserRateLimitingService {
   recordSuccessfulRequest(
     userId: string,
     operationType: BrowserOperationType,
-    sessionId?: string
+    sessionId?: string,
   ): void {
     const config = this.defaultConfigs.get(operationType);
 
@@ -269,7 +312,7 @@ export class BrowserRateLimitingService {
   recordFailedRequest(
     userId: string,
     operationType: BrowserOperationType,
-    sessionId?: string
+    sessionId?: string,
   ): void {
     const config = this.defaultConfigs.get(operationType);
 
@@ -290,7 +333,7 @@ export class BrowserRateLimitingService {
   getRateLimitStatus(
     userId: string,
     operationType: BrowserOperationType,
-    sessionId?: string
+    sessionId?: string,
   ): RateLimitInfo | null {
     const key = this.generateRateLimitKey(userId, operationType, sessionId);
     const entry = this.rateLimitStore.get(key);
@@ -301,7 +344,9 @@ export class BrowserRateLimitingService {
     }
 
     const now = Date.now();
-    const isBlocked = entry.blockedUntil ? now < entry.blockedUntil : entry.count >= config.maxRequests;
+    const isBlocked = entry.blockedUntil
+      ? now < entry.blockedUntil
+      : entry.count >= config.maxRequests;
 
     return {
       key,
@@ -321,7 +366,7 @@ export class BrowserRateLimitingService {
   resetRateLimit(
     userId: string,
     operationType?: BrowserOperationType,
-    sessionId?: string
+    sessionId?: string,
   ): void {
     if (operationType) {
       const key = this.generateRateLimitKey(userId, operationType, sessionId);
@@ -346,12 +391,19 @@ export class BrowserRateLimitingService {
     totalEntries: number;
     blockedEntries: number;
     topViolators: Array<{ key: string; violations: number; count: number }>;
-    operationStats: Map<BrowserOperationType, { total: number; blocked: number }>;
+    operationStats: Map<
+      BrowserOperationType,
+      { total: number; blocked: number }
+    >;
   } {
     const now = Date.now();
     let blockedEntries = 0;
-    const violators: Array<{ key: string; violations: number; count: number }> = [];
-    const operationStats = new Map<BrowserOperationType, { total: number; blocked: number }>();
+    const violators: Array<{ key: string; violations: number; count: number }> =
+      [];
+    const operationStats = new Map<
+      BrowserOperationType,
+      { total: number; blocked: number }
+    >();
 
     for (const [key, entry] of this.rateLimitStore) {
       const isBlocked = entry.blockedUntil ? now < entry.blockedUntil : false;
@@ -361,13 +413,20 @@ export class BrowserRateLimitingService {
       }
 
       if (entry.violations > 0) {
-        violators.push({ key, violations: entry.violations, count: entry.count });
+        violators.push({
+          key,
+          violations: entry.violations,
+          count: entry.count,
+        });
       }
 
       // Extract operation type from key
       const operationType = this.extractOperationTypeFromKey(key);
       if (operationType) {
-        const stats = operationStats.get(operationType) || { total: 0, blocked: 0 };
+        const stats = operationStats.get(operationType) || {
+          total: 0,
+          blocked: 0,
+        };
         stats.total++;
         if (isBlocked) stats.blocked++;
         operationStats.set(operationType, stats);
@@ -390,7 +449,7 @@ export class BrowserRateLimitingService {
    */
   private async applyDynamicAdjustments(
     config: RateLimitConfig,
-    operationType: BrowserOperationType
+    operationType: BrowserOperationType,
   ): Promise<RateLimitConfig> {
     try {
       // Get system metrics (placeholder implementation)
@@ -401,32 +460,46 @@ export class BrowserRateLimitingService {
       // Check CPU usage
       if (systemMetrics.cpuUsage > this.dynamicConfig.cpuThreshold) {
         adjustmentFactor *= this.dynamicConfig.adjustmentFactor;
-        this.logger.debug(`Reducing rate limits due to high CPU usage: ${systemMetrics.cpuUsage}%`);
+        this.logger.debug(
+          `Reducing rate limits due to high CPU usage: ${systemMetrics.cpuUsage}%`,
+        );
       }
 
       // Check memory usage
       if (systemMetrics.memoryUsage > this.dynamicConfig.memoryThreshold) {
         adjustmentFactor *= this.dynamicConfig.adjustmentFactor;
-        this.logger.debug(`Reducing rate limits due to high memory usage: ${systemMetrics.memoryUsage}%`);
+        this.logger.debug(
+          `Reducing rate limits due to high memory usage: ${systemMetrics.memoryUsage}%`,
+        );
       }
 
       // Check active sessions
-      if (systemMetrics.activeSessions > this.dynamicConfig.activeSessionsThreshold) {
+      if (
+        systemMetrics.activeSessions >
+        this.dynamicConfig.activeSessionsThreshold
+      ) {
         adjustmentFactor *= this.dynamicConfig.adjustmentFactor;
-        this.logger.debug(`Reducing rate limits due to high session count: ${systemMetrics.activeSessions}`);
+        this.logger.debug(
+          `Reducing rate limits due to high session count: ${systemMetrics.activeSessions}`,
+        );
       }
 
       // Apply adjustments
       if (adjustmentFactor < 1.0) {
         return {
           ...config,
-          maxRequests: Math.max(1, Math.floor(config.maxRequests * adjustmentFactor)),
+          maxRequests: Math.max(
+            1,
+            Math.floor(config.maxRequests * adjustmentFactor),
+          ),
         };
       }
 
       return config;
     } catch (error) {
-      this.logger.error(`Failed to apply dynamic rate adjustments: ${error.message}`);
+      this.logger.error(
+        `Failed to apply dynamic rate adjustments: ${error.message}`,
+      );
       return config;
     }
   }
@@ -453,7 +526,7 @@ export class BrowserRateLimitingService {
   private generateRateLimitKey(
     userId: string,
     operationType: BrowserOperationType,
-    sessionId?: string
+    sessionId?: string,
   ): string {
     if (sessionId) {
       return `user:${userId}:session:${sessionId}:operation:${operationType}`;
@@ -464,7 +537,9 @@ export class BrowserRateLimitingService {
   /**
    * Extract operation type from rate limit key
    */
-  private extractOperationTypeFromKey(key: string): BrowserOperationType | null {
+  private extractOperationTypeFromKey(
+    key: string,
+  ): BrowserOperationType | null {
     const match = key.match(/operation:(\w+)$/);
     return match ? (match[1] as BrowserOperationType) : null;
   }
@@ -495,13 +570,16 @@ export class BrowserRateLimitingService {
   /**
    * Log rate limit violation
    */
-  private logRateLimitViolation(info: RateLimitInfo, config: RateLimitConfig): void {
+  private logRateLimitViolation(
+    info: RateLimitInfo,
+    config: RateLimitConfig,
+  ): void {
     this.logger.warn(
       `Rate limit exceeded for ${info.key} - ` +
-      `Operation: ${info.operationType}, ` +
-      `Requests: ${info.totalRequests}/${config.maxRequests}, ` +
-      `Window: ${config.windowMs}ms, ` +
-      `Reset: ${info.resetTime.toISOString()}`
+        `Operation: ${info.operationType}, ` +
+        `Requests: ${info.totalRequests}/${config.maxRequests}, ` +
+        `Window: ${config.windowMs}ms, ` +
+        `Reset: ${info.resetTime.toISOString()}`,
     );
   }
 
@@ -523,14 +601,19 @@ export class BrowserRateLimitingService {
 
     for (const [key, entry] of this.rateLimitStore) {
       // Remove entries that have been expired for more than 1 hour
-      if (entry.resetTime < now - 3600000 && (!entry.blockedUntil || entry.blockedUntil < now)) {
+      if (
+        entry.resetTime < now - 3600000 &&
+        (!entry.blockedUntil || entry.blockedUntil < now)
+      ) {
         this.rateLimitStore.delete(key);
         cleanedCount++;
       }
     }
 
     if (cleanedCount > 0) {
-      this.logger.debug(`Cleaned up ${cleanedCount} expired rate limit entries`);
+      this.logger.debug(
+        `Cleaned up ${cleanedCount} expired rate limit entries`,
+      );
     }
   }
 
@@ -539,14 +622,15 @@ export class BrowserRateLimitingService {
    */
   updateOperationConfig(
     operationType: BrowserOperationType,
-    config: Partial<RateLimitConfig>
+    config: Partial<RateLimitConfig>,
   ): void {
-    const currentConfig = this.defaultConfigs.get(operationType) || this.globalConfig;
+    const currentConfig =
+      this.defaultConfigs.get(operationType) || this.globalConfig;
     const newConfig = { ...currentConfig, ...config };
     this.defaultConfigs.set(operationType, newConfig);
 
     this.logger.log(
-      `Updated rate limit configuration for ${operationType}: ${JSON.stringify(newConfig)}`
+      `Updated rate limit configuration for ${operationType}: ${JSON.stringify(newConfig)}`,
     );
   }
 

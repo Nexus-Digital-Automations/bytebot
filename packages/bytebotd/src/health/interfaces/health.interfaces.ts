@@ -12,7 +12,9 @@
  * Basic health response interface
  */
 export interface BasicHealthResponse {
-  status: 'healthy' | 'unhealthy';timestamp: string;uptime: number;
+  status: 'healthy' | 'unhealthy';
+  timestamp: string;
+  uptime: number;
   memory: {
     used: number;
     free: number;
@@ -24,7 +26,9 @@ export interface BasicHealthResponse {
  * Detailed status response interface
  */
 export interface DetailedStatusResponse {
-  status: 'healthy' | 'degraded' | 'unhealthy';timestamp: string;uptime: number;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  timestamp: string;
+  uptime: number;
   memory: {
     used: number;
     free: number;
@@ -33,7 +37,11 @@ export interface DetailedStatusResponse {
     heapTotal: number;
   };
   services: {
-    database: 'connected' | 'disconnected' | 'unknown';cache: 'available' | 'unavailable' | 'unknown';external: 'reachable' | 'unreachable' | 'unknown';};performance: {
+    database: 'connected' | 'disconnected' | 'unknown';
+    cache: 'available' | 'unavailable' | 'unknown';
+    external: 'reachable' | 'unreachable' | 'unknown';
+  };
+  performance: {
     requestsPerSecond: number;
     averageResponseTime: number;
   };
@@ -83,7 +91,9 @@ export interface PerformanceMetrics {
  * Service status map interface
  */
 export interface ServiceStatusMap {
-  database: 'connected' | 'disconnected' | 'unknown';cache: 'available' | 'unavailable' | 'unknown';external: 'reachable' | 'unreachable' | 'unknown';
+  database: 'connected' | 'disconnected' | 'unknown';
+  cache: 'available' | 'unavailable' | 'unknown';
+  external: 'reachable' | 'unreachable' | 'unknown';
 }
 
 /**

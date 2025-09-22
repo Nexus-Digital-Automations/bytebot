@@ -20,7 +20,13 @@
  * @version 2.0.0
  */
 
-import { Module, Logger } from '@nestjs/common';import { TerminusModule } from '@nestjs/terminus';import { HttpModule } from '@nestjs/axios';import { HealthController } from './health.controller';import { HealthService } from './health.service';import { ParlantModule } from '../parlant/parlant.module';import { MetricsModule } from '../metrics/metrics.module';/*** Enterprise health monitoring module providing Kubernetes observability
+import { Module, Logger } from '@nestjs/common';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
+import { HealthController } from './health.controller';
+import { HealthService } from './health.service';
+import { ParlantModule } from '../parlant/parlant.module';
+import { MetricsModule } from '../metrics/metrics.module'; /*** Enterprise health monitoring module providing Kubernetes observability
  */
 @Module({
   imports: [
@@ -38,9 +44,15 @@ export class HealthModule {
 
   constructor() {
     this.logger.log(
-      'Enterprise Health Module initialized - Kubernetes monitoring and Prometheus metrics enabled',);this.logger.log(
-      'Available endpoints: GET /health, GET /health/live, GET /health/ready, GET /health/startup, GET /health/status, GET /health/metrics',);this.logger.log(
-      'Kubernetes probes: liveness (/health/live), readiness (/health/ready), startup (/health/startup)',);this.logger.log(
+      'Enterprise Health Module initialized - Kubernetes monitoring and Prometheus metrics enabled',
+    );
+    this.logger.log(
+      'Available endpoints: GET /health, GET /health/live, GET /health/ready, GET /health/startup, GET /health/status, GET /health/metrics',
+    );
+    this.logger.log(
+      'Kubernetes probes: liveness (/health/live), readiness (/health/ready), startup (/health/startup)',
+    );
+    this.logger.log(
       'Prometheus metrics: /health/metrics - exposing health and performance metrics for local monitoring',
     );
   }

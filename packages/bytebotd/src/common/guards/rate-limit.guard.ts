@@ -21,7 +21,6 @@ import {
   Logger,
   SetMetadata,
   Inject,
-
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import {
@@ -29,7 +28,6 @@ import {
   ThrottlerException,
   ThrottlerModuleOptions,
   ThrottlerStorage,
-
 } from '@nestjs/throttler';
 import { Request } from 'express';
 
@@ -48,8 +46,6 @@ interface RateLimitConfig {
 
   /** Custom error message */
   message?: string;
-
-
 }
 
 /**
@@ -58,41 +54,40 @@ interface RateLimitConfig {
 const RATE_LIMIT_CONFIGS: Record<string, RateLimitConfig | undefined> = {
   // Computer control operations - moderate limits,
   computer_use: {
-  limit: 120,
+    limit: 120,
     windowSeconds: 60,
     tier: 'moderate',
-      message: 'Computer control rate limit exceeded. Please slow down.',
-},// Authentication endpoints - strict limits
+    message: 'Computer control rate limit exceeded. Please slow down.',
+  }, // Authentication endpoints - strict limits
   auth: {
-  limit: 10,
+    limit: 10,
     windowSeconds: 60,
     tier: 'strict',
-      message: 'Authentication rate limit exceeded. Try again later.',
-},// Screenshot/vision operations - moderate limits (resource intensive)
+    message: 'Authentication rate limit exceeded. Try again later.',
+  }, // Screenshot/vision operations - moderate limits (resource intensive)
   vision: {
-  limit: 30,
+    limit: 30,
     windowSeconds: 60,
     tier: 'moderate',
-      message: 'Vision processing rate limit exceeded.',
-},// File operations - strict limits (potential for abuse)
+    message: 'Vision processing rate limit exceeded.',
+  }, // File operations - strict limits (potential for abuse)
   file_operations: {
-  limit: 20,
+    limit: 20,
     windowSeconds: 60,
     tier: 'strict',
-      message: 'File operation rate limit exceeded.',
-},// General API operations - lenient limits
+    message: 'File operation rate limit exceeded.',
+  }, // General API operations - lenient limits
   general: {
-  limit: 200,
+    limit: 200,
     windowSeconds: 60,
     tier: 'lenient',
-      message: 'API rate limit exceeded. Please reduce request frequency.',
-},};
+    message: 'API rate limit exceeded. Please reduce request frequency.',
+  },
+};
 
 /**
  * Metadata key for rate limit configuration
- */;
-
-export const RATE_LIMIT_KEY = 'rate-limit';
+ */ export const RATE_LIMIT_KEY = 'rate-limit';
 
 /**
  * Decorator to set custom rate limits for specific endpoints
@@ -102,10 +97,9 @@ export const RateLimit = (
   config: Partial<RateLimitConfig> & { type: string },
 ) =>
   SetMetadata(RATE_LIMIT_KEY, {
-  ...RATE_LIMIT_CONFIGS.general,
+    ...RATE_LIMIT_CONFIGS.general,
     ...config,
-  
-});
+  });
 
 @Injectable()
 export class EnterpriseRateLimitGuard
@@ -125,20 +119,20 @@ export class EnterpriseRateLimitGuard
   >();
 
   constructor(
-    @Inject('THROTTLER:MODULE_OPTIONS')options: ThrottlerModuleOptions,@Inject('THROTTLER_STORAGE')
+    @Inject('THROTTLER:MODULE_OPTIONS') options: ThrottlerModuleOptions,
+    @Inject('THROTTLER_STORAGE')
     storageService: ThrottlerStorage,
     protected reflector: Reflector,
   ) {
-  super(options, storageService, reflector);
-  
-}
+    super(options, storageService, reflector);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const operationId = `rate-limit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     try {
-  // Get rate limit configuration for this endpoint
+      // Get rate limit configuration for this endpoint
       const rateLimitConfig = this.getRateLimitConfig(context);
       const clientIdentifier = this.getClientIdentifier(request);
 
@@ -150,8 +144,7 @@ export class EnterpriseRateLimitGuard
         rateLimitTier: rateLimitConfig.tier,
         limit: rateLimitConfig.limit,
         windowSeconds: rateLimitConfig.windowSeconds,
-      
-});
+      });
 
       // Check if client is temporarily blocked for suspicious activity
       if (this.isClientBlocked(clientIdentifier)) {
@@ -162,8 +155,7 @@ export class EnterpriseRateLimitGuard
             clientIdentifier,
             endpoint: request.path,
             blocked: true,
-          
-},
+          },
         );
 
         throw new ThrottlerException(
@@ -181,8 +173,7 @@ export class EnterpriseRateLimitGuard
           endpoint: request.path,
           allowed: true,
           rateLimitTier: rateLimitConfig.tier,
-        
-});
+        });
 
         // Reset suspicious activity counter on successful request
         this.resetSuspiciousActivity(clientIdentifier);
@@ -195,7 +186,9 @@ export class EnterpriseRateLimitGuard
     } catch (_error) {
       if (
         _error instanceof ThrottlerException ||
-        (typeof _error === 'object' && _error !== null && 'status' in _error &&
+        (typeof _error === 'object' &&
+          _error !== null &&
+          'status' in _error &&
           _error.status === HttpStatus.TOO_MANY_REQUESTS)
       ) {
         const clientIdentifier = this.getClientIdentifier(request);
@@ -238,50 +231,52 @@ export class EnterpriseRateLimitGuard
    * Get rate limit configuration for the current endpoint
    */
   private getRateLimitConfig(context: ExecutionContext): RateLimitConfig {
-  // Try to get custom rate limit from decorator first
+    // Try to get custom rate limit from decorator first
     const customConfig = this.reflector.getAllAndOverride<
-      RateLimitConfig & { type: string 
-}
+      RateLimitConfig & { type: string }
     >(RATE_LIMIT_KEY, [context.getHandler(), context.getClass()]);
 
     if (customConfig) {
-  return customConfig;
-    
-}
+      return customConfig;
+    }
 
     // Determine rate limit type based on endpoint path
     const request = context.switchToHttp().getRequest<Request>();
     const path = request.path.toLowerCase();
 
     if (path.includes('computer-use')) {
-  return (RATE_LIMIT_CONFIGS.computer_use ??
+      return (
+        RATE_LIMIT_CONFIGS.computer_use ??
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
-    
-} else if (path.includes('auth') || path.includes('login')) {
-  return (RATE_LIMIT_CONFIGS.auth ??
+    } else if (path.includes('auth') || path.includes('login')) {
+      return (
+        RATE_LIMIT_CONFIGS.auth ??
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
-    
-} else if (
-      path.includes('screenshot') ||path.includes('vision') ||path.includes('ocr')) {
-  return (
+    } else if (
+      path.includes('screenshot') ||
+      path.includes('vision') ||
+      path.includes('ocr')
+    ) {
+      return (
         RATE_LIMIT_CONFIGS.vision ??
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
-    
-} else if (
-      path.includes('file') ||path.includes('read') ||path.includes('write')) {
-  return (
+    } else if (
+      path.includes('file') ||
+      path.includes('read') ||
+      path.includes('write')
+    ) {
+      return (
         RATE_LIMIT_CONFIGS.file_operations ??
         RATE_LIMIT_CONFIGS.general ??
         this.getDefaultConfig()
       );
-    
-}
+    }
 
     // Default to general rate limiting
     return RATE_LIMIT_CONFIGS.general ?? this.getDefaultConfig();
@@ -303,25 +298,30 @@ export class EnterpriseRateLimitGuard
    * Generate client identifier for rate limiting
    */
   private getClientIdentifier(request: Request): string {
-  // Use combination of IP and User-Agent for better identification
+    // Use combination of IP and User-Agent for better identification
     const ip =
       request.ip ??
       request.connection.remoteAddress ??
       request.socket.remoteAddress ??
-      (request.headers['x-forwarded-for'] as string | undefined)?.split(',')[0] ??'unknown';
-const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unknown';
+      (request.headers['x-forwarded-for'] as string | undefined)?.split(
+        ',',
+      )[0] ??
+      'unknown';
+    const userAgent =
+      (request.headers['user-agent'] as string | undefined) ?? 'unknown';
 
     // Create hash-like identifier without actually hashing (for performance)
-    return `${ip
-}:${userAgent.substring(0, 50)}`.replace(
+    return `${ip}:${userAgent.substring(0, 50)}`.replace(
       /[^a-zA-Z0-9:.-]/g,
-      '',);}
+      '',
+    );
+  }
 
   /**
    * Track suspicious activity for potential threats
    */
   private trackSuspiciousActivity(clientIdentifier: string): void {
-  const now = new Date();
+    const now = new Date();
     const existingEntry = this.suspiciousActivityTracker.get(clientIdentifier);
 
     if (existingEntry) {
@@ -334,21 +334,21 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
         existingEntry.blocked = true;
 
         this.logger.error(
-          'Client blocked for suspicious rate limit violations',{clientIdentifier,
+          'Client blocked for suspicious rate limit violations',
+          {
+            clientIdentifier,
             violations: existingEntry.violations,
             timePeriodMs: timeDiff,
             blocked: true,
-          
-},
+          },
         );
       }
     } else {
-  this.suspiciousActivityTracker.set(clientIdentifier, {
-  violations: 1,
+      this.suspiciousActivityTracker.set(clientIdentifier, {
+        violations: 1,
         firstViolation: now,
         blocked: false,
-      
-});
+      });
     }
 
     // Clean up old entries (keep only last hour)
@@ -359,7 +359,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
    * Check if client is currently blocked
    */
   private isClientBlocked(clientIdentifier: string): boolean {
-  const entry = this.suspiciousActivityTracker.get(clientIdentifier);
+    const entry = this.suspiciousActivityTracker.get(clientIdentifier);
 
     if (!entry) return false;
 
@@ -370,8 +370,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
     if (timeSinceFirstViolation > blockDuration) {
       this.suspiciousActivityTracker.delete(clientIdentifier);
       return false;
-    
-}
+    }
 
     return entry.blocked;
   }
@@ -380,7 +379,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
    * Reset suspicious activity tracking for client
    */
   private resetSuspiciousActivity(clientIdentifier: string): void {
-  const entry = this.suspiciousActivityTracker.get(clientIdentifier);
+    const entry = this.suspiciousActivityTracker.get(clientIdentifier);
 
     if (entry && entry.violations > 0) {
       // Reset violations but keep the entry for tracking
@@ -393,7 +392,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
    * Clean up old suspicious activity entries
    */
   private cleanupSuspiciousActivityTracker(): void {
-  const now = Date.now();
+    const now = Date.now();
     const maxAge = 60 * 60 * 1000; // 1 hour
 
     for (const [clientId, entry] of Array.from(
@@ -401,8 +400,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
     )) {
       if (now - entry.firstViolation.getTime() > maxAge) {
         this.suspiciousActivityTracker.delete(clientId);
-      
-}
+      }
     }
   }
 
@@ -410,7 +408,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
    * Get current suspicious activity statistics (for monitoring)
    */
   getSuspiciousActivityStats(): {
-  totalTracked: number;
+    totalTracked: number;
     currentlyBlocked: number;
     topViolators: Array<{
       client: string;
@@ -418,7 +416,7 @@ const userAgent = (request.headers['user-agent'] as string | undefined) ?? 'unkn
       blocked: boolean;
     }>;
   } {
-  const blocked = Array.from(this.suspiciousActivityTracker.entries()).filter(
+    const blocked = Array.from(this.suspiciousActivityTracker.entries()).filter(
       ([, entry]) => entry.blocked,
     ).length;
 

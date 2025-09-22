@@ -27,7 +27,7 @@ import {
   SecurityTestType,
   SecurityTestStatus,
   SecurityRiskLevel,
-  SecurityTestUtils
+  SecurityTestUtils,
 } from '../framework/security-test-framework';
 
 // ===== RBAC TESTING INTERFACES =====
@@ -53,7 +53,7 @@ enum SecurityClearanceLevel {
   INTERNAL = 'INTERNAL',
   CONFIDENTIAL = 'CONFIDENTIAL',
   SECRET = 'SECRET',
-  CLASSIFIED = 'CLASSIFIED'
+  CLASSIFIED = 'CLASSIFIED',
 }
 
 interface PermissionTest {
@@ -68,7 +68,7 @@ interface PermissionTest {
 // ===== UTILITY FUNCTIONS =====
 
 function createTestUserWithRole(roleId: string): TestUser {
-  const role = testRoles.find(r => r.id === roleId);
+  const role = testRoles.find((r) => r.id === roleId);
   if (!role) {
     throw new Error(`Test role ${roleId} not found`);
   }
@@ -78,11 +78,13 @@ function createTestUserWithRole(roleId: string): TestUser {
     username: `testuser_${roleId}_${SecurityTestUtils.generateRandomData(4)}`,
     roles: [roleId],
     permissions: role.permissions,
-    securityClearance: getDefaultSecurityClearance(roleId)
+    securityClearance: getDefaultSecurityClearance(roleId),
   };
 }
 
-function createTestUserWithSecurityClearance(clearance: SecurityClearanceLevel): TestUser {
+function createTestUserWithSecurityClearance(
+  clearance: SecurityClearanceLevel,
+): TestUser {
   const roleId = getRoleForSecurityClearance(clearance);
   const user = createTestUserWithRole(roleId);
   user.securityClearance = clearance;
@@ -91,35 +93,40 @@ function createTestUserWithSecurityClearance(clearance: SecurityClearanceLevel):
 
 function getDefaultSecurityClearance(roleId: string): SecurityClearanceLevel {
   const clearanceMap: Record<string, SecurityClearanceLevel> = {
-    'guest': SecurityClearanceLevel.PUBLIC,
-    'user': SecurityClearanceLevel.INTERNAL,
-    'moderator': SecurityClearanceLevel.CONFIDENTIAL,
-    'admin': SecurityClearanceLevel.SECRET,
-    'superadmin': SecurityClearanceLevel.CLASSIFIED
+    guest: SecurityClearanceLevel.PUBLIC,
+    user: SecurityClearanceLevel.INTERNAL,
+    moderator: SecurityClearanceLevel.CONFIDENTIAL,
+    admin: SecurityClearanceLevel.SECRET,
+    superadmin: SecurityClearanceLevel.CLASSIFIED,
   };
 
   return clearanceMap[roleId] || SecurityClearanceLevel.PUBLIC;
 }
 
-function getRoleForSecurityClearance(clearance: SecurityClearanceLevel): string {
+function getRoleForSecurityClearance(
+  clearance: SecurityClearanceLevel,
+): string {
   const roleMap: Record<SecurityClearanceLevel, string> = {
     [SecurityClearanceLevel.PUBLIC]: 'guest',
     [SecurityClearanceLevel.INTERNAL]: 'user',
     [SecurityClearanceLevel.CONFIDENTIAL]: 'moderator',
     [SecurityClearanceLevel.SECRET]: 'admin',
-    [SecurityClearanceLevel.CLASSIFIED]: 'superadmin'
+    [SecurityClearanceLevel.CLASSIFIED]: 'superadmin',
   };
 
   return roleMap[clearance] || 'guest';
 }
 
-function canAccessSecurityLevel(userClearance: SecurityClearanceLevel, resourceLevel: SecurityClearanceLevel): boolean {
+function canAccessSecurityLevel(
+  userClearance: SecurityClearanceLevel,
+  resourceLevel: SecurityClearanceLevel,
+): boolean {
   const clearanceLevels = {
     [SecurityClearanceLevel.PUBLIC]: 1,
     [SecurityClearanceLevel.INTERNAL]: 2,
     [SecurityClearanceLevel.CONFIDENTIAL]: 3,
     [SecurityClearanceLevel.SECRET]: 4,
-    [SecurityClearanceLevel.CLASSIFIED]: 5
+    [SecurityClearanceLevel.CLASSIFIED]: 5,
   };
 
   return clearanceLevels[userClearance] >= clearanceLevels[resourceLevel];
@@ -138,36 +145,48 @@ describe('RBAC Authorization Testing Suite', () => {
       name: 'Guest User',
       permissions: ['read:public'],
       level: 1,
-      description: 'Basic read-only access to public resources'
+      description: 'Basic read-only access to public resources',
     },
     {
       id: 'user',
       name: 'Regular User',
       permissions: ['read:public', 'read:internal', 'write:own'],
       level: 2,
-      description: 'Standard user with basic read/write permissions'
+      description: 'Standard user with basic read/write permissions',
     },
     {
       id: 'moderator',
       name: 'Content Moderator',
-      permissions: ['read:public', 'read:internal', 'write:own', 'moderate:content', 'delete:content'],
+      permissions: [
+        'read:public',
+        'read:internal',
+        'write:own',
+        'moderate:content',
+        'delete:content',
+      ],
       level: 3,
-      description: 'Content moderation and management permissions'
+      description: 'Content moderation and management permissions',
     },
     {
       id: 'admin',
       name: 'Administrator',
-      permissions: ['read:*', 'write:*', 'delete:*', 'admin:users', 'admin:system'],
+      permissions: [
+        'read:*',
+        'write:*',
+        'delete:*',
+        'admin:users',
+        'admin:system',
+      ],
       level: 4,
-      description: 'Full administrative access'
+      description: 'Full administrative access',
     },
     {
       id: 'superadmin',
       name: 'Super Administrator',
       permissions: ['*'],
       level: 5,
-      description: 'Ultimate system access with emergency override'
-    }
+      description: 'Ultimate system access with emergency override',
+    },
   ];
 
   // Permission test scenarios
@@ -178,7 +197,7 @@ describe('RBAC Authorization Testing Suite', () => {
       requiredPermissions: ['read:public'],
       requiredRoles: ['guest', 'user', 'moderator', 'admin', 'superadmin'],
       securityLevel: SecurityClearanceLevel.PUBLIC,
-      conversationalValidation: false
+      conversationalValidation: false,
     },
     {
       endpoint: '/api/internal/reports',
@@ -186,7 +205,7 @@ describe('RBAC Authorization Testing Suite', () => {
       requiredPermissions: ['read:internal'],
       requiredRoles: ['user', 'moderator', 'admin', 'superadmin'],
       securityLevel: SecurityClearanceLevel.INTERNAL,
-      conversationalValidation: false
+      conversationalValidation: false,
     },
     {
       endpoint: '/api/admin/users',
@@ -194,7 +213,7 @@ describe('RBAC Authorization Testing Suite', () => {
       requiredPermissions: ['admin:users'],
       requiredRoles: ['admin', 'superadmin'],
       securityLevel: SecurityClearanceLevel.CONFIDENTIAL,
-      conversationalValidation: true
+      conversationalValidation: true,
     },
     {
       endpoint: '/api/admin/system/config',
@@ -202,7 +221,7 @@ describe('RBAC Authorization Testing Suite', () => {
       requiredPermissions: ['admin:system'],
       requiredRoles: ['admin', 'superadmin'],
       securityLevel: SecurityClearanceLevel.SECRET,
-      conversationalValidation: true
+      conversationalValidation: true,
     },
     {
       endpoint: '/api/emergency/override',
@@ -210,20 +229,22 @@ describe('RBAC Authorization Testing Suite', () => {
       requiredPermissions: ['*'],
       requiredRoles: ['superadmin'],
       securityLevel: SecurityClearanceLevel.CLASSIFIED,
-      conversationalValidation: true
-    }
+      conversationalValidation: true,
+    },
   ];
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [AppModule],
-      providers: [SecurityTestFramework]
+      providers: [SecurityTestFramework],
     }).compile();
 
     app = module.createNestApplication();
     await app.init();
 
-    securityFramework = module.get<SecurityTestFramework>(SecurityTestFramework);
+    securityFramework = module.get<SecurityTestFramework>(
+      SecurityTestFramework,
+    );
     await securityFramework.initialize(module);
 
     configService = module.get<ConfigService>(ConfigService);
@@ -235,7 +256,6 @@ describe('RBAC Authorization Testing Suite', () => {
   });
 
   describe('RBAC Permission Validation Testing', () => {
-
     it('should validate proper permission enforcement for each role level', async () => {
       await securityFramework.executeSecurityTest(
         'RBAC Permission Level Enforcement',
@@ -250,7 +270,9 @@ describe('RBAC Authorization Testing Suite', () => {
                 [permissionTest.method.toLowerCase()](permissionTest.endpoint)
                 .set('Authorization', `Bearer ${token}`);
 
-              const shouldHaveAccess = permissionTest.requiredRoles.includes(role.id);
+              const shouldHaveAccess = permissionTest.requiredRoles.includes(
+                role.id,
+              );
 
               if (shouldHaveAccess) {
                 expect([200, 201, 204, 404]).toContain(response.status);
@@ -259,7 +281,7 @@ describe('RBAC Authorization Testing Suite', () => {
               }
             }
           }
-        }
+        },
       );
     });
 
@@ -270,18 +292,20 @@ describe('RBAC Authorization Testing Suite', () => {
         async () => {
           // Higher level roles should inherit lower level permissions
           const adminUser = createTestUserWithRole('admin');
-          const userPermissions = testRoles.find(r => r.id === 'user')?.permissions || [];
+          const userPermissions =
+            testRoles.find((r) => r.id === 'user')?.permissions || [];
 
           for (const permission of userPermissions) {
-            const adminRole = testRoles.find(r => r.id === 'admin');
-            const hasPermission = adminRole?.permissions.includes(permission) ||
-                                  adminRole?.permissions.includes('*') ||
-                                  adminRole?.permissions.includes('read:*') ||
-                                  adminRole?.permissions.includes('write:*');
+            const adminRole = testRoles.find((r) => r.id === 'admin');
+            const hasPermission =
+              adminRole?.permissions.includes(permission) ||
+              adminRole?.permissions.includes('*') ||
+              adminRole?.permissions.includes('read:*') ||
+              adminRole?.permissions.includes('write:*');
 
             expect(hasPermission).toBeTruthy();
           }
-        }
+        },
       );
     });
 
@@ -297,7 +321,7 @@ describe('RBAC Authorization Testing Suite', () => {
           const adminEndpoints = [
             '/api/admin/users',
             '/api/admin/system/config',
-            '/api/admin/security/settings'
+            '/api/admin/security/settings',
           ];
 
           for (const endpoint of adminEndpoints) {
@@ -306,15 +330,16 @@ describe('RBAC Authorization Testing Suite', () => {
               .set('Authorization', `Bearer ${token}`)
               .expect(403);
 
-            expect(response.body.message).toMatch(/forbidden|unauthorized|access denied/i);
+            expect(response.body.message).toMatch(
+              /forbidden|unauthorized|access denied/i,
+            );
           }
-        }
+        },
       );
     });
   });
 
   describe('Role Escalation Attack Prevention', () => {
-
     it('should prevent horizontal privilege escalation', async () => {
       await securityFramework.executeSecurityTest(
         'Horizontal Privilege Escalation Prevention',
@@ -331,8 +356,10 @@ describe('RBAC Authorization Testing Suite', () => {
             .set('Authorization', `Bearer ${token1}`)
             .expect(403);
 
-          expect(response.body.message).toMatch(/forbidden|unauthorized|access denied/i);
-        }
+          expect(response.body.message).toMatch(
+            /forbidden|unauthorized|access denied/i,
+          );
+        },
       );
     });
 
@@ -347,7 +374,7 @@ describe('RBAC Authorization Testing Suite', () => {
           const manipulatedPayload = {
             ...regularUser,
             roles: ['admin'],
-            permissions: ['admin:*']
+            permissions: ['admin:*'],
           };
 
           const token = securityFramework.generateTestJWT(manipulatedPayload);
@@ -358,7 +385,7 @@ describe('RBAC Authorization Testing Suite', () => {
 
           // Should either reject the token or properly validate permissions
           expect([401, 403]).toContain(response.status);
-        }
+        },
       );
     });
 
@@ -377,14 +404,15 @@ describe('RBAC Authorization Testing Suite', () => {
             .send({ role: 'admin' })
             .expect(403);
 
-          expect(response.body.message).toMatch(/forbidden|unauthorized|insufficient privileges/i);
-        }
+          expect(response.body.message).toMatch(
+            /forbidden|unauthorized|insufficient privileges/i,
+          );
+        },
       );
     });
   });
 
   describe('Conversational Validation Workflow Testing', () => {
-
     it('should validate PARLANT conversational approval for sensitive operations', async () => {
       await securityFramework.executeSecurityTest(
         'PARLANT Conversational Approval Validation',
@@ -411,7 +439,7 @@ describe('RBAC Authorization Testing Suite', () => {
             // Endpoint doesn't exist or requires additional validation
             expect([404, 403]).toContain(response.status);
           }
-        }
+        },
       );
     });
 
@@ -437,13 +465,12 @@ describe('RBAC Authorization Testing Suite', () => {
           } else {
             expect([401, 403, 422]).toContain(response.status);
           }
-        }
+        },
       );
     });
   });
 
   describe('Security Clearance Level Testing', () => {
-
     it('should validate security clearance level enforcement', async () => {
       await securityFramework.executeSecurityTest(
         'Security Clearance Level Validation',
@@ -473,13 +500,12 @@ describe('RBAC Authorization Testing Suite', () => {
               }
             }
           }
-        }
+        },
       );
     });
   });
 
   describe('Multi-Factor Authorization Testing', () => {
-
     it('should validate multi-factor authorization for critical operations', async () => {
       await securityFramework.executeSecurityTest(
         'Multi-Factor Authorization Validation',
@@ -505,13 +531,12 @@ describe('RBAC Authorization Testing Suite', () => {
             // Operation rejected or endpoint doesn't exist
             expect([401, 403, 404, 422]).toContain(response.status);
           }
-        }
+        },
       );
     });
   });
 
   describe('RBAC Audit Trail and Compliance', () => {
-
     it('should validate comprehensive authorization audit trail', async () => {
       await securityFramework.executeSecurityTest(
         'RBAC Authorization Audit Trail',
@@ -527,7 +552,7 @@ describe('RBAC Authorization Testing Suite', () => {
             .send({
               username: 'newuser',
               email: 'newuser@test.com',
-              role: 'user'
+              role: 'user',
             });
 
           // Validate audit trail generation
@@ -536,7 +561,7 @@ describe('RBAC Authorization Testing Suite', () => {
             expect(response.body.auditTrail.action).toBe('user_creation');
             expect(response.body.auditTrail.actor).toBe(admin.id);
           }
-        }
+        },
       );
     });
 
@@ -549,16 +574,15 @@ describe('RBAC Authorization Testing Suite', () => {
           expect(testRoles.length).toBeGreaterThanOrEqual(3);
 
           // Validate least privilege principle
-          const guestRole = testRoles.find(r => r.id === 'guest');
+          const guestRole = testRoles.find((r) => r.id === 'guest');
           expect(guestRole?.permissions.length).toBeLessThanOrEqual(2);
 
           // Validate administrative separation
-          const adminRole = testRoles.find(r => r.id === 'admin');
-          const superAdminRole = testRoles.find(r => r.id === 'superadmin');
+          const adminRole = testRoles.find((r) => r.id === 'admin');
+          const superAdminRole = testRoles.find((r) => r.id === 'superadmin');
           expect(adminRole?.level).toBeLessThan(superAdminRole?.level || 0);
-        }
+        },
       );
     });
   });
-
 });

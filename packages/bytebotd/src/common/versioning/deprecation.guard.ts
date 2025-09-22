@@ -17,7 +17,6 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
@@ -26,7 +25,6 @@ import {
   getVersionConfig,
   isDesktopApiVersion,
   getDesktopCompatibility,
-
 } from './api-version.decorator';
 
 /**
@@ -108,8 +106,6 @@ interface DesktopClientInfo {
   clientId?: string;
   vncClient?: string;
   isComputerUse?: boolean;
-
-
 }
 
 /**
@@ -122,8 +118,6 @@ interface DeprecationResult {
   isSunset: boolean;
   isPastSunsetGrace: boolean;
   daysUntilSunset: number | null;
-
-
 }
 
 /**
@@ -153,8 +147,6 @@ interface DeprecationStats {
 
   /** VNC client information */
   vncClients: Set<string>;
-
-
 }
 
 @Injectable()
@@ -169,9 +161,10 @@ export class DeprecationGuard implements CanActivate {
   ) {
     // Load deprecation policy from configuration with BytebotD defaults
     this.policy = {
-  enforcement: this.configService.get<DeprecationEnforcement>(
+      enforcement: this.configService.get<DeprecationEnforcement>(
         'api.deprecation.enforcement',
-      DeprecationEnforcement.WARN,),
+        DeprecationEnforcement.WARN,
+      ),
       gracePeriodDays: this.configService.get<number>(
         'api.deprecation.gracePeriodDays',
         30,
@@ -558,7 +551,7 @@ export class DeprecationGuard implements CanActivate {
     desktopClientInfo: DesktopClientInfo,
     operationId: string,
   ): boolean {
-  // Check if legacy desktop clients should be allowed extended access
+    // Check if legacy desktop clients should be allowed extended access
     if (
       this.policy.desktopSpecific.allowLegacyClients &&
       isDesktopEndpoint &&

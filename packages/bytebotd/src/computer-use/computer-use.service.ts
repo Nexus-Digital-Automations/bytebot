@@ -389,15 +389,20 @@ export class ComputerUseService {
    * @throws Error when mouse movement fails
    */
   private async moveMouse(action: MoveMouseAction): Promise<void> {
-    const operationId = `move_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Moving mouse to coordinates`, {operationId,
-  targetX: action.coordinates.x,
+    const operationId = `move_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
+
+    this.logger.log(`[${operationId}] Moving mouse to coordinates`, {
+      operationId,
+      targetX: action.coordinates.x,
       targetY: action.coordinates.y,
     });
 
     try {
       await this.nutService.mouseMoveEvent(action.coordinates);
 
-      this.logger.log(`[${operationId}] Mouse movement completed successfully`);} catch (_error) {const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger.log(`[${operationId}] Mouse movement completed successfully`);
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
         `[${operationId}] Mouse movement failed: ${errorMessage}`,
         {
@@ -1131,17 +1136,23 @@ export class ComputerUseService {
 
       // Validate application is supported
       if (!commandMap[application]) {
-        throw new Error(`Unsupported application: ${application}`);}// Check if application is already running using wmctrl with timeout
+        throw new Error(`Unsupported application: ${application}`);
+      }
+
+      // Check if application is already running using wmctrl with timeout
       let appOpen = false;
       try {
         this.logger.log(
-          `[${operationId}] Checking if ${application} is already running`,);
-    const { stdout } = await execAsync(
-          `sudo -u user wmctrl -lx | grep ${processMap[application]}`,{ timeout: 5000 }, // 5 second timeout for safety);
+          `[${operationId}] Checking if ${application} is already running`
+        );
+        const { stdout } = await execAsync(
+          `sudo -u user wmctrl -lx | grep ${processMap[application]}`,
+          { timeout: 5000 } // 5 second timeout for safety
+        );
 
         appOpen = stdout.trim().length > 0;
         this.logger.log(
-          `[${operationId}] Application ${application} running status: ${appOpen}`,
+          `[${operationId}] Application ${application} running status: ${appOpen}`
         );
       } catch (_error) {
         // Handle wmctrl/grep errors safely with type checking
@@ -1149,13 +1160,16 @@ export class ComputerUseService {
 
         // Extract _error code safely
         const errorCode =
-          _error && typeof _error === 'object' && 'code' in _error? (_error as { code: unknown }).code: null;
+          _error && typeof _error === 'object' && 'code' in _error
+            ? (_error as { code: unknown }).code
+            : null;
 
         // grep returns exit code 1 when no match found (app not running)
         // Also handle timeout and other expected errors
         if (errorCode !== 1 && !errorMessage.includes('timeout')) {
           this.logger.warn(
-            `[${operationId}] Error checking application status: ${errorMessage}`,);
+            `[${operationId}] Error checking application status: ${errorMessage}`
+          );
     // Continue with assumption app is not running
         }
 

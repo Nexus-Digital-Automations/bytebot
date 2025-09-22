@@ -81,7 +81,7 @@ class ParlantBidirectionalTestClient extends EventEmitter {
   constructor(
     private url: string,
     clientIdentifier: string,
-    private options: BidirectionalClientOptions = {}
+    private options: BidirectionalClientOptions = {},
   ) {
     super();
     this.clientId = `parlant_client_${clientIdentifier}_${Date.now()}`;
@@ -140,7 +140,8 @@ class ParlantBidirectionalTestClient extends EventEmitter {
 
         this.ws.on('open', () => {
           this.connected = true;
-          this.performanceMetrics.connectionTime = performance.now() - this.connectionStartTime;
+          this.performanceMetrics.connectionTime =
+            performance.now() - this.connectionStartTime;
 
           this.emit('connected', {
             clientId: this.clientId,
@@ -149,15 +150,17 @@ class ParlantBidirectionalTestClient extends EventEmitter {
           });
 
           // Initialize session with server
-          this.initializeSession().then(() => {
-            resolve({
-              success: true,
-              clientId: this.clientId,
-              sessionId: this.sessionId,
-              connectionTime: this.performanceMetrics.connectionTime,
-              serverCapabilities: null, // Will be populated from session response
-            });
-          }).catch(reject);
+          this.initializeSession()
+            .then(() => {
+              resolve({
+                success: true,
+                clientId: this.clientId,
+                sessionId: this.sessionId,
+                connectionTime: this.performanceMetrics.connectionTime,
+                serverCapabilities: null, // Will be populated from session response
+              });
+            })
+            .catch(reject);
         });
 
         this.ws.on('message', (data: WebSocket.RawData) => {
@@ -181,7 +184,6 @@ class ParlantBidirectionalTestClient extends EventEmitter {
             metrics: this.getPerformanceMetrics(),
           });
         });
-
       } catch (error) {
         reject(error);
       }
@@ -226,7 +228,7 @@ class ParlantBidirectionalTestClient extends EventEmitter {
     // Wait for session ready confirmation
     await this.waitForMessage(
       (msg) => msg.type === ConversationalMessageType.SESSION_READY,
-      5000
+      5000,
     );
   }
 
@@ -268,7 +270,6 @@ class ParlantBidirectionalTestClient extends EventEmitter {
         latency: this.messageLatencies.get(message.messageId),
         totalMessages: this.receivedMessages.size,
       });
-
     } catch (error) {
       this.performanceMetrics.errors++;
       this.emit('messageError', { clientId: this.clientId, error });
@@ -381,7 +382,7 @@ class ParlantBidirectionalTestClient extends EventEmitter {
    */
   async sendValidationRequest(
     action: ValidationAction,
-    context?: Partial<ValidationContext>
+    context?: Partial<ValidationContext>,
   ): Promise<BidirectionalValidationResult> {
     const validationId = this.generateValidationId();
 
@@ -395,15 +396,21 @@ class ParlantBidirectionalTestClient extends EventEmitter {
         validationId,
         context: {
           userId: context?.userId || `test-user-${this.clientId}`,
-          applicationContext: context?.applicationContext || 'parlant-bidirectional-testing',
-          environmentInfo: context?.environmentInfo || { test: true, clientId: this.clientId },
+          applicationContext:
+            context?.applicationContext || 'parlant-bidirectional-testing',
+          environmentInfo: context?.environmentInfo || {
+            test: true,
+            clientId: this.clientId,
+          },
           previousActions: context?.previousActions || [],
-          securityContext: context?.securityContext || {
-            authenticationLevel: 'basic',
-            permissions: ['read', 'write', 'validate'],
-            auditRequired: true,
-            complianceFlags: ['GDPR', 'testing'],
-          } as SecurityContext,
+          securityContext:
+            context?.securityContext ||
+            ({
+              authenticationLevel: 'basic',
+              permissions: ['read', 'write', 'validate'],
+              auditRequired: true,
+              complianceFlags: ['GDPR', 'testing'],
+            } as SecurityContext),
         },
         action,
         riskLevel: this.calculateRiskLevel(action),
@@ -430,9 +437,10 @@ class ParlantBidirectionalTestClient extends EventEmitter {
 
     // Wait for validation response
     const response = await this.waitForMessage(
-      (msg) => msg.type === ConversationalMessageType.VALIDATION_RESPONSE &&
-               msg.payload.validationId === validationId,
-      15000 // 15 second timeout for validation
+      (msg) =>
+        msg.type === ConversationalMessageType.VALIDATION_RESPONSE &&
+        msg.payload.validationId === validationId,
+      15000, // 15 second timeout for validation
     );
 
     const responseTime = performance.now() - startTime;
@@ -443,7 +451,9 @@ class ParlantBidirectionalTestClient extends EventEmitter {
       response,
       responseTime,
       progressUpdates: this.progressUpdates.get(validationId) || [],
-      success: response.payload.status === 'approved' || response.payload.status === 'received',
+      success:
+        response.payload.status === 'approved' ||
+        response.payload.status === 'received',
     };
   }
 
@@ -453,7 +463,7 @@ class ParlantBidirectionalTestClient extends EventEmitter {
   async sendUserConfirmation(
     validationId: string,
     approved: boolean,
-    reasoning?: string
+    reasoning?: string,
   ): Promise<BidirectionalConfirmationResult> {
     const confirmationId = this.generateConfirmationId();
 
@@ -483,9 +493,10 @@ class ParlantBidirectionalTestClient extends EventEmitter {
 
     // Wait for confirmation result
     const result = await this.waitForMessage(
-      (msg) => msg.type === ConversationalMessageType.CONFIRMATION_RESULT &&
-               msg.payload.validationId === validationId,
-      10000
+      (msg) =>
+        msg.type === ConversationalMessageType.CONFIRMATION_RESULT &&
+        msg.payload.validationId === validationId,
+      10000,
     );
 
     const responseTime = performance.now() - startTime;
@@ -506,14 +517,17 @@ class ParlantBidirectionalTestClient extends EventEmitter {
   async performBidirectionalValidationWorkflow(
     action: ValidationAction,
     userApproval: boolean = true,
-    context?: Partial<ValidationContext>
+    context?: Partial<ValidationContext>,
   ): Promise<BidirectionalWorkflowResult> {
     const workflowId = this.generateWorkflowId();
     const startTime = performance.now();
 
     try {
       // Step 1: Send validation request
-      const validationResult = await this.sendValidationRequest(action, context);
+      const validationResult = await this.sendValidationRequest(
+        action,
+        context,
+      );
 
       // Step 2: Wait for server processing (collect progress updates)
       await this.collectProgressUpdates(validationResult.validationId, 5000);
@@ -522,14 +536,15 @@ class ParlantBidirectionalTestClient extends EventEmitter {
       const confirmationResult = await this.sendUserConfirmation(
         validationResult.validationId,
         userApproval,
-        `Automated test ${userApproval ? 'approval' : 'rejection'}`
+        `Automated test ${userApproval ? 'approval' : 'rejection'}`,
       );
 
       // Step 4: Wait for final result
       const finalResult = await this.waitForMessage(
-        (msg) => msg.type === ConversationalMessageType.STREAMING_COMPLETE &&
-                 msg.payload.validationId === validationResult.validationId,
-        10000
+        (msg) =>
+          msg.type === ConversationalMessageType.STREAMING_COMPLETE &&
+          msg.payload.validationId === validationResult.validationId,
+        10000,
       );
 
       const totalTime = performance.now() - startTime;
@@ -541,9 +556,11 @@ class ParlantBidirectionalTestClient extends EventEmitter {
         finalResult,
         totalTime,
         success: finalResult.payload.status === 'completed',
-        messageCount: this.sentMessages.size - this.performanceMetrics.messagesSent + this.performanceMetrics.messagesReceived,
+        messageCount:
+          this.sentMessages.size -
+          this.performanceMetrics.messagesSent +
+          this.performanceMetrics.messagesReceived,
       };
-
     } catch (error) {
       const totalTime = performance.now() - startTime;
 
@@ -565,18 +582,19 @@ class ParlantBidirectionalTestClient extends EventEmitter {
    */
   private async collectProgressUpdates(
     validationId: string,
-    timeout: number = 5000
+    timeout: number = 5000,
   ): Promise<ProgressUpdateMessage[]> {
     const startTime = Date.now();
     const updates: ProgressUpdateMessage[] = [];
 
     while (Date.now() - startTime < timeout) {
       try {
-        const update = await this.waitForMessage(
-          (msg) => msg.type === ConversationalMessageType.PROGRESS_UPDATE &&
-                   msg.payload.operationId === validationId,
-          1000
-        ) as ProgressUpdateMessage;
+        const update = (await this.waitForMessage(
+          (msg) =>
+            msg.type === ConversationalMessageType.PROGRESS_UPDATE &&
+            msg.payload.operationId === validationId,
+          1000,
+        )) as ProgressUpdateMessage;
 
         updates.push(update);
 
@@ -595,7 +613,9 @@ class ParlantBidirectionalTestClient extends EventEmitter {
   /**
    * Send message with comprehensive tracking
    */
-  private async sendMessageWithTracking(message: ConversationalMessage): Promise<void> {
+  private async sendMessageWithTracking(
+    message: ConversationalMessage,
+  ): Promise<void> {
     if (!this.ws || !this.connected) {
       throw new Error(`WebSocket not connected for client ${this.clientId}`);
     }
@@ -630,7 +650,9 @@ class ParlantBidirectionalTestClient extends EventEmitter {
   /**
    * Send acknowledgment for received message
    */
-  private async sendAcknowledgment(originalMessage: ConversationalMessage): Promise<void> {
+  private async sendAcknowledgment(
+    originalMessage: ConversationalMessage,
+  ): Promise<void> {
     const ackMessage: ConversationalMessage = {
       type: ConversationalMessageType.HEARTBEAT_ACK,
       messageId: this.generateMessageId(),
@@ -656,7 +678,9 @@ class ParlantBidirectionalTestClient extends EventEmitter {
   /**
    * Send heartbeat response
    */
-  private async sendHeartbeatResponse(heartbeat: ConversationalMessage): Promise<void> {
+  private async sendHeartbeatResponse(
+    heartbeat: ConversationalMessage,
+  ): Promise<void> {
     const response: ConversationalMessage = {
       type: ConversationalMessageType.HEARTBEAT_ACK,
       messageId: this.generateMessageId(),
@@ -684,7 +708,7 @@ class ParlantBidirectionalTestClient extends EventEmitter {
    */
   async waitForMessage(
     predicate: (message: ConversationalMessage) => boolean,
-    timeout: number = 5000
+    timeout: number = 5000,
   ): Promise<ConversationalMessage> {
     const startTime = Date.now();
 
@@ -694,7 +718,7 @@ class ParlantBidirectionalTestClient extends EventEmitter {
       if (message) {
         return message;
       }
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
 
     throw new Error(`Timeout waiting for message (client: ${this.clientId})`);
@@ -750,14 +774,22 @@ class ParlantBidirectionalTestClient extends EventEmitter {
     this.performanceMetrics.p95Latency =
       latencies[Math.floor(latencies.length * 0.95)] || 0;
 
-    this.performanceMetrics.maxLatency = Math.max(this.performanceMetrics.maxLatency, latency);
-    this.performanceMetrics.minLatency = Math.min(this.performanceMetrics.minLatency, latency);
+    this.performanceMetrics.maxLatency = Math.max(
+      this.performanceMetrics.maxLatency,
+      latency,
+    );
+    this.performanceMetrics.minLatency = Math.min(
+      this.performanceMetrics.minLatency,
+      latency,
+    );
   }
 
   /**
    * Calculate risk level based on action
    */
-  private calculateRiskLevel(action: ValidationAction): 'low' | 'medium' | 'high' | 'critical' {
+  private calculateRiskLevel(
+    action: ValidationAction,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     if (action.impact.scope === 'external' || !action.reversible) {
       return 'critical';
     } else if (action.impact.scope === 'system' || action.impact.stateChanges) {
@@ -799,9 +831,12 @@ class ParlantBidirectionalTestClient extends EventEmitter {
       this.performanceMetrics.messagesSent / (connectionDuration / 1000);
 
     // Calculate compression ratio
-    const totalMessages = this.performanceMetrics.messagesSent + this.performanceMetrics.messagesReceived;
+    const totalMessages =
+      this.performanceMetrics.messagesSent +
+      this.performanceMetrics.messagesReceived;
     if (totalMessages > 0) {
-      const averageMessageSize = this.performanceMetrics.bytesTransferred / totalMessages;
+      const averageMessageSize =
+        this.performanceMetrics.bytesTransferred / totalMessages;
       this.performanceMetrics.compressionRatio = averageMessageSize / 1024; // Estimate
     }
 
@@ -968,7 +1003,7 @@ class ConversationSerializationTester {
    * Test PARLANT conversation data serialization/deserialization
    */
   static testConversationSerialization(
-    originalMessage: ConversationalMessage
+    originalMessage: ConversationalMessage,
   ): SerializationTestResult {
     const startTime = performance.now();
 
@@ -983,7 +1018,10 @@ class ConversationSerializationTester {
       const deserializationTime = performance.now() - deserializeStartTime;
 
       // Validate data integrity
-      const integrityCheck = this.validateMessageIntegrity(originalMessage, deserialized);
+      const integrityCheck = this.validateMessageIntegrity(
+        originalMessage,
+        deserialized,
+      );
 
       const totalTime = performance.now() - startTime;
 
@@ -996,10 +1034,12 @@ class ConversationSerializationTester {
         deserializationTime,
         totalTime,
         serializedSize: serialized.length,
-        compressionRatio: this.calculateCompressionRatio(originalMessage, serialized),
+        compressionRatio: this.calculateCompressionRatio(
+          originalMessage,
+          serialized,
+        ),
         integrityCheck,
       };
-
     } catch (error) {
       const totalTime = performance.now() - startTime;
 
@@ -1024,7 +1064,7 @@ class ConversationSerializationTester {
    */
   private static validateMessageIntegrity(
     original: ConversationalMessage,
-    deserialized: ConversationalMessage
+    deserialized: ConversationalMessage,
   ): IntegrityCheckResult {
     const errors: string[] = [];
 
@@ -1034,32 +1074,50 @@ class ConversationSerializationTester {
     }
 
     if (original.messageId !== deserialized.messageId) {
-      errors.push(`MessageId mismatch: ${original.messageId} !== ${deserialized.messageId}`);
+      errors.push(
+        `MessageId mismatch: ${original.messageId} !== ${deserialized.messageId}`,
+      );
     }
 
     if (original.sessionId !== deserialized.sessionId) {
-      errors.push(`SessionId mismatch: ${original.sessionId} !== ${deserialized.sessionId}`);
+      errors.push(
+        `SessionId mismatch: ${original.sessionId} !== ${deserialized.sessionId}`,
+      );
     }
 
     if (original.timestamp !== deserialized.timestamp) {
-      errors.push(`Timestamp mismatch: ${original.timestamp} !== ${deserialized.timestamp}`);
+      errors.push(
+        `Timestamp mismatch: ${original.timestamp} !== ${deserialized.timestamp}`,
+      );
     }
 
     if (original.sequence !== deserialized.sequence) {
-      errors.push(`Sequence mismatch: ${original.sequence} !== ${deserialized.sequence}`);
+      errors.push(
+        `Sequence mismatch: ${original.sequence} !== ${deserialized.sequence}`,
+      );
     }
 
     // Deep compare payload
-    const payloadComparison = this.deepCompare(original.payload, deserialized.payload);
+    const payloadComparison = this.deepCompare(
+      original.payload,
+      deserialized.payload,
+    );
     if (!payloadComparison.equal) {
-      errors.push(`Payload mismatch: ${payloadComparison.differences.join(', ')}`);
+      errors.push(
+        `Payload mismatch: ${payloadComparison.differences.join(', ')}`,
+      );
     }
 
     // Compare metadata if present
     if (original.metadata || deserialized.metadata) {
-      const metadataComparison = this.deepCompare(original.metadata, deserialized.metadata);
+      const metadataComparison = this.deepCompare(
+        original.metadata,
+        deserialized.metadata,
+      );
       if (!metadataComparison.equal) {
-        errors.push(`Metadata mismatch: ${metadataComparison.differences.join(', ')}`);
+        errors.push(
+          `Metadata mismatch: ${metadataComparison.differences.join(', ')}`,
+        );
       }
     }
 
@@ -1077,7 +1135,9 @@ class ConversationSerializationTester {
 
     const compare = (a: unknown, b: unknown, path: string = ''): void => {
       if (typeof a !== typeof b) {
-        differences.push(`${path}: type mismatch (${typeof a} !== ${typeof b})`);
+        differences.push(
+          `${path}: type mismatch (${typeof a} !== ${typeof b})`,
+        );
         return;
       }
 
@@ -1096,7 +1156,9 @@ class ConversationSerializationTester {
         const bKeys = Object.keys(bObj);
 
         if (aKeys.length !== bKeys.length) {
-          differences.push(`${path}: key count mismatch (${aKeys.length} !== ${bKeys.length})`);
+          differences.push(
+            `${path}: key count mismatch (${aKeys.length} !== ${bKeys.length})`,
+          );
         }
 
         for (const key of aKeys) {
@@ -1130,7 +1192,7 @@ class ConversationSerializationTester {
    */
   private static calculateCompressionRatio(
     original: ConversationalMessage,
-    serialized: string
+    serialized: string,
   ): number {
     const originalSize = JSON.stringify(original).length;
     return serialized.length / originalSize;
@@ -1166,12 +1228,12 @@ interface ComparisonResult {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
     };
     return config[key] ?? defaultValue;
   }),
@@ -1201,14 +1263,18 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
 
     // Initialize services
     await integrationService.onModuleInit();
 
     // Give services time to start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   afterAll(async () => {
@@ -1224,7 +1290,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
     let testClient: ParlantBidirectionalTestClient;
 
     beforeEach(async () => {
-      testClient = new ParlantBidirectionalTestClient(TEST_URL, `bidirectional_${Date.now()}`);
+      testClient = new ParlantBidirectionalTestClient(
+        TEST_URL,
+        `bidirectional_${Date.now()}`,
+      );
       await testClient.connect();
     });
 
@@ -1264,8 +1333,12 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
 
       expect(validationResult.success).toBe(true);
       expect(validationResult.responseTime).toBeLessThan(5000); // <5 seconds
-      expect(validationResult.response.type).toBe(ConversationalMessageType.VALIDATION_RESPONSE);
-      expect(validationResult.response.payload.validationId).toBe(validationResult.validationId);
+      expect(validationResult.response.type).toBe(
+        ConversationalMessageType.VALIDATION_RESPONSE,
+      );
+      expect(validationResult.response.payload.validationId).toBe(
+        validationResult.validationId,
+      );
     });
 
     it('should perform server-to-client message flow with progress updates', async () => {
@@ -1290,7 +1363,7 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       const validationResult = await testClient.sendValidationRequest(action);
 
       // Wait for progress updates
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       expect(validationResult.success).toBe(true);
       expect(progressUpdatesReceived).toBeGreaterThan(0);
@@ -1377,7 +1450,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         },
       };
 
-      const result = ConversationSerializationTester.testConversationSerialization(validationRequest);
+      const result =
+        ConversationSerializationTester.testConversationSerialization(
+          validationRequest,
+        );
 
       expect(result.success).toBe(true);
       expect(result.integrityCheck.valid).toBe(true);
@@ -1416,7 +1492,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         },
       };
 
-      const result = ConversationSerializationTester.testConversationSerialization(userConfirmation);
+      const result =
+        ConversationSerializationTester.testConversationSerialization(
+          userConfirmation,
+        );
 
       expect(result.success).toBe(true);
       expect(result.integrityCheck.valid).toBe(true);
@@ -1466,13 +1545,20 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         },
       };
 
-      const result = ConversationSerializationTester.testConversationSerialization(progressUpdate);
+      const result =
+        ConversationSerializationTester.testConversationSerialization(
+          progressUpdate,
+        );
 
       expect(result.success).toBe(true);
       expect(result.integrityCheck.valid).toBe(true);
       expect(result.deserializedMessage?.payload.progress).toBe(75);
-      expect(result.deserializedMessage?.payload.details.errors).toHaveLength(1);
-      expect(result.deserializedMessage?.payload.details.warnings).toHaveLength(1);
+      expect(result.deserializedMessage?.payload.details.errors).toHaveLength(
+        1,
+      );
+      expect(result.deserializedMessage?.payload.details.warnings).toHaveLength(
+        1,
+      );
     });
 
     it('should handle serialization of large conversation payloads', () => {
@@ -1508,7 +1594,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         },
       };
 
-      const result = ConversationSerializationTester.testConversationSerialization(largeMessage);
+      const result =
+        ConversationSerializationTester.testConversationSerialization(
+          largeMessage,
+        );
 
       expect(result.success).toBe(true);
       expect(result.integrityCheck.valid).toBe(true);
@@ -1524,7 +1613,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
     let testClient: ParlantBidirectionalTestClient;
 
     beforeEach(async () => {
-      testClient = new ParlantBidirectionalTestClient(TEST_URL, `streaming_${Date.now()}`);
+      testClient = new ParlantBidirectionalTestClient(
+        TEST_URL,
+        `streaming_${Date.now()}`,
+      );
       await testClient.connect();
     });
 
@@ -1552,7 +1644,8 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         } as ActionImpact,
       };
 
-      const workflowResult = await testClient.performBidirectionalValidationWorkflow(action, true);
+      const workflowResult =
+        await testClient.performBidirectionalValidationWorkflow(action, true);
 
       expect(workflowResult.success).toBe(true);
       expect(workflowResult.totalTime).toBeLessThan(15000); // <15 seconds
@@ -1587,20 +1680,25 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       const validationResult = await testClient.sendValidationRequest(action);
 
       // Wait for progress updates to stream
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       expect(validationResult.success).toBe(true);
       expect(progressUpdates.length).toBeGreaterThan(0);
 
       // Verify progress updates are in sequence
       for (let i = 1; i < progressUpdates.length; i++) {
-        expect(progressUpdates[i].operationId).toBe(progressUpdates[0].operationId);
-        expect(progressUpdates[i].progress).toBeGreaterThanOrEqual(progressUpdates[i-1].progress);
+        expect(progressUpdates[i].operationId).toBe(
+          progressUpdates[0].operationId,
+        );
+        expect(progressUpdates[i].progress).toBeGreaterThanOrEqual(
+          progressUpdates[i - 1].progress,
+        );
       }
 
       // Verify timing of updates (should be roughly 200ms apart)
       for (let i = 1; i < progressUpdates.length; i++) {
-        const timeDiff = progressUpdates[i].timestamp - progressUpdates[i-1].timestamp;
+        const timeDiff =
+          progressUpdates[i].timestamp - progressUpdates[i - 1].timestamp;
         expect(timeDiff).toBeGreaterThanOrEqual(150); // Allow some timing variance
         expect(timeDiff).toBeLessThanOrEqual(350); // Allow some timing variance
       }
@@ -1630,7 +1728,7 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       }, 100); // Every 100ms
 
       const validationResult = await testClient.sendValidationRequest(action);
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Allow time for state changes
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // Allow time for state changes
 
       clearInterval(monitorInterval);
 
@@ -1651,7 +1749,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
     let testClient: ParlantBidirectionalTestClient;
 
     beforeEach(async () => {
-      testClient = new ParlantBidirectionalTestClient(TEST_URL, `performance_${Date.now()}`);
+      testClient = new ParlantBidirectionalTestClient(
+        TEST_URL,
+        `performance_${Date.now()}`,
+      );
       await testClient.connect();
     });
 
@@ -1688,12 +1789,13 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         expect(validationResult.success).toBe(true);
 
         // Small delay between messages to avoid overwhelming the server
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
       }
 
       latencies.sort((a, b) => a - b);
 
-      const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+      const averageLatency =
+        latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
       const p95Latency = latencies[Math.floor(latencies.length * 0.95)];
       const p99Latency = latencies[Math.floor(latencies.length * 0.99)];
 
@@ -1738,14 +1840,17 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       const totalTime = performance.now() - startTime;
 
       // All validations should succeed
-      expect(results.every(result => result.success)).toBe(true);
+      expect(results.every((result) => result.success)).toBe(true);
 
       // Calculate latency statistics
-      const responseTimes = results.map(result => result.responseTime);
+      const responseTimes = results.map((result) => result.responseTime);
       responseTimes.sort((a, b) => a - b);
 
-      const averageResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
-      const p95ResponseTime = responseTimes[Math.floor(responseTimes.length * 0.95)];
+      const averageResponseTime =
+        responseTimes.reduce((sum, time) => sum + time, 0) /
+        responseTimes.length;
+      const p95ResponseTime =
+        responseTimes[Math.floor(responseTimes.length * 0.95)];
 
       expect(averageResponseTime).toBeLessThan(100); // Average <100ms under load
       expect(p95ResponseTime).toBeLessThan(150); // P95 <150ms under load
@@ -1806,7 +1911,7 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       }, messageInterval);
 
       // Wait for test completion
-      await new Promise(resolve => setTimeout(resolve, testDuration + 1000));
+      await new Promise((resolve) => setTimeout(resolve, testDuration + 1000));
 
       const actualDuration = performance.now() - startTime;
       const sendThroughput = messagesSent / (actualDuration / 1000);
@@ -1835,7 +1940,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
     let testClient: ParlantBidirectionalTestClient;
 
     beforeEach(async () => {
-      testClient = new ParlantBidirectionalTestClient(TEST_URL, `delivery_${Date.now()}`);
+      testClient = new ParlantBidirectionalTestClient(
+        TEST_URL,
+        `delivery_${Date.now()}`,
+      );
       await testClient.connect();
     });
 
@@ -1857,7 +1965,8 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       // Track acknowledgments from server
       testClient.on('message', (data) => {
         if (data.message.type === ConversationalMessageType.HEARTBEAT_ACK) {
-          const originalMessageId = data.message.payload.originalMessageId as string;
+          const originalMessageId = data.message.payload
+            .originalMessageId as string;
           if (originalMessageId) {
             acknowledgedMessages.push(originalMessageId);
           }
@@ -1882,11 +1991,11 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         await testClient.sendValidationRequest(action);
 
         // Small delay to avoid overwhelming
-        await new Promise(resolve => setTimeout(resolve, 20));
+        await new Promise((resolve) => setTimeout(resolve, 20));
       }
 
       // Wait for all acknowledgments
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       const deliveryRate = acknowledgedMessages.length / sentMessages.length;
 
@@ -1927,7 +2036,7 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       }
 
       // Wait for all responses
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Verify sequence ordering
       expect(receivedSequences.length).toBeGreaterThan(0);
@@ -1935,7 +2044,7 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       // Check if sequences are generally in order (allowing for some network reordering)
       let orderedCount = 0;
       for (let i = 1; i < receivedSequences.length; i++) {
-        if (receivedSequences[i] >= receivedSequences[i-1]) {
+        if (receivedSequences[i] >= receivedSequences[i - 1]) {
           orderedCount++;
         }
       }
@@ -2022,7 +2131,7 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
       }
 
       // Wait for responses
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Should only receive one response for duplicate messages
       expect(duplicateResponsesReceived).toBeLessThanOrEqual(1);
@@ -2033,7 +2142,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
 
   describe('WebSocket Protocol Compliance and Standards Validation', () => {
     it('should comply with WebSocket protocol standards', async () => {
-      const testClient = new ParlantBidirectionalTestClient(TEST_URL, `protocol_${Date.now()}`);
+      const testClient = new ParlantBidirectionalTestClient(
+        TEST_URL,
+        `protocol_${Date.now()}`,
+      );
 
       // Test connection establishment with proper headers
       const connectionResult = await testClient.connect();
@@ -2051,7 +2163,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
     });
 
     it('should handle WebSocket close codes properly', async () => {
-      const testClient = new ParlantBidirectionalTestClient(TEST_URL, `close_code_${Date.now()}`);
+      const testClient = new ParlantBidirectionalTestClient(
+        TEST_URL,
+        `close_code_${Date.now()}`,
+      );
       await testClient.connect();
 
       let closeCode: number | undefined;
@@ -2072,7 +2187,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
     it('should validate WebSocket subprotocol negotiation', async () => {
       // Test with specific subprotocols
       const testUrl = `${TEST_URL}?subprotocol=parlant-validation-v1`;
-      const testClient = new ParlantBidirectionalTestClient(testUrl, `subprotocol_${Date.now()}`);
+      const testClient = new ParlantBidirectionalTestClient(
+        testUrl,
+        `subprotocol_${Date.now()}`,
+      );
 
       const connectionResult = await testClient.connect();
 
@@ -2094,7 +2212,10 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
 
       // Create and connect multiple clients
       for (let i = 0; i < clientCount; i++) {
-        const client = new ParlantBidirectionalTestClient(TEST_URL, `suite_client_${i}`);
+        const client = new ParlantBidirectionalTestClient(
+          TEST_URL,
+          `suite_client_${i}`,
+        );
         await client.connect();
         clients.push(client);
       }
@@ -2124,23 +2245,33 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
         const results = await Promise.all(testPromises);
 
         // Analyze results
-        const successfulTests = results.filter(result => result.success);
-        const averageResponseTime = results.reduce((sum, result) => sum + result.totalTime, 0) / results.length;
+        const successfulTests = results.filter((result) => result.success);
+        const averageResponseTime =
+          results.reduce((sum, result) => sum + result.totalTime, 0) /
+          results.length;
 
         expect(successfulTests.length).toBe(clientCount);
         expect(averageResponseTime).toBeLessThan(10000); // <10 seconds average
 
         // Collect comprehensive metrics
-        const allMetrics = clients.map(client => client.getPerformanceMetrics());
-        const totalMessages = allMetrics.reduce((sum, metrics) => sum + metrics.messagesSent + metrics.messagesReceived, 0);
-        const averageLatency = allMetrics.reduce((sum, metrics) => sum + metrics.averageLatency, 0) / allMetrics.length;
+        const allMetrics = clients.map((client) =>
+          client.getPerformanceMetrics(),
+        );
+        const totalMessages = allMetrics.reduce(
+          (sum, metrics) =>
+            sum + metrics.messagesSent + metrics.messagesReceived,
+          0,
+        );
+        const averageLatency =
+          allMetrics.reduce((sum, metrics) => sum + metrics.averageLatency, 0) /
+          allMetrics.length;
 
         const testSuiteDuration = performance.now() - testSuiteStartTime;
 
         console.log('Comprehensive Test Suite Results:', {
           clientCount,
           successfulTests: successfulTests.length,
-          successRate: `${(successfulTests.length / clientCount * 100).toFixed(1)}%`,
+          successRate: `${((successfulTests.length / clientCount) * 100).toFixed(1)}%`,
           totalMessages,
           averageLatency: `${averageLatency.toFixed(2)}ms`,
           averageResponseTime: `${averageResponseTime.toFixed(2)}ms`,
@@ -2150,12 +2281,13 @@ describe('PARLANT Phase 1 WebSocket Bidirectional Communication Testing', () => 
 
         // Validate PARLANT Phase 1 requirements
         expect(averageLatency).toBeLessThan(100); // Sub-100ms requirement
-        expect(successfulTests.length / clientCount).toBeGreaterThanOrEqual(0.95); // 95% success rate
+        expect(successfulTests.length / clientCount).toBeGreaterThanOrEqual(
+          0.95,
+        ); // 95% success rate
         expect(totalMessages).toBeGreaterThan(clientCount * 10); // At least 10 messages per client
-
       } finally {
         // Clean up all clients
-        await Promise.all(clients.map(client => client.disconnect()));
+        await Promise.all(clients.map((client) => client.disconnect()));
       }
     });
   });

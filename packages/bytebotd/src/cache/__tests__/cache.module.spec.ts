@@ -103,7 +103,10 @@ describe('CacheModule', () => {let module: TestingModule;let cacheService: Cache
     it('should be a global module', () => {const moduleMetadata = Reflect.getMetadata('_module:global__', CacheModule);expect(moduleMetadata).toBe(true);});
   });
 
-  describe('Configuration with Default Environment Variables', () => {it('should use default configuration when no env vars are set', async () => {restoreEnv = mockEnvVars({}); // No environment variablesmodule = await Test.createTestingModule({
+  describe('Configuration with Default Environment Variables', () => {
+    it('should use default configuration when no env vars are set', async () => {
+      restoreEnv = mockEnvVars({}); // No environment variables
+      module = await Test.createTestingModule({
         imports: [CacheModule],
         providers: [
           {
@@ -302,30 +305,64 @@ describe('CacheModule', () => {let module: TestingModule;let cacheService: Cache
       keyGenerator = module.get<CacheKeyGenerator>(CacheKeyGenerator);
     });
 
-    it('should enable cache operations through CacheService', async () => {// Mock the underlying cache manager for this testconst mockCacheManager = {
-        get: jest.fn().mockResolvedValue('"test-value"'),set: jest.fn().mockResolvedValue(undefined),del: jest.fn().mockResolvedValue(undefined),
+    it('should enable cache operations through CacheService', async () => {
+      // Mock the underlying cache manager for this test
+      const mockCacheManager = {
+        get: jest.fn().mockResolvedValue('"test-value"'),
+        set: jest.fn().mockResolvedValue(undefined),
+        del: jest.fn().mockResolvedValue(undefined),
       };
 
       // Replace the cache manager in the service
       (cacheService as unknown).cacheManager = mockCacheManager;
 
       // Test cache operations
-      await cacheService.set('test-key', 'test-value');expect(mockCacheManager.set).toHaveBeenCalled();const value = await cacheService.get('test-key');expect(mockCacheManager.get).toHaveBeenCalled();expect(value).toBe('test-value');await cacheService.del('test-key');expect(mockCacheManager.del).toHaveBeenCalled();});
+      await cacheService.set('test-key', 'test-value');
+      expect(mockCacheManager.set).toHaveBeenCalled();
 
-    it('should enable key generation through CacheKeyGenerator', () => {const simpleKey = keyGenerator.generate('simple');expect(simpleKey).toBe('bytebot:simple');const apiKey = keyGenerator.generateApiKey('GET', '/api/test');expect(apiKey).toMatch(/^api:api:get:api_test$/);const dbKey = keyGenerator.generateDbKey('users', 'SELECT');expect(dbKey).toBe('database:db:users:select');});it('should coordinate between CacheService and CacheKeyGenerator', async () => {// Mock the cache managerconst mockCacheManager = {
+      const value = await cacheService.get('test-key');
+      expect(mockCacheManager.get).toHaveBeenCalled();
+      expect(value).toBe('test-value');
+
+      await cacheService.del('test-key');
+      expect(mockCacheManager.del).toHaveBeenCalled();
+    });
+
+    it('should enable key generation through CacheKeyGenerator', () => {
+      const simpleKey = keyGenerator.generate('simple');
+      expect(simpleKey).toBe('bytebot:simple');
+
+      const apiKey = keyGenerator.generateApiKey('GET', '/api/test');
+      expect(apiKey).toMatch(/^api:api:get:api_test$/);
+
+      const dbKey = keyGenerator.generateDbKey('users', 'SELECT');
+      expect(dbKey).toBe('database:db:users:select');
+    });
+
+    it('should coordinate between CacheService and CacheKeyGenerator', async () => {
+      // Mock the cache manager
+      const mockCacheManager = {
         get: jest.fn().mockResolvedValue(null),
         set: jest.fn().mockResolvedValue(undefined),
       };
       (cacheService as unknown).cacheManager = mockCacheManager;
 
       // Use CacheService which should use CacheKeyGenerator internally
-      await cacheService.set('coordination-test', 'test-value');// Verify that key generation was used (check the call to cache manager)expect(mockCacheManager.set).toHaveBeenCalledWith(
-        'bytebot:coordination-test',expect.any(String),expect.any(Number)
+      await cacheService.set('coordination-test', 'test-value');
+
+      // Verify that key generation was used (check the call to cache manager)
+      expect(mockCacheManager.set).toHaveBeenCalledWith(
+        'bytebot:coordination-test',
+        expect.any(String),
+        expect.any(Number)
       );
     });
   });
 
-  describe('Error Handling', () => {it('should handle MetricsService dependency injection errors', async () => {// Test with missing MetricsServiceawait expect(
+  describe('Error Handling', () => {
+    it('should handle MetricsService dependency injection errors', async () => {
+      // Test with missing MetricsService
+      await expect(
         Test.createTestingModule({
           imports: [CacheModule],
           // No MetricsService provided

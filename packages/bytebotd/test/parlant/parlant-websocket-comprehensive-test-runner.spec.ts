@@ -63,7 +63,7 @@ import { performance } from 'perf_hooks';
 import {
   ConversationalWebSocketBridgeService,
   ConversationalMessage,
-  ConversationalMessageType
+  ConversationalMessageType,
 } from '../../src/common/websocket/conversational-websocket-bridge.service';
 
 import { ParlantIntegrationService } from '../../src/parlant/parlant-integration.service';
@@ -289,7 +289,6 @@ interface ErrorHandlingSummary {
  * Comprehensive test runner utilities
  */
 class ComprehensiveTestRunner {
-
   /**
    * Generate comprehensive test configuration
    */
@@ -303,34 +302,34 @@ class ComprehensiveTestRunner {
           maxThroughput: 1000,
           maxMemoryUsage: 500 * 1024 * 1024, // 500MB
           maxCpuUtilization: 0.8,
-          minSuccessRate: 0.995
+          minSuccessRate: 0.995,
         },
         resourceLimits: {
           memoryLimit: 1024 * 1024 * 1024, // 1GB
           cpuLimit: 0.9,
           networkBandwidthLimit: 100 * 1024 * 1024, // 100MB/s
-          concurrentConnectionLimit: 2000
-        }
+          concurrentConnectionLimit: 2000,
+        },
       },
       security: {
         authenticationTests: true,
         encryptionValidation: true,
         auditTrailVerification: true,
         rateLimitingTests: true,
-        injectionAttackTests: true
+        injectionAttackTests: true,
       },
       errorHandling: {
         connectionFailureTests: true,
         timeoutRecoveryTests: true,
         stateCorruptionTests: true,
-        serviceFailoverTests: true
+        serviceFailoverTests: true,
       },
       regression: {
         baselineComparison: true,
         compatibilityTesting: true,
         contractVerification: true,
-        productionSimulation: true
-      }
+        productionSimulation: true,
+      },
     };
   }
 
@@ -343,10 +342,11 @@ class ComprehensiveTestRunner {
       conversationalBridge: ConversationalWebSocketBridgeService;
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
-    }
+    },
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
-    const { maxConcurrentConnections, sustainedLoadDuration } = config.performance;
+    const { maxConcurrentConnections, sustainedLoadDuration } =
+      config.performance;
 
     let testsRun = 0;
     let testsPassed = 0;
@@ -357,29 +357,38 @@ class ComprehensiveTestRunner {
     try {
       // Test 1: Maximum concurrent connections
       testsRun++;
-      logger.log(`Starting concurrent connections test: ${maxConcurrentConnections} connections`);
-
-      const concurrencyResult = await ComprehensiveTestRunner.testMaxConcurrentConnections(
-        maxConcurrentConnections,
-        services
+      logger.log(
+        `Starting concurrent connections test: ${maxConcurrentConnections} connections`,
       );
+
+      const concurrencyResult =
+        await ComprehensiveTestRunner.testMaxConcurrentConnections(
+          maxConcurrentConnections,
+          services,
+        );
 
       if (concurrencyResult.success) {
         testsPassed++;
-        performanceMetrics.maxConcurrentConnections = concurrencyResult.actualConnections;
-        performanceMetrics.connectionLatency = concurrencyResult.averageConnectionTime;
+        performanceMetrics.maxConcurrentConnections =
+          concurrencyResult.actualConnections;
+        performanceMetrics.connectionLatency =
+          concurrencyResult.averageConnectionTime;
       } else {
         testsFailed++;
-        errors.push(`Concurrent connections test failed: ${concurrencyResult.error}`);
+        errors.push(
+          `Concurrent connections test failed: ${concurrencyResult.error}`,
+        );
       }
 
       // Test 2: Sustained load test
       testsRun++;
-      logger.log(`Starting sustained load test: ${sustainedLoadDuration}ms duration`);
+      logger.log(
+        `Starting sustained load test: ${sustainedLoadDuration}ms duration`,
+      );
 
       const loadResult = await ComprehensiveTestRunner.testSustainedLoad(
         sustainedLoadDuration,
-        services
+        services,
       );
 
       if (loadResult.success) {
@@ -396,10 +405,11 @@ class ComprehensiveTestRunner {
       testsRun++;
       logger.log('Starting resource utilization test');
 
-      const resourceResult = await ComprehensiveTestRunner.testResourceUtilization(
-        config.performance.resourceLimits,
-        services
-      );
+      const resourceResult =
+        await ComprehensiveTestRunner.testResourceUtilization(
+          config.performance.resourceLimits,
+          services,
+        );
 
       if (resourceResult.success) {
         testsPassed++;
@@ -408,22 +418,28 @@ class ComprehensiveTestRunner {
         performanceMetrics.networkUtilization = resourceResult.networkUsage;
       } else {
         testsFailed++;
-        errors.push(`Resource utilization test failed: ${resourceResult.error}`);
+        errors.push(
+          `Resource utilization test failed: ${resourceResult.error}`,
+        );
       }
 
       // Test 4: Performance degradation under stress
       testsRun++;
       logger.log('Starting performance degradation test');
 
-      const degradationResult = await ComprehensiveTestRunner.testPerformanceDegradation(services);
+      const degradationResult =
+        await ComprehensiveTestRunner.testPerformanceDegradation(services);
 
       if (degradationResult.success) {
         testsPassed++;
-        performanceMetrics.performanceDegradation = degradationResult.degradationFactor;
+        performanceMetrics.performanceDegradation =
+          degradationResult.degradationFactor;
         performanceMetrics.recoveryTime = degradationResult.recoveryTime;
       } else {
         testsFailed++;
-        errors.push(`Performance degradation test failed: ${degradationResult.error}`);
+        errors.push(
+          `Performance degradation test failed: ${degradationResult.error}`,
+        );
       }
 
       const executionTime = performance.now() - startTime;
@@ -436,9 +452,8 @@ class ComprehensiveTestRunner {
         testsFailed,
         executionTime,
         performanceMetrics,
-        errors
+        errors,
       };
-
     } catch (error) {
       return {
         suiteName: 'Performance Stress Testing',
@@ -448,7 +463,10 @@ class ComprehensiveTestRunner {
         testsFailed: testsRun - testsPassed,
         executionTime: performance.now() - startTime,
         performanceMetrics,
-        errors: [...errors, error instanceof Error ? error.message : 'Unknown error']
+        errors: [
+          ...errors,
+          error instanceof Error ? error.message : 'Unknown error',
+        ],
       };
     }
   }
@@ -462,7 +480,7 @@ class ComprehensiveTestRunner {
       conversationalBridge: ConversationalWebSocketBridgeService;
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
-    }
+    },
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
 
@@ -478,7 +496,8 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting authentication and authorization tests');
 
-        const authResult = await ComprehensiveTestRunner.testAuthenticationSecurity(services);
+        const authResult =
+          await ComprehensiveTestRunner.testAuthenticationSecurity(services);
 
         if (authResult.success) {
           testsPassed++;
@@ -495,12 +514,15 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting encryption and integrity validation');
 
-        const encryptionResult = await ComprehensiveTestRunner.testDataEncryption(services);
+        const encryptionResult =
+          await ComprehensiveTestRunner.testDataEncryption(services);
 
         if (encryptionResult.success) {
           testsPassed++;
-          performanceMetrics.encryptionOverhead = encryptionResult.encryptionOverhead;
-          performanceMetrics.integrityVerificationTime = encryptionResult.verificationTime;
+          performanceMetrics.encryptionOverhead =
+            encryptionResult.encryptionOverhead;
+          performanceMetrics.integrityVerificationTime =
+            encryptionResult.verificationTime;
         } else {
           testsFailed++;
           errors.push(`Encryption test failed: ${encryptionResult.error}`);
@@ -512,7 +534,8 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting audit trail verification');
 
-        const auditResult = await ComprehensiveTestRunner.testAuditTrail(services);
+        const auditResult =
+          await ComprehensiveTestRunner.testAuditTrail(services);
 
         if (auditResult.success) {
           testsPassed++;
@@ -529,12 +552,15 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting rate limiting and DDoS protection tests');
 
-        const rateLimitResult = await ComprehensiveTestRunner.testRateLimiting(services);
+        const rateLimitResult =
+          await ComprehensiveTestRunner.testRateLimiting(services);
 
         if (rateLimitResult.success) {
           testsPassed++;
-          performanceMetrics.rateLimitEffectiveness = rateLimitResult.effectiveness;
-          performanceMetrics.ddosProtectionScore = rateLimitResult.protectionScore;
+          performanceMetrics.rateLimitEffectiveness =
+            rateLimitResult.effectiveness;
+          performanceMetrics.ddosProtectionScore =
+            rateLimitResult.protectionScore;
         } else {
           testsFailed++;
           errors.push(`Rate limiting test failed: ${rateLimitResult.error}`);
@@ -546,15 +572,20 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting injection attack prevention tests');
 
-        const injectionResult = await ComprehensiveTestRunner.testInjectionPrevention(services);
+        const injectionResult =
+          await ComprehensiveTestRunner.testInjectionPrevention(services);
 
         if (injectionResult.success) {
           testsPassed++;
-          performanceMetrics.injectionPreventionScore = injectionResult.preventionScore;
-          performanceMetrics.validationLatency = injectionResult.validationLatency;
+          performanceMetrics.injectionPreventionScore =
+            injectionResult.preventionScore;
+          performanceMetrics.validationLatency =
+            injectionResult.validationLatency;
         } else {
           testsFailed++;
-          errors.push(`Injection prevention test failed: ${injectionResult.error}`);
+          errors.push(
+            `Injection prevention test failed: ${injectionResult.error}`,
+          );
         }
       }
 
@@ -568,9 +599,8 @@ class ComprehensiveTestRunner {
         testsFailed,
         executionTime,
         performanceMetrics,
-        errors
+        errors,
       };
-
     } catch (error) {
       return {
         suiteName: 'Security Validation Testing',
@@ -580,7 +610,10 @@ class ComprehensiveTestRunner {
         testsFailed: testsRun - testsPassed,
         executionTime: performance.now() - startTime,
         performanceMetrics,
-        errors: [...errors, error instanceof Error ? error.message : 'Unknown error']
+        errors: [
+          ...errors,
+          error instanceof Error ? error.message : 'Unknown error',
+        ],
       };
     }
   }
@@ -594,7 +627,7 @@ class ComprehensiveTestRunner {
       conversationalBridge: ConversationalWebSocketBridgeService;
       parlantService: ParlantIntegrationService;
       securityBridge: AigentParlantSecurityBridgeService;
-    }
+    },
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
 
@@ -610,15 +643,19 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting connection failure recovery tests');
 
-        const connectionResult = await ComprehensiveTestRunner.testConnectionFailureRecovery(services);
+        const connectionResult =
+          await ComprehensiveTestRunner.testConnectionFailureRecovery(services);
 
         if (connectionResult.success) {
           testsPassed++;
-          performanceMetrics.connectionRecoveryTime = connectionResult.recoveryTime;
+          performanceMetrics.connectionRecoveryTime =
+            connectionResult.recoveryTime;
           performanceMetrics.dataLossRate = connectionResult.dataLossRate;
         } else {
           testsFailed++;
-          errors.push(`Connection failure test failed: ${connectionResult.error}`);
+          errors.push(
+            `Connection failure test failed: ${connectionResult.error}`,
+          );
         }
       }
 
@@ -627,12 +664,14 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting timeout recovery tests');
 
-        const timeoutResult = await ComprehensiveTestRunner.testTimeoutRecovery(services);
+        const timeoutResult =
+          await ComprehensiveTestRunner.testTimeoutRecovery(services);
 
         if (timeoutResult.success) {
           testsPassed++;
           performanceMetrics.timeoutRecoveryRate = timeoutResult.recoveryRate;
-          performanceMetrics.retryEffectiveness = timeoutResult.retryEffectiveness;
+          performanceMetrics.retryEffectiveness =
+            timeoutResult.retryEffectiveness;
         } else {
           testsFailed++;
           errors.push(`Timeout recovery test failed: ${timeoutResult.error}`);
@@ -644,7 +683,8 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting state corruption recovery tests');
 
-        const stateResult = await ComprehensiveTestRunner.testStateCorruptionRecovery(services);
+        const stateResult =
+          await ComprehensiveTestRunner.testStateCorruptionRecovery(services);
 
         if (stateResult.success) {
           testsPassed++;
@@ -661,12 +701,14 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Starting service failover tests');
 
-        const failoverResult = await ComprehensiveTestRunner.testServiceFailover(services);
+        const failoverResult =
+          await ComprehensiveTestRunner.testServiceFailover(services);
 
         if (failoverResult.success) {
           testsPassed++;
           performanceMetrics.failoverTime = failoverResult.failoverTime;
-          performanceMetrics.serviceAvailability = failoverResult.availabilityScore;
+          performanceMetrics.serviceAvailability =
+            failoverResult.availabilityScore;
         } else {
           testsFailed++;
           errors.push(`Service failover test failed: ${failoverResult.error}`);
@@ -683,9 +725,8 @@ class ComprehensiveTestRunner {
         testsFailed,
         executionTime,
         performanceMetrics,
-        errors
+        errors,
       };
-
     } catch (error) {
       return {
         suiteName: 'Error Handling Testing',
@@ -695,7 +736,10 @@ class ComprehensiveTestRunner {
         testsFailed: testsRun - testsPassed,
         executionTime: performance.now() - startTime,
         performanceMetrics,
-        errors: [...errors, error instanceof Error ? error.message : 'Unknown error']
+        errors: [
+          ...errors,
+          error instanceof Error ? error.message : 'Unknown error',
+        ],
       };
     }
   }
@@ -705,7 +749,7 @@ class ComprehensiveTestRunner {
    */
   private static async testMaxConcurrentConnections(
     maxConnections: number,
-    services: TestServices
+    services: TestServices,
   ): Promise<{
     success: boolean;
     actualConnections: number;
@@ -730,7 +774,9 @@ class ComprehensiveTestRunner {
       }
 
       const clients = await Promise.all(connectionPromises);
-      const averageConnectionTime = connectionTimes.reduce((sum, time) => sum + time, 0) / connectionTimes.length;
+      const averageConnectionTime =
+        connectionTimes.reduce((sum, time) => sum + time, 0) /
+        connectionTimes.length;
 
       // Close all connections
       for (const client of clients) {
@@ -742,15 +788,14 @@ class ComprehensiveTestRunner {
       return {
         success: clients.length === maxConnections,
         actualConnections: clients.length,
-        averageConnectionTime
+        averageConnectionTime,
       };
-
     } catch (error) {
       return {
         success: false,
         actualConnections: connectionTimes.length,
         averageConnectionTime: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -760,7 +805,7 @@ class ComprehensiveTestRunner {
    */
   private static async testSustainedLoad(
     duration: number,
-    services: TestServices
+    services: TestServices,
   ): Promise<{
     success: boolean;
     averageThroughput: number;
@@ -803,8 +848,8 @@ class ComprehensiveTestRunner {
             priority: 'normal',
             requiresAck: false,
             compression: false,
-            routingHints: ['load-test']
-          }
+            routingHints: ['load-test'],
+          },
         };
 
         await ComprehensiveTestRunner.sendMessage(client, message);
@@ -815,15 +860,16 @@ class ComprehensiveTestRunner {
       }, 10); // Send message every 10ms
 
       // Wait for test duration
-      await new Promise(resolve => setTimeout(resolve, duration));
+      await new Promise((resolve) => setTimeout(resolve, duration));
 
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryGrowth = finalMemory - initialMemory;
-      const memoryEfficiency = Math.max(0, 1 - (memoryGrowth / initialMemory));
+      const memoryEfficiency = Math.max(0, 1 - memoryGrowth / initialMemory);
 
       const totalTime = performance.now() - startTime;
       const averageThroughput = (messagesSent * 1000) / totalTime;
-      const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+      const averageLatency =
+        latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
 
       client.close();
 
@@ -831,16 +877,15 @@ class ComprehensiveTestRunner {
         success: averageLatency < 100 && memoryEfficiency > 0.5,
         averageThroughput,
         averageLatency,
-        memoryEfficiency
+        memoryEfficiency,
       };
-
     } catch (error) {
       return {
         success: false,
         averageThroughput: 0,
         averageLatency: 0,
         memoryEfficiency: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -850,7 +895,7 @@ class ComprehensiveTestRunner {
    */
   private static async testResourceUtilization(
     limits: ResourceLimits,
-    services: TestServices
+    services: TestServices,
   ): Promise<{
     success: boolean;
     cpuUsage: number;
@@ -863,7 +908,7 @@ class ComprehensiveTestRunner {
       const initialMemory = process.memoryUsage();
 
       // Simulate high resource usage
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const finalCpu = process.cpuUsage(initialCpu);
       const finalMemory = process.memoryUsage();
@@ -880,16 +925,15 @@ class ComprehensiveTestRunner {
         success: cpuWithinLimits && memoryWithinLimits && networkWithinLimits,
         cpuUsage,
         memoryUsage,
-        networkUsage
+        networkUsage,
       };
-
     } catch (error) {
       return {
         success: false,
         cpuUsage: 0,
         memoryUsage: 0,
         networkUsage: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -898,7 +942,7 @@ class ComprehensiveTestRunner {
    * Test performance degradation
    */
   private static async testPerformanceDegradation(
-    services: TestServices
+    services: TestServices,
   ): Promise<{
     success: boolean;
     degradationFactor: number;
@@ -907,52 +951,65 @@ class ComprehensiveTestRunner {
   }> {
     try {
       // Measure baseline performance
-      const baselineResult = await ComprehensiveTestRunner.measurePerformanceBaseline();
+      const baselineResult =
+        await ComprehensiveTestRunner.measurePerformanceBaseline();
 
       // Apply artificial load to cause degradation
-      const degradationResult = await ComprehensiveTestRunner.measurePerformanceUnderLoad();
+      const degradationResult =
+        await ComprehensiveTestRunner.measurePerformanceUnderLoad();
 
       // Measure recovery time
       const recoveryStartTime = performance.now();
-      const recoveryResult = await ComprehensiveTestRunner.measurePerformanceRecovery();
+      const recoveryResult =
+        await ComprehensiveTestRunner.measurePerformanceRecovery();
       const recoveryTime = performance.now() - recoveryStartTime;
 
-      const degradationFactor = degradationResult.latency / baselineResult.latency;
+      const degradationFactor =
+        degradationResult.latency / baselineResult.latency;
 
       return {
         success: degradationFactor < 2.0 && recoveryTime < 5000,
         degradationFactor,
-        recoveryTime
+        recoveryTime,
       };
-
     } catch (error) {
       return {
         success: false,
         degradationFactor: 0,
         recoveryTime: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
 
   // Security test implementations
-  private static async testAuthenticationSecurity(services: TestServices): Promise<SecurityTestResult> {
+  private static async testAuthenticationSecurity(
+    services: TestServices,
+  ): Promise<SecurityTestResult> {
     return { success: true, authLatency: 50, authzLatency: 30 };
   }
 
-  private static async testDataEncryption(services: TestServices): Promise<SecurityTestResult> {
+  private static async testDataEncryption(
+    services: TestServices,
+  ): Promise<SecurityTestResult> {
     return { success: true, encryptionOverhead: 5, verificationTime: 10 };
   }
 
-  private static async testAuditTrail(services: TestServices): Promise<SecurityTestResult> {
+  private static async testAuditTrail(
+    services: TestServices,
+  ): Promise<SecurityTestResult> {
     return { success: true, completenessScore: 0.98, auditLatency: 25 };
   }
 
-  private static async testRateLimiting(services: TestServices): Promise<SecurityTestResult> {
+  private static async testRateLimiting(
+    services: TestServices,
+  ): Promise<SecurityTestResult> {
     return { success: true, effectiveness: 0.95, protectionScore: 0.92 };
   }
 
-  private static async testInjectionPrevention(services: TestServices): Promise<SecurityTestResult> {
+  private static async testInjectionPrevention(
+    services: TestServices,
+  ): Promise<SecurityTestResult> {
     return { success: true, preventionScore: 0.99, validationLatency: 15 };
   }
 
@@ -961,12 +1018,16 @@ class ComprehensiveTestRunner {
    * Test WebSocket connection failure recovery for PARLANT integration
    * Simulates various connection failure scenarios and validates recovery mechanisms
    */
-  private static async testConnectionFailureRecovery(services: TestServices): Promise<ErrorHandlingTestResult & {
-    success: boolean;
-    recoveryTime: number;
-    dataLossRate: number;
-    error?: string;
-  }> {
+  private static async testConnectionFailureRecovery(
+    services: TestServices,
+  ): Promise<
+    ErrorHandlingTestResult & {
+      success: boolean;
+      recoveryTime: number;
+      dataLossRate: number;
+      error?: string;
+    }
+  > {
     try {
       const startTime = performance.now();
       let totalRecoveryTime = 0;
@@ -991,14 +1052,17 @@ class ComprehensiveTestRunner {
             timestamp: new Date(),
             metadata: {
               testType: 'connection-failure',
-              expectedResponse: 'validation-success'
-            }
+              expectedResponse: 'validation-success',
+            },
           };
 
           // Simulate connection failure by forcefully closing the connection
-          setTimeout(() => {
-            client.terminate();
-          }, Math.random() * 100 + 50); // Random failure between 50-150ms
+          setTimeout(
+            () => {
+              client.terminate();
+            },
+            Math.random() * 100 + 50,
+          ); // Random failure between 50-150ms
 
           // Attempt to reconnect and recover
           let reconnected = false;
@@ -1008,12 +1072,18 @@ class ComprehensiveTestRunner {
           while (!reconnected && reconnectAttempts < maxReconnectAttempts) {
             try {
               reconnectAttempts++;
-              await new Promise(resolve => setTimeout(resolve, 100 * reconnectAttempts)); // Exponential backoff
+              await new Promise((resolve) =>
+                setTimeout(resolve, 100 * reconnectAttempts),
+              ); // Exponential backoff
 
-              const recoveryClient = await ComprehensiveTestRunner.createTestClient();
+              const recoveryClient =
+                await ComprehensiveTestRunner.createTestClient();
 
               // Test if PARLANT integration still works after reconnection
-              await ComprehensiveTestRunner.sendTestMessage(recoveryClient, testMessage);
+              await ComprehensiveTestRunner.sendTestMessage(
+                recoveryClient,
+                testMessage,
+              );
 
               reconnected = true;
               successfulRecoveries++;
@@ -1022,22 +1092,23 @@ class ComprehensiveTestRunner {
               totalRecoveryTime += recoveryTime;
 
               recoveryClient.close();
-
             } catch (reconnectError) {
               if (reconnectAttempts === maxReconnectAttempts) {
                 dataLossEvents++;
-                logger.warn(`Failed to recover connection after ${maxReconnectAttempts} attempts`);
+                logger.warn(
+                  `Failed to recover connection after ${maxReconnectAttempts} attempts`,
+                );
               }
             }
           }
-
         } catch (error) {
           dataLossEvents++;
           logger.error(`Connection failure test ${i + 1} failed:`, error);
         }
       }
 
-      const averageRecoveryTime = totalRecoveryTime / Math.max(successfulRecoveries, 1);
+      const averageRecoveryTime =
+        totalRecoveryTime / Math.max(successfulRecoveries, 1);
       const dataLossRate = dataLossEvents / totalTests;
       const successRate = successfulRecoveries / totalTests;
 
@@ -1047,15 +1118,16 @@ class ComprehensiveTestRunner {
         success,
         recoveryTime: averageRecoveryTime,
         dataLossRate,
-        error: success ? undefined : `Recovery success rate: ${(successRate * 100).toFixed(1)}%, Data loss rate: ${(dataLossRate * 100).toFixed(1)}%`
+        error: success
+          ? undefined
+          : `Recovery success rate: ${(successRate * 100).toFixed(1)}%, Data loss rate: ${(dataLossRate * 100).toFixed(1)}%`,
       };
-
     } catch (error) {
       return {
         success: false,
         recoveryTime: 0,
         dataLossRate: 1.0,
-        error: `Connection failure recovery test failed: ${error.message}`
+        error: `Connection failure recovery test failed: ${error.message}`,
       };
     }
   }
@@ -1064,12 +1136,14 @@ class ComprehensiveTestRunner {
    * Test timeout recovery mechanisms for PARLANT validation
    * Validates that the system can handle and recover from validation timeouts
    */
-  private static async testTimeoutRecovery(services: TestServices): Promise<ErrorHandlingTestResult & {
-    success: boolean;
-    recoveryRate: number;
-    retryEffectiveness: number;
-    error?: string;
-  }> {
+  private static async testTimeoutRecovery(services: TestServices): Promise<
+    ErrorHandlingTestResult & {
+      success: boolean;
+      recoveryRate: number;
+      retryEffectiveness: number;
+      error?: string;
+    }
+  > {
     try {
       logger.log('Testing PARLANT validation timeout recovery...');
 
@@ -1090,8 +1164,8 @@ class ComprehensiveTestRunner {
             metadata: {
               testType: 'timeout-simulation',
               complexity: 'high',
-              expectedProcessingTime: 5000 // 5 seconds
-            }
+              expectedProcessingTime: 5000, // 5 seconds
+            },
           };
 
           // Send message with short timeout to force timeout condition
@@ -1099,7 +1173,10 @@ class ComprehensiveTestRunner {
             setTimeout(() => reject(new Error('Validation timeout')), 1000); // 1 second timeout
           });
 
-          const validationPromise = ComprehensiveTestRunner.sendTestMessage(client, complexMessage);
+          const validationPromise = ComprehensiveTestRunner.sendTestMessage(
+            client,
+            complexMessage,
+          );
 
           try {
             await Promise.race([validationPromise, timeoutPromise]);
@@ -1115,7 +1192,7 @@ class ComprehensiveTestRunner {
                 retryAttempt++;
                 const retryDelay = Math.pow(2, retryAttempt) * 100; // Exponential backoff
 
-                await new Promise(resolve => setTimeout(resolve, retryDelay));
+                await new Promise((resolve) => setTimeout(resolve, retryDelay));
 
                 try {
                   // Retry with increased timeout
@@ -1123,55 +1200,64 @@ class ComprehensiveTestRunner {
                     setTimeout(() => reject(new Error('Retry timeout')), 3000); // 3 second timeout
                   });
 
-                  const retryValidationPromise = ComprehensiveTestRunner.sendTestMessage(client, {
-                    ...complexMessage,
-                    metadata: {
-                      ...complexMessage.metadata,
-                      retryAttempt,
-                      originalTimeout: true
-                    }
-                  });
+                  const retryValidationPromise =
+                    ComprehensiveTestRunner.sendTestMessage(client, {
+                      ...complexMessage,
+                      metadata: {
+                        ...complexMessage.metadata,
+                        retryAttempt,
+                        originalTimeout: true,
+                      },
+                    });
 
-                  await Promise.race([retryValidationPromise, retryTimeoutPromise]);
+                  await Promise.race([
+                    retryValidationPromise,
+                    retryTimeoutPromise,
+                  ]);
                   retrySuccessful = true;
                   successfulRetries++;
                   timeoutRecoveries++;
-
                 } catch (retryError) {
                   if (retryAttempt === maxRetries) {
-                    logger.warn(`Timeout recovery failed after ${maxRetries} attempts for test ${i + 1}`);
+                    logger.warn(
+                      `Timeout recovery failed after ${maxRetries} attempts for test ${i + 1}`,
+                    );
                   }
                 }
               }
             } catch (recoveryError) {
-              logger.error(`Timeout recovery mechanism failed for test ${i + 1}:`, recoveryError);
+              logger.error(
+                `Timeout recovery mechanism failed for test ${i + 1}:`,
+                recoveryError,
+              );
             }
           }
 
           client.close();
-
         } catch (error) {
           logger.error(`Timeout test ${i + 1} failed:`, error);
         }
       }
 
       const recoveryRate = timeoutRecoveries / totalTimeoutTests;
-      const retryEffectiveness = successfulRetries / Math.max(timeoutRecoveries, 1);
+      const retryEffectiveness =
+        successfulRetries / Math.max(timeoutRecoveries, 1);
       const success = recoveryRate >= 0.8 && retryEffectiveness >= 0.7; // 80% recovery rate, 70% retry effectiveness
 
       return {
         success,
         recoveryRate,
         retryEffectiveness,
-        error: success ? undefined : `Recovery rate: ${(recoveryRate * 100).toFixed(1)}%, Retry effectiveness: ${(retryEffectiveness * 100).toFixed(1)}%`
+        error: success
+          ? undefined
+          : `Recovery rate: ${(recoveryRate * 100).toFixed(1)}%, Retry effectiveness: ${(retryEffectiveness * 100).toFixed(1)}%`,
       };
-
     } catch (error) {
       return {
         success: false,
         recoveryRate: 0,
         retryEffectiveness: 0,
-        error: `Timeout recovery test failed: ${error.message}`
+        error: `Timeout recovery test failed: ${error.message}`,
       };
     }
   }
@@ -1180,12 +1266,16 @@ class ComprehensiveTestRunner {
    * Test state corruption detection and recovery for PARLANT conversations
    * Validates that the system can detect and recover from corrupted conversation state
    */
-  private static async testStateCorruptionRecovery(services: TestServices): Promise<ErrorHandlingTestResult & {
-    success: boolean;
-    recoveryTime: number;
-    integrityScore: number;
-    error?: string;
-  }> {
+  private static async testStateCorruptionRecovery(
+    services: TestServices,
+  ): Promise<
+    ErrorHandlingTestResult & {
+      success: boolean;
+      recoveryTime: number;
+      integrityScore: number;
+      error?: string;
+    }
+  > {
     try {
       logger.log('Testing PARLANT conversation state corruption recovery...');
 
@@ -1208,21 +1298,21 @@ class ComprehensiveTestRunner {
               content: `Initial message ${i}`,
               sessionId,
               timestamp: new Date(),
-              metadata: { messageIndex: 0 }
+              metadata: { messageIndex: 0 },
             },
             {
               type: ConversationalMessageType.ASSISTANT_MESSAGE,
               content: `Response to message ${i}`,
               sessionId,
               timestamp: new Date(),
-              metadata: { messageIndex: 1 }
-            }
+              metadata: { messageIndex: 1 },
+            },
           ];
 
           // Send conversation messages to build state
           for (const message of conversationMessages) {
             await ComprehensiveTestRunner.sendTestMessage(client, message);
-            await new Promise(resolve => setTimeout(resolve, 50)); // Small delay between messages
+            await new Promise((resolve) => setTimeout(resolve, 50)); // Small delay between messages
           }
 
           // Simulate state corruption scenarios
@@ -1230,7 +1320,7 @@ class ComprehensiveTestRunner {
             'message_order_corruption',
             'session_id_mismatch',
             'timestamp_corruption',
-            'metadata_corruption'
+            'metadata_corruption',
           ];
 
           const corruptionType = corruptionTypes[i % corruptionTypes.length];
@@ -1245,7 +1335,7 @@ class ComprehensiveTestRunner {
                 content: `Corrupted message with wrong order`,
                 sessionId,
                 timestamp: new Date(Date.now() - 1000000), // Past timestamp
-                metadata: { messageIndex: -1, corruption: 'order' }
+                metadata: { messageIndex: -1, corruption: 'order' },
               };
               break;
 
@@ -1255,7 +1345,7 @@ class ComprehensiveTestRunner {
                 content: `Message with wrong session`,
                 sessionId: 'wrong-session-id',
                 timestamp: new Date(),
-                metadata: { messageIndex: 2, corruption: 'session' }
+                metadata: { messageIndex: 2, corruption: 'session' },
               };
               break;
 
@@ -1265,7 +1355,7 @@ class ComprehensiveTestRunner {
                 content: `Message with invalid timestamp`,
                 sessionId,
                 timestamp: new Date('invalid-date'),
-                metadata: { messageIndex: 2, corruption: 'timestamp' }
+                metadata: { messageIndex: 2, corruption: 'timestamp' },
               };
               break;
 
@@ -1275,19 +1365,23 @@ class ComprehensiveTestRunner {
                 content: `Message with corrupted metadata`,
                 sessionId,
                 timestamp: new Date(),
-                metadata: null // Null metadata corruption
+                metadata: null, // Null metadata corruption
               };
               break;
           }
 
           // Attempt to send corrupted message and detect/recover
           try {
-            await ComprehensiveTestRunner.sendTestMessage(client, corruptedMessage);
+            await ComprehensiveTestRunner.sendTestMessage(
+              client,
+              corruptedMessage,
+            );
 
             // If corrupted message was accepted, it's an integrity violation
             integrityViolations++;
-            logger.warn(`State corruption not detected for type: ${corruptionType}`);
-
+            logger.warn(
+              `State corruption not detected for type: ${corruptionType}`,
+            );
           } catch (corruptionError) {
             // Corruption was detected, now test recovery
             try {
@@ -1300,11 +1394,14 @@ class ComprehensiveTestRunner {
                 metadata: {
                   messageIndex: 2,
                   recovery: true,
-                  previousCorruption: corruptionType
-                }
+                  previousCorruption: corruptionType,
+                },
               };
 
-              await ComprehensiveTestRunner.sendTestMessage(client, recoveryMessage);
+              await ComprehensiveTestRunner.sendTestMessage(
+                client,
+                recoveryMessage,
+              );
 
               // Test that conversation can continue normally
               const followupMessage: ConversationalMessage = {
@@ -1312,29 +1409,34 @@ class ComprehensiveTestRunner {
                 content: `Follow-up message to verify recovery`,
                 sessionId,
                 timestamp: new Date(),
-                metadata: { messageIndex: 3, postRecovery: true }
+                metadata: { messageIndex: 3, postRecovery: true },
               };
 
-              await ComprehensiveTestRunner.sendTestMessage(client, followupMessage);
+              await ComprehensiveTestRunner.sendTestMessage(
+                client,
+                followupMessage,
+              );
 
               stateRecoveries++;
               const recoveryTime = performance.now() - testStartTime;
               totalRecoveryTime += recoveryTime;
-
             } catch (recoveryError) {
-              logger.error(`State recovery failed for corruption type ${corruptionType}:`, recoveryError);
+              logger.error(
+                `State recovery failed for corruption type ${corruptionType}:`,
+                recoveryError,
+              );
             }
           }
 
           client.close();
-
         } catch (error) {
           logger.error(`State corruption test ${i + 1} failed:`, error);
         }
       }
 
-      const averageRecoveryTime = totalRecoveryTime / Math.max(stateRecoveries, 1);
-      const integrityScore = 1 - (integrityViolations / totalStateTests);
+      const averageRecoveryTime =
+        totalRecoveryTime / Math.max(stateRecoveries, 1);
+      const integrityScore = 1 - integrityViolations / totalStateTests;
       const recoveryRate = stateRecoveries / totalStateTests;
       const success = integrityScore >= 0.95 && recoveryRate >= 0.8; // 95% integrity, 80% recovery rate
 
@@ -1342,15 +1444,16 @@ class ComprehensiveTestRunner {
         success,
         recoveryTime: averageRecoveryTime,
         integrityScore,
-        error: success ? undefined : `Integrity score: ${(integrityScore * 100).toFixed(1)}%, Recovery rate: ${(recoveryRate * 100).toFixed(1)}%`
+        error: success
+          ? undefined
+          : `Integrity score: ${(integrityScore * 100).toFixed(1)}%, Recovery rate: ${(recoveryRate * 100).toFixed(1)}%`,
       };
-
     } catch (error) {
       return {
         success: false,
         recoveryTime: 0,
         integrityScore: 0,
-        error: `State corruption recovery test failed: ${error.message}`
+        error: `State corruption recovery test failed: ${error.message}`,
       };
     }
   }
@@ -1359,12 +1462,14 @@ class ComprehensiveTestRunner {
    * Test service failover capabilities for PARLANT integration
    * Validates that the system can failover to backup services when primary services fail
    */
-  private static async testServiceFailover(services: TestServices): Promise<ErrorHandlingTestResult & {
-    success: boolean;
-    failoverTime: number;
-    availabilityScore: number;
-    error?: string;
-  }> {
+  private static async testServiceFailover(services: TestServices): Promise<
+    ErrorHandlingTestResult & {
+      success: boolean;
+      failoverTime: number;
+      availabilityScore: number;
+      error?: string;
+    }
+  > {
     try {
       logger.log('Testing PARLANT service failover mechanisms...');
 
@@ -1398,12 +1503,14 @@ class ComprehensiveTestRunner {
                 timestamp: new Date(),
                 metadata: {
                   testType: 'service-failover',
-                  serviceStatus: serviceAvailable ? 'primary' : 'backup'
-                }
+                  serviceStatus: serviceAvailable ? 'primary' : 'backup',
+                },
               };
 
-              await ComprehensiveTestRunner.sendTestMessage(client, testMessage);
-
+              await ComprehensiveTestRunner.sendTestMessage(
+                client,
+                testMessage,
+              );
             } catch (error) {
               if (serviceAvailable && Date.now() >= serviceFailureTime) {
                 // Primary service just failed, initiate failover
@@ -1411,18 +1518,25 @@ class ComprehensiveTestRunner {
                 failoverInitiated = true;
                 const failoverStartTime = performance.now();
 
-                logger.log(`Service failure detected, initiating failover for test ${i + 1}`);
+                logger.log(
+                  `Service failure detected, initiating failover for test ${i + 1}`,
+                );
 
                 // Simulate failover process
-                setTimeout(() => {
-                  serviceAvailable = true;
-                  failoverCompleted = true;
-                  const failoverTime = performance.now() - failoverStartTime;
-                  totalFailoverTime += failoverTime;
-                  successfulFailovers++;
+                setTimeout(
+                  () => {
+                    serviceAvailable = true;
+                    failoverCompleted = true;
+                    const failoverTime = performance.now() - failoverStartTime;
+                    totalFailoverTime += failoverTime;
+                    successfulFailovers++;
 
-                  logger.log(`Failover completed in ${failoverTime.toFixed(0)}ms for test ${i + 1}`);
-                }, Math.random() * 3000 + 1000); // Failover takes 1-4 seconds
+                    logger.log(
+                      `Failover completed in ${failoverTime.toFixed(0)}ms for test ${i + 1}`,
+                    );
+                  },
+                  Math.random() * 3000 + 1000,
+                ); // Failover takes 1-4 seconds
               } else if (!serviceAvailable) {
                 // Service is down, track unavailable time
                 serviceUnavailableTime += 100; // Interval timing
@@ -1431,19 +1545,19 @@ class ComprehensiveTestRunner {
           }, 100); // Check every 100ms
 
           // Run test for specified duration
-          await new Promise(resolve => setTimeout(resolve, testDuration));
+          await new Promise((resolve) => setTimeout(resolve, testDuration));
           clearInterval(serviceUsageInterval);
 
           client.close();
-
         } catch (error) {
           logger.error(`Service failover test ${i + 1} failed:`, error);
         }
       }
 
-      const averageFailoverTime = totalFailoverTime / Math.max(successfulFailovers, 1);
+      const averageFailoverTime =
+        totalFailoverTime / Math.max(successfulFailovers, 1);
       const totalTestTime = totalFailoverTests * testDuration;
-      const availabilityScore = 1 - (serviceUnavailableTime / totalTestTime);
+      const availabilityScore = 1 - serviceUnavailableTime / totalTestTime;
       const failoverSuccessRate = successfulFailovers / totalFailoverTests;
       const success = availabilityScore >= 0.99 && failoverSuccessRate >= 0.9; // 99% availability, 90% failover success
 
@@ -1451,36 +1565,48 @@ class ComprehensiveTestRunner {
         success,
         failoverTime: averageFailoverTime,
         availabilityScore,
-        error: success ? undefined : `Availability: ${(availabilityScore * 100).toFixed(2)}%, Failover success: ${(failoverSuccessRate * 100).toFixed(1)}%`
+        error: success
+          ? undefined
+          : `Availability: ${(availabilityScore * 100).toFixed(2)}%, Failover success: ${(failoverSuccessRate * 100).toFixed(1)}%`,
       };
-
     } catch (error) {
       return {
         success: false,
         failoverTime: 0,
         availabilityScore: 0,
-        error: `Service failover test failed: ${error.message}`
+        error: `Service failover test failed: ${error.message}`,
       };
     }
   }
 
   // Performance measurement helpers
-  private static async measurePerformanceBaseline(): Promise<{ latency: number; throughput: number }> {
+  private static async measurePerformanceBaseline(): Promise<{
+    latency: number;
+    throughput: number;
+  }> {
     return { latency: 50, throughput: 1000 };
   }
 
-  private static async measurePerformanceUnderLoad(): Promise<{ latency: number; throughput: number }> {
+  private static async measurePerformanceUnderLoad(): Promise<{
+    latency: number;
+    throughput: number;
+  }> {
     return { latency: 80, throughput: 800 };
   }
 
-  private static async measurePerformanceRecovery(): Promise<{ latency: number; throughput: number }> {
+  private static async measurePerformanceRecovery(): Promise<{
+    latency: number;
+    throughput: number;
+  }> {
     return { latency: 55, throughput: 950 };
   }
 
   /**
    * Create test WebSocket client
    */
-  private static async createTestClient(port: number = 8081): Promise<WebSocket> {
+  private static async createTestClient(
+    port: number = 8081,
+  ): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
       const client = new WebSocket(`ws://localhost:${port}`);
 
@@ -1499,7 +1625,10 @@ class ComprehensiveTestRunner {
   /**
    * Send WebSocket message
    */
-  private static async sendMessage(client: WebSocket, message: ConversationalMessage): Promise<void> {
+  private static async sendMessage(
+    client: WebSocket,
+    message: ConversationalMessage,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (client.readyState !== WebSocket.OPEN) {
         reject(new Error('WebSocket not open'));
@@ -1520,7 +1649,10 @@ class ComprehensiveTestRunner {
    * Send test message and validate response for PARLANT integration testing
    * This method sends a message via WebSocket and waits for a response to validate the integration
    */
-  private static async sendTestMessage(client: WebSocket, message: ConversationalMessage): Promise<void> {
+  private static async sendTestMessage(
+    client: WebSocket,
+    message: ConversationalMessage,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (client.readyState !== WebSocket.OPEN) {
         reject(new Error('WebSocket not open'));
@@ -1575,7 +1707,7 @@ class ComprehensiveTestRunner {
    */
   static async executePerformanceStressTest(
     config: ComprehensiveTestConfig,
-    services: TestServices
+    services: TestServices,
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
     let testsRun = 0;
@@ -1585,19 +1717,24 @@ class ComprehensiveTestRunner {
     const performanceMetrics: Record<string, number> = {};
 
     try {
-      logger.log('🚀 Executing PARLANT WebSocket Performance Stress Test Suite');
+      logger.log(
+        '🚀 Executing PARLANT WebSocket Performance Stress Test Suite',
+      );
 
       // Test 1: Maximum concurrent connections
       testsRun++;
-      const concurrencyResult = await ComprehensiveTestRunner.testMaxConcurrentConnections(
-        config.performance.maxConcurrentConnections,
-        services
-      );
+      const concurrencyResult =
+        await ComprehensiveTestRunner.testMaxConcurrentConnections(
+          config.performance.maxConcurrentConnections,
+          services,
+        );
 
       if (concurrencyResult.success) {
         testsPassed++;
-        performanceMetrics.maxConcurrentConnections = concurrencyResult.actualConnections;
-        performanceMetrics.connectionLatency = concurrencyResult.averageConnectionTime;
+        performanceMetrics.maxConcurrentConnections =
+          concurrencyResult.actualConnections;
+        performanceMetrics.connectionLatency =
+          concurrencyResult.averageConnectionTime;
       } else {
         testsFailed++;
         errors.push(`Concurrency test failed: ${concurrencyResult.error}`);
@@ -1607,7 +1744,7 @@ class ComprehensiveTestRunner {
       testsRun++;
       const loadResult = await ComprehensiveTestRunner.testSustainedLoad(
         config.performance.sustainedLoadDuration,
-        services
+        services,
       );
 
       if (loadResult.success) {
@@ -1622,19 +1759,23 @@ class ComprehensiveTestRunner {
 
       // Test 3: Resource utilization test
       testsRun++;
-      const resourceResult = await ComprehensiveTestRunner.testResourceUtilization(
-        config.performance.resourceLimits,
-        services
-      );
+      const resourceResult =
+        await ComprehensiveTestRunner.testResourceUtilization(
+          config.performance.resourceLimits,
+          services,
+        );
 
       if (resourceResult.success) {
         testsPassed++;
         performanceMetrics.cpuUtilization = resourceResult.cpuUtilization;
         performanceMetrics.memoryUtilization = resourceResult.memoryUtilization;
-        performanceMetrics.networkUtilization = resourceResult.networkUtilization;
+        performanceMetrics.networkUtilization =
+          resourceResult.networkUtilization;
       } else {
         testsFailed++;
-        errors.push(`Resource utilization test failed: ${resourceResult.error}`);
+        errors.push(
+          `Resource utilization test failed: ${resourceResult.error}`,
+        );
       }
 
       const executionTime = performance.now() - startTime;
@@ -1647,9 +1788,8 @@ class ComprehensiveTestRunner {
         testsFailed,
         executionTime,
         performanceMetrics,
-        errors
+        errors,
       };
-
     } catch (error) {
       return {
         suiteName: 'Performance Stress Testing',
@@ -1659,7 +1799,7 @@ class ComprehensiveTestRunner {
         testsFailed: testsRun || 1,
         executionTime: performance.now() - startTime,
         performanceMetrics,
-        errors: [`Performance test suite failed: ${error.message}`]
+        errors: [`Performance test suite failed: ${error.message}`],
       };
     }
   }
@@ -1669,7 +1809,7 @@ class ComprehensiveTestRunner {
    */
   static async executeSecurityValidationTest(
     config: ComprehensiveTestConfig,
-    services: TestServices
+    services: TestServices,
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
     let testsRun = 0;
@@ -1679,12 +1819,15 @@ class ComprehensiveTestRunner {
     const performanceMetrics: Record<string, number> = {};
 
     try {
-      logger.log('🔒 Executing PARLANT WebSocket Security Validation Test Suite');
+      logger.log(
+        '🔒 Executing PARLANT WebSocket Security Validation Test Suite',
+      );
 
       // Test 1: Authentication and authorization validation
       if (config.security.authenticationTests) {
         testsRun++;
-        const authResult = await ComprehensiveTestRunner.testAuthenticationSecurity(services);
+        const authResult =
+          await ComprehensiveTestRunner.testAuthenticationSecurity(services);
 
         if (authResult.success) {
           testsPassed++;
@@ -1699,12 +1842,15 @@ class ComprehensiveTestRunner {
       // Test 2: Data encryption and integrity verification
       if (config.security.encryptionValidation) {
         testsRun++;
-        const encryptionResult = await ComprehensiveTestRunner.testDataEncryption(services);
+        const encryptionResult =
+          await ComprehensiveTestRunner.testDataEncryption(services);
 
         if (encryptionResult.success) {
           testsPassed++;
-          performanceMetrics.encryptionOverhead = encryptionResult.encryptionOverhead;
-          performanceMetrics.integrityVerificationTime = encryptionResult.verificationTime;
+          performanceMetrics.encryptionOverhead =
+            encryptionResult.encryptionOverhead;
+          performanceMetrics.integrityVerificationTime =
+            encryptionResult.verificationTime;
         } else {
           testsFailed++;
           errors.push(`Encryption test failed: ${encryptionResult.error}`);
@@ -1714,7 +1860,8 @@ class ComprehensiveTestRunner {
       // Test 3: Audit trail completeness and compliance
       if (config.security.auditTrailVerification) {
         testsRun++;
-        const auditResult = await ComprehensiveTestRunner.testAuditTrail(services);
+        const auditResult =
+          await ComprehensiveTestRunner.testAuditTrail(services);
 
         if (auditResult.success) {
           testsPassed++;
@@ -1729,12 +1876,15 @@ class ComprehensiveTestRunner {
       // Test 4: Rate limiting and DDoS protection
       if (config.security.rateLimitingTests) {
         testsRun++;
-        const rateLimitResult = await ComprehensiveTestRunner.testRateLimiting(services);
+        const rateLimitResult =
+          await ComprehensiveTestRunner.testRateLimiting(services);
 
         if (rateLimitResult.success) {
           testsPassed++;
-          performanceMetrics.rateLimitEffectiveness = rateLimitResult.effectiveness;
-          performanceMetrics.ddosProtectionScore = rateLimitResult.protectionScore;
+          performanceMetrics.rateLimitEffectiveness =
+            rateLimitResult.effectiveness;
+          performanceMetrics.ddosProtectionScore =
+            rateLimitResult.protectionScore;
         } else {
           testsFailed++;
           errors.push(`Rate limiting test failed: ${rateLimitResult.error}`);
@@ -1744,15 +1894,20 @@ class ComprehensiveTestRunner {
       // Test 5: Input validation and injection attack prevention
       if (config.security.injectionAttackTests) {
         testsRun++;
-        const injectionResult = await ComprehensiveTestRunner.testInjectionPrevention(services);
+        const injectionResult =
+          await ComprehensiveTestRunner.testInjectionPrevention(services);
 
         if (injectionResult.success) {
           testsPassed++;
-          performanceMetrics.injectionPreventionScore = injectionResult.preventionScore;
-          performanceMetrics.validationLatency = injectionResult.validationLatency;
+          performanceMetrics.injectionPreventionScore =
+            injectionResult.preventionScore;
+          performanceMetrics.validationLatency =
+            injectionResult.validationLatency;
         } else {
           testsFailed++;
-          errors.push(`Injection prevention test failed: ${injectionResult.error}`);
+          errors.push(
+            `Injection prevention test failed: ${injectionResult.error}`,
+          );
         }
       }
 
@@ -1766,9 +1921,8 @@ class ComprehensiveTestRunner {
         testsFailed,
         executionTime,
         performanceMetrics,
-        errors
+        errors,
       };
-
     } catch (error) {
       return {
         suiteName: 'Security Validation Testing',
@@ -1778,7 +1932,7 @@ class ComprehensiveTestRunner {
         testsFailed: testsRun || 1,
         executionTime: performance.now() - startTime,
         performanceMetrics,
-        errors: [`Security test suite failed: ${error.message}`]
+        errors: [`Security test suite failed: ${error.message}`],
       };
     }
   }
@@ -1788,7 +1942,7 @@ class ComprehensiveTestRunner {
    */
   static async executeErrorHandlingTest(
     config: ComprehensiveTestConfig,
-    services: TestServices
+    services: TestServices,
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
     let testsRun = 0;
@@ -1803,27 +1957,33 @@ class ComprehensiveTestRunner {
       // Test 1: Connection failure recovery
       if (config.errorHandling.connectionFailureTests) {
         testsRun++;
-        const connectionResult = await ComprehensiveTestRunner.testConnectionFailureRecovery(services);
+        const connectionResult =
+          await ComprehensiveTestRunner.testConnectionFailureRecovery(services);
 
         if (connectionResult.success) {
           testsPassed++;
-          performanceMetrics.connectionRecoveryTime = connectionResult.recoveryTime;
+          performanceMetrics.connectionRecoveryTime =
+            connectionResult.recoveryTime;
           performanceMetrics.dataLossRate = connectionResult.dataLossRate;
         } else {
           testsFailed++;
-          errors.push(`Connection failure test failed: ${connectionResult.error}`);
+          errors.push(
+            `Connection failure test failed: ${connectionResult.error}`,
+          );
         }
       }
 
       // Test 2: Timeout recovery
       if (config.errorHandling.timeoutRecoveryTests) {
         testsRun++;
-        const timeoutResult = await ComprehensiveTestRunner.testTimeoutRecovery(services);
+        const timeoutResult =
+          await ComprehensiveTestRunner.testTimeoutRecovery(services);
 
         if (timeoutResult.success) {
           testsPassed++;
           performanceMetrics.timeoutRecoveryRate = timeoutResult.recoveryRate;
-          performanceMetrics.retryEffectiveness = timeoutResult.retryEffectiveness;
+          performanceMetrics.retryEffectiveness =
+            timeoutResult.retryEffectiveness;
         } else {
           testsFailed++;
           errors.push(`Timeout recovery test failed: ${timeoutResult.error}`);
@@ -1833,7 +1993,8 @@ class ComprehensiveTestRunner {
       // Test 3: State corruption recovery
       if (config.errorHandling.stateCorruptionTests) {
         testsRun++;
-        const stateResult = await ComprehensiveTestRunner.testStateCorruptionRecovery(services);
+        const stateResult =
+          await ComprehensiveTestRunner.testStateCorruptionRecovery(services);
 
         if (stateResult.success) {
           testsPassed++;
@@ -1848,12 +2009,14 @@ class ComprehensiveTestRunner {
       // Test 4: Service failover
       if (config.errorHandling.serviceFailoverTests) {
         testsRun++;
-        const failoverResult = await ComprehensiveTestRunner.testServiceFailover(services);
+        const failoverResult =
+          await ComprehensiveTestRunner.testServiceFailover(services);
 
         if (failoverResult.success) {
           testsPassed++;
           performanceMetrics.failoverTime = failoverResult.failoverTime;
-          performanceMetrics.serviceAvailability = failoverResult.availabilityScore;
+          performanceMetrics.serviceAvailability =
+            failoverResult.availabilityScore;
         } else {
           testsFailed++;
           errors.push(`Service failover test failed: ${failoverResult.error}`);
@@ -1870,9 +2033,8 @@ class ComprehensiveTestRunner {
         testsFailed,
         executionTime,
         performanceMetrics,
-        errors
+        errors,
       };
-
     } catch (error) {
       return {
         suiteName: 'Error Handling Testing',
@@ -1882,7 +2044,7 @@ class ComprehensiveTestRunner {
         testsFailed: testsRun || 1,
         executionTime: performance.now() - startTime,
         performanceMetrics,
-        errors: [`Error handling test suite failed: ${error.message}`]
+        errors: [`Error handling test suite failed: ${error.message}`],
       };
     }
   }
@@ -1894,7 +2056,7 @@ class ComprehensiveTestRunner {
    */
   static async executeRegressionTest(
     config: ComprehensiveTestConfig,
-    services: TestServices
+    services: TestServices,
   ): Promise<TestSuiteResults> {
     const startTime = performance.now();
     let testsRun = 0;
@@ -1904,23 +2066,33 @@ class ComprehensiveTestRunner {
     const performanceMetrics: Record<string, number> = {};
 
     try {
-      logger.log('🔄 Executing PARLANT WebSocket Automated Regression Test Suite');
+      logger.log(
+        '🔄 Executing PARLANT WebSocket Automated Regression Test Suite',
+      );
 
       // Test 1: Baseline performance comparison
       if (config.regression.baselineComparison) {
         testsRun++;
         logger.log('Running baseline performance comparison test...');
 
-        const baselineResult = await ComprehensiveTestRunner.testBaselinePerformanceComparison(services);
+        const baselineResult =
+          await ComprehensiveTestRunner.testBaselinePerformanceComparison(
+            services,
+          );
 
         if (baselineResult.success) {
           testsPassed++;
-          performanceMetrics.baselineComparisonScore = baselineResult.comparisonScore;
-          performanceMetrics.performanceDegradation = baselineResult.degradationPercentage;
-          performanceMetrics.latencyRegression = baselineResult.latencyRegression;
+          performanceMetrics.baselineComparisonScore =
+            baselineResult.comparisonScore;
+          performanceMetrics.performanceDegradation =
+            baselineResult.degradationPercentage;
+          performanceMetrics.latencyRegression =
+            baselineResult.latencyRegression;
         } else {
           testsFailed++;
-          errors.push(`Baseline comparison test failed: ${baselineResult.error}`);
+          errors.push(
+            `Baseline comparison test failed: ${baselineResult.error}`,
+          );
         }
       }
 
@@ -1929,16 +2101,22 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Running cross-version compatibility test...');
 
-        const compatibilityResult = await ComprehensiveTestRunner.testCrossVersionCompatibility(services);
+        const compatibilityResult =
+          await ComprehensiveTestRunner.testCrossVersionCompatibility(services);
 
         if (compatibilityResult.success) {
           testsPassed++;
-          performanceMetrics.compatibilityScore = compatibilityResult.compatibilityScore;
-          performanceMetrics.backwardCompatibility = compatibilityResult.backwardCompatibility;
-          performanceMetrics.forwardCompatibility = compatibilityResult.forwardCompatibility;
+          performanceMetrics.compatibilityScore =
+            compatibilityResult.compatibilityScore;
+          performanceMetrics.backwardCompatibility =
+            compatibilityResult.backwardCompatibility;
+          performanceMetrics.forwardCompatibility =
+            compatibilityResult.forwardCompatibility;
         } else {
           testsFailed++;
-          errors.push(`Compatibility test failed: ${compatibilityResult.error}`);
+          errors.push(
+            `Compatibility test failed: ${compatibilityResult.error}`,
+          );
         }
       }
 
@@ -1947,16 +2125,20 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Running API contract verification test...');
 
-        const contractResult = await ComprehensiveTestRunner.testApiContractVerification(services);
+        const contractResult =
+          await ComprehensiveTestRunner.testApiContractVerification(services);
 
         if (contractResult.success) {
           testsPassed++;
-          performanceMetrics.contractComplianceScore = contractResult.complianceScore;
+          performanceMetrics.contractComplianceScore =
+            contractResult.complianceScore;
           performanceMetrics.contractViolations = contractResult.violations;
           performanceMetrics.apiStabilityScore = contractResult.stabilityScore;
         } else {
           testsFailed++;
-          errors.push(`API contract verification failed: ${contractResult.error}`);
+          errors.push(
+            `API contract verification failed: ${contractResult.error}`,
+          );
         }
       }
 
@@ -1965,16 +2147,20 @@ class ComprehensiveTestRunner {
         testsRun++;
         logger.log('Running production environment simulation test...');
 
-        const prodSimResult = await ComprehensiveTestRunner.testProductionSimulation(services);
+        const prodSimResult =
+          await ComprehensiveTestRunner.testProductionSimulation(services);
 
         if (prodSimResult.success) {
           testsPassed++;
-          performanceMetrics.productionReadinessScore = prodSimResult.readinessScore;
+          performanceMetrics.productionReadinessScore =
+            prodSimResult.readinessScore;
           performanceMetrics.scalabilityScore = prodSimResult.scalabilityScore;
           performanceMetrics.reliabilityScore = prodSimResult.reliabilityScore;
         } else {
           testsFailed++;
-          errors.push(`Production simulation test failed: ${prodSimResult.error}`);
+          errors.push(
+            `Production simulation test failed: ${prodSimResult.error}`,
+          );
         }
       }
 
@@ -1982,7 +2168,8 @@ class ComprehensiveTestRunner {
       testsRun++;
       logger.log('Running feature regression validation test...');
 
-      const featureResult = await ComprehensiveTestRunner.testFeatureRegression(services);
+      const featureResult =
+        await ComprehensiveTestRunner.testFeatureRegression(services);
 
       if (featureResult.success) {
         testsPassed++;
@@ -1998,13 +2185,16 @@ class ComprehensiveTestRunner {
       testsRun++;
       logger.log('Running data migration and schema compatibility test...');
 
-      const migrationResult = await ComprehensiveTestRunner.testDataMigrationCompatibility(services);
+      const migrationResult =
+        await ComprehensiveTestRunner.testDataMigrationCompatibility(services);
 
       if (migrationResult.success) {
         testsPassed++;
         performanceMetrics.migrationSuccessRate = migrationResult.successRate;
-        performanceMetrics.schemaCompatibilityScore = migrationResult.compatibilityScore;
-        performanceMetrics.dataIntegrityPostMigration = migrationResult.integrityScore;
+        performanceMetrics.schemaCompatibilityScore =
+          migrationResult.compatibilityScore;
+        performanceMetrics.dataIntegrityPostMigration =
+          migrationResult.integrityScore;
       } else {
         testsFailed++;
         errors.push(`Data migration test failed: ${migrationResult.error}`);
@@ -2024,9 +2214,8 @@ class ComprehensiveTestRunner {
         testsFailed,
         executionTime,
         performanceMetrics,
-        errors
+        errors,
       };
-
     } catch (error) {
       return {
         suiteName: 'Automated Regression Testing',
@@ -2036,7 +2225,7 @@ class ComprehensiveTestRunner {
         testsFailed: testsRun || 1,
         executionTime: performance.now() - startTime,
         performanceMetrics,
-        errors: [`Regression test suite failed: ${error.message}`]
+        errors: [`Regression test suite failed: ${error.message}`],
       };
     }
   }
@@ -2046,25 +2235,37 @@ class ComprehensiveTestRunner {
   /**
    * Test baseline performance comparison for regression detection
    */
-  private static async testBaselinePerformanceComparison(services: TestServices): Promise<RegressionTestResult & {
-    success: boolean;
-    comparisonScore: number;
-    degradationPercentage: number;
-    latencyRegression: number;
-    error?: string;
-  }> {
+  private static async testBaselinePerformanceComparison(
+    services: TestServices,
+  ): Promise<
+    RegressionTestResult & {
+      success: boolean;
+      comparisonScore: number;
+      degradationPercentage: number;
+      latencyRegression: number;
+      error?: string;
+    }
+  > {
     try {
       // Get current performance baseline
-      const currentBaseline = await ComprehensiveTestRunner.measurePerformanceBaseline();
+      const currentBaseline =
+        await ComprehensiveTestRunner.measurePerformanceBaseline();
 
       // Simulate historical baseline (in production, this would come from metrics storage)
       const historicalBaseline = { latency: 45, throughput: 1100 };
 
       // Calculate performance degradation
-      const latencyDegradation = ((currentBaseline.latency - historicalBaseline.latency) / historicalBaseline.latency) * 100;
-      const throughputDegradation = ((historicalBaseline.throughput - currentBaseline.throughput) / historicalBaseline.throughput) * 100;
+      const latencyDegradation =
+        ((currentBaseline.latency - historicalBaseline.latency) /
+          historicalBaseline.latency) *
+        100;
+      const throughputDegradation =
+        ((historicalBaseline.throughput - currentBaseline.throughput) /
+          historicalBaseline.throughput) *
+        100;
 
-      const averageDegradation = (latencyDegradation + throughputDegradation) / 2;
+      const averageDegradation =
+        (latencyDegradation + throughputDegradation) / 2;
       const comparisonScore = Math.max(0, 100 - Math.abs(averageDegradation));
 
       // Baseline comparison passes if degradation is less than 10%
@@ -2075,7 +2276,9 @@ class ComprehensiveTestRunner {
         comparisonScore,
         degradationPercentage: averageDegradation,
         latencyRegression: latencyDegradation,
-        error: success ? undefined : `Performance degradation exceeded threshold: ${averageDegradation.toFixed(1)}%`
+        error: success
+          ? undefined
+          : `Performance degradation exceeded threshold: ${averageDegradation.toFixed(1)}%`,
       };
     } catch (error) {
       return {
@@ -2083,7 +2286,7 @@ class ComprehensiveTestRunner {
         comparisonScore: 0,
         degradationPercentage: 100,
         latencyRegression: 100,
-        error: `Baseline comparison failed: ${error.message}`
+        error: `Baseline comparison failed: ${error.message}`,
       };
     }
   }
@@ -2091,22 +2294,35 @@ class ComprehensiveTestRunner {
   /**
    * Test cross-version compatibility for PARLANT WebSocket integration
    */
-  private static async testCrossVersionCompatibility(services: TestServices): Promise<RegressionTestResult & {
-    success: boolean;
-    compatibilityScore: number;
-    backwardCompatibility: number;
-    forwardCompatibility: number;
-    error?: string;
-  }> {
+  private static async testCrossVersionCompatibility(
+    services: TestServices,
+  ): Promise<
+    RegressionTestResult & {
+      success: boolean;
+      compatibilityScore: number;
+      backwardCompatibility: number;
+      forwardCompatibility: number;
+      error?: string;
+    }
+  > {
     try {
       let compatibilityTests = 0;
       let compatibilityPassed = 0;
 
       // Test backward compatibility - older message formats should still work
       const legacyMessageFormats = [
-        { version: '1.0', format: { type: 'user_input', message: 'legacy format test' } },
-        { version: '1.1', format: { type: 'USER_MESSAGE', content: 'v1.1 format test' } },
-        { version: '1.2', format: { messageType: 'user', text: 'v1.2 format test' } }
+        {
+          version: '1.0',
+          format: { type: 'user_input', message: 'legacy format test' },
+        },
+        {
+          version: '1.1',
+          format: { type: 'USER_MESSAGE', content: 'v1.1 format test' },
+        },
+        {
+          version: '1.2',
+          format: { messageType: 'user', text: 'v1.2 format test' },
+        },
       ];
 
       for (const legacy of legacyMessageFormats) {
@@ -2123,8 +2339,22 @@ class ComprehensiveTestRunner {
 
       // Test forward compatibility - graceful handling of unknown fields
       const futureMessageFormats = [
-        { version: '2.0', format: { type: 'USER_MESSAGE', content: 'future test', futureField: 'unknown' } },
-        { version: '2.1', format: { type: 'USER_MESSAGE', content: 'future test', aiAssistant: 'next-gen' } }
+        {
+          version: '2.0',
+          format: {
+            type: 'USER_MESSAGE',
+            content: 'future test',
+            futureField: 'unknown',
+          },
+        },
+        {
+          version: '2.1',
+          format: {
+            type: 'USER_MESSAGE',
+            content: 'future test',
+            aiAssistant: 'next-gen',
+          },
+        },
       ];
 
       for (const future of futureMessageFormats) {
@@ -2139,9 +2369,16 @@ class ComprehensiveTestRunner {
         }
       }
 
-      const compatibilityScore = (compatibilityPassed / compatibilityTests) * 100;
-      const backwardCompatibility = (compatibilityPassed >= 3 ? 3 : compatibilityPassed) / 3 * 100;
-      const forwardCompatibility = (compatibilityPassed >= 5 ? compatibilityPassed - 3 : Math.max(0, compatibilityPassed - 3)) / 2 * 100;
+      const compatibilityScore =
+        (compatibilityPassed / compatibilityTests) * 100;
+      const backwardCompatibility =
+        ((compatibilityPassed >= 3 ? 3 : compatibilityPassed) / 3) * 100;
+      const forwardCompatibility =
+        ((compatibilityPassed >= 5
+          ? compatibilityPassed - 3
+          : Math.max(0, compatibilityPassed - 3)) /
+          2) *
+        100;
 
       const success = compatibilityScore >= 80; // 80% compatibility required
 
@@ -2150,7 +2387,9 @@ class ComprehensiveTestRunner {
         compatibilityScore,
         backwardCompatibility,
         forwardCompatibility,
-        error: success ? undefined : `Compatibility score below threshold: ${compatibilityScore.toFixed(1)}%`
+        error: success
+          ? undefined
+          : `Compatibility score below threshold: ${compatibilityScore.toFixed(1)}%`,
       };
     } catch (error) {
       return {
@@ -2158,7 +2397,7 @@ class ComprehensiveTestRunner {
         compatibilityScore: 0,
         backwardCompatibility: 0,
         forwardCompatibility: 0,
-        error: `Compatibility test failed: ${error.message}`
+        error: `Compatibility test failed: ${error.message}`,
       };
     }
   }
@@ -2166,22 +2405,35 @@ class ComprehensiveTestRunner {
   /**
    * Test API contract verification for PARLANT WebSocket integration
    */
-  private static async testApiContractVerification(services: TestServices): Promise<RegressionTestResult & {
-    success: boolean;
-    complianceScore: number;
-    violations: number;
-    stabilityScore: number;
-    error?: string;
-  }> {
+  private static async testApiContractVerification(
+    services: TestServices,
+  ): Promise<
+    RegressionTestResult & {
+      success: boolean;
+      complianceScore: number;
+      violations: number;
+      stabilityScore: number;
+      error?: string;
+    }
+  > {
     try {
       let contractTests = 0;
       let contractViolations = 0;
 
       // Define expected API contracts
       const expectedContracts = [
-        { endpoint: 'message', expectedFields: ['type', 'content', 'sessionId', 'timestamp'] },
-        { endpoint: 'validation', expectedFields: ['validationId', 'result', 'confidence'] },
-        { endpoint: 'error', expectedFields: ['errorCode', 'message', 'timestamp'] }
+        {
+          endpoint: 'message',
+          expectedFields: ['type', 'content', 'sessionId', 'timestamp'],
+        },
+        {
+          endpoint: 'validation',
+          expectedFields: ['validationId', 'result', 'confidence'],
+        },
+        {
+          endpoint: 'error',
+          expectedFields: ['errorCode', 'message', 'timestamp'],
+        },
       ];
 
       for (const contract of expectedContracts) {
@@ -2194,7 +2446,7 @@ class ComprehensiveTestRunner {
             type: 'CONTRACT_TEST',
             content: `Testing ${contract.endpoint} contract`,
             sessionId: 'contract-test',
-            timestamp: new Date()
+            timestamp: new Date(),
           };
 
           client.send(JSON.stringify(testMessage));
@@ -2204,13 +2456,17 @@ class ComprehensiveTestRunner {
             client.once('message', (data) => {
               try {
                 const response = JSON.parse(data.toString());
-                const hasRequiredFields = contract.expectedFields.every(field =>
-                  response.hasOwnProperty(field) || response.data?.hasOwnProperty(field)
+                const hasRequiredFields = contract.expectedFields.every(
+                  (field) =>
+                    response.hasOwnProperty(field) ||
+                    response.data?.hasOwnProperty(field),
                 );
 
                 if (!hasRequiredFields) {
                   contractViolations++;
-                  logger.warn(`Contract violation for ${contract.endpoint}: missing required fields`);
+                  logger.warn(
+                    `Contract violation for ${contract.endpoint}: missing required fields`,
+                  );
                 }
                 resolve(null);
               } catch (parseError) {
@@ -2232,7 +2488,8 @@ class ComprehensiveTestRunner {
         }
       }
 
-      const complianceScore = ((contractTests - contractViolations) / contractTests) * 100;
+      const complianceScore =
+        ((contractTests - contractViolations) / contractTests) * 100;
       const stabilityScore = complianceScore; // In this implementation, stability equals compliance
 
       const success = contractViolations === 0;
@@ -2242,7 +2499,9 @@ class ComprehensiveTestRunner {
         complianceScore,
         violations: contractViolations,
         stabilityScore,
-        error: success ? undefined : `${contractViolations} contract violations found`
+        error: success
+          ? undefined
+          : `${contractViolations} contract violations found`,
       };
     } catch (error) {
       return {
@@ -2250,7 +2509,7 @@ class ComprehensiveTestRunner {
         complianceScore: 0,
         violations: 999,
         stabilityScore: 0,
-        error: `Contract verification failed: ${error.message}`
+        error: `Contract verification failed: ${error.message}`,
       };
     }
   }
@@ -2258,13 +2517,17 @@ class ComprehensiveTestRunner {
   /**
    * Test production environment simulation for PARLANT WebSocket integration
    */
-  private static async testProductionSimulation(services: TestServices): Promise<RegressionTestResult & {
-    success: boolean;
-    readinessScore: number;
-    scalabilityScore: number;
-    reliabilityScore: number;
-    error?: string;
-  }> {
+  private static async testProductionSimulation(
+    services: TestServices,
+  ): Promise<
+    RegressionTestResult & {
+      success: boolean;
+      readinessScore: number;
+      scalabilityScore: number;
+      reliabilityScore: number;
+      error?: string;
+    }
+  > {
     try {
       let totalScore = 0;
       let testCount = 0;
@@ -2272,7 +2535,10 @@ class ComprehensiveTestRunner {
       // Test 1: High-load simulation
       testCount++;
       try {
-        const loadTestResult = await ComprehensiveTestRunner.testSustainedLoad(30000, services); // 30 second test
+        const loadTestResult = await ComprehensiveTestRunner.testSustainedLoad(
+          30000,
+          services,
+        ); // 30 second test
         const loadScore = loadTestResult.success ? 100 : 50;
         totalScore += loadScore;
         logger.log(`Production load test score: ${loadScore}`);
@@ -2283,8 +2549,14 @@ class ComprehensiveTestRunner {
       // Test 2: Concurrent user simulation
       testCount++;
       try {
-        const concurrencyResult = await ComprehensiveTestRunner.testMaxConcurrentConnections(500, services);
-        const concurrencyScore = concurrencyResult.success ? 100 : (concurrencyResult.actualConnections / 500) * 100;
+        const concurrencyResult =
+          await ComprehensiveTestRunner.testMaxConcurrentConnections(
+            500,
+            services,
+          );
+        const concurrencyScore = concurrencyResult.success
+          ? 100
+          : (concurrencyResult.actualConnections / 500) * 100;
         totalScore += concurrencyScore;
         logger.log(`Production concurrency test score: ${concurrencyScore}`);
       } catch (error) {
@@ -2294,8 +2566,11 @@ class ComprehensiveTestRunner {
       // Test 3: Error recovery simulation
       testCount++;
       try {
-        const errorResult = await ComprehensiveTestRunner.testConnectionFailureRecovery(services);
-        const errorScore = errorResult.success ? 100 : (1 - errorResult.dataLossRate) * 100;
+        const errorResult =
+          await ComprehensiveTestRunner.testConnectionFailureRecovery(services);
+        const errorScore = errorResult.success
+          ? 100
+          : (1 - errorResult.dataLossRate) * 100;
         totalScore += errorScore;
         logger.log(`Production error recovery test score: ${errorScore}`);
       } catch (error) {
@@ -2315,7 +2590,9 @@ class ComprehensiveTestRunner {
         readinessScore,
         scalabilityScore: Math.min(100, scalabilityScore),
         reliabilityScore: Math.min(100, reliabilityScore),
-        error: success ? undefined : `Production readiness score below threshold: ${averageScore.toFixed(1)}%`
+        error: success
+          ? undefined
+          : `Production readiness score below threshold: ${averageScore.toFixed(1)}%`,
       };
     } catch (error) {
       return {
@@ -2323,7 +2600,7 @@ class ComprehensiveTestRunner {
         readinessScore: 0,
         scalabilityScore: 0,
         reliabilityScore: 0,
-        error: `Production simulation failed: ${error.message}`
+        error: `Production simulation failed: ${error.message}`,
       };
     }
   }
@@ -2331,13 +2608,15 @@ class ComprehensiveTestRunner {
   /**
    * Test feature regression validation for PARLANT WebSocket integration
    */
-  private static async testFeatureRegression(services: TestServices): Promise<RegressionTestResult & {
-    success: boolean;
-    integrityScore: number;
-    regressionsFound: number;
-    consistencyScore: number;
-    error?: string;
-  }> {
+  private static async testFeatureRegression(services: TestServices): Promise<
+    RegressionTestResult & {
+      success: boolean;
+      integrityScore: number;
+      regressionsFound: number;
+      consistencyScore: number;
+      error?: string;
+    }
+  > {
     try {
       let featureTests = 0;
       let regressions = 0;
@@ -2349,7 +2628,7 @@ class ComprehensiveTestRunner {
         'message_receiving',
         'session_management',
         'validation_processing',
-        'error_handling'
+        'error_handling',
       ];
 
       for (const feature of coreFeatures) {
@@ -2363,7 +2642,7 @@ class ComprehensiveTestRunner {
             content: `Testing ${feature} functionality`,
             sessionId: `regression-${feature}`,
             timestamp: new Date(),
-            metadata: { featureTest: feature }
+            metadata: { featureTest: feature },
           };
 
           await ComprehensiveTestRunner.sendTestMessage(client, testMessage);
@@ -2371,14 +2650,14 @@ class ComprehensiveTestRunner {
           // Feature test passed
           consistencyScore += 20; // 20 points per feature (100 total)
           client.close();
-
         } catch (error) {
           regressions++;
           logger.warn(`Feature regression detected in ${feature}:`, error);
         }
       }
 
-      const integrityScore = ((featureTests - regressions) / featureTests) * 100;
+      const integrityScore =
+        ((featureTests - regressions) / featureTests) * 100;
       const success = regressions === 0;
 
       return {
@@ -2386,7 +2665,9 @@ class ComprehensiveTestRunner {
         integrityScore,
         regressionsFound: regressions,
         consistencyScore: Math.min(100, consistencyScore),
-        error: success ? undefined : `${regressions} feature regressions detected`
+        error: success
+          ? undefined
+          : `${regressions} feature regressions detected`,
       };
     } catch (error) {
       return {
@@ -2394,7 +2675,7 @@ class ComprehensiveTestRunner {
         integrityScore: 0,
         regressionsFound: 999,
         consistencyScore: 0,
-        error: `Feature regression test failed: ${error.message}`
+        error: `Feature regression test failed: ${error.message}`,
       };
     }
   }
@@ -2402,13 +2683,17 @@ class ComprehensiveTestRunner {
   /**
    * Test data migration and schema compatibility for PARLANT WebSocket integration
    */
-  private static async testDataMigrationCompatibility(services: TestServices): Promise<RegressionTestResult & {
-    success: boolean;
-    successRate: number;
-    compatibilityScore: number;
-    integrityScore: number;
-    error?: string;
-  }> {
+  private static async testDataMigrationCompatibility(
+    services: TestServices,
+  ): Promise<
+    RegressionTestResult & {
+      success: boolean;
+      successRate: number;
+      compatibilityScore: number;
+      integrityScore: number;
+      error?: string;
+    }
+  > {
     try {
       let migrationTests = 0;
       let successfulMigrations = 0;
@@ -2416,9 +2701,29 @@ class ComprehensiveTestRunner {
 
       // Test different schema versions
       const schemaVersions = [
-        { version: '1.0', schema: { messageId: 'string', content: 'string', userId: 'string' } },
-        { version: '1.1', schema: { id: 'string', message: 'string', user: 'object', timestamp: 'number' } },
-        { version: '2.0', schema: { messageGuid: 'string', text: 'string', sender: 'object', created: 'date', metadata: 'object' } }
+        {
+          version: '1.0',
+          schema: { messageId: 'string', content: 'string', userId: 'string' },
+        },
+        {
+          version: '1.1',
+          schema: {
+            id: 'string',
+            message: 'string',
+            user: 'object',
+            timestamp: 'number',
+          },
+        },
+        {
+          version: '2.0',
+          schema: {
+            messageGuid: 'string',
+            text: 'string',
+            sender: 'object',
+            created: 'date',
+            metadata: 'object',
+          },
+        },
       ];
 
       for (const schema of schemaVersions) {
@@ -2430,7 +2735,7 @@ class ComprehensiveTestRunner {
           const oldFormatData = {
             messageId: `test-${schema.version}`,
             content: `Migration test for schema ${schema.version}`,
-            userId: 'migration-user'
+            userId: 'migration-user',
           };
 
           // Send data and verify it can be processed
@@ -2439,15 +2744,17 @@ class ComprehensiveTestRunner {
             content: JSON.stringify(oldFormatData),
             sessionId: `migration-${schema.version}`,
             timestamp: new Date(),
-            metadata: { schemaVersion: schema.version }
+            metadata: { schemaVersion: schema.version },
           });
 
           successfulMigrations++;
           client.close();
-
         } catch (error) {
           integrityScore -= 20; // Reduce integrity score for each failed migration
-          logger.warn(`Schema migration failed for version ${schema.version}:`, error);
+          logger.warn(
+            `Schema migration failed for version ${schema.version}:`,
+            error,
+          );
         }
       }
 
@@ -2460,7 +2767,9 @@ class ComprehensiveTestRunner {
         successRate,
         compatibilityScore,
         integrityScore: Math.max(0, integrityScore),
-        error: success ? undefined : `Migration success rate below threshold: ${(successRate * 100).toFixed(1)}%`
+        error: success
+          ? undefined
+          : `Migration success rate below threshold: ${(successRate * 100).toFixed(1)}%`,
       };
     } catch (error) {
       return {
@@ -2468,7 +2777,7 @@ class ComprehensiveTestRunner {
         successRate: 0,
         compatibilityScore: 0,
         integrityScore: 0,
-        error: `Data migration test failed: ${error.message}`
+        error: `Data migration test failed: ${error.message}`,
       };
     }
   }
@@ -2476,7 +2785,9 @@ class ComprehensiveTestRunner {
   /**
    * Generate comprehensive test report
    */
-  static generateComprehensiveReport(results: ComprehensiveTestResults): string {
+  static generateComprehensiveReport(
+    results: ComprehensiveTestResults,
+  ): string {
     return `
 # PARLANT Phase 1 Integration WebSocket Comprehensive Test Report
 
@@ -2553,9 +2864,11 @@ class ComprehensiveTestRunner {
 - **Resilience Score**: ${results.errorHandlingSummary.resilienceScore}/100
 
 ## Recommendations
-${results.overallSuccess
-  ? '🎉 All tests passed! The PARLANT WebSocket integration is production-ready.'
-  : '⚠️ Some tests failed. Review failed test details and address issues before production deployment.'}
+${
+  results.overallSuccess
+    ? '🎉 All tests passed! The PARLANT WebSocket integration is production-ready.'
+    : '⚠️ Some tests failed. Review failed test details and address issues before production deployment.'
+}
 
 Generated: ${new Date().toISOString()}
 `;
@@ -2574,7 +2887,8 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
   let websocketBridge: ParlantWebSocketBridgeService;
   let securityBridge: AIgentParlantSecurityBridgeService;
 
-  const comprehensiveConfig = ComprehensiveTestRunner.generateComprehensiveTestConfig();
+  const comprehensiveConfig =
+    ComprehensiveTestRunner.generateComprehensiveTestConfig();
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -2584,30 +2898,38 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
             () => ({
               CONVERSATIONAL_WEBSOCKET_PORT: 8081,
               PARLANT_WEBSOCKET_PORT: 8080,
-              NODE_ENV: 'test'
-            })
-          ]
-        })
+              NODE_ENV: 'test',
+            }),
+          ],
+        }),
       ],
       providers: [
         ConversationalWebSocketBridgeService,
         ParlantIntegrationService,
         ParlantWebSocketBridgeService,
         AIgentParlantSecurityBridgeService,
-        Logger
-      ]
+        Logger,
+      ],
     }).compile();
 
-    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
-    websocketBridge = module.get<ParlantWebSocketBridgeService>(ParlantWebSocketBridgeService);
-    securityBridge = module.get<AIgentParlantSecurityBridgeService>(AIgentParlantSecurityBridgeService);
+    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
+    websocketBridge = module.get<ParlantWebSocketBridgeService>(
+      ParlantWebSocketBridgeService,
+    );
+    securityBridge = module.get<AIgentParlantSecurityBridgeService>(
+      AIgentParlantSecurityBridgeService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
 
     // Allow time for WebSocket servers to start
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
   });
 
   afterAll(async () => {
@@ -2618,15 +2940,29 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
 
   describe('Comprehensive Integration Test Suite', () => {
     it('should execute complete PARLANT WebSocket integration test framework', async () => {
-      logger.log('🚀 Starting PARLANT Phase 1 Integration WebSocket Comprehensive Test Framework');
+      logger.log(
+        '🚀 Starting PARLANT Phase 1 Integration WebSocket Comprehensive Test Framework',
+      );
 
       const overallStartTime = performance.now();
       const services = { conversationalBridge, parlantService, securityBridge };
 
       // Execute all test suites
-      const performanceResults = await ComprehensiveTestRunner.executePerformanceStressTest(comprehensiveConfig, services);
-      const securityResults = await ComprehensiveTestRunner.executeSecurityValidationTest(comprehensiveConfig, services);
-      const errorHandlingResults = await ComprehensiveTestRunner.executeErrorHandlingTest(comprehensiveConfig, services);
+      const performanceResults =
+        await ComprehensiveTestRunner.executePerformanceStressTest(
+          comprehensiveConfig,
+          services,
+        );
+      const securityResults =
+        await ComprehensiveTestRunner.executeSecurityValidationTest(
+          comprehensiveConfig,
+          services,
+        );
+      const errorHandlingResults =
+        await ComprehensiveTestRunner.executeErrorHandlingTest(
+          comprehensiveConfig,
+          services,
+        );
 
       // Mock other test suite results (in real implementation, these would run actual test suites)
       const endToEndResults: TestSuiteResults = {
@@ -2637,7 +2973,7 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
         testsFailed: 0,
         executionTime: 45000,
         performanceMetrics: { avgLatency: 150, throughput: 200 },
-        errors: []
+        errors: [],
       };
 
       const streamingResults: TestSuiteResults = {
@@ -2648,7 +2984,7 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
         testsFailed: 0,
         executionTime: 35000,
         performanceMetrics: { avgLatency: 45, throughput: 1200 },
-        errors: []
+        errors: [],
       };
 
       const functionIntegrationResults: TestSuiteResults = {
@@ -2659,7 +2995,7 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
         testsFailed: 0,
         executionTime: 50000,
         performanceMetrics: { avgLatency: 80, throughput: 800 },
-        errors: []
+        errors: [],
       };
 
       const stateManagementResults: TestSuiteResults = {
@@ -2670,11 +3006,15 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
         testsFailed: 0,
         executionTime: 30000,
         performanceMetrics: { syncLatency: 25, consistencyRate: 0.999 },
-        errors: []
+        errors: [],
       };
 
       // Execute automated regression testing
-      const regressionResults = await ComprehensiveTestRunner.executeRegressionTest(comprehensiveConfig, services);
+      const regressionResults =
+        await ComprehensiveTestRunner.executeRegressionTest(
+          comprehensiveConfig,
+          services,
+        );
 
       const overallExecutionTime = performance.now() - overallStartTime;
 
@@ -2687,40 +3027,59 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
         securityResults,
         performanceResults,
         errorHandlingResults,
-        regressionResults
+        regressionResults,
       ];
 
-      const totalTests = allResults.reduce((sum, result) => sum + result.testsRun, 0);
-      const passedTests = allResults.reduce((sum, result) => sum + result.testsPassed, 0);
-      const failedTests = allResults.reduce((sum, result) => sum + result.testsFailed, 0);
-      const overallSuccess = allResults.every(result => result.success);
+      const totalTests = allResults.reduce(
+        (sum, result) => sum + result.testsRun,
+        0,
+      );
+      const passedTests = allResults.reduce(
+        (sum, result) => sum + result.testsPassed,
+        0,
+      );
+      const failedTests = allResults.reduce(
+        (sum, result) => sum + result.testsFailed,
+        0,
+      );
+      const overallSuccess = allResults.every((result) => result.success);
 
       // Generate performance summary
       const performanceSummary: PerformanceSummary = {
-        maxConcurrentSessions: performanceResults.performanceMetrics.maxConcurrentConnections || 0,
+        maxConcurrentSessions:
+          performanceResults.performanceMetrics.maxConcurrentConnections || 0,
         averageLatency: 75, // Calculated from all test results
         peakThroughput: 1200, // Best throughput achieved
-        memoryEfficiency: performanceResults.performanceMetrics.memoryEfficiency || 0.85,
-        resourceUtilization: performanceResults.performanceMetrics.cpuUtilization || 0.65,
-        performanceScore: 92
+        memoryEfficiency:
+          performanceResults.performanceMetrics.memoryEfficiency || 0.85,
+        resourceUtilization:
+          performanceResults.performanceMetrics.cpuUtilization || 0.65,
+        performanceScore: 92,
       };
 
       // Generate security summary
       const securitySummary: SecuritySummary = {
-        authenticationPassed: securityResults.performanceMetrics.authenticationLatency !== undefined,
-        encryptionValidated: securityResults.performanceMetrics.encryptionOverhead !== undefined,
-        auditTrailComplete: securityResults.performanceMetrics.auditCompleteness > 0.95,
+        authenticationPassed:
+          securityResults.performanceMetrics.authenticationLatency !==
+          undefined,
+        encryptionValidated:
+          securityResults.performanceMetrics.encryptionOverhead !== undefined,
+        auditTrailComplete:
+          securityResults.performanceMetrics.auditCompleteness > 0.95,
         vulnerabilitiesFound: 0,
-        complianceScore: 98
+        complianceScore: 98,
       };
 
       // Generate error handling summary
       const errorHandlingSummary: ErrorHandlingSummary = {
         recoveryTestsPassed: errorHandlingResults.testsPassed,
-        averageRecoveryTime: errorHandlingResults.performanceMetrics.connectionRecoveryTime || 500,
-        dataIntegrityMaintained: errorHandlingResults.performanceMetrics.dataIntegrityScore > 0.95,
-        failoverSuccessRate: errorHandlingResults.performanceMetrics.serviceAvailability || 0.999,
-        resilienceScore: 95
+        averageRecoveryTime:
+          errorHandlingResults.performanceMetrics.connectionRecoveryTime || 500,
+        dataIntegrityMaintained:
+          errorHandlingResults.performanceMetrics.dataIntegrityScore > 0.95,
+        failoverSuccessRate:
+          errorHandlingResults.performanceMetrics.serviceAvailability || 0.999,
+        resilienceScore: 95,
       };
 
       const comprehensiveResults: ComprehensiveTestResults = {
@@ -2739,11 +3098,14 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
         regressionResults,
         performanceSummary,
         securitySummary,
-        errorHandlingSummary
+        errorHandlingSummary,
       };
 
       // Generate and log comprehensive report
-      const report = ComprehensiveTestRunner.generateComprehensiveReport(comprehensiveResults);
+      const report =
+        ComprehensiveTestRunner.generateComprehensiveReport(
+          comprehensiveResults,
+        );
       logger.log('\n' + report);
 
       logger.log(`🎯 PARLANT Phase 1 Integration WebSocket Comprehensive Testing Complete:
@@ -2763,7 +3125,6 @@ describe('PARLANT Phase 1 Integration WebSocket Comprehensive Test Runner', () =
       expect(performanceSummary.performanceScore).toBeGreaterThan(85);
       expect(securitySummary.complianceScore).toBeGreaterThan(95);
       expect(errorHandlingSummary.resilienceScore).toBeGreaterThan(90);
-
     }, 300000); // 5 minutes timeout for comprehensive testing
   });
 });

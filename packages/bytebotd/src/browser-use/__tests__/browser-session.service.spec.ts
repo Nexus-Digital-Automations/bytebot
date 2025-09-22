@@ -57,16 +57,22 @@ describe('BrowserSessionService', () => {
     });
 
     it('should log initialization message on creation', () => {
-      expect(loggerSpy).toHaveBeenCalledWith('BrowserSessionService initialized');
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'BrowserSessionService initialized',
+      );
     });
 
     it('should be injectable as singleton', async () => {
-      const anotherService = module.get<BrowserSessionService>(BrowserSessionService);
+      const anotherService = module.get<BrowserSessionService>(
+        BrowserSessionService,
+      );
       expect(service).toBe(anotherService);
     });
 
     it('should initialize with empty session map', async () => {
-      const nonExistentSession = await service.getSession('non-existent-session');
+      const nonExistentSession = await service.getSession(
+        'non-existent-session',
+      );
       expect(nonExistentSession).toBeUndefined();
     });
   });
@@ -81,7 +87,9 @@ describe('BrowserSessionService', () => {
           success: true,
           sessionId,
         });
-        expect(loggerSpy).toHaveBeenCalledWith(`Creating browser session: ${sessionId}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Creating browser session: ${sessionId}`,
+        );
       });
 
       it('should create session with alphanumeric session ID', async () => {
@@ -184,7 +192,9 @@ describe('BrowserSessionService', () => {
 
         expect(result.success).toBe(true);
         expect(result.sessionId).toBeNull();
-        expect(loggerSpy).toHaveBeenCalledWith('Creating browser session: null');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Creating browser session: null',
+        );
       });
 
       it('should handle undefined session ID parameter', async () => {
@@ -193,7 +203,9 @@ describe('BrowserSessionService', () => {
 
         expect(result.success).toBe(true);
         expect(result.sessionId).toBeUndefined();
-        expect(loggerSpy).toHaveBeenCalledWith('Creating browser session: undefined');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Creating browser session: undefined',
+        );
       });
 
       it('should handle numeric session ID parameter', async () => {
@@ -202,7 +214,9 @@ describe('BrowserSessionService', () => {
 
         expect(result.success).toBe(true);
         expect(result.sessionId).toBe(12345);
-        expect(loggerSpy).toHaveBeenCalledWith('Creating browser session: 12345');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Creating browser session: 12345',
+        );
       });
 
       it('should handle object session ID parameter', async () => {
@@ -227,11 +241,14 @@ describe('BrowserSessionService', () => {
       });
 
       it('should handle concurrent session creation', async () => {
-        const sessionIds = Array.from({ length: 10 }, (_, i) => `concurrent-session-${i}`);
+        const sessionIds = Array.from(
+          { length: 10 },
+          (_, i) => `concurrent-session-${i}`,
+        );
 
         const startTime = performance.now();
         const results = await Promise.all(
-          sessionIds.map(sessionId => service.createSession(sessionId))
+          sessionIds.map((sessionId) => service.createSession(sessionId)),
         );
         const endTime = performance.now();
 
@@ -255,7 +272,8 @@ describe('BrowserSessionService', () => {
           executionTimes.push(endTime - startTime);
         }
 
-        const averageTime = executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
+        const averageTime =
+          executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
         const maxTime = Math.max(...executionTimes);
 
         expect(averageTime).toBeLessThan(25); // Average under 25ms
@@ -293,7 +311,9 @@ describe('BrowserSessionService', () => {
         const retrievedSession = await service.getSession(sessionId);
 
         expect(retrievedSession.id).toBe(sessionId);
-        expect(retrievedSession.createdAt.getTime()).toBeGreaterThanOrEqual(creationTime.getTime());
+        expect(retrievedSession.createdAt.getTime()).toBeGreaterThanOrEqual(
+          creationTime.getTime(),
+        );
       });
 
       it('should retrieve correct session among multiple sessions', async () => {
@@ -353,7 +373,7 @@ describe('BrowserSessionService', () => {
 
         const startTime = performance.now();
         const sessions = await Promise.all(
-          sessionIds.map(sessionId => service.getSession(sessionId))
+          sessionIds.map((sessionId) => service.getSession(sessionId)),
         );
         const endTime = performance.now();
 
@@ -386,7 +406,9 @@ describe('BrowserSessionService', () => {
         // Destroy session
         const result = await service.destroySession(sessionId);
         expect(result).toEqual({ success: true });
-        expect(loggerSpy).toHaveBeenCalledWith(`Destroying browser session: ${sessionId}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Destroying browser session: ${sessionId}`,
+        );
 
         // Verify session no longer exists
         const sessionAfter = await service.getSession(sessionId);
@@ -398,7 +420,9 @@ describe('BrowserSessionService', () => {
 
         const result = await service.destroySession(nonExistentSessionId);
         expect(result).toEqual({ success: true });
-        expect(loggerSpy).toHaveBeenCalledWith(`Destroying browser session: ${nonExistentSessionId}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Destroying browser session: ${nonExistentSessionId}`,
+        );
       });
 
       it('should destroy multiple sessions independently', async () => {
@@ -413,7 +437,9 @@ describe('BrowserSessionService', () => {
         }
 
         // Verify other sessions still exist
-        const remainingSession = await service.getSession('destroy-test-session-3');
+        const remainingSession = await service.getSession(
+          'destroy-test-session-3',
+        );
         expect(remainingSession).toBeDefined();
       });
 
@@ -439,14 +465,18 @@ describe('BrowserSessionService', () => {
         // @ts-expect-error Testing null parameter
         const result = await service.destroySession(null);
         expect(result).toEqual({ success: true });
-        expect(loggerSpy).toHaveBeenCalledWith('Destroying browser session: null');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Destroying browser session: null',
+        );
       });
 
       it('should handle undefined session ID parameter', async () => {
         // @ts-expect-error Testing undefined parameter
         const result = await service.destroySession(undefined);
         expect(result).toEqual({ success: true });
-        expect(loggerSpy).toHaveBeenCalledWith('Destroying browser session: undefined');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Destroying browser session: undefined',
+        );
       });
 
       it('should handle empty string session ID', async () => {
@@ -483,11 +513,11 @@ describe('BrowserSessionService', () => {
 
         const startTime = performance.now();
         const results = await Promise.all(
-          sessionIds.map(sessionId => service.destroySession(sessionId))
+          sessionIds.map((sessionId) => service.destroySession(sessionId)),
         );
         const endTime = performance.now();
 
-        results.forEach(result => {
+        results.forEach((result) => {
           expect(result.success).toBe(true);
         });
 
@@ -496,7 +526,10 @@ describe('BrowserSessionService', () => {
 
       it('should handle rapid successive destruction operations', async () => {
         // Create many sessions
-        const sessionIds = Array.from({ length: 50 }, (_, i) => `rapid-destroy-session-${i}`);
+        const sessionIds = Array.from(
+          { length: 50 },
+          (_, i) => `rapid-destroy-session-${i}`,
+        );
         for (const sessionId of sessionIds) {
           await service.createSession(sessionId);
         }
@@ -510,7 +543,8 @@ describe('BrowserSessionService', () => {
           executionTimes.push(endTime - startTime);
         }
 
-        const averageTime = executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
+        const averageTime =
+          executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
         const maxTime = Math.max(...executionTimes);
 
         expect(averageTime).toBeLessThan(25); // Average under 25ms
@@ -600,7 +634,8 @@ describe('BrowserSessionService', () => {
       }
 
       const finalMemoryUsage = process.memoryUsage();
-      const memoryIncrease = finalMemoryUsage.heapUsed - initialMemoryUsage.heapUsed;
+      const memoryIncrease =
+        finalMemoryUsage.heapUsed - initialMemoryUsage.heapUsed;
 
       // Memory increase should be reasonable (less than 10MB for 1000 sessions)
       expect(memoryIncrease).toBeLessThan(10 * 1024 * 1024);
@@ -670,22 +705,22 @@ describe('BrowserSessionService', () => {
 
       // Batch create
       const createResults = await Promise.all(
-        sessionIds.map(id => service.createSession(id))
+        sessionIds.map((id) => service.createSession(id)),
       );
 
       // Batch retrieve
       const sessions = await Promise.all(
-        sessionIds.map(id => service.getSession(id))
+        sessionIds.map((id) => service.getSession(id)),
       );
 
       // Batch destroy
       const destroyResults = await Promise.all(
-        sessionIds.map(id => service.destroySession(id))
+        sessionIds.map((id) => service.destroySession(id)),
       );
 
-      createResults.forEach(result => expect(result.success).toBe(true));
-      sessions.forEach(session => expect(session).toBeDefined());
-      destroyResults.forEach(result => expect(result.success).toBe(true));
+      createResults.forEach((result) => expect(result.success).toBe(true));
+      sessions.forEach((session) => expect(session).toBeDefined());
+      destroyResults.forEach((result) => expect(result.success).toBe(true));
     });
   });
 });

@@ -15,9 +15,7 @@
  * Security: Enterprise-grade validation with conversational authentication
  * Performance: Sub-500ms validation targets with intelligent caching
  * Compliance: Complete audit trails for SOX, GDPR, HIPAA requirements
- */;
-
-import {
+ */ import {
   Controller,
   Get,
   Post,
@@ -31,8 +29,7 @@ import {
   Logger,
   HttpStatus,
   HttpException,
-  HttpCode
-
+  HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -42,8 +39,7 @@ import {
   ApiQuery,
   ApiBody,
   ApiBearerAuth,
-  ApiSecurity
-
+  ApiSecurity,
 } from '@nestjs/swagger';
 
 // PARLANT Validation Integration;
@@ -56,10 +52,13 @@ import {
   SecurityLevel,
   ValidationMode,
   ConversationContext,
-  ParlantValidationInterceptor
-
+  ParlantValidationInterceptor,
 } from '@bytebot/shared/src/parlant/parlant-validation.decorator';
-import { ConversationContextParameter, ConversationContext as ConversationContextType, ConversationContext } from '@bytebot/shared/src/types/conversation-context.types';
+import {
+  ConversationContextParameter,
+  ConversationContext as ConversationContextType,
+  ConversationContext,
+} from '@bytebot/shared/src/types/conversation-context.types';
 
 // Authentication and Authorization;
 
@@ -71,7 +70,6 @@ import {
   AdminOnly,
   CurrentUser,
   ByteBotdUser,
-
 } from '../auth/decorators/roles.decorator';
 
 // Interceptors and Pipes;
@@ -104,8 +102,11 @@ export interface DatabaseQueryDto {
   readOnly?: boolean;
 
   /** Transaction isolation level */
-  isolationLevel?: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
-
+  isolationLevel?:
+    | 'READ_UNCOMMITTED'
+    | 'READ_COMMITTED'
+    | 'REPEATABLE_READ'
+    | 'SERIALIZABLE';
 }
 
 /**
@@ -132,8 +133,6 @@ export interface DatabaseModificationDto {
 
   /** Backup requirement before modification */
   requireBackup?: boolean;
-
-
 }
 
 /**
@@ -141,7 +140,12 @@ export interface DatabaseModificationDto {
  */
 export interface DatabaseSchemaDto {
   /** Schema operation type */
-  operation: 'CREATE_TABLE' | 'ALTER_TABLE' | 'DROP_TABLE' | 'CREATE_INDEX' | 'DROP_INDEX';
+  operation:
+    | 'CREATE_TABLE'
+    | 'ALTER_TABLE'
+    | 'DROP_TABLE'
+    | 'CREATE_INDEX'
+    | 'DROP_INDEX';
 
   /** SQL DDL statement */
   ddl: string;
@@ -154,8 +158,6 @@ export interface DatabaseSchemaDto {
 
   /** Rollback instructions */
   rollbackInstructions?: string;
-
-
 }
 
 /**
@@ -176,8 +178,6 @@ export interface DatabaseBackupDto {
 
   /** Encryption requirement */
   encrypt?: boolean;
-
-
 }
 
 /**
@@ -195,8 +195,6 @@ export interface DatabaseAnalyticsDto {
 
   /** Include usage statistics */
   includeUsage?: boolean;
-
-
 }
 
 // ===== DATABASE API CONTROLLER =====
@@ -210,10 +208,11 @@ export interface DatabaseAnalyticsDto {
 export class DatabaseApiController {
   private readonly logger = new Logger(DatabaseApiController.name);
 
-  constructor(
-    // Database services would be injected here
-  ) {
-    this.logger.log('Database API Controller initialized with comprehensive PARLANT validation');
+  constructor() // Database services would be injected here
+  {
+    this.logger.log(
+      'Database API Controller initialized with comprehensive PARLANT validation',
+    );
   }
 
   // ===== READ OPERATIONS (Low to Medium Risk) =====
@@ -231,15 +230,24 @@ export class DatabaseApiController {
     businessCategory: 'DATABASE_QUERY',
     complianceFlags: ['DATA_ACCESS', 'READ_OPERATION'],
     cacheable: true,
-    timeout: 5000
+    timeout: 5000,
   })
   @ApiOperation({
     summary: 'Execute read-only database query',
-    description: 'Execute parameterized read-only queries with automatic PARLANT validation'
+    description:
+      'Execute parameterized read-only queries with automatic PARLANT validation',
   })
   @ApiQuery({ name: 'query', description: 'SQL query string' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Maximum rows to return' })
-  @ApiQuery({ name: 'offset', required: false, description: 'Pagination offset' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Maximum rows to return',
+  })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    description: 'Pagination offset',
+  })
   @ApiResponse({
     status: 200,
     description: 'Query executed successfully',
@@ -249,9 +257,9 @@ export class DatabaseApiController {
         data: { type: 'array', items: { type: 'object' } },
         totalRows: { type: 'number' },
         executionTime: { type: 'number' },
-        operationId: { type: 'string' }
-      }
-    }
+        operationId: { type: 'string' },
+      },
+    },
   })
   executeQuery(
     @Query('query') query: string,
@@ -260,13 +268,12 @@ export class DatabaseApiController {
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): {
-  data: unknown[];
+    data: unknown[];
     totalRows: number;
     executionTime: number;
     operationId: string;
-
-} {
-  const operationId = this.generateOperationId();
+  } {
+    const operationId = this.generateOperationId();
     const startTime = Date.now();
 
     this.logger.log(`[${operationId}] Database query execution`, {
@@ -275,12 +282,17 @@ export class DatabaseApiController {
       limit,
       offset,
       userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined,
-      validationApproved: true
+      conversationId:
+        conversationContext &&
+        typeof conversationContext === 'object' &&
+        'conversationId' in conversationContext
+          ? (conversationContext as { conversationId: string }).conversationId
+          : undefined,
+      validationApproved: true,
     });
 
     try {
-  // Validate query is read-only
+      // Validate query is read-only
       this.validateReadOnlyQuery(query);
 
       // Execute query with timeout and safety checks
@@ -290,35 +302,40 @@ export class DatabaseApiController {
         limit: limit || 100,
         offset: offset || 0,
         timeout: 30000,
-        readOnly: true
+        readOnly: true,
       });
 
       const executionTime = Date.now() - startTime;
 
-      this.logger.log(`[${operationId}] Query executed successfully (${executionTime}ms)`, {
-        operationId,
-        rowCount: data.length,
-        executionTime,
-        userId: user.id
-      });
+      this.logger.log(
+        `[${operationId}] Query executed successfully (${executionTime}ms)`,
+        {
+          operationId,
+          rowCount: data.length,
+          executionTime,
+          userId: user.id,
+        },
+      );
 
       return {
         data,
         totalRows: data.length,
         executionTime,
-        operationId
-      };
-
-    } catch (error) {
-  const executionTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Query execution failed (${executionTime}ms)`, {
         operationId,
-        error: error instanceof Error ? error.message : String(error),
-        userId: user.id
-      });
+      };
+    } catch (error) {
+      const executionTime = Date.now() - startTime;
+      this.logger.error(
+        `[${operationId}] Query execution failed (${executionTime}ms)`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          userId: user.id,
+        },
+      );
       throw new HttpException(
         `Query execution failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -335,11 +352,11 @@ export class DatabaseApiController {
     businessCategory: 'SCHEMA_INSPECTION',
     complianceFlags: ['SCHEMA_ACCESS', 'METADATA_ACCESS'],
     cacheable: true,
-    timeout: 3000
+    timeout: 3000,
   })
   @ApiOperation({
     summary: 'Get table schema',
-    description: 'Retrieve schema information for specified database table'
+    description: 'Retrieve schema information for specified database table',
   })
   @ApiParam({ name: 'tableName', description: 'Name of the table' })
   getTableSchema(
@@ -347,27 +364,34 @@ export class DatabaseApiController {
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): {
-  tableName: string;
+    tableName: string;
     columns: unknown[];
     indexes: unknown[];
     constraints: unknown[];
+  } {
+    const operationId = this.generateOperationId();
 
-} {
-  const operationId = this.generateOperationId();
-
-    this.logger.log(`[${operationId}] Schema inspection for table: ${tableName}`, {
-      operationId,
-      tableName,
-      userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined
-    });
+    this.logger.log(
+      `[${operationId}] Schema inspection for table: ${tableName}`,
+      {
+        operationId,
+        tableName,
+        userId: user.id,
+        conversationId:
+          conversationContext &&
+          typeof conversationContext === 'object' &&
+          'conversationId' in conversationContext
+            ? (conversationContext as { conversationId: string }).conversationId
+            : undefined,
+      },
+    );
 
     // Mock implementation - would integrate with actual database schema inspection
     return {
       tableName,
       columns: [],
       indexes: [],
-      constraints: []
+      constraints: [],
     };
   }
 
@@ -380,8 +404,9 @@ export class DatabaseApiController {
   @Post('modify')
   @OperatorOrAdmin()
   @ParlantCritical(
-    'Execute database modification operation with data validation and backup requirements',{
-  securityLevel: SecurityLevel.CRITICAL,
+    'Execute database modification operation with data validation and backup requirements',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
       businessCategory: 'DATABASE_MODIFICATION',
       complianceFlags: ['DATA_MODIFICATION', 'HIGH_RISK', 'AUDIT_REQUIRED'],
@@ -391,43 +416,48 @@ export class DatabaseApiController {
       customRules: [
         {
           name: 'backup_requirement_validation',
-          condition: 'operation in ["DELETE", "UPDATE"] && requireBackup === true',
+          condition:
+            'operation in ["DELETE", "UPDATE"] && requireBackup === true',
           action: 'APPROVE',
-          priority: 10
+          priority: 10,
         },
         {
           name: 'bulk_operation_validation',
           condition: 'estimated_affected_rows > 1000',
           action: 'REQUIRE_CONFIRMATION',
-          priority: 9
+          priority: 9,
         },
         {
           name: 'critical_table_validation',
           condition: 'table in ["users", "payments", "orders"]',
           action: 'REQUIRE_CONFIRMATION',
-          priority: 8
-        }
-      ]
-    }
+          priority: 8,
+        },
+      ],
+    },
   )
   @ApiOperation({
     summary: 'Execute database modification',
-    description: 'Execute INSERT, UPDATE, DELETE, or UPSERT operations with comprehensive validation'
+    description:
+      'Execute INSERT, UPDATE, DELETE, or UPSERT operations with comprehensive validation',
   })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
         table: { type: 'string' },
-        operation: { type: 'string', enum: ['INSERT', 'UPDATE', 'DELETE', 'UPSERT'] },
+        operation: {
+          type: 'string',
+          enum: ['INSERT', 'UPDATE', 'DELETE', 'UPSERT'],
+        },
         data: { type: 'object' },
         conditions: { type: 'object' },
         justification: { type: 'string' },
         useTransaction: { type: 'boolean' },
-        requireBackup: { type: 'boolean' }
+        requireBackup: { type: 'boolean' },
       },
-      required: ['table', 'operation', 'justification']
-    }
+      required: ['table', 'operation', 'justification'],
+    },
   })
   @ApiResponse({
     status: 200,
@@ -438,22 +468,21 @@ export class DatabaseApiController {
         success: { type: 'boolean' },
         affectedRows: { type: 'number' },
         operationId: { type: 'string' },
-        backupId: { type: 'string' }
-      }
-    }
+        backupId: { type: 'string' },
+      },
+    },
   })
   executeModification(
     @Body() modificationDto: DatabaseModificationDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): {
-  success: boolean;
+    success: boolean;
     affectedRows: number;
     operationId: string;
     backupId?: string;
-
-} {
-  const operationId = this.generateOperationId();
+  } {
+    const operationId = this.generateOperationId();
     const startTime = Date.now();
 
     this.logger.log(`[${operationId}] Database modification request`, {
@@ -462,54 +491,81 @@ export class DatabaseApiController {
       operation: modificationDto.operation,
       justification: modificationDto.justification,
       userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined,
+      conversationId:
+        conversationContext &&
+        typeof conversationContext === 'object' &&
+        'conversationId' in conversationContext
+          ? (conversationContext as { conversationId: string }).conversationId
+          : undefined,
       validationApproved: true,
-      securityLevel: conversationContext && typeof conversationContext === 'object' && 'securityContext' in conversationContext && conversationContext.securityContext && typeof conversationContext.securityContext === 'object' && 'accessLevel' in conversationContext.securityContext ? (conversationContext.securityContext as { accessLevel: SecurityLevel }).accessLevel : SecurityLevel.MEDIUM
+      securityLevel:
+        conversationContext &&
+        typeof conversationContext === 'object' &&
+        'securityContext' in conversationContext &&
+        conversationContext.securityContext &&
+        typeof conversationContext.securityContext === 'object' &&
+        'accessLevel' in conversationContext.securityContext
+          ? (
+              conversationContext.securityContext as {
+                accessLevel: SecurityLevel;
+              }
+            ).accessLevel
+          : SecurityLevel.MEDIUM,
     });
 
     try {
-  // Validate modification request
+      // Validate modification request
       this.validateModificationRequest(modificationDto);
 
       // Execute backup if required
       let backupId: string | undefined;
       if (modificationDto.requireBackup) {
         backupId = this.createPreModificationBackup(modificationDto.table);
-        this.logger.log(`[${operationId}] Pre-modification backup created: ${backupId}`);
+        this.logger.log(
+          `[${operationId}] Pre-modification backup created: ${backupId}`,
+        );
       }
 
       // Execute modification in transaction if requested
-      const result = this.executeModificationOperation(modificationDto, operationId);
+      const result = this.executeModificationOperation(
+        modificationDto,
+        operationId,
+      );
 
       const executionTime = Date.now() - startTime;
-      this.logger.log(`[${operationId}] Modification completed successfully (${executionTime}ms)`, {
-        operationId,
-        affectedRows: result.affectedRows,
-        backupId,
-        executionTime,
-        userId: user.id
-      });
+      this.logger.log(
+        `[${operationId}] Modification completed successfully (${executionTime}ms)`,
+        {
+          operationId,
+          affectedRows: result.affectedRows,
+          backupId,
+          executionTime,
+          userId: user.id,
+        },
+      );
 
       return {
         success: true,
         affectedRows: result.affectedRows,
         operationId,
-        backupId
+        backupId,
       };
-
     } catch (error) {
-  const executionTime = Date.now() - startTime;
-      this.logger.error(`[${operationId}] Modification failed (${executionTime}ms)`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        table: modificationDto.table,
-        operation: modificationDto.operation,
-        userId: user.id
-      });
+      const executionTime = Date.now() - startTime;
+      this.logger.error(
+        `[${operationId}] Modification failed (${executionTime}ms)`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          table: modificationDto.table,
+          operation: modificationDto.operation,
+          userId: user.id,
+        },
+      );
 
       throw new HttpException(
         `Database modification failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -523,11 +579,16 @@ export class DatabaseApiController {
   @Post('schema')
   @AdminOnly()
   @ParlantAdmin(
-    'Execute database schema modification with DDL operations and migration support',{
-  securityLevel: SecurityLevel.CRITICAL,
+    'Execute database schema modification with DDL operations and migration support',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
       businessCategory: 'SCHEMA_MODIFICATION',
-      complianceFlags: ['SCHEMA_CHANGE', 'DDL_OPERATION', 'CRITICAL_SYSTEM_CHANGE'],
+      complianceFlags: [
+        'SCHEMA_CHANGE',
+        'DDL_OPERATION',
+        'CRITICAL_SYSTEM_CHANGE',
+      ],
       requiredRoles: ['ADMIN'],
       timeout: 60000,
       cacheable: false,
@@ -549,38 +610,47 @@ export class DatabaseApiController {
           condition: 'reversible === true',
           action: 'APPROVE',
           priority: 5,
-        }
-      ]
-    }
+        },
+      ],
+    },
   )
   @ApiOperation({
     summary: 'Execute schema modification',
-    description: 'Execute DDL operations with comprehensive validation and rollback support'
+    description:
+      'Execute DDL operations with comprehensive validation and rollback support',
   })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        operation: { type: 'string', enum: ['CREATE_TABLE', 'ALTER_TABLE', 'DROP_TABLE', 'CREATE_INDEX', 'DROP_INDEX'] },
+        operation: {
+          type: 'string',
+          enum: [
+            'CREATE_TABLE',
+            'ALTER_TABLE',
+            'DROP_TABLE',
+            'CREATE_INDEX',
+            'DROP_INDEX',
+          ],
+        },
         ddl: { type: 'string' },
         description: { type: 'string' },
         reversible: { type: 'boolean' },
-        rollbackInstructions: { type: 'string' }
+        rollbackInstructions: { type: 'string' },
       },
-      required: ['operation', 'ddl', 'description']
-    }
+      required: ['operation', 'ddl', 'description'],
+    },
   })
   executeSchemaChange(
     @Body() schemaDto: DatabaseSchemaDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): {
-  success: boolean;
+    success: boolean;
     migrationId: string;
     operationId: string;
-
-} {
-  const operationId = this.generateOperationId();
+  } {
+    const operationId = this.generateOperationId();
 
     this.logger.log(`[${operationId}] Schema modification request`, {
       operationId,
@@ -588,12 +658,17 @@ export class DatabaseApiController {
       description: schemaDto.description,
       reversible: schemaDto.reversible,
       userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined,
-      validationApproved: true
+      conversationId:
+        conversationContext &&
+        typeof conversationContext === 'object' &&
+        'conversationId' in conversationContext
+          ? (conversationContext as { conversationId: string }).conversationId
+          : undefined,
+      validationApproved: true,
     });
 
     try {
-  // Validate DDL operation
+      // Validate DDL operation
       this.validateSchemaOperation(schemaDto);
 
       // Create migration record
@@ -602,30 +677,32 @@ export class DatabaseApiController {
       // Execute schema change
       this.executeSchemaOperation(schemaDto, migrationId);
 
-      this.logger.log(`[${operationId}] Schema change completed: ${migrationId}`, {
-        operationId,
-        migrationId,
-        operation: schemaDto.operation,
-        userId: user.id
-      });
+      this.logger.log(
+        `[${operationId}] Schema change completed: ${migrationId}`,
+        {
+          operationId,
+          migrationId,
+          operation: schemaDto.operation,
+          userId: user.id,
+        },
+      );
 
       return {
         success: true,
         migrationId,
-        operationId
+        operationId,
       };
-
     } catch (error) {
       this.logger.error(`[${operationId}] Schema change failed`, {
         operationId,
         error: error instanceof Error ? error.message : String(error),
         operation: schemaDto.operation,
-        userId: user.id
+        userId: user.id,
       });
 
       throw new HttpException(
         `Schema modification failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -647,32 +724,36 @@ export class DatabaseApiController {
       complianceFlags: ['BACKUP_OPERATION', 'DATA_PROTECTION'],
       requiredRoles: ['ADMIN'],
       timeout: 30000,
-      cacheable: false
-    }
+      cacheable: false,
+    },
   )
   @ApiOperation({
     summary: 'Create database backup',
-    description: 'Create full or incremental database backup with encryption'
+    description: 'Create full or incremental database backup with encryption',
   })
   createBackup(
     @Body() backupDto: DatabaseBackupDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): {
-  success: boolean;
+    success: boolean;
     backupId: string;
     location: string;
     size: number;
-
-} {
-  const operationId = this.generateOperationId();
+  } {
+    const operationId = this.generateOperationId();
 
     this.logger.log(`[${operationId}] Backup creation request`, {
       operationId,
       type: backupDto.type,
       encrypt: backupDto.encrypt,
       userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined
+      conversationId:
+        conversationContext &&
+        typeof conversationContext === 'object' &&
+        'conversationId' in conversationContext
+          ? (conversationContext as { conversationId: string }).conversationId
+          : undefined,
     });
 
     // Mock backup implementation
@@ -682,7 +763,7 @@ export class DatabaseApiController {
       success: true,
       backupId,
       location: backupDto.location || '/backups',
-      size: 1024000 // Mock size
+      size: 1024000, // Mock size
     };
   }
 
@@ -700,11 +781,12 @@ export class DatabaseApiController {
     businessCategory: 'DATABASE_ANALYTICS',
     complianceFlags: ['PERFORMANCE_MONITORING', 'ANALYTICS'],
     cacheable: true,
-    timeout: 10000
+    timeout: 10000,
   })
   @ApiOperation({
     summary: 'Get database analytics',
-    description: 'Retrieve comprehensive database performance and usage analytics'
+    description:
+      'Retrieve comprehensive database performance and usage analytics',
   })
   @ApiQuery({ name: 'timeRange', enum: ['1h', '24h', '7d', '30d'] })
   getAnalytics(
@@ -712,20 +794,24 @@ export class DatabaseApiController {
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): {
-  timeRange: string;
+    timeRange: string;
     performance: unknown;
     security: unknown;
     usage: unknown;
     timestamp: Date;
-
-} {
-  const operationId = this.generateOperationId();
+  } {
+    const operationId = this.generateOperationId();
 
     this.logger.log(`[${operationId}] Analytics request`, {
       operationId,
       timeRange: analyticsDto.timeRange,
       userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined
+      conversationId:
+        conversationContext &&
+        typeof conversationContext === 'object' &&
+        'conversationId' in conversationContext
+          ? (conversationContext as { conversationId: string }).conversationId
+          : undefined,
     });
 
     return {
@@ -733,7 +819,7 @@ export class DatabaseApiController {
       performance: analyticsDto.includePerformance ? {} : null,
       security: analyticsDto.includeSecurity ? {} : null,
       usage: analyticsDto.includeUsage ? {} : null,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -741,12 +827,20 @@ export class DatabaseApiController {
 
   private validateReadOnlyQuery(query: string): void {
     const lowerQuery = query.toLowerCase().trim();
-    const writeOperations = ['insert', 'update', 'delete', 'drop', 'create', 'alter', 'truncate'];
+    const writeOperations = [
+      'insert',
+      'update',
+      'delete',
+      'drop',
+      'create',
+      'alter',
+      'truncate',
+    ];
 
-    if (writeOperations.some(op => lowerQuery.includes(op))) {
+    if (writeOperations.some((op) => lowerQuery.includes(op))) {
       throw new HttpException(
         'Query contains write operations - use modification endpoint instead',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
@@ -755,7 +849,7 @@ export class DatabaseApiController {
     if (!dto.justification || dto.justification.length < 10) {
       throw new HttpException(
         'Business justification required for all modifications',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -766,7 +860,7 @@ export class DatabaseApiController {
     if (dto.operation.includes('DROP') && !dto.rollbackInstructions) {
       throw new HttpException(
         'Rollback instructions required for DROP operations',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
@@ -778,7 +872,7 @@ export class DatabaseApiController {
 
   private executeModificationOperation(
     dto: DatabaseModificationDto,
-    operationId: string
+    operationId: string,
   ): { affectedRows: number } {
     // Mock implementation - would integrate with actual database
     return { affectedRows: 1 };
@@ -789,14 +883,22 @@ export class DatabaseApiController {
     return `backup_${tableName}_${Date.now()}`;
   }
 
-  private createMigrationRecord(dto: DatabaseSchemaDto, userId: string): string {
+  private createMigrationRecord(
+    dto: DatabaseSchemaDto,
+    userId: string,
+  ): string {
     // Mock implementation - would create migration tracking record
     return `migration_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private executeSchemaOperation(dto: DatabaseSchemaDto, migrationId: string): void {
+  private executeSchemaOperation(
+    dto: DatabaseSchemaDto,
+    migrationId: string,
+  ): void {
     // Mock implementation - would execute actual DDL
-    this.logger.log(`Executing schema operation: ${dto.operation} (${migrationId})`);
+    this.logger.log(
+      `Executing schema operation: ${dto.operation} (${migrationId})`,
+    );
   }
 
   private generateOperationId(): string {

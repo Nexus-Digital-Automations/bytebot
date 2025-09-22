@@ -502,7 +502,7 @@ export enum RequirementCategory {
   AUDIT = 'AUDIT',
   REPORTING = 'REPORTING',
   INCIDENT_RESPONSE = 'INCIDENT_RESPONSE',
-  BUSINESS_CONTINUITY = 'BUSINESS_CONTINUITY'
+  BUSINESS_CONTINUITY = 'BUSINESS_CONTINUITY',
 }
 
 export enum ControlFamily {
@@ -521,7 +521,7 @@ export enum ControlFamily {
   RISK_ASSESSMENT = 'RISK_ASSESSMENT',
   SECURITY_ASSESSMENT = 'SECURITY_ASSESSMENT',
   SYSTEM_COMMUNICATIONS = 'SYSTEM_COMMUNICATIONS',
-  SYSTEM_INFORMATION = 'SYSTEM_INFORMATION'
+  SYSTEM_INFORMATION = 'SYSTEM_INFORMATION',
 }
 
 export enum ControlType {
@@ -530,14 +530,14 @@ export enum ControlType {
   CORRECTIVE = 'CORRECTIVE',
   DETERRENT = 'DETERRENT',
   RECOVERY = 'RECOVERY',
-  COMPENSATING = 'COMPENSATING'
+  COMPENSATING = 'COMPENSATING',
 }
 
 export enum ClassificationLevel {
   UNCLASSIFIED = 'UNCLASSIFIED',
   CONFIDENTIAL = 'CONFIDENTIAL',
   SECRET = 'SECRET',
-  TOP_SECRET = 'TOP_SECRET'
+  TOP_SECRET = 'TOP_SECRET',
 }
 
 export enum DataCategory {
@@ -548,7 +548,7 @@ export enum DataCategory {
   TRADE_SECRET = 'TRADE_SECRET',
   OPERATIONAL = 'OPERATIONAL',
   TECHNICAL = 'TECHNICAL',
-  LEGAL = 'LEGAL'
+  LEGAL = 'LEGAL',
 }
 
 export enum DataSensitivity {
@@ -556,7 +556,7 @@ export enum DataSensitivity {
   INTERNAL = 'INTERNAL',
   CONFIDENTIAL = 'CONFIDENTIAL',
   RESTRICTED = 'RESTRICTED',
-  HIGHLY_CONFIDENTIAL = 'HIGHLY_CONFIDENTIAL'
+  HIGHLY_CONFIDENTIAL = 'HIGHLY_CONFIDENTIAL',
 }
 
 export enum FindingCategory {
@@ -567,7 +567,7 @@ export enum FindingCategory {
   POLICY_VIOLATION = 'POLICY_VIOLATION',
   PROCEDURE_DEVIATION = 'PROCEDURE_DEVIATION',
   DOCUMENTATION_ISSUE = 'DOCUMENTATION_ISSUE',
-  TRAINING_DEFICIENCY = 'TRAINING_DEFICIENCY'
+  TRAINING_DEFICIENCY = 'TRAINING_DEFICIENCY',
 }
 
 export enum FindingSeverity {
@@ -575,7 +575,7 @@ export enum FindingSeverity {
   HIGH = 'HIGH',
   MEDIUM = 'MEDIUM',
   LOW = 'LOW',
-  INFORMATIONAL = 'INFORMATIONAL'
+  INFORMATIONAL = 'INFORMATIONAL',
 }
 
 export enum ViolationSeverity {
@@ -583,7 +583,7 @@ export enum ViolationSeverity {
   MAJOR = 'MAJOR',
   MODERATE = 'MODERATE',
   MINOR = 'MINOR',
-  NEGLIGIBLE = 'NEGLIGIBLE'
+  NEGLIGIBLE = 'NEGLIGIBLE',
 }
 
 export enum AuditFindingType {
@@ -592,7 +592,7 @@ export enum AuditFindingType {
   SIGNIFICANT_DEFICIENCY = 'SIGNIFICANT_DEFICIENCY',
   OPERATIONAL_FINDING = 'OPERATIONAL_FINDING',
   COMPLIANCE_EXCEPTION = 'COMPLIANCE_EXCEPTION',
-  BEST_PRACTICE_OPPORTUNITY = 'BEST_PRACTICE_OPPORTUNITY'
+  BEST_PRACTICE_OPPORTUNITY = 'BEST_PRACTICE_OPPORTUNITY',
 }
 
 export enum RemediationType {
@@ -601,7 +601,7 @@ export enum RemediationType {
   LONG_TERM = 'LONG_TERM',
   STRATEGIC = 'STRATEGIC',
   PREVENTIVE = 'PREVENTIVE',
-  CORRECTIVE = 'CORRECTIVE'
+  CORRECTIVE = 'CORRECTIVE',
 }
 
 export enum CertificationType {
@@ -612,7 +612,7 @@ export enum CertificationType {
   GDPR = 'GDPR',
   FedRAMP = 'FedRAMP',
   NIST = 'NIST',
-  COBIT = 'COBIT'
+  COBIT = 'COBIT',
 }
 
 // Note: All compliance types are already exported when declared with 'export interface' above
@@ -703,7 +703,14 @@ export interface AssessmentType {
 }
 
 export interface AssessmentFrequency {
-  readonly frequency: 'CONTINUOUS' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY' | 'BIANNUAL';
+  readonly frequency:
+    | 'CONTINUOUS'
+    | 'DAILY'
+    | 'WEEKLY'
+    | 'MONTHLY'
+    | 'QUARTERLY'
+    | 'ANNUALLY'
+    | 'BIANNUAL';
   readonly interval: number;
   readonly tolerance: number;
   readonly exceptions: string[];
@@ -719,7 +726,13 @@ export interface ReportingRequirement {
 }
 
 export interface ReportingFrequency {
-  readonly frequency: 'REAL_TIME' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
+  readonly frequency:
+    | 'REAL_TIME'
+    | 'DAILY'
+    | 'WEEKLY'
+    | 'MONTHLY'
+    | 'QUARTERLY'
+    | 'ANNUALLY';
   readonly deadlines: Date[];
   readonly exceptions: string[];
   readonly grace_period: number;
@@ -761,7 +774,13 @@ export interface TestingRequirement {
 }
 
 export interface TestingFrequency {
-  readonly frequency: 'CONTINUOUS' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY';
+  readonly frequency:
+    | 'CONTINUOUS'
+    | 'DAILY'
+    | 'WEEKLY'
+    | 'MONTHLY'
+    | 'QUARTERLY'
+    | 'ANNUALLY';
   readonly samples: number;
   readonly coverage: number;
   readonly rotation: boolean;
@@ -807,7 +826,11 @@ export interface AutomationLevel {
 }
 
 export interface EffectivenessRating {
-  readonly rating: 'INEFFECTIVE' | 'PARTIALLY_EFFECTIVE' | 'EFFECTIVE' | 'HIGHLY_EFFECTIVE';
+  readonly rating:
+    | 'INEFFECTIVE'
+    | 'PARTIALLY_EFFECTIVE'
+    | 'EFFECTIVE'
+    | 'HIGHLY_EFFECTIVE';
   readonly score: number;
   readonly evidence: string[];
   readonly factors: string[];

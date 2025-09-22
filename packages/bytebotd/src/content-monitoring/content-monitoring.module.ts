@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common';import { ContentMonitoringController } from './content-monitoring.controller';import { ContentMonitoringService } from './content-monitoring.service';import { ComputerUseModule } from '../computer-use/computer-use.module';
+import { Module } from '@nestjs/common';
+import { ContentMonitoringController } from './content-monitoring.controller';
+import { ContentMonitoringService } from './content-monitoring.service';
+import { ComputerUseModule } from '../computer-use/computer-use.module';
 
 /**
  * Content Monitoring Module

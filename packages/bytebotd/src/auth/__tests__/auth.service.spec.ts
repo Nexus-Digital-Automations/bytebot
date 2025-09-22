@@ -1,6 +1,3 @@
- 
- 
- 
 /* eslint-env jest */
 /**
  * Authentication Service Test Suite
@@ -15,9 +12,7 @@
  * @author Claude Code (Testing & QA Specialist)
  * @version 1.0.0
  * @coverage-target 95%+
- */;
-
-import { Test, TestingModule } from '@nestjs/testing';
+ */ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
@@ -81,7 +76,7 @@ class MockAuthService {
     email: string,
     password: string,
   ): Promise<Omit<UserData, 'passwordHash'> | null> {
-  // Mock implementation based on research requirements
+    // Mock implementation based on research requirements
     const user = await this.findUserByEmail(email);
     if (user && (await bcrypt.compare(password, user.passwordHash))) {
       const { passwordHash: _passwordHash, ...result } = user;
@@ -91,7 +86,7 @@ class MockAuthService {
   }
 
   async login(loginDto: LoginDto): Promise<TokenResponse> {
-  const user = await this.validateUser(loginDto.email, loginDto.password);
+    const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -99,7 +94,7 @@ class MockAuthService {
   }
 
   async register(registerDto: RegisterDto): Promise<TokenResponse> {
-  const existingUser = await this.findUserByEmail(registerDto.email);
+    const existingUser = await this.findUserByEmail(registerDto.email);
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
@@ -107,7 +102,7 @@ class MockAuthService {
     const passwordHash = await bcrypt.hash(registerDto.password, saltRounds);
 
     const newUser = {
-  id: 'user_' + Date.now(),
+      id: 'user_' + Date.now(),
       email: registerDto.email,
       passwordHash,
       role: registerDto.role ?? 'viewer',
@@ -118,9 +113,9 @@ class MockAuthService {
   }
 
   refreshToken(refreshToken: string): TokenResponse | never {
-  try {
+    try {
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get('JWT_REFRESH_SECRET')
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
       }) as JwtPayload;
       const user = this.findUserById(payload.sub);
       if (!user) {
@@ -133,13 +128,11 @@ class MockAuthService {
   }
 
   logout(): void {
-  // In real implementation, would invalidate refresh tokens
+    // In real implementation, would invalidate refresh tokens
     return;
   }
 
-  private generateTokens(
-    user: Omit<UserData, 'passwordHash'>
-  ): TokenResponse {
+  private generateTokens(user: Omit<UserData, 'passwordHash'>): TokenResponse {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -156,7 +149,7 @@ class MockAuthService {
       {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
         expiresIn: '7d', // 7 days as per research spec
-      }
+      },
     );
 
     return {
@@ -183,7 +176,7 @@ class MockAuthService {
   }
 
   private async findUserByEmail(email: string): Promise<UserData | null> {
-  // Mock user database - in real implementation would use Prisma
+    // Mock user database - in real implementation would use Prisma
     const mockUsers: UserData[] = [
       {
         id: 'user_1',
@@ -192,8 +185,7 @@ class MockAuthService {
         role: 'admin',
         createdAt: new Date(),
         isActive: true,
-      
-},
+      },
       {
         id: 'user_2',
         email: 'operator@bytebot.ai',
@@ -201,26 +193,27 @@ class MockAuthService {
         role: 'operator',
         createdAt: new Date(),
         isActive: true,
-      
-},
+      },
     ];
     return mockUsers.find((u) => u.email === email) ?? null;
   }
 
-  private findUserById(
-    id: string,
-  ): Omit<UserData, 'passwordHash'> | null {
-  const mockUsers: Omit<UserData, 'passwordHash'>[] = [{id: 'user_1',
-      email: 'admin@bytebot.ai',
-        role: 'admin', createdAt: new Date(), isActive: true,
-      
-},
+  private findUserById(id: string): Omit<UserData, 'passwordHash'> | null {
+    const mockUsers: Omit<UserData, 'passwordHash'>[] = [
       {
-  id: 'user_2',
-      email: 'operator@bytebot.ai',
-        role: 'operator', createdAt: new Date(), isActive: true,
-      
-},
+        id: 'user_1',
+        email: 'admin@bytebot.ai',
+        role: 'admin',
+        createdAt: new Date(),
+        isActive: true,
+      },
+      {
+        id: 'user_2',
+        email: 'operator@bytebot.ai',
+        role: 'operator',
+        createdAt: new Date(),
+        isActive: true,
+      },
     ];
     return mockUsers.find((u) => u.id === id) ?? null;
   }
@@ -234,9 +227,7 @@ describe('AuthService', () => {
   const operationId = `auth_test_${Date.now()}`;
 
   beforeEach(async () => {
-    console.log(
-      `[${operationId}] Setting up AuthService test environment`,
-    );
+    console.log(`[${operationId}] Setting up AuthService test environment`);
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
@@ -264,12 +255,12 @@ describe('AuthService', () => {
             }),
           },
         },
-      ]
+      ],
     }).compile();
 
     service = new MockAuthService(
       module.get<JwtService>(JwtService),
-      module.get<ConfigService>(ConfigService)
+      module.get<ConfigService>(ConfigService),
     );
     jwtService = module.get<JwtService>(JwtService);
     _configService = module.get<ConfigService>(ConfigService);
@@ -277,24 +268,20 @@ describe('AuthService', () => {
     console.log(`[${operationId}] AuthService test setup completed`);
   });
 
-    afterEach(() => {
+  afterEach(() => {
     console.log(`[${operationId}] AuthService test cleanup completed`);
   });
 
   describe('User Authentication', () => {
-  it('should authenticate valid user credentials', async () => {
-      const testId = `${operationId
-}_auth_valid`;
-      console.log(
-        `[${testId}] Testing valid authentication credentials`,
-      );
+    it('should authenticate valid user credentials', async () => {
+      const testId = `${operationId}_auth_valid`;
+      console.log(`[${testId}] Testing valid authentication credentials`);
       const loginDto = {
-  email: 'admin@bytebot.ai',
+        email: 'admin@bytebot.ai',
         password: 'admin123',
-      
-};
+      };
 
-      (jest.spyOn(jwtService, 'sign')).mockReturnValue('mocked-jwt-token');
+      jest.spyOn(jwtService, 'sign').mockReturnValue('mocked-jwt-token');
 
       const result = await service.login(loginDto);
       expect(result).toBeDefined();
@@ -311,16 +298,15 @@ describe('AuthService', () => {
 
     it('should reject invalid user credentials', async () => {
       const testId = `${operationId}_auth_invalid`;
-      console.log(
-        `[${testId}] Testing invalid authentication credentials`,
-      );
+      console.log(`[${testId}] Testing invalid authentication credentials`);
       const loginDto = {
         email: 'admin@bytebot.ai',
         password: 'wrongpassword',
       };
 
       await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException);
+        UnauthorizedException,
+      );
 
       console.log(
         `[${testId}] Invalid authentication rejection test completed`,
@@ -329,23 +315,22 @@ describe('AuthService', () => {
 
     it('should reject non-existent user', async () => {
       const testId = `${operationId}_auth_nonexistent`;
-      console.log(
-        `[${testId}] Testing non-existent user authentication`,
-      );
+      console.log(`[${testId}] Testing non-existent user authentication`);
       const loginDto = {
         email: 'nonexistent@bytebot.ai',
         password: 'password123',
       };
 
       await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException);
+        UnauthorizedException,
+      );
 
       console.log(`[${testId}] Non-existent user rejection test completed`);
     });
   });
 
   describe('User Registration', () => {
-  it('should register new user with valid data', async () => {
+    it('should register new user with valid data', async () => {
       const testId = `${operationId}_register_valid`;
       console.log(`[${testId}] Starting user registration test`);
 
@@ -370,14 +355,13 @@ describe('AuthService', () => {
       const testId = `${operationId}_register_duplicate`;
       console.log(`[${testId}] Starting duplicate user registration test`);
       const registerDto = {
-  email: 'admin@bytebot.ai', // Already exists in mock data,
-  password: 'password123',
+        email: 'admin@bytebot.ai', // Already exists in mock data,
+        password: 'password123',
         role: 'viewer',
-      
-};
+      };
 
       await expect(service.register(registerDto)).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
 
       console.log(
@@ -387,9 +371,7 @@ describe('AuthService', () => {
 
     it('should default to viewer role when none specified', async () => {
       const testId = `${operationId}_register_default_role`;
-      console.log(
-        `[${testId}] Testing default role assignment`,
-      );
+      console.log(`[${testId}] Testing default role assignment`);
       const registerDto = {
         email: 'defaultrole@bytebot.ai',
         password: 'password123',
@@ -404,12 +386,10 @@ describe('AuthService', () => {
     });
   });
 
-    describe('Token Management', () => {
-  it('should generate JWT tokens with correct structure', async () => {
+  describe('Token Management', () => {
+    it('should generate JWT tokens with correct structure', async () => {
       const testId = `${operationId}_token_structure`;
-      console.log(
-        `[${testId}] Testing JWT token structure generation`,
-      );
+      console.log(`[${testId}] Testing JWT token structure generation`);
       const mockUser = {
         id: 'user_123',
         email: 'test@bytebot.ai',
@@ -431,23 +411,28 @@ describe('AuthService', () => {
       };
 
       const _expectedRefreshPayload = {
-  sub: mockUser.id,
-      
-};
+        sub: mockUser.id,
+      };
 
       jest
-        .spyOn(jwtService, 'sign').mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');await service['generateTokens'](mockUser);
-      expect(jwtService.sign).toHaveBeenCalledWith(_expectedAccessPayload,
+        .spyOn(jwtService, 'sign')
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
+      await service['generateTokens'](mockUser);
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        _expectedAccessPayload,
         expect.objectContaining({
-  secret: 'test-secret-key', expiresIn: '15m'
-      
-}),);
+          secret: 'test-secret-key',
+          expiresIn: '15m',
+        }),
+      );
       expect(jwtService.sign).toHaveBeenCalledWith(
         _expectedRefreshPayload,
         expect.objectContaining({
-  secret: 'test-refresh-secret-key', expiresIn: '7d'
-      
-}));
+          secret: 'test-refresh-secret-key',
+          expiresIn: '7d',
+        }),
+      );
 
       console.log(`[${testId}] JWT token structure test completed`);
     });
@@ -458,7 +443,7 @@ describe('AuthService', () => {
 
       const mockPayload = { sub: 'user_1' };
       const refreshToken = 'valid-refresh-token';
-      (jest.spyOn(jwtService, 'verify')).mockReturnValue(mockPayload);
+      jest.spyOn(jwtService, 'verify').mockReturnValue(mockPayload);
       jest
         .spyOn(jwtService, 'sign')
         .mockReturnValueOnce('new-access-token')
@@ -472,39 +457,45 @@ describe('AuthService', () => {
     });
 
     it('should reject invalid refresh tokens', async () => {
-      const testId = `${operationId}_token_refresh_invalid`;console.log(
-
-      );
-      const invalidToken = 'invalid-refresh-token';(jest.spyOn(jwtService, 'verify')).mockImplementation(() => {
-  throw new Error('Invalid token');
-      
-});
+      const testId = `${operationId}_token_refresh_invalid`;
+      console.log();
+      const invalidToken = 'invalid-refresh-token';
+      jest.spyOn(jwtService, 'verify').mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
 
       await expect(service.refreshToken(invalidToken)).rejects.toThrow(
-        UnauthorizedException);
+        UnauthorizedException,
+      );
 
       console.log(`[${testId}] Invalid refresh token rejection test completed`);
     });
   });
 
-    describe('Role-Based Permissions', () => {
-  it('should assign correct permissions for admin role', () => {
-      const testId = `${operationId
-}_permissions_admin`;console.log(
-
-      );
+  describe('Role-Based Permissions', () => {
+    it('should assign correct permissions for admin role', () => {
+      const testId = `${operationId}_permissions_admin`;
+      console.log();
       const permissions = service['getRolePermissions']('admin');
-      expect(permissions).toEqual(['task:read','task:write','computer:control','system:admin']);
+      expect(permissions).toEqual([
+        'task:read',
+        'task:write',
+        'computer:control',
+        'system:admin',
+      ]);
 
       console.log(`[${testId}] Admin permissions test completed`);
     });
 
     it('should assign correct permissions for operator role', () => {
-      const testId = `${operationId}_permissions_operator`;console.log(
-
-      );
+      const testId = `${operationId}_permissions_operator`;
+      console.log();
       const permissions = service['getRolePermissions']('operator');
-      expect(permissions).toEqual(['task:read','task:write','computer:control']);
+      expect(permissions).toEqual([
+        'task:read',
+        'task:write',
+        'computer:control',
+      ]);
 
       console.log(`[${testId}] Operator permissions test completed`);
     });
@@ -528,17 +519,17 @@ describe('AuthService', () => {
     });
   });
 
-    describe('Security Features', () => {
-  it('should use strong password hashing', async () => {
-      const testId = `${operationId
-}_security_hashing`;console.log(
-
-      );
-      const password = 'testpassword123';const saltRounds = 12;// Mock bcrypt to verify it's called with correct rounds
-      const bcryptSpy = jest.spyOn(bcrypt, 'hash');const registerDto = {
-  email: 'security@bytebot.ai',passwordrole: 'viewer',
-      
-};
+  describe('Security Features', () => {
+    it('should use strong password hashing', async () => {
+      const testId = `${operationId}_security_hashing`;
+      console.log();
+      const password = 'testpassword123';
+      const saltRounds = 12; // Mock bcrypt to verify it's called with correct rounds
+      const bcryptSpy = jest.spyOn(bcrypt, 'hash');
+      const registerDto = {
+        email: 'security@bytebot.ai',
+        passwordrole: 'viewer',
+      };
 
       await service.register(registerDto);
       expect(bcryptSpy).toHaveBeenCalledWith(passwordsaltRounds);
@@ -551,7 +542,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Starting concurrent login test`);
       const loginDto = {
         email: 'admin@bytebot.ai',
-        password: 'admin123'
+        password: 'admin123',
       };
       jest.spyOn(jwtService, 'sign').mockReturnValue('concurrent-test-token');
 
@@ -563,10 +554,9 @@ describe('AuthService', () => {
 
       // All should succeed with valid tokens
       results.forEach((result) => {
-  expect(result.accessToken).toBe('concurrent-test-token');
-      expect(result.user.email).toBe(loginDto.email);
-      
-});
+        expect(result.accessToken).toBe('concurrent-test-token');
+        expect(result.user.email).toBe(loginDto.email);
+      });
 
       console.log(`[${testId}] Concurrent login safety test completed`);
     });
@@ -585,18 +575,17 @@ describe('AuthService', () => {
       const expiredToken = 'expired-refresh-token';
 
       await expect(service.refreshToken(expiredToken)).rejects.toThrow(
-        UnauthorizedException);
+        UnauthorizedException,
+      );
 
       console.log(`[${testId}] Token expiration test completed`);
     });
   });
 
-    describe('Performance & Reliability', () => {
-  it('should complete authentication within performance threshold', async () => {
-      const testId = `${operationId
-}_performance_auth`;console.log(
-
-      );
+  describe('Performance & Reliability', () => {
+    it('should complete authentication within performance threshold', async () => {
+      const testId = `${operationId}_performance_auth`;
+      console.log();
       const loginDto = {
         email: 'admin@bytebot.ai',
         password: 'admin123',
@@ -617,15 +606,15 @@ describe('AuthService', () => {
     });
 
     it('should handle database connection errors gracefully', async () => {
-      const testId = `${operationId}_reliability_db_error`;console.log(`[${testId}] Testing database error handling`);
+      const testId = `${operationId}_reliability_db_error`;
+      console.log(`[${testId}] Testing database error handling`);
 
       // Mock database error
-      (
-        jest.spyOn(
-          service,
-          'findUserByEmail' as keyof MockAuthService,)).mockRejectedValue(new Error('Database connection failed'));
+      jest
+        .spyOn(service, 'findUserByEmail' as keyof MockAuthService)
+        .mockRejectedValue(new Error('Database connection failed'));
 
-      const loginDto = {email: 'admin@bytebot.ai', password: 'admin123'};
+      const loginDto = { email: 'admin@bytebot.ai', password: 'admin123' };
 
       await expect(service.login(loginDto)).rejects.toThrow();
 
@@ -634,9 +623,7 @@ describe('AuthService', () => {
 
     it('should maintain consistent response format', async () => {
       const testId = `${operationId}_reliability_response_format`;
-      console.log(
-        `[${testId}] Testing response format consistency`
-      );
+      console.log(`[${testId}] Testing response format consistency`);
       const loginDto = {
         email: 'admin@bytebot.ai',
         password: 'admin123',
@@ -657,29 +644,29 @@ describe('AuthService', () => {
     });
   });
 
-    describe('Edge Cases & Error Scenarios', () => {
-  it('should handle malformed token gracefully', async () => {
-      const testId = `${operationId
-}_edge_malformed_token`;console.log(
-
-      );
-      const malformedToken = 'not.a.jwt.token';(jest.spyOn(jwtService, 'verify')).mockImplementation(() => {
-  throw new Error('Malformed token');
-      
-});
+  describe('Edge Cases & Error Scenarios', () => {
+    it('should handle malformed token gracefully', async () => {
+      const testId = `${operationId}_edge_malformed_token`;
+      console.log();
+      const malformedToken = 'not.a.jwt.token';
+      jest.spyOn(jwtService, 'verify').mockImplementation(() => {
+        throw new Error('Malformed token');
+      });
 
       await expect(service.refreshToken(malformedToken)).rejects.toThrow(
-        UnauthorizedException);
+        UnauthorizedException,
+      );
 
       console.log(`[${testId}] Malformed token handling test completed`);
     });
 
     it('should handle empty credentials', async () => {
-      const testId = `${operationId}_edge_empty_credentials`;console.log(
-
-      );
+      const testId = `${operationId}_edge_empty_credentials`;
+      console.log();
       const loginDto = {
-        email: '', password: ''};
+        email: '',
+        password: '',
+      };
 
       await expect(service.login(loginDto)).rejects.toThrow();
 
@@ -687,11 +674,14 @@ describe('AuthService', () => {
     });
 
     it('should handle null/undefined inputs', async () => {
-      const testId = `${operationId}_edge_null_inputs`;console.log(`[${testId}] Testing null/undefined input handling`);
-      await expect(service.login(null as unknown as LoginDto),
+      const testId = `${operationId}_edge_null_inputs`;
+      console.log(`[${testId}] Testing null/undefined input handling`);
+      await expect(
+        service.login(null as unknown as LoginDto),
       ).rejects.toThrow();
       await expect(
-        service.refreshToken(null as unknown as string)).rejects.toThrow();
+        service.refreshToken(null as unknown as string),
+      ).rejects.toThrow();
 
       console.log(`[${testId}] Null/undefined input handling test completed`);
     });

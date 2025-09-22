@@ -18,7 +18,12 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { AsyncJobService } from '../async-job.service';
@@ -100,7 +105,9 @@ interface AlertConfig {
 }
 
 @Injectable()
-export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestroy {
+export class JobMonitoringEnhancedService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(JobMonitoringEnhancedService.name);
 
   // Monitoring data storage
@@ -182,12 +189,21 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
         startedAt: baseStatus.startedAt,
         completedAt: baseStatus.completedAt,
         estimatedCompletionAt: this.calculateEstimatedCompletion(jobId),
-        performanceMetrics: includePerformanceMetrics ? this.getJobPerformanceMetrics(jobId) : new JobPerformanceMetricsDto(),
-        resourceUtilization: includeResourceUtilization ? this.getCurrentResourceUtilization() : new ResourceUtilizationDto(),
-        queueInfo: baseStatus.status === JobStatus.PENDING ? this.getQueueInformation(jobId) : undefined,
+        performanceMetrics: includePerformanceMetrics
+          ? this.getJobPerformanceMetrics(jobId)
+          : new JobPerformanceMetricsDto(),
+        resourceUtilization: includeResourceUtilization
+          ? this.getCurrentResourceUtilization()
+          : new ResourceUtilizationDto(),
+        queueInfo:
+          baseStatus.status === JobStatus.PENDING
+            ? this.getQueueInformation(jobId)
+            : undefined,
         errorInfo: this.getErrorInformation(jobId, baseStatus.errorMessage),
         currentStep: this.getCurrentExecutionStep(jobId),
-        executionSteps: includeExecutionSteps ? this.getExecutionSteps(jobId) : undefined,
+        executionSteps: includeExecutionSteps
+          ? this.getExecutionSteps(jobId)
+          : undefined,
         batchId: baseStatus.metadata?.batchId as string,
         dependencies: this.getJobDependencies(jobId),
         dependents: this.getJobDependents(jobId),
@@ -199,12 +215,15 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
       };
 
       const processingTime = Date.now() - startTime;
-      this.logger.debug(`Enhanced job status retrieved in ${processingTime}ms for job: ${jobId}`);
+      this.logger.debug(
+        `Enhanced job status retrieved in ${processingTime}ms for job: ${jobId}`,
+      );
 
       return enhancedStatus;
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
 
       this.logger.error(
         `Error getting enhanced job status: ${errorMessage} (${processingTime}ms)`,
@@ -218,13 +237,20 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
   /**
    * Get bulk enhanced job status for multiple jobs
    */
-  async getBulkEnhancedJobStatus(request: BulkJobStatusRequestDto): Promise<BulkJobStatusResponseDto> {
+  async getBulkEnhancedJobStatus(
+    request: BulkJobStatusRequestDto,
+  ): Promise<BulkJobStatusResponseDto> {
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`Getting bulk enhanced status for ${request.jobIds.length} jobs`);
+      this.logger.debug(
+        `Getting bulk enhanced status for ${request.jobIds.length} jobs`,
+      );
 
-      const results: Record<string, EnhancedJobStatusResponseDto | { error: string }> = {};
+      const results: Record<
+        string,
+        EnhancedJobStatusResponseDto | { error: string }
+      > = {};
       let successCount = 0;
       let failureCount = 0;
 
@@ -240,7 +266,8 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
           results[jobId] = status;
           successCount++;
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
           results[jobId] = { error: errorMessage };
           failureCount++;
         }
@@ -268,14 +295,17 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
       return response;
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
 
       this.logger.error(
         `Error getting bulk enhanced job status: ${errorMessage} (${processingTime}ms)`,
         error instanceof Error ? error.stack : undefined,
       );
 
-      throw new Error(`Failed to get bulk enhanced job status: ${errorMessage}`);
+      throw new Error(
+        `Failed to get bulk enhanced job status: ${errorMessage}`,
+      );
     }
   }
 
@@ -312,15 +342,22 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
     // Basic prediction algorithm (can be enhanced with ML models)
     const baseEstimate = systemHealth.averageExecutionTime || 30000; // 30 seconds default
     const resourceFactor = 1 - (systemHealth.cpuUsage / 100) * 0.3; // Adjust for CPU load
-    const queueFactor = Math.max(0.5, 1 - (systemHealth.queueLength * 0.1)); // Adjust for queue length
+    const queueFactor = Math.max(0.5, 1 - systemHealth.queueLength * 0.1); // Adjust for queue length
 
     const estimatedTime = baseEstimate * resourceFactor * queueFactor;
-    const confidence = Math.min(0.95, Math.max(0.1, resourceFactor * queueFactor));
+    const confidence = Math.min(
+      0.95,
+      Math.max(0.1, resourceFactor * queueFactor),
+    );
 
     return {
       estimatedCompletionTimeMs: Math.round(estimatedTime),
       confidenceLevel: confidence,
-      factorsConsidered: ['historical_performance', 'system_load', 'queue_length'],
+      factorsConsidered: [
+        'historical_performance',
+        'system_load',
+        'queue_length',
+      ],
       historicalBasis: baseEstimate,
       resourceAvailability: resourceFactor,
     };
@@ -345,7 +382,8 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
       }
 
       // Check memory usage
-      const memoryUsagePercent = (health.memoryUsage / health.memoryTotal) * 100;
+      const memoryUsagePercent =
+        (health.memoryUsage / health.memoryTotal) * 100;
       if (memoryUsagePercent > this.alertConfig.thresholds.highMemoryUsage) {
         alerts.push(`High memory usage: ${memoryUsagePercent.toFixed(1)}%`);
       }
@@ -371,7 +409,6 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
 
       // Update performance trends
       this.updatePerformanceTrends(health);
-
     } catch (error) {
       this.logger.error(
         `Health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -451,7 +488,9 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
 
   private calculateEstimatedCompletion(jobId: string): string | undefined {
     const prediction = this.predictJobCompletion(jobId);
-    const estimatedCompletion = new Date(Date.now() + prediction.estimatedCompletionTimeMs);
+    const estimatedCompletion = new Date(
+      Date.now() + prediction.estimatedCompletionTimeMs,
+    );
     return estimatedCompletion.toISOString();
   }
 
@@ -488,17 +527,24 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
       queuePosition: 1, // Would need queue implementation details
       jobsAhead: stats.queueLength,
       estimatedWaitTimeMs: stats.queueLength * avgExecutionTime,
-      expectedStartTime: new Date(Date.now() + stats.queueLength * avgExecutionTime).toISOString(),
+      expectedStartTime: new Date(
+        Date.now() + stats.queueLength * avgExecutionTime,
+      ).toISOString(),
     };
   }
 
-  private getErrorInformation(jobId: string, errorMessage?: string): ErrorInformationDto {
+  private getErrorInformation(
+    jobId: string,
+    errorMessage?: string,
+  ): ErrorInformationDto {
     return {
       lastErrorMessage: errorMessage,
       retryCount: 0, // Would need retry tracking
       maxRetries: 3,
       nextRetryAt: undefined,
-      errorCategory: errorMessage ? this.categorizeError(errorMessage) : undefined,
+      errorCategory: errorMessage
+        ? this.categorizeError(errorMessage)
+        : undefined,
     };
   }
 
@@ -547,7 +593,9 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
 
   private areSystemResourcesAvailable(): boolean {
     const health = this.getSystemHealthMetrics();
-    return health.cpuUsage < 90 && (health.memoryUsage / health.memoryTotal) < 0.9;
+    return (
+      health.cpuUsage < 90 && health.memoryUsage / health.memoryTotal < 0.9
+    );
   }
 
   private categorizeError(errorMessage: string): string {
@@ -573,7 +621,9 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
     const timeWindow = `${now.getHours()}:00`;
 
     // Update hourly performance trends
-    const existingTrend = this.performanceTrends.find(t => t.timeWindow === timeWindow);
+    const existingTrend = this.performanceTrends.find(
+      (t) => t.timeWindow === timeWindow,
+    );
     if (existingTrend) {
       // Update existing trend
       existingTrend.averageExecutionTime = health.averageExecutionTime;
@@ -597,7 +647,10 @@ export class JobMonitoringEnhancedService implements OnModuleInit, OnModuleDestr
     }
   }
 
-  private async triggerHealthAlert(alerts: string[], health: SystemHealthMetrics): Promise<void> {
+  private async triggerHealthAlert(
+    alerts: string[],
+    health: SystemHealthMetrics,
+  ): Promise<void> {
     this.logger.warn(`System health alerts: ${alerts.join(', ')}`);
 
     const alertData = {

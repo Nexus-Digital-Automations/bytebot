@@ -17,14 +17,16 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import {ComputerUseService,
+import {
+  ComputerUseService,
   ErrorHandler,
   ScreenshotResult as _ScreenshotResult,
   FileWriteResult,
   FileReadResult,
 } from './computer-use.service';
 import { NutService } from '../nut/nut.service';
-import {ComputerAction,
+import {
+  ComputerAction,
   MoveMouseAction,
   TraceMouseAction,
   ClickMouseAction,
@@ -46,10 +48,13 @@ import * as fs from 'fs/promises';
 // Type-safe Jest expectation helpers
 type JestExpectedType<T> = T;
 const expectAnyDate = (): JestExpectedType<Date> => expect.any(Date) as Date;
-const expectAnyString = (): JestExpectedType<string> => expect.any(String) as string;
-const expectAnyNumber = (): JestExpectedType<number> => expect.any(Number) as number;
-const expectObjectContaining = <T extends object>(obj: Partial<T>): JestExpectedType<T> =>
-  expect.objectContaining(obj) as T;
+const expectAnyString = (): JestExpectedType<string> =>
+  expect.any(String) as string;
+const expectAnyNumber = (): JestExpectedType<number> =>
+  expect.any(Number) as number;
+const expectObjectContaining = <T extends object>(
+  obj: Partial<T>,
+): JestExpectedType<T> => expect.objectContaining(obj) as T;
 const expectStringContaining = (str: string): JestExpectedType<string> =>
   expect.stringContaining(str) as string;
 
@@ -60,7 +65,7 @@ jest.mock('child_process');
 
 jest.mock('util', () => ({
   promisify: jest.fn(() =>
-    jest.fn().mockResolvedValue({ stdout: 'mocked output' })
+    jest.fn().mockResolvedValue({ stdout: 'mocked output' }),
   ),
 }));
 
@@ -88,7 +93,9 @@ describe('ComputerUseService', () => {
     jest.clearAllMocks();
 
     // Reset file system mocks with proper typing
-    const mockWriteFile = fs.writeFile as jest.MockedFunction<typeof fs.writeFile>;
+    const mockWriteFile = fs.writeFile as jest.MockedFunction<
+      typeof fs.writeFile
+    >;
     const mockReadFile = fs.readFile as jest.MockedFunction<typeof fs.readFile>;
     const mockUnlink = fs.unlink as jest.MockedFunction<typeof fs.unlink>;
 
@@ -111,7 +118,7 @@ describe('ComputerUseService', () => {
     // Setup default mock behaviors with proper typing
     mockNutService.screendump.mockResolvedValue(Buffer.from('fake-image-data'));
     mockNutService.getCursorPosition.mockResolvedValue({ x: 100, y: 200 });
-});
+  });
 
   afterEach(async () => {
     await testModule?.close();
@@ -148,10 +155,10 @@ describe('ComputerUseService', () => {
         };
 
         mockNutService.mouseMoveEvent.mockRejectedValue(
-          new Error('Mouse movement failed')
+          new Error('Mouse movement failed'),
         );
         await expect(service.action(action)).rejects.toThrow(
-          'Failed to execute move_mouse: Mouse movement failed'
+          'Failed to execute move_mouse: Mouse movement failed',
         );
       });
     });
@@ -186,50 +193,76 @@ describe('ComputerUseService', () => {
         });
       });
 
-      it('should trace mouse along path with hold keys', async () => {const action: TraceMouseAction = {action: 'trace_mouse',
-  path: [{ x: 0, y: 0 },
+      it('should trace mouse along path with hold keys', async () => {
+        const action: TraceMouseAction = {
+          action: 'trace_mouse',
+          path: [
+            { x: 0, y: 0 },
             { x: 100, y: 100 },
           ],
-          holdKeys: ['shift', 'ctrl'],};mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
+          holdKeys: ['shift', 'ctrl'],
+        };
+        mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
         mockNutService.holdKeys.mockResolvedValue({ success: true });
 
         await service.action(action);
 
         expect(mockNutService.holdKeys).toHaveBeenCalledWith(
-          ['shift', 'ctrl'],true,);
+          ['shift', 'ctrl'],
+          true,
+        );
         expect(mockNutService.holdKeys).toHaveBeenCalledWith(
-          ['shift', 'ctrl'],false,);
+          ['shift', 'ctrl'],
+          false,
+        );
       });
 
-      it('should handle empty path error', async () => {const action: TraceMouseAction = {action: 'trace_mouse',
-  path: [],};
+      it('should handle empty path error', async () => {
+        const action: TraceMouseAction = { action: 'trace_mouse', path: [] };
 
         await expect(service.action(action)).rejects.toThrow(
-          'Mouse trace path must contain at least one coordinate',);});
+          'Mouse trace path must contain at least one coordinate',
+        );
+      });
 
-      it('should release keys on error', async () => {const action: TraceMouseAction = {action: 'trace_mouse',
-  path: [{ x: 0, y: 0 }],
-  holdKeys: ['shift'],};mockNutService.mouseMoveEvent.mockRejectedValue(
-          new Error('Movement failed'),);mockNutService.holdKeys.mockResolvedValue({ success: true });
+      it('should release keys on error', async () => {
+        const action: TraceMouseAction = {
+          action: 'trace_mouse',
+          path: [{ x: 0, y: 0 }],
+          holdKeys: ['shift'],
+        };
+        mockNutService.mouseMoveEvent.mockRejectedValue(
+          new Error('Movement failed'),
+        );
+        mockNutService.holdKeys.mockResolvedValue({ success: true });
 
         await expect(service.action(action)).rejects.toThrow();
-        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['shift'], false);});
-});
+        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['shift'], false);
+      });
+    });
 
-    describe('click_mouse action', () => {it('should perform single click without coordinates', async () => {const action: ClickMouseAction = {action: 'click_mouse',
-  button: 'left',
-  clickCount: 1,};
+    describe('click_mouse action', () => {
+      it('should perform single click without coordinates', async () => {
+        const action: ClickMouseAction = {
+          action: 'click_mouse',
+          button: 'left',
+          clickCount: 1,
+        };
 
         mockNutService.mouseClickEvent.mockResolvedValue({ success: true });
 
         await service.action(action);
 
-        expect(mockNutService.mouseClickEvent).toHaveBeenCalledWith('left');});
+        expect(mockNutService.mouseClickEvent).toHaveBeenCalledWith('left');
+      });
 
-  it('should perform multiple clicks with coordinates', async () => {const action: ClickMouseAction = {action: 'click_mouse',
-  coordinates: { x: 100, y: 200 },
-  button: 'right',
-  clickCount: 3,};
+      it('should perform multiple clicks with coordinates', async () => {
+        const action: ClickMouseAction = {
+          action: 'click_mouse',
+          coordinates: { x: 100, y: 200 },
+          button: 'right',
+          clickCount: 3,
+        };
 
         mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
         mockNutService.mouseClickEvent.mockResolvedValue({ success: true });
@@ -258,30 +291,47 @@ describe('ComputerUseService', () => {
         expect(mockNutService.mouseClickEvent).toHaveBeenCalledTimes(10);
       });
 
-      it('should handle click with hold keys and error cleanup', async () => {const action: ClickMouseAction = {action: 'click_mouse',
-  button: 'left',
-  clickCount: 1,
-  holdKeys: ['ctrl'],};mockNutService.holdKeys.mockResolvedValue({ success: true });
+      it('should handle click with hold keys and error cleanup', async () => {
+        const action: ClickMouseAction = {
+          action: 'click_mouse',
+          button: 'left',
+          clickCount: 1,
+          holdKeys: ['ctrl'],
+        };
+        mockNutService.holdKeys.mockResolvedValue({ success: true });
         mockNutService.mouseClickEvent.mockRejectedValue(
-          new Error('Click failed'),);
-    await expect(service.action(action)).rejects.toThrow();
-        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);});
-});
+          new Error('Click failed'),
+        );
+        await expect(service.action(action)).rejects.toThrow();
+        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);
+      });
+    });
 
-    describe('press_mouse action', () => {it('should press mouse button', async () => {const action: PressMouseAction = {action: 'press_mouse',
-  button: 'left',
-  press: 'down',};mockNutService.mouseButtonEvent.mockResolvedValue({ success: true });
+    describe('press_mouse action', () => {
+      it('should press mouse button', async () => {
+        const action: PressMouseAction = {
+          action: 'press_mouse',
+          button: 'left',
+          press: 'down',
+        };
+        mockNutService.mouseButtonEvent.mockResolvedValue({ success: true });
 
         await service.action(action);
 
         expect(mockNutService.mouseButtonEvent).toHaveBeenCalledWith(
-          'left',true,);
+          'left',
+          true,
+        );
       });
 
-      it('should release mouse button with coordinates', async () => {const action: PressMouseAction = {action: 'press_mouse',
-  coordinates: { x: 50, y: 75 },
-  button: 'right',
-  press: 'up',};mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
+      it('should release mouse button with coordinates', async () => {
+        const action: PressMouseAction = {
+          action: 'press_mouse',
+          coordinates: { x: 50, y: 75 },
+          button: 'right',
+          press: 'up',
+        };
+        mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
         mockNutService.mouseButtonEvent.mockResolvedValue({ success: true });
 
         await service.action(action);
@@ -291,59 +341,87 @@ describe('ComputerUseService', () => {
           y: 75,
         });
         expect(mockNutService.mouseButtonEvent).toHaveBeenCalledWith(
-          'right',false,);
+          'right',
+          false,
+        );
       });
     });
 
-    describe('drag_mouse action', () => {it('should perform drag operation', async () => {const action: DragMouseAction = {action: 'drag_mouse',
-  path: [{ x: 0, y: 0 },
+    describe('drag_mouse action', () => {
+      it('should perform drag operation', async () => {
+        const action: DragMouseAction = {
+          action: 'drag_mouse',
+          path: [
+            { x: 0, y: 0 },
             { x: 100, y: 100 },
           ],
-          button: 'left',};mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
+          button: 'left',
+        };
+        mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
         mockNutService.mouseButtonEvent.mockResolvedValue({ success: true });
 
         await service.action(action);
 
         expect(mockNutService.mouseButtonEvent).toHaveBeenCalledWith(
-          'left',true,);
+          'left',
+          true,
+        );
         expect(mockNutService.mouseMoveEvent).toHaveBeenCalledTimes(2);
         expect(mockNutService.mouseButtonEvent).toHaveBeenCalledWith(
-          'left',false,);
+          'left',
+          false,
+        );
       });
 
-      it('should handle empty drag path', async () => {const action: DragMouseAction = {action: 'drag_mouse',
-  path: [],
-  button: 'left',};await expect(service.action(action)).rejects.toThrow(
-          'Mouse drag path must contain at least one coordinate',);});
+      it('should handle empty drag path', async () => {
+        const action: DragMouseAction = {
+          action: 'drag_mouse',
+          path: [],
+          button: 'left',
+        };
+        await expect(service.action(action)).rejects.toThrow(
+          'Mouse drag path must contain at least one coordinate',
+        );
+      });
 
-      it('should cleanup on drag error', async () => {const action: DragMouseAction = {action: 'drag_mouse',
-  path: [{ x: 0, y: 0 }],
-  button: 'left',
-  holdKeys: ['shift'],};mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
+      it('should cleanup on drag error', async () => {
+        const action: DragMouseAction = {
+          action: 'drag_mouse',
+          path: [{ x: 0, y: 0 }],
+          button: 'left',
+          holdKeys: ['shift'],
+        };
+        mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
         mockNutService.mouseButtonEvent
           .mockResolvedValueOnce({ success: true }) // Press
           .mockRejectedValue(new Error('Release failed')); // Release failsmockNutService.holdKeys.mockResolvedValue({ success: true });
-    await expect(service.action(action)).rejects.toThrow();
-        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['shift'], false);});
-});
+        await expect(service.action(action)).rejects.toThrow();
+        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['shift'], false);
+      });
+    });
 
-    describe('scroll action', () => {it('should perform scroll operation', async () => {const action: ScrollAction = {action: 'scroll',
-  direction: 'up',
-  scrollCount: 3,};
+    describe('scroll action', () => {
+      it('should perform scroll operation', async () => {
+        const action: ScrollAction = {
+          action: 'scroll',
+          direction: 'up',
+          scrollCount: 3,
+        };
 
         mockNutService.mouseWheelEvent.mockResolvedValue({ success: true });
 
         await service.action(action);
 
         expect(mockNutService.mouseWheelEvent).toHaveBeenCalledTimes(3);
-        expect(mockNutService.mouseWheelEvent).toHaveBeenCalledWith('up', 1);});
+        expect(mockNutService.mouseWheelEvent).toHaveBeenCalledWith('up', 1);
+      });
 
-  it('should handle scroll count limits', async () => {
-    const action: ScrollAction = {
-      action: 'scroll',
-      direction: 'down',
-      scrollCount: 100, // Over limit
-    };
+      it('should handle scroll count limits', async () => {
+        const action: ScrollAction = {
+          action: 'scroll',
+          direction: 'down',
+          scrollCount: 100, // Over limit
+        };
 
         mockNutService.mouseWheelEvent.mockResolvedValue({ success: true });
 
@@ -353,11 +431,15 @@ describe('ComputerUseService', () => {
         expect(mockNutService.mouseWheelEvent).toHaveBeenCalledTimes(50);
       });
 
-      it('should scroll with coordinates and hold keys', async () => {const action: ScrollAction = {action: 'scroll',
-  coordinates: { x: 200, y: 300 },
-  direction: 'left',
-  scrollCount: 2,
-  holdKeys: ['alt'],};mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
+      it('should scroll with coordinates and hold keys', async () => {
+        const action: ScrollAction = {
+          action: 'scroll',
+          coordinates: { x: 200, y: 300 },
+          direction: 'left',
+          scrollCount: 2,
+          holdKeys: ['alt'],
+        };
+        mockNutService.mouseMoveEvent.mockResolvedValue({ success: true });
         mockNutService.mouseWheelEvent.mockResolvedValue({ success: true });
         mockNutService.holdKeys.mockResolvedValue({ success: true });
 
@@ -368,64 +450,99 @@ describe('ComputerUseService', () => {
           y: 300,
         });
         expect(mockNutService.holdKeys).toHaveBeenCalledWith(['alt'], true);
-      expect(mockNutService.holdKeys).toHaveBeenCalledWith(['alt'], false);});
-});
+        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['alt'], false);
+      });
+    });
   });
 
-  describe('Keyboard Operations', () => {describe('type_keys action', () => {it('should type key sequence', async () => {const action: TypeKeysAction = {action: 'type_keys',
-  keys: ['a', 'b', 'c'],};mockNutService.sendKeys.mockResolvedValue({ success: true });
+  describe('Keyboard Operations', () => {
+    describe('type_keys action', () => {
+      it('should type key sequence', async () => {
+        const action: TypeKeysAction = {
+          action: 'type_keys',
+          keys: ['a', 'b', 'c'],
+        };
+        mockNutService.sendKeys.mockResolvedValue({ success: true });
 
         await service.action(action);
 
         expect(mockNutService.sendKeys).toHaveBeenCalledWith(
-          ['a', 'b', 'c'],undefined,);
+          ['a', 'b', 'c'],
+          undefined,
+        );
       });
 
-      it('should type keys with delay', async () => {const action: TypeKeysAction = {action: 'type_keys',
-  keys: ['ctrl', 'c'],
-  delay: 100,};
+      it('should type keys with delay', async () => {
+        const action: TypeKeysAction = {
+          action: 'type_keys',
+          keys: ['ctrl', 'c'],
+          delay: 100,
+        };
 
         mockNutService.sendKeys.mockResolvedValue({ success: true });
 
         await service.action(action);
 
         expect(mockNutService.sendKeys).toHaveBeenCalledWith(
-          ['ctrl', 'c'],100,);
+          ['ctrl', 'c'],
+          100,
+        );
       });
     });
 
-    describe('press_keys action', () => {it('should press keys down', async () => {const action: PressKeysAction = {action: 'press_keys',
-  keys: ['shift', 'ctrl'],
-  press: 'down',};mockNutService.holdKeys.mockResolvedValue({ success: true });
+    describe('press_keys action', () => {
+      it('should press keys down', async () => {
+        const action: PressKeysAction = {
+          action: 'press_keys',
+          keys: ['shift', 'ctrl'],
+          press: 'down',
+        };
+        mockNutService.holdKeys.mockResolvedValue({ success: true });
 
         await service.action(action);
 
         expect(mockNutService.holdKeys).toHaveBeenCalledWith(
-          ['shift', 'ctrl'],true,);
+          ['shift', 'ctrl'],
+          true,
+        );
       });
 
-      it('should release keys', async () => {const action: PressKeysAction = {action: 'press_keys',
-  keys: ['alt'],
-  press: 'up',};mockNutService.holdKeys.mockResolvedValue({ success: true });
+      it('should release keys', async () => {
+        const action: PressKeysAction = {
+          action: 'press_keys',
+          keys: ['alt'],
+          press: 'up',
+        };
+        mockNutService.holdKeys.mockResolvedValue({ success: true });
 
         await service.action(action);
 
-        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['alt'], false);});
-});
+        expect(mockNutService.holdKeys).toHaveBeenCalledWith(['alt'], false);
+      });
+    });
 
-    describe('type_text action', () => {it('should type text without delay', async () => {const action: TypeTextAction = {action: 'type_text',
-  text: 'Hello World',};mockNutService.typeText.mockResolvedValue(undefined);
+    describe('type_text action', () => {
+      it('should type text without delay', async () => {
+        const action: TypeTextAction = {
+          action: 'type_text',
+          text: 'Hello World',
+        };
+        mockNutService.typeText.mockResolvedValue(undefined);
 
         await service.action(action);
 
         expect(mockNutService.typeText).toHaveBeenCalledWith(
-          'Hello World',undefined,);
+          'Hello World',
+          undefined,
+        );
       });
 
-      it('should type text with delay', async () => {const action: TypeTextAction = {action: 'type_text',
-  text: 'Sensitive data',
-  delay: 50,
-  sensitive: true,
+      it('should type text with delay', async () => {
+        const action: TypeTextAction = {
+          action: 'type_text',
+          text: 'Sensitive data',
+          delay: 50,
+          sensitive: true,
         };
 
         mockNutService.typeText.mockResolvedValue(undefined);
@@ -433,22 +550,33 @@ describe('ComputerUseService', () => {
         await service.action(action);
 
         expect(mockNutService.typeText).toHaveBeenCalledWith(
-          'Sensitive data',50,);
+          'Sensitive data',
+          50,
+        );
       });
     });
 
-    describe('paste_text action', () => {it('should paste text', async () => {const action: PasteTextAction = {action: 'paste_text',
-  text: 'Clipboard content',};mockNutService.pasteText.mockResolvedValue(undefined);
+    describe('paste_text action', () => {
+      it('should paste text', async () => {
+        const action: PasteTextAction = {
+          action: 'paste_text',
+          text: 'Clipboard content',
+        };
+        mockNutService.pasteText.mockResolvedValue(undefined);
 
         await service.action(action);
 
         expect(mockNutService.pasteText).toHaveBeenCalledWith(
-          'Clipboard content',);});
+          'Clipboard content',
+        );
+      });
     });
   });
 
-  describe('Utility Operations', () => {describe('wait action', () => {it('should wait for specified duration', async () => {const action = {action: 'wait' as const,
-  duration: 100,};
+  describe('Utility Operations', () => {
+    describe('wait action', () => {
+      it('should wait for specified duration', async () => {
+        const action = { action: 'wait' as const, duration: 100 };
 
         const startTime = Date.now();
         await service.action(action);
@@ -474,9 +602,12 @@ describe('ComputerUseService', () => {
       });
     });
 
-    describe('screenshot action', () => {it('should take screenshot successfully', async () => {const action: ScreenshotAction = {action: 'screenshot',};
-    const fakeImageBuffer = Buffer.from('fake-image-data');mockNutService.screendump.mockResolvedValue(fakeImageBuffer);
-    const result = await service.action(action);
+    describe('screenshot action', () => {
+      it('should take screenshot successfully', async () => {
+        const action: ScreenshotAction = { action: 'screenshot' };
+        const fakeImageBuffer = Buffer.from('fake-image-data');
+        mockNutService.screendump.mockResolvedValue(fakeImageBuffer);
+        const result = await service.action(action);
 
         expect(mockNutService.screendump).toHaveBeenCalled();
         expect(result).toMatchObject({
@@ -514,27 +645,31 @@ describe('ComputerUseService', () => {
         };
 
         mockNutService.getCursorPosition.mockRejectedValue(
-          new Error('Position failed')
+          new Error('Position failed'),
         );
 
         await expect(service.action(action)).rejects.toThrow(
-          'Cursor position retrieval failed: Position failed'
+          'Cursor position retrieval failed: Position failed',
         );
       });
     });
   });
 
-  describe('Application Management', () => {const mockExecAsync = jest.fn();
+  describe('Application Management', () => {
+    const mockExecAsync = jest.fn();
     const mockSpawn = jest.fn();
 
     beforeEach(() => {
       // Mock exec and spawn
-      const util = jest.requireMock('util') as {promisify: { mockReturnValue: (value: unknown) => void };};
+      const util = jest.requireMock('util') as {
+        promisify: { mockReturnValue: (value: unknown) => void };
+      };
       util.promisify.mockReturnValue(mockExecAsync);
 
       // Mock child_process.spawn
-      jest.doMock('child_process', () => ({spawn: mockSpawn,
-  exec: jest.fn(),
+      jest.doMock('child_process', () => ({
+        spawn: mockSpawn,
+        exec: jest.fn(),
       }));
 
       mockSpawn.mockReturnValue({
@@ -542,19 +677,31 @@ describe('ComputerUseService', () => {
       });
     });
 
-    describe('application action', () => {it('should handle desktop activation', async () => {const action: ApplicationAction = {action: 'application',
-  application: 'desktop',};await service.action(action);
+    describe('application action', () => {
+      it('should handle desktop activation', async () => {
+        const action: ApplicationAction = {
+          action: 'application',
+          application: 'desktop',
+        };
+        await service.action(action);
 
         expect(mockSpawn).toHaveBeenCalledWith(
-          'sudo',['-u', 'user', 'wmctrl', '-k', 'on'],expectObjectContaining({env: expectObjectContaining({ DISPLAY: ':0.0' }),
-  stdio: 'ignore',
-  detached: true,}),
+          'sudo',
+          ['-u', 'user', 'wmctrl', '-k', 'on'],
+          expectObjectContaining({
+            env: expectObjectContaining({ DISPLAY: ':0.0' }),
+            stdio: 'ignore',
+            detached: true,
+          }),
         );
       });
 
-      it('should launch new application when not running', async () => {const action: ApplicationAction = {action: 'application',
-  application: 'firefox',};
-    // Mock application not running (error code 1)
+      it('should launch new application when not running', async () => {
+        const action: ApplicationAction = {
+          action: 'application',
+          application: 'firefox',
+        };
+        // Mock application not running (error code 1)
         (
           mockExecAsync as jest.MockedFunction<
             () => Promise<{ stdout: string; stderr?: string }>
@@ -566,22 +713,30 @@ describe('ComputerUseService', () => {
         await service.action(action);
 
         expect(mockSpawn).toHaveBeenCalledWith(
-          'sudo',['-u', 'user', 'nohup', 'firefox-esr'],expectObjectContaining({env: expectObjectContaining({ DISPLAY: ':0.0' }),
-  stdio: 'ignore',
-  detached: true,}),
+          'sudo',
+          ['-u', 'user', 'nohup', 'firefox-esr'],
+          expectObjectContaining({
+            env: expectObjectContaining({ DISPLAY: ':0.0' }),
+            stdio: 'ignore',
+            detached: true,
+          }),
         );
       });
 
-      it('should activate existing application when running', async () => {const action: ApplicationAction = {action: 'application',
-  application: 'vscode',};
-    // Mock application already running
+      it('should activate existing application when running', async () => {
+        const action: ApplicationAction = {
+          action: 'application',
+          application: 'vscode',
+        };
+        // Mock application already running
         (
           mockExecAsync as jest.MockedFunction<
             () => Promise<{ stdout: string; stderr?: string }>
           >
         ).mockResolvedValue({
-          stdout: 'Navigator.code.Code running',});
-    await service.action(action);
+          stdout: 'Navigator.code.Code running',
+        });
+        await service.action(action);
 
         expect(mockSpawn).toHaveBeenCalledWith(
           'sudo',
@@ -590,16 +745,25 @@ describe('ComputerUseService', () => {
         );
       });
 
-      it('should handle unsupported application', async () => {const action: ApplicationAction = {action: 'application',
-  application: 'unsupported-app',};await expect(service.action(action)).rejects.toThrow(
-          'Unsupported application: unsupported-app',);});
+      it('should handle unsupported application', async () => {
+        const action: ApplicationAction = {
+          action: 'application',
+          application: 'unsupported-app',
+        };
+        await expect(service.action(action)).rejects.toThrow(
+          'Unsupported application: unsupported-app',
+        );
+      });
 
-      it('should handle wmctrl timeout error gracefully', async () => {const action: ApplicationAction = {action: 'application',
-  application: 'firefox',};
-    // Mock timeout error
+      it('should handle wmctrl timeout error gracefully', async () => {
+        const action: ApplicationAction = {
+          action: 'application',
+          application: 'firefox',
+        };
+        // Mock timeout error
         (mockExecAsync as jest.Mock).mockRejectedValue({ message: 'timeout' });
-    await service.action(action);
-    // Should proceed to launch new application
+        await service.action(action);
+        // Should proceed to launch new application
         expect(mockSpawn).toHaveBeenCalledWith(
           'sudo',
           ['-u', 'user', 'nohup', 'firefox-esr'],
@@ -609,207 +773,316 @@ describe('ComputerUseService', () => {
     });
   });
 
-  describe('File Operations', () => {const mockExecAsync = jest.fn();
+  describe('File Operations', () => {
+    const mockExecAsync = jest.fn();
 
-  beforeEach(() => {
-      const util = jest.requireMock('util') as {promisify: { mockReturnValue: (value: unknown) => void };};
+    beforeEach(() => {
+      const util = jest.requireMock('util') as {
+        promisify: { mockReturnValue: (value: unknown) => void };
+      };
       util.promisify.mockReturnValue(mockExecAsync);
       mockExecAsync.mockResolvedValue({ stdout: 'success' });
-});
+    });
 
-describe('write_file action', () => {it('should write file successfully', async () => {const testData = Buffer.from('test file content').toString('base64');
-    const action: WriteFileAction = {action: 'write_file',
-  path: '/home/user/test.txt',
-  data: testData,};
+    describe('write_file action', () => {
+      it('should write file successfully', async () => {
+        const testData = Buffer.from('test file content').toString('base64');
+        const action: WriteFileAction = {
+          action: 'write_file',
+          path: '/home/user/test.txt',
+          data: testData,
+        };
 
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
         (mockExecAsync as jest.Mock).mockResolvedValue({ stdout: '' });
-    const result = await service.action(action);
-      expect(result).toMatchObject({
+        const result = await service.action(action);
+        expect(result).toMatchObject({
           success: true,
           message: expectStringContaining('File written successfully'),
-  path: '/home/user/test.txt',
+          path: '/home/user/test.txt',
           size: expectAnyNumber(),
           operationId: expectAnyString(),
           timestamp: expectAnyDate(),
         });
       });
 
-      it('should handle relative paths', async () => {const testData = Buffer.from('test').toString('base64');
-    const action: WriteFileAction = {action: 'write_file',
-  path: 'relative/test.txt',
-  data: testData,};
+      it('should handle relative paths', async () => {
+        const testData = Buffer.from('test').toString('base64');
+        const action: WriteFileAction = {
+          action: 'write_file',
+          path: 'relative/test.txt',
+          data: testData,
+        };
 
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
 
         const result = (await service.action(action)) as FileWriteResult;
 
-        expect(result.path).toBe('/home/user/Desktop/relative/test.txt');});
+        expect(result.path).toBe('/home/user/Desktop/relative/test.txt');
+      });
 
-  it('should reject unsafe paths', async () => {const testData = Buffer.from('test').toString('base64');
-    const action: WriteFileAction = {action: 'write_file',
-  path: '/etc/passwd',
-  data: testData,};
+      it('should reject unsafe paths', async () => {
+        const testData = Buffer.from('test').toString('base64');
+        const action: WriteFileAction = {
+          action: 'write_file',
+          path: '/etc/passwd',
+          data: testData,
+        };
 
         const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'File path outside allowed directories',);});
+          'File path outside allowed directories',
+        );
+      });
 
-      it('should handle invalid base64 data', async () => {const action: WriteFileAction = {action: 'write_file',
-  path: '/home/user/test.txt',
-  data: 'invalid-base64-data',};
-    const result = (await service.action(action)) as FileWriteResult;
+      it('should handle invalid base64 data', async () => {
+        const action: WriteFileAction = {
+          action: 'write_file',
+          path: '/home/user/test.txt',
+          data: 'invalid-base64-data',
+        };
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
-        expect(result.message).toContain('Invalid base64 data');});
+        expect(result.message).toContain('Invalid base64 data');
+      });
 
-  it('should cleanup temporary file on error', async () => {const testData = Buffer.from('test').toString('base64');
-    const action: WriteFileAction = {action: 'write_file',
-  path: '/home/user/test.txt',
-  data: testData,};
+      it('should cleanup temporary file on error', async () => {
+        const testData = Buffer.from('test').toString('base64');
+        const action: WriteFileAction = {
+          action: 'write_file',
+          path: '/home/user/test.txt',
+          data: testData,
+        };
 
         (fs.writeFile as jest.Mock).mockResolvedValue(undefined);
         (mockExecAsync as jest.Mock).mockRejectedValue(
-          new Error('Copy failed'),);
-    const result = (await service.action(action)) as FileWriteResult;
+          new Error('Copy failed'),
+        );
+        const result = (await service.action(action)) as FileWriteResult;
 
         expect(result.success).toBe(false);
         expect(fs.unlink).toHaveBeenCalled();
       });
     });
 
-    describe('read_file action', () => {it('should read file successfully', async () => {const action: ReadFileAction = {action: 'read_file',
-  path: '/home/user/test.txt',};
-    const fileContent = Buffer.from('test file content');(fs.readFile as jest.Mock).mockResolvedValue(fileContent);mockExecAsync
-          .mockResolvedValueOnce({ stdout: '' }) // mkdir.mockResolvedValueOnce({ stdout: '' }) // chmod.mockResolvedValueOnce({ stdout: '17 1609459200' }); // statconst result = await service.action(action);
-      expect(result).toMatchObject({
+    describe('read_file action', () => {
+      it('should read file successfully', async () => {
+        const action: ReadFileAction = {
+          action: 'read_file',
+          path: '/home/user/test.txt',
+        };
+        const fileContent = Buffer.from('test file content');
+        (fs.readFile as jest.Mock).mockResolvedValue(fileContent);
+        mockExecAsync.mockResolvedValueOnce({ stdout: '' }); // mkdir.mockResolvedValueOnce({ stdout: '' }) // chmod.mockResolvedValueOnce({ stdout: '17 1609459200' }); // statconst result = await service.action(action);
+        expect(result).toMatchObject({
           success: true,
           data: fileContent.toString('base64'),
-  name: 'test.txt',
-  size: 17,
-  mediaType: 'text/plain',
+          name: 'test.txt',
+          size: 17,
+          mediaType: 'text/plain',
           lastModified: expectAnyDate(),
           operationId: expectAnyString(),
           timestamp: expectAnyDate(),
         });
       });
 
-      it('should handle relative paths', async () => {const action: ReadFileAction = {action: 'read_file',
-  path: 'test.txt',};(fs.readFile as jest.Mock).mockResolvedValue(Buffer.from('test'));mockExecAsync.mockResolvedValueOnce({ stdout: '' }).mockResolvedValueOnce({ stdout: '' }).mockResolvedValueOnce({ stdout: '4 1609459200' });
-    const result = (await service.action(action)) as FileReadResult;
-      expect(result.success).toBe(true);
+      it('should handle relative paths', async () => {
+        const action: ReadFileAction = {
+          action: 'read_file',
+          path: 'test.txt',
+        };
+        (fs.readFile as jest.Mock).mockResolvedValue(Buffer.from('test'));
+        mockExecAsync
+          .mockResolvedValueOnce({ stdout: '' })
+          .mockResolvedValueOnce({ stdout: '' })
+          .mockResolvedValueOnce({ stdout: '4 1609459200' });
+        const result = (await service.action(action)) as FileReadResult;
+        expect(result.success).toBe(true);
       });
 
-      it('should detect media types correctly', async () => {const action: ReadFileAction = {action: 'read_file',
-  path: '/home/user/image.png',};(fs.readFile as jest.Mock).mockResolvedValue(Buffer.from('png data'));mockExecAsync.mockResolvedValueOnce({ stdout: '' }).mockResolvedValueOnce({ stdout: '' }).mockResolvedValueOnce({ stdout: '8 1609459200' });
-    const result = (await service.action(action)) as FileReadResult;
-      expect(result.mediaType).toBe('image/png');});
+      it('should detect media types correctly', async () => {
+        const action: ReadFileAction = {
+          action: 'read_file',
+          path: '/home/user/image.png',
+        };
+        (fs.readFile as jest.Mock).mockResolvedValue(Buffer.from('png data'));
+        mockExecAsync
+          .mockResolvedValueOnce({ stdout: '' })
+          .mockResolvedValueOnce({ stdout: '' })
+          .mockResolvedValueOnce({ stdout: '8 1609459200' });
+        const result = (await service.action(action)) as FileReadResult;
+        expect(result.mediaType).toBe('image/png');
+      });
 
-  it('should reject unsafe paths', async () => {const action: ReadFileAction = {action: 'read_file',
-  path: '/etc/shadow',};
-    const result = (await service.action(action)) as FileReadResult;
+      it('should reject unsafe paths', async () => {
+        const action: ReadFileAction = {
+          action: 'read_file',
+          path: '/etc/shadow',
+        };
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
         expect(result.message).toContain(
-          'File path outside allowed directories',);});
+          'File path outside allowed directories',
+        );
+      });
 
-      it('should handle file read errors', async () => {const action: ReadFileAction = {action: 'read_file',
-  path: '/home/user/nonexistent.txt',};(mockExecAsync as jest.Mock).mockRejectedValue(
-          new Error('File not found'),);
-    const result = (await service.action(action)) as FileReadResult;
+      it('should handle file read errors', async () => {
+        const action: ReadFileAction = {
+          action: 'read_file',
+          path: '/home/user/nonexistent.txt',
+        };
+        (mockExecAsync as jest.Mock).mockRejectedValue(
+          new Error('File not found'),
+        );
+        const result = (await service.action(action)) as FileReadResult;
 
         expect(result.success).toBe(false);
-        expect(result.message).toContain('File read failed');});
+        expect(result.message).toContain('File read failed');
+      });
 
-  it('should cleanup temporary file on error', async () => {const action: ReadFileAction = {action: 'read_file',
-  path: '/home/user/test.txt',};(mockExecAsync as jest.Mock).mockRejectedValue(
-          new Error('Copy failed'),);
-    await service.action(action);
+      it('should cleanup temporary file on error', async () => {
+        const action: ReadFileAction = {
+          action: 'read_file',
+          path: '/home/user/test.txt',
+        };
+        (mockExecAsync as jest.Mock).mockRejectedValue(
+          new Error('Copy failed'),
+        );
+        await service.action(action);
 
         expect(fs.unlink).toHaveBeenCalled();
       });
     });
   });
 
-  describe('Error Handling', () => {describe('ErrorHandler utility', () => {it('should extract error messages from Error objects', () => {const error = new Error('Test error message');
-    const message = ErrorHandler.extractErrorMessage(error);
-      expect(message).toBe('Test error message');});
-
-  it('should extract error messages from string errors', () => {const message = ErrorHandler.extractErrorMessage('String error');
-      expect(message).toBe('String error');});
-
-  it('should extract error messages from objects with message property', () => {const error = { message: 'Object error message' };
-    const message = ErrorHandler.extractErrorMessage(error);
-      expect(message).toBe('Object error message');});
-
-  it('should handle unknown error types', () => {const error = { unknownProperty: 'value' };
-    const message = ErrorHandler.extractErrorMessage(error);
-      expect(message).toBe(JSON.stringify(error));
+  describe('Error Handling', () => {
+    describe('ErrorHandler utility', () => {
+      it('should extract error messages from Error objects', () => {
+        const error = new Error('Test error message');
+        const message = ErrorHandler.extractErrorMessage(error);
+        expect(message).toBe('Test error message');
       });
 
-      it('should extract stack traces from Error objects', () => {const error = new Error('Test error');
-    const stack = ErrorHandler.extractErrorStack(error);
-      expect(stack).toBeDefined();
-        expect(stack).toContain('Error: Test error');});
-
-  it('should extract stack traces from objects with stack property', () => {const error = { stack: 'Custom stack trace' };
-    const stack = ErrorHandler.extractErrorStack(error);
-      expect(stack).toBe('Custom stack trace');});
-
-  it('should return undefined for objects without stack', () => {const error = { message: 'No stack' };
-    const stack = ErrorHandler.extractErrorStack(error);
-      expect(stack).toBeUndefined();
+      it('should extract error messages from string errors', () => {
+        const message = ErrorHandler.extractErrorMessage('String error');
+        expect(message).toBe('String error');
       });
 
-      it('should create comprehensive error objects', () => {const originalError = new Error('Original error');
-    const error = ErrorHandler.createError('TEST_ERROR','Test message','operation_123',{ contextKey: 'contextValue' },originalError,);
+      it('should extract error messages from objects with message property', () => {
+        const error = { message: 'Object error message' };
+        const message = ErrorHandler.extractErrorMessage(error);
+        expect(message).toBe('Object error message');
+      });
+
+      it('should handle unknown error types', () => {
+        const error = { unknownProperty: 'value' };
+        const message = ErrorHandler.extractErrorMessage(error);
+        expect(message).toBe(JSON.stringify(error));
+      });
+
+      it('should extract stack traces from Error objects', () => {
+        const error = new Error('Test error');
+        const stack = ErrorHandler.extractErrorStack(error);
+        expect(stack).toBeDefined();
+        expect(stack).toContain('Error: Test error');
+      });
+
+      it('should extract stack traces from objects with stack property', () => {
+        const error = { stack: 'Custom stack trace' };
+        const stack = ErrorHandler.extractErrorStack(error);
+        expect(stack).toBe('Custom stack trace');
+      });
+
+      it('should return undefined for objects without stack', () => {
+        const error = { message: 'No stack' };
+        const stack = ErrorHandler.extractErrorStack(error);
+        expect(stack).toBeUndefined();
+      });
+
+      it('should create comprehensive error objects', () => {
+        const originalError = new Error('Original error');
+        const error = ErrorHandler.createError(
+          'TEST_ERROR',
+          'Test message',
+          'operation_123',
+          { contextKey: 'contextValue' },
+          originalError,
+        );
 
         expect(error).toMatchObject({
           code: 'TEST_ERROR',
-  message: 'Test message',
-  operationId: 'operation_123',
+          message: 'Test message',
+          operationId: 'operation_123',
           timestamp: expectAnyDate(),
-  context: { contextKey: 'contextValue' },
+          context: { contextKey: 'contextValue' },
           stack: expectStringContaining('Error: Original error'),
-  originalError: originalError,});
+          originalError: originalError,
+        });
       });
 
-      it('should create error objects without original error', () => {const error = ErrorHandler.createError('SIMPLE_ERROR','Simple message','operation_456',);
-      expect(error).toMatchObject({
+      it('should create error objects without original error', () => {
+        const error = ErrorHandler.createError(
+          'SIMPLE_ERROR',
+          'Simple message',
+          'operation_456',
+        );
+        expect(error).toMatchObject({
           code: 'SIMPLE_ERROR',
-  message: 'Simple message',
-  operationId: 'operation_456',
+          message: 'Simple message',
+          operationId: 'operation_456',
           timestamp: expectAnyDate(),
-  context: {},
+          context: {},
           stack: undefined,
           originalError: undefined,
         });
       });
     });
 
-    describe('Action error handling', () => {it('should handle unknown action types', async () => {const invalidAction = {action: 'invalid_action',} as unknown as ComputerAction;await expect(service.action(invalidAction)).rejects.toThrow(
-          'Unsupported computer action',);});
+    describe('Action error handling', () => {
+      it('should handle unknown action types', async () => {
+        const invalidAction = {
+          action: 'invalid_action',
+        } as unknown as ComputerAction;
+        await expect(service.action(invalidAction)).rejects.toThrow(
+          'Unsupported computer action',
+        );
+      });
 
-      it('should provide structured error information', async () => {const action: MoveMouseAction = {action: 'move_mouse',
-  coordinates: { x: 100, y: 200 },};
+      it('should provide structured error information', async () => {
+        const action: MoveMouseAction = {
+          action: 'move_mouse',
+          coordinates: { x: 100, y: 200 },
+        };
 
-        const originalError = new Error('NUT service error');mockNutService.mouseMoveEvent.mockRejectedValue(originalError);try {
+        const originalError = new Error('NUT service error');
+        mockNutService.mouseMoveEvent.mockRejectedValue(originalError);
+        try {
           await service.action(action);
         } catch (error) {
           expect(error).toBeInstanceOf(Error);
           expect((error as Error).message).toContain(
-            'Failed to execute move_mouse',);
-      expect((error as Error).message).toContain('NUT service error');}});
+            'Failed to execute move_mouse',
+          );
+          expect((error as Error).message).toContain('NUT service error');
+        }
+      });
     });
   });
 
-  describe('Integration Scenarios', () => {it('should handle complex mouse operation with all features', async () => {const action: ClickMouseAction = {action: 'click_mouse',
-  coordinates: { x: 100, y: 200 },
-  button: 'left',
-  clickCount: 2,
-  holdKeys: ['ctrl', 'shift'],};(mockNutService.mouseMoveEvent as jest.Mock).mockResolvedValue({
+  describe('Integration Scenarios', () => {
+    it('should handle complex mouse operation with all features', async () => {
+      const action: ClickMouseAction = {
+        action: 'click_mouse',
+        coordinates: { x: 100, y: 200 },
+        button: 'left',
+        clickCount: 2,
+        holdKeys: ['ctrl', 'shift'],
+      };
+      (mockNutService.mouseMoveEvent as jest.Mock).mockResolvedValue({
         success: true,
       });
       (mockNutService.holdKeys as jest.Mock).mockResolvedValue({
@@ -826,16 +1099,23 @@ describe('write_file action', () => {it('should write file successfully', async 
         y: 200,
       });
       expect(mockNutService.holdKeys).toHaveBeenCalledWith(
-        ['ctrl', 'shift'],true,);
+        ['ctrl', 'shift'],
+        true,
+      );
       expect(mockNutService.mouseClickEvent).toHaveBeenCalledTimes(2);
       expect(mockNutService.holdKeys).toHaveBeenCalledWith(
-        ['ctrl', 'shift'],false,);
+        ['ctrl', 'shift'],
+        false,
+      );
     });
 
-    it('should handle file operations with comprehensive error scenarios', async () => {const action: WriteFileAction = {action: 'write_file',
-  path: '/home/user/test.txt',
-  data: 'invalid-base64',};
-    const result = (await service.action(action)) as FileWriteResult;
+    it('should handle file operations with comprehensive error scenarios', async () => {
+      const action: WriteFileAction = {
+        action: 'write_file',
+        path: '/home/user/test.txt',
+        data: 'invalid-base64',
+      };
+      const result = (await service.action(action)) as FileWriteResult;
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('Invalid base64 data');

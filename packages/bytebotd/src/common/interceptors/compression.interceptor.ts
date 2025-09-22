@@ -16,32 +16,47 @@
  *
  * @author Claude Code - Performance Optimization Specialist
  * @version 1.0.0
- */;
-
-import {
+ */ import {
   CallHandler,
   ExecutionContext,
   Injectable,
   Logger,
   NestInterceptor,
-
 } from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { Request, Response } from 'express';
-import { gzip, brotliCompress, deflate, constants as zlibConstants } from 'zlib';
+import {
+  gzip,
+  brotliCompress,
+  deflate,
+  constants as zlibConstants,
+} from 'zlib';
 import { promisify } from 'util';
 import { MetricsService } from '../../metrics/metrics.service';
 
 // Promisify compression functions
-const gzipAsync = promisify(gzip) as (buffer: Buffer, options?: { level?: number }) => Promise<Buffer>;
-const brotliCompressAsync = promisify(brotliCompress) as (buffer: Buffer, options?: { params?: Record<number, number> }) => Promise<Buffer>;
-const deflateAsync = promisify(deflate) as (buffer: Buffer, options?: { level?: number }) => Promise<Buffer>;
+const gzipAsync = promisify(gzip) as (
+  buffer: Buffer,
+  options?: { level?: number },
+) => Promise<Buffer>;
+const brotliCompressAsync = promisify(brotliCompress) as (
+  buffer: Buffer,
+  options?: { params?: Record<number, number> },
+) => Promise<Buffer>;
+const deflateAsync = promisify(deflate) as (
+  buffer: Buffer,
+  options?: { level?: number },
+) => Promise<Buffer>;
 
 /**
  * Compression algorithm types
  */
-type CompressionAlgorithm = 'gzip' | 'brotli' | 'deflate' | 'identity';/*** Compression configuration
+type CompressionAlgorithm =
+  | 'gzip'
+  | 'brotli'
+  | 'deflate'
+  | 'identity'; /*** Compression configuration
  */
 interface CompressionConfig {
   minSize: number; // Minimum response size to compress (bytes);
@@ -49,8 +64,6 @@ interface CompressionConfig {
   threshold: number; // Minimum compression ratio to use compression;
   compressibleTypes: Set<string>; // Content types that should be compressed;
   maxSize: number; // Maximum response size to compress (bytes)
-
-
 }
 
 /**
@@ -64,8 +77,6 @@ interface CompressionStats {
   bytesCompressed: number;
   averageCompressionTime: number;
   algorithmUsage: Record<CompressionAlgorithm, number>;
-
-
 }
 
 /**
@@ -78,8 +89,6 @@ interface CompressionResult {
   ratio: number;
   compressionTime: number;
   applied: boolean;
-
-
 }
 
 /**
@@ -89,19 +98,18 @@ interface CompressionResult {
 export class CompressionInterceptor implements NestInterceptor {
   private readonly logger = new Logger(CompressionInterceptor.name);
   private readonly stats: CompressionStats = {
-  totalRequests: 0,
+    totalRequests: 0,
     compressedRequests: 0,
     compressionRatio: 0,
     bytesOriginal: 0,
     bytesCompressed: 0,
     averageCompressionTime: 0,
     algorithmUsage: {
-  gzip: 0,
+      gzip: 0,
       brotli: 0,
       deflate: 0,
       identity: 0,
-    
-},
+    },
   };
 
   // Compression configuration (configurable via environment variables)
@@ -150,19 +158,21 @@ export class CompressionInterceptor implements NestInterceptor {
   /**
    * Handle compression asynchronously with proper type safety
    */
-  private async handleCompressionAsync(data: unknown,
+  private async handleCompressionAsync(
+    data: unknown,
     request: Request,
     response: Response,
-  ): Promise<unknown>  {
-  // Skip compression if already handled by middleware
-    if (response.get('Content-Encoding')) {this.updateStats({algorithm: 'identity',
-      originalSize: 0,
-      compressedSize: 0,
+  ): Promise<unknown> {
+    // Skip compression if already handled by middleware
+    if (response.get('Content-Encoding')) {
+      this.updateStats({
+        algorithm: 'identity',
+        originalSize: 0,
+        compressedSize: 0,
         ratio: 1,
         compressionTime: 0,
         applied: false,
-      
-});
+      });
       return data;
     }
 
@@ -175,15 +185,20 @@ export class CompressionInterceptor implements NestInterceptor {
 
     if (
       compressionResult.applied &&
-      compressionResult.algorithm !== 'identity') {
-  // Set compression headers
-      response.set('Content-Encoding', compressionResult.algorithm);response.set('Vary', 'Accept-Encoding');
+      compressionResult.algorithm !== 'identity'
+    ) {
+      // Set compression headers
+      response.set('Content-Encoding', compressionResult.algorithm);
+      response.set('Vary', 'Accept-Encoding');
 
       this.logger.debug(
-        `Response compressed: ${compressionResult.algorithm
-}, ` +`${compressionResult.originalSize}
+        `Response compressed: ${compressionResult.algorithm}, ` +
+          `${compressionResult.originalSize}
 b → ${compressionResult.compressedSize}
-b ` +`(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,);}
+b ` +
+          `(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,
+      );
+    }
 
     this.updateStats(compressionResult);
     return data;
@@ -192,31 +207,31 @@ b ` +`(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,);}
   /**
    * Compress response data with optimal algorithm selection
    */
-  private async compressResponse(data: unknown,
+  private async compressResponse(
+    data: unknown,
     request: Request,
     response: Response,
-  ): Promise<CompressionResult>  {
-  const operationId =
-      (request as Request & { operationId?: string 
-}).operationId ??
+  ): Promise<CompressionResult> {
+    const operationId =
+      (request as Request & { operationId?: string }).operationId ??
       `compress${Date.now()}`;
     const startTime = Date.now();
 
     try {
-  // Convert data to buffer for processing
+      // Convert data to buffer for processing
       const responseBuffer = this.dataToBuffer(data);
       const originalSize = responseBuffer.length;
 
       // Check if compression should be applied
       if (!this.shouldCompress(responseBuffer, response)) {
         return {
-  algorithm: 'identity',
-      originalSize,compressedSize: originalSize,
+          algorithm: 'identity',
+          originalSize,
+          compressedSize: originalSize,
           ratio: 1,
           compressionTime: 0,
           applied: false,
-        
-};
+        };
       }
 
       // Determine best compression algorithm
@@ -232,50 +247,49 @@ b ` +`(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,);}
 
       // Check if compression is beneficial
       if (ratio > this.config.threshold) {
-  // Compression not beneficial enough
+        // Compression not beneficial enough
         return {
-  algorithm: 'identity',
-      originalSize,compressedSize: originalSize,
+          algorithm: 'identity',
+          originalSize,
+          compressedSize: originalSize,
           ratio: 1,
           compressionTime: Date.now() - startTime,
           applied: false,
-        
-};
+        };
       }
 
       // Set compressed data as response
       response.send(compressedData);
 
       return {
-  algorithm,
+        algorithm,
         originalSize,
         compressedSize,
         ratio,
         compressionTime: Date.now() - startTime,
         applied: true,
-      
-};
+      };
     } catch (_error) {
-  const compressionTime = Date.now() - startTime;
+      const compressionTime = Date.now() - startTime;
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown _error';
 
       this.logger.error(
-        `[${operationId
-}] Compression failed: ${errorMessage} (${compressionTime}
+        `[${
+          operationId
+        }] Compression failed: ${errorMessage} (${compressionTime}
 ms)`,
       );
 
       // Return uncompressed data on error
       return {
-  algorithm: 'identity',
-      originalSize: this.dataToBuffer(data).length,
-      compressedSize: this.dataToBuffer(data).length,
+        algorithm: 'identity',
+        originalSize: this.dataToBuffer(data).length,
+        compressedSize: this.dataToBuffer(data).length,
         ratio: 1,
         compressionTime,
         applied: false,
-      
-};
+      };
     }
   }
 
@@ -283,22 +297,21 @@ ms)`,
    * Determine if response should be compressed
    */
   private shouldCompress(data: Buffer, response: Response): boolean {
-  // Check minimum size
+    // Check minimum size
     if (data.length < this.config.minSize) {
       return false;
-    
-}
+    }
 
     // Check maximum size
     if (data.length > this.config.maxSize) {
-  return false;
-    
-}
+      return false;
+    }
 
     // Check content type
     const contentType = response.get('Content-Type') ?? '';
-const baseType = contentType.split(';')[0]?.toLowerCase() ?? '';
-return this.config.compressibleTypes.has(baseType);}
+    const baseType = contentType.split(';')[0]?.toLowerCase() ?? '';
+    return this.config.compressibleTypes.has(baseType);
+  }
 
   /**
    * Select optimal compression algorithm based on client support
@@ -346,19 +359,23 @@ return this.config.compressibleTypes.has(baseType);}
    * Convert response data to buffer
    */
   private dataToBuffer(data: unknown): Buffer {
-  if (Buffer.isBuffer(data)) {
+    if (Buffer.isBuffer(data)) {
       return data;
-    
-}
+    }
 
-  if(typeof data === 'string') {return Buffer.from(data, 'utf8');}
+    if (typeof data === 'string') {
+      return Buffer.from(data, 'utf8');
+    }
 
-  if(typeof data === 'object') {return Buffer.from(JSON.stringify(data), 'utf8');}
-return Buffer.from(String(data), 'utf8');}/**
+    if (typeof data === 'object') {
+      return Buffer.from(JSON.stringify(data), 'utf8');
+    }
+    return Buffer.from(String(data), 'utf8');
+  } /**
    * Update compression statistics
    */
   private updateStats(result: CompressionResult): void {
-  try {
+    try {
       this.stats.totalRequests++;
 
       if (result.applied && result.algorithm !== 'identity') {
@@ -372,38 +389,35 @@ return Buffer.from(String(data), 'utf8');}/**
             (this.stats.compressedRequests - 1) +
             result.compressionTime) /
           this.stats.compressedRequests;
-      
-} else {
-  this.stats.bytesOriginal += result.originalSize;
+      } else {
+        this.stats.bytesOriginal += result.originalSize;
         this.stats.bytesCompressed += result.originalSize; // No compression applied
-      
-}
+      }
 
       // Update algorithm usage
       this.stats.algorithmUsage[result.algorithm]++;
 
       // Calculate overall compression ratio
       if (this.stats.bytesOriginal > 0) {
-  this.stats.compressionRatio =
+        this.stats.compressionRatio =
           (this.stats.bytesOriginal - this.stats.bytesCompressed) /
           this.stats.bytesOriginal;
-      
-}
+      }
 
       // Record metrics
       if (this.metricsService) {
-  this.metricsService.recordCompressionMetrics?.(
+        this.metricsService.recordCompressionMetrics?.(
           result.algorithm,
           result.originalSize,
           result.compressedSize,
           result.compressionTime,
         );
-      
-}
+      }
     } catch (_error) {
-  this.logger.error(
-        `Failed to update compression statistics: ${_error instanceof Error ? _error.message : 'Unknown error'
-}`,
+      this.logger.error(
+        `Failed to update compression statistics: ${
+          _error instanceof Error ? _error.message : 'Unknown error'
+        }`,
       );
     }
   }
@@ -412,10 +426,9 @@ return Buffer.from(String(data), 'utf8');}/**
    * Get current compression statistics
    */
   getStats(): CompressionStats {
-  return {
+    return {
       ...this.stats,
-      algorithmUsage: { ...this.stats.algorithmUsage 
-},
+      algorithmUsage: { ...this.stats.algorithmUsage },
     };
   }
 
@@ -423,35 +436,40 @@ return Buffer.from(String(data), 'utf8');}/**
    * Clear compression statistics
    */
   clearStats(): void {
-  Object.assign(this.stats, {
-  totalRequests: 0,
+    Object.assign(this.stats, {
+      totalRequests: 0,
       compressedRequests: 0,
       compressionRatio: 0,
       bytesOriginal: 0,
       bytesCompressed: 0,
       averageCompressionTime: 0,
       algorithmUsage: {
-  gzip: 0,
+        gzip: 0,
         brotli: 0,
         deflate: 0,
         identity: 0,
-      
-},
+      },
     });
 
-    this.logger.log('Compression statistics cleared');}/**
+    this.logger.log('Compression statistics cleared');
+  } /**
    * Start periodic statistics reporting
    */
   private startPeriodicReporting(): void {
-  // Report compression stats every 10 minutes
+    // Report compression stats every 10 minutes
     setInterval(() => {
       if (this.stats.totalRequests > 0) {
         this.logger.log('Compression Statistics Summary:', {
-  totalRequests: this.stats.totalRequests,
+          totalRequests: this.stats.totalRequests,
           compressedRequests: this.stats.compressedRequests,
-          compressionRate: `${((this.stats.compressedRequests / this.stats.totalRequests) * 100).toFixed(1)
-}%`,overallCompressionRatio: `${(this.stats.compressionRatio * 100).toFixed(1)}%`,bytesSaved: `${((this.stats.bytesOriginal - this.stats.bytesCompressed) / 1024 / 1024).toFixed(2)}
-MB`,averageCompressionTime: `${this.stats.averageCompressionTime.toFixed(2)}
+          compressionRate: `${(
+            (this.stats.compressedRequests / this.stats.totalRequests) *
+            100
+          ).toFixed(1)}%`,
+          overallCompressionRatio: `${(this.stats.compressionRatio * 100).toFixed(1)}%`,
+          bytesSaved: `${((this.stats.bytesOriginal - this.stats.bytesCompressed) / 1024 / 1024).toFixed(2)}
+MB`,
+          averageCompressionTime: `${this.stats.averageCompressionTime.toFixed(2)}
 ms`,
           algorithmUsage: this.stats.algorithmUsage,
         });

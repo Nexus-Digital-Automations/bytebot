@@ -85,7 +85,9 @@ export class BytebotMetricsService {
   constructor(
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
-    this.logger.log('Metrics Service initializing with Prometheus client and Parlant validation');
+    this.logger.log(
+      'Metrics Service initializing with Prometheus client and Parlant validation',
+    );
 
     // Enable default system metrics collection
     collectDefaultMetrics({
@@ -274,7 +276,9 @@ export class BytebotMetricsService {
       if (error instanceof Error) {
         throw error;
       } else {
-        throw new Error(`Failed to collect Prometheus metrics: ${errorMessage}`);
+        throw new Error(
+          `Failed to collect Prometheus metrics: ${errorMessage}`,
+        );
       }
     }
   }
@@ -301,7 +305,9 @@ export class BytebotMetricsService {
       .labels(method, route, statusCode.toString())
       .observe(durationSeconds);
 
-    this.logger.debug('API request metrics recorded', {method,route,
+    this.logger.debug('API request metrics recorded', {
+      method,
+      route,
       statusCode,
       durationMs: duration,
     });
@@ -336,7 +342,9 @@ export class BytebotMetricsService {
    */
   recordTaskProcessing(
     taskType: string,
-    status: 'completed' | 'failed' | 'cancelled',duration: number,): void {
+    status: 'completed' | 'failed' | 'cancelled',
+    duration: number,
+  ): void {
     const durationSeconds = duration / 1000;
 
     this.taskProcessingTotal.labels(taskType, status).inc();
@@ -344,7 +352,9 @@ export class BytebotMetricsService {
       .labels(taskType, status)
       .observe(durationSeconds);
 
-    this.logger.debug('Task processing metrics recorded', {taskType,status,
+    this.logger.debug('Task processing metrics recorded', {
+      taskType,
+      status,
       durationMs: duration,
     });
   }
@@ -376,11 +386,15 @@ export class BytebotMetricsService {
     priority: string,
   ): void {
     const durationSeconds = duration / 1000;
-    const status = success ? 'completed' : 'failed';this.taskProcessingTotal.labels(jobType, status).inc();this.taskProcessingDuration
+    const status = success ? 'completed' : 'failed';
+    this.taskProcessingTotal.labels(jobType, status).inc();
+    this.taskProcessingDuration
       .labels(jobType, status)
       .observe(durationSeconds);
 
-    this.logger.debug('Job execution metrics recorded', {jobType,status,
+    this.logger.debug('Job execution metrics recorded', {
+      jobType,
+      status,
       durationMs: duration,
       retryCount,
       priority,
@@ -395,8 +409,8 @@ export class BytebotMetricsService {
    * @param priority Job priority level
    */
   recordJobSubmission(jobType: string, priority: string): void {
-    this.taskProcessingTotal.labels(jobType, 'submitted').inc();this.logger.debug('Job submission metrics recorded', {jobType,priority,
-    });
+    this.taskProcessingTotal.labels(jobType, 'submitted').inc();
+    this.logger.debug('Job submission metrics recorded', { jobType, priority });
   }
 
   /**
@@ -409,7 +423,13 @@ export class BytebotMetricsService {
   recordJobCompletion(jobType: string, duration: number): void {
     const durationSeconds = duration / 1000;
 
-    this.taskProcessingTotal.labels(jobType, 'completed').inc();this.taskProcessingDuration.labels(jobType, 'completed').observe(durationSeconds);this.logger.debug('Job completion metrics recorded', {jobType,durationMs: duration,
+    this.taskProcessingTotal.labels(jobType, 'completed').inc();
+    this.taskProcessingDuration
+      .labels(jobType, 'completed')
+      .observe(durationSeconds);
+    this.logger.debug('Job completion metrics recorded', {
+      jobType,
+      durationMs: duration,
     });
   }
 
@@ -421,8 +441,8 @@ export class BytebotMetricsService {
    * @param errorType Type of error encountered
    */
   recordJobError(jobType: string, errorType: string): void {
-    this.taskProcessingTotal.labels(jobType, 'error').inc();this.logger.debug('Job error metrics recorded', {jobType,errorType,
-    });
+    this.taskProcessingTotal.labels(jobType, 'error').inc();
+    this.logger.debug('Job error metrics recorded', { jobType, errorType });
   }
 
   /**
@@ -526,29 +546,33 @@ export class BytebotMetricsService {
     duration: number,
   ): Promise<void> {
     const operationId = `db_metrics${Date.now()}`;
-    
+
     try {
       // PARLANT VALIDATION: Database metrics (MEDIUM risk - data sensitivity)
-      const validation = await this.parlantValidationService.validateMetricsOperation(
-        MetricsOperationType.DATABASE_METRICS,
-        {
-          operation: 'database_query_metrics',
-          dbOperation: operation,
-          table,
-          duration,
-          sensitivityLevel: 'MEDIUM',
-        },
-        { userId: 'system', userRole: 'metrics_service' },
-      );
+      const validation =
+        await this.parlantValidationService.validateMetricsOperation(
+          MetricsOperationType.DATABASE_METRICS,
+          {
+            operation: 'database_query_metrics',
+            dbOperation: operation,
+            table,
+            duration,
+            sensitivityLevel: 'MEDIUM',
+          },
+          { userId: 'system', userRole: 'metrics_service' },
+        );
 
       if (!validation.approved) {
-        this.logger.warn(`[${operationId}] Database metrics recording rejected by Parlant validation`, {
-          operationId,
-          operation,
-          table,
-          reason: validation.reason,
-          conversationId: validation.conversationId,
-        });
+        this.logger.warn(
+          `[${operationId}] Database metrics recording rejected by Parlant validation`,
+          {
+            operationId,
+            operation,
+            table,
+            reason: validation.reason,
+            conversationId: validation.conversationId,
+          },
+        );
         return; // Skip metrics recording if not approved
       }
 
@@ -559,23 +583,29 @@ export class BytebotMetricsService {
         .labels(operation, table)
         .observe(durationSeconds);
 
-      this.logger.debug('Database query metrics recorded with Parlant validation', {
-        operationId,
-        operation,
-        table,
-        durationMs: duration,
-        conversationId: validation.conversationId,
-        parlantApproved: true,
-      });
-
+      this.logger.debug(
+        'Database query metrics recorded with Parlant validation',
+        {
+          operationId,
+          operation,
+          table,
+          durationMs: duration,
+          conversationId: validation.conversationId,
+          parlantApproved: true,
+        },
+      );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Database metrics recording failed: ${errorMessage}`, {
-        operationId,
-        operation,
-        table,
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `[${operationId}] Database metrics recording failed: ${errorMessage}`,
+        {
+          operationId,
+          operation,
+          table,
+          error: errorMessage,
+        },
+      );
     }
   }
 
@@ -704,7 +734,8 @@ export class BytebotMetricsService {
   } {
     try {
       const memoryUsage = process.memoryUsage();
-      const memoryUtilization = (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
+      const memoryUtilization =
+        (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100;
 
       // For demonstration purposes, returning mock values
       // In a real implementation, these would be calculated from actual system metrics

@@ -207,9 +207,19 @@ export function IsSafeUrl(validationOptions?: ValidationOptions) {
  */
 export function SanitizeHtml() {
   return Transform(({ value }) => {
-    if (typeof value !== 'string') return value;// Basic HTML sanitizationreturn value
-      .replace(/<script[^>]*>.*?<\/script>/gi, '').replace(/<style[^>]*>.*?<\/style>/gi, '').replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
-      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '').replace(/javascript:/gi, '').replace(/vbscript:/gi, '').replace(/data:/gi, '');});}
+    if (typeof value !== 'string') return value;
+
+    // Basic HTML sanitization
+    return value
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/<style[^>]*>.*?<\/style>/gi, '')
+      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/vbscript:/gi, '')
+      .replace(/data:/gi, '');
+  });
+}
 
 /**
  * Browser Automation Validation Service

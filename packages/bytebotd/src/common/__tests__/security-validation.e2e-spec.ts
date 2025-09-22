@@ -67,7 +67,9 @@ describe('Security Validation E2E Tests', () => {
         .expect(200); // Note: CORS is enforced by browser, not server blocking
 
       // Check if CORS headers are present
-      expect(response.headers['access-control-allow-origin'] as string | undefined).toBeUndefined();
+      expect(
+        response.headers['access-control-allow-origin'] as string | undefined,
+      ).toBeUndefined();
     });
 
     it('should allow requests from authorized origins', async () => {
@@ -76,7 +78,9 @@ describe('Security Validation E2E Tests', () => {
         .set('Origin', 'http://localhost:3000')
         .send({ action: 'screenshot' });
 
-      expect(response.headers['access-control-allow-origin'] as string | undefined).toBeDefined();
+      expect(
+        response.headers['access-control-allow-origin'] as string | undefined,
+      ).toBeDefined();
     });
 
     it('should include security headers in response', async () => {
@@ -110,21 +114,23 @@ describe('Security Validation E2E Tests', () => {
           })
           .expect(400);
 
-        expect((response.body as ApiErrorResponse).message).toContain('security');
+        expect((response.body as ApiErrorResponse).message).toContain(
+          'security',
+        );
       });
     });
 
     it('should sanitize text inputs with HTML content', async () => {
-      const response = await request(server)
-        .post('/computer-use')
-        .send({
-          action: 'type_text',
-          text: '<b>Bold text</b> with HTML',
-        });
+      const response = await request(server).post('/computer-use').send({
+        action: 'type_text',
+        text: '<b>Bold text</b> with HTML',
+      });
 
       // Should either block or sanitize
       if (response.status === 400) {
-        expect((response.body as ApiErrorResponse).message).toContain('security');
+        expect((response.body as ApiErrorResponse).message).toContain(
+          'security',
+        );
       } else {
         // If allowed, should be sanitized
         expect(response.body).toBeDefined();
@@ -141,7 +147,7 @@ describe('Security Validation E2E Tests', () => {
       "admin'--",
       "' OR 1=1#",
       "1; EXEC xp_cmdshell('dir') --",
-      '"; WAITFOR DELAY \'00:00:05\' --',
+      "\"; WAITFOR DELAY '00:00:05' --",
     ];
 
     sqlInjectionPayloads.forEach((payload, index) => {
@@ -155,7 +161,9 @@ describe('Security Validation E2E Tests', () => {
           })
           .expect(400);
 
-        expect((response.body as ApiErrorResponse).message).toContain('security');
+        expect((response.body as ApiErrorResponse).message).toContain(
+          'security',
+        );
       });
     });
   });
@@ -182,7 +190,9 @@ describe('Security Validation E2E Tests', () => {
           })
           .expect(400);
 
-        expect((response.body as ApiErrorResponse).message).toContain('security');
+        expect((response.body as ApiErrorResponse).message).toContain(
+          'security',
+        );
       });
     });
   });
@@ -207,7 +217,9 @@ describe('Security Validation E2E Tests', () => {
           })
           .expect(400);
 
-        expect((response.body as ApiErrorResponse).message).toContain('security');
+        expect((response.body as ApiErrorResponse).message).toContain(
+          'security',
+        );
       });
     });
   });
@@ -231,8 +243,12 @@ describe('Security Validation E2E Tests', () => {
 
       // Check rate limit response format
       const rateLimitResponse = rateLimitedResponses[0];
-      expect((rateLimitResponse?.body as ApiErrorResponse).error).toBe('Too Many Requests');
-      expect((rateLimitResponse?.body as ApiErrorResponse).message).toContain('rate limit');
+      expect((rateLimitResponse?.body as ApiErrorResponse).error).toBe(
+        'Too Many Requests',
+      );
+      expect((rateLimitResponse?.body as ApiErrorResponse).message).toContain(
+        'rate limit',
+      );
     });
 
     it('should include rate limit headers', async () => {
@@ -280,7 +296,9 @@ describe('Security Validation E2E Tests', () => {
         })
         .expect(400);
 
-      expect((response.body as ApiValidationErrorResponse).errors).toBeDefined();
+      expect(
+        (response.body as ApiValidationErrorResponse).errors,
+      ).toBeDefined();
     });
 
     it('should limit payload size', async () => {
@@ -293,7 +311,9 @@ describe('Security Validation E2E Tests', () => {
         })
         .expect(413); // Payload Too Large
 
-      expect((response.body as ApiErrorResponse).message).toContain('too large');
+      expect((response.body as ApiErrorResponse).message).toContain(
+        'too large',
+      );
     });
   });
 
@@ -322,7 +342,8 @@ describe('Security Validation E2E Tests', () => {
         .expect(400);
 
       expect(
-        (response.body as ApiResponse).requestId ?? (response.headers['x-request-id'] as string | undefined)
+        (response.body as ApiResponse).requestId ??
+          (response.headers['x-request-id'] as string | undefined),
       ).toBeDefined();
     });
 
@@ -397,12 +418,10 @@ describe('Security Validation E2E Tests', () => {
 
     fuzzingPayloads.forEach((payload, index) => {
       it(`should handle fuzzing payload #${index + 1} gracefully`, async () => {
-        const response = await request(server)
-          .post('/computer-use')
-          .send({
-            action: 'type_text',
-            text: payload,
-          });
+        const response = await request(server).post('/computer-use').send({
+          action: 'type_text',
+          text: payload,
+        });
 
         // Should either process successfully or return appropriate error
         expect(response.status).toBeLessThan(500); // No server errors

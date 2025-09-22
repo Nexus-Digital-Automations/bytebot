@@ -93,10 +93,7 @@ export class CircuitBreakerGuard implements CanActivate {
         'CIRCUIT_BREAKER_SUCCESS_THRESHOLD',
         3,
       ),
-      timeout: this.configService.get<number>(
-        'CIRCUIT_BREAKER_TIMEOUT',
-        60000,
-      ), // 60 seconds
+      timeout: this.configService.get<number>('CIRCUIT_BREAKER_TIMEOUT', 60000), // 60 seconds
       monitoringWindow: this.configService.get<number>(
         'CIRCUIT_BREAKER_MONITORING_WINDOW',
         60000,
@@ -117,14 +114,16 @@ export class CircuitBreakerGuard implements CanActivate {
     const controller = context.getClass();
 
     // Get circuit breaker configuration from metadata
-    const methodConfig = this.reflector.get<Partial<CircuitBreakerConfig>>(
-      'circuit-breaker-config',
-      handler,
-    ) || {};
-    const classConfig = this.reflector.get<Partial<CircuitBreakerConfig>>(
-      'circuit-breaker-config',
-      controller,
-    ) || {};
+    const methodConfig =
+      this.reflector.get<Partial<CircuitBreakerConfig>>(
+        'circuit-breaker-config',
+        handler,
+      ) || {};
+    const classConfig =
+      this.reflector.get<Partial<CircuitBreakerConfig>>(
+        'circuit-breaker-config',
+        controller,
+      ) || {};
 
     const config = {
       ...this.defaultConfig,
@@ -152,7 +151,7 @@ export class CircuitBreakerGuard implements CanActivate {
       if (!canProceed) {
         this.logger.warn(
           `Circuit breaker OPEN for ${circuitKey} - failing fast. ` +
-          `Failures: ${metrics.failureCount}, Rate: ${metrics.failureRate.toFixed(2)}%`
+            `Failures: ${metrics.failureCount}, Rate: ${metrics.failureRate.toFixed(2)}%`,
         );
         throw new ServiceUnavailableException({
           message: 'Service temporarily unavailable due to circuit breaker',
@@ -204,15 +203,18 @@ export class CircuitBreakerGuard implements CanActivate {
 
     this.logger.debug(
       `Success recorded for ${circuitKey} - ` +
-      `State: ${metrics.state}, Success: ${metrics.successCount}, ` +
-      `Failures: ${metrics.failureCount}, Rate: ${metrics.failureRate.toFixed(2)}%`
+        `State: ${metrics.state}, Success: ${metrics.successCount}, ` +
+        `Failures: ${metrics.failureCount}, Rate: ${metrics.failureRate.toFixed(2)}%`,
     );
   }
 
   /**
    * Record a failed operation
    */
-  recordFailure(metrics: CircuitBreakerMetrics, config: CircuitBreakerConfig): void {
+  recordFailure(
+    metrics: CircuitBreakerMetrics,
+    config: CircuitBreakerConfig,
+  ): void {
     metrics.failureCount++;
     metrics.totalRequests++;
     metrics.lastFailureTime = new Date();
@@ -265,7 +267,10 @@ export class CircuitBreakerGuard implements CanActivate {
   /**
    * Open the circuit breaker
    */
-  private openCircuit(metrics: CircuitBreakerMetrics, config: CircuitBreakerConfig): void {
+  private openCircuit(
+    metrics: CircuitBreakerMetrics,
+    config: CircuitBreakerConfig,
+  ): void {
     metrics.state = CircuitBreakerState.OPEN;
     metrics.stateChangedAt = new Date();
     metrics.nextRetryTime = new Date(Date.now() + config.timeout);
@@ -273,8 +278,8 @@ export class CircuitBreakerGuard implements CanActivate {
 
     this.logger.warn(
       `Circuit breaker OPENED - ` +
-      `Failures: ${metrics.failureCount}, Rate: ${metrics.failureRate.toFixed(2)}%, ` +
-      `Retry after: ${metrics.nextRetryTime.toISOString()}`
+        `Failures: ${metrics.failureCount}, Rate: ${metrics.failureRate.toFixed(2)}%, ` +
+        `Retry after: ${metrics.nextRetryTime.toISOString()}`,
     );
   }
 
@@ -287,7 +292,9 @@ export class CircuitBreakerGuard implements CanActivate {
     metrics.halfOpenAttempts = 0;
     metrics.nextRetryTime = null;
 
-    this.logger.log('Circuit breaker moved to HALF_OPEN state - testing recovery');
+    this.logger.log(
+      'Circuit breaker moved to HALF_OPEN state - testing recovery',
+    );
   }
 
   /**
@@ -315,7 +322,8 @@ export class CircuitBreakerGuard implements CanActivate {
     if (metrics.totalRequests === 0) {
       metrics.failureRate = 0;
     } else {
-      metrics.failureRate = (metrics.failureCount / metrics.totalRequests) * 100;
+      metrics.failureRate =
+        (metrics.failureCount / metrics.totalRequests) * 100;
     }
   }
 
@@ -340,7 +348,10 @@ export class CircuitBreakerGuard implements CanActivate {
   /**
    * Clean old metrics based on monitoring window
    */
-  private cleanOldMetrics(metrics: CircuitBreakerMetrics, config: CircuitBreakerConfig): void {
+  private cleanOldMetrics(
+    metrics: CircuitBreakerMetrics,
+    config: CircuitBreakerConfig,
+  ): void {
     const now = new Date();
     const windowStart = new Date(now.getTime() - config.monitoringWindow);
 
@@ -357,14 +368,18 @@ export class CircuitBreakerGuard implements CanActivate {
       metrics.failureCount = 0;
       metrics.failureRate = 0;
 
-      this.logger.debug('Circuit breaker metrics cleaned due to monitoring window expiry');
+      this.logger.debug(
+        'Circuit breaker metrics cleaned due to monitoring window expiry',
+      );
     }
   }
 
   /**
    * Get circuit metrics for monitoring
    */
-  getCircuitMetrics(circuitKey?: string): Map<string, CircuitBreakerMetrics> | CircuitBreakerMetrics | undefined {
+  getCircuitMetrics(
+    circuitKey?: string,
+  ): Map<string, CircuitBreakerMetrics> | CircuitBreakerMetrics | undefined {
     if (circuitKey) {
       return this.circuits.get(circuitKey);
     }
@@ -429,7 +444,7 @@ export class CircuitBreakerGuard implements CanActivate {
     }
 
     this.logger.warn(
-      `Circuit breaker state forced: ${circuitKey} ${oldState} -> ${state}`
+      `Circuit breaker state forced: ${circuitKey} ${oldState} -> ${state}`,
     );
   }
 }

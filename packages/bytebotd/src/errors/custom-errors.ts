@@ -17,7 +17,7 @@ import {
   SystemError,
   HttpError,
   ErrorSeverity as _ErrorSeverity,
-} from '../types/error-types';/*** Base custom error class that all other errors extend
+} from '../types/error-types'; /*** Base custom error class that all other errors extend
  */
 export abstract class BaseCustomError extends Error {
   public readonly timestamp: Date;
@@ -47,8 +47,17 @@ export class TokenInvalidError
   extends BaseCustomError
   implements AuthenticationError
 {
-  public readonly name = 'AuthenticationError' as const;public readonly code = 'TOKEN_INVALID' as const;public readonly userId?: string;public readonly tokenType?: 'access' | 'refresh' | 'api';constructor(message = 'Invalid or malformed token',options: {userId?: string;
-      tokenType?: 'access' | 'refresh' | 'api';context?: Record<string, unknown>;} = {},
+  public readonly name = 'AuthenticationError' as const;
+  public readonly code = 'TOKEN_INVALID' as const;
+  public readonly userId?: string;
+  public readonly tokenType?: 'access' | 'refresh' | 'api';
+  constructor(
+    message = 'Invalid or malformed token',
+    options: {
+      userId?: string;
+      tokenType?: 'access' | 'refresh' | 'api';
+      context?: Record<string, unknown>;
+    } = {},
   ) {
     super(message, options.context);
     this.userId = options.userId;
@@ -60,8 +69,17 @@ export class TokenExpiredError
   extends BaseCustomError
   implements AuthenticationError
 {
-  public readonly name = 'AuthenticationError' as const;public readonly code = 'TOKEN_EXPIRED' as const;public readonly userId?: string;public readonly tokenType?: 'access' | 'refresh' | 'api';constructor(message = 'Token has expired',options: {userId?: string;
-      tokenType?: 'access' | 'refresh' | 'api';context?: Record<string, unknown>;} = {},
+  public readonly name = 'AuthenticationError' as const;
+  public readonly code = 'TOKEN_EXPIRED' as const;
+  public readonly userId?: string;
+  public readonly tokenType?: 'access' | 'refresh' | 'api';
+  constructor(
+    message = 'Token has expired',
+    options: {
+      userId?: string;
+      tokenType?: 'access' | 'refresh' | 'api';
+      context?: Record<string, unknown>;
+    } = {},
   ) {
     super(message, options.context);
     this.userId = options.userId;
@@ -73,8 +91,17 @@ export class AuthenticationFailedError
   extends BaseCustomError
   implements AuthenticationError
 {
-  public readonly name = 'AuthenticationError' as const;public readonly code = 'AUTH_FAILED' as const;public readonly userId?: string;public readonly tokenType?: 'access' | 'refresh' | 'api';constructor(message = 'Authentication failed',options: {userId?: string;
-      tokenType?: 'access' | 'refresh' | 'api';context?: Record<string, unknown>;} = {},
+  public readonly name = 'AuthenticationError' as const;
+  public readonly code = 'AUTH_FAILED' as const;
+  public readonly userId?: string;
+  public readonly tokenType?: 'access' | 'refresh' | 'api';
+  constructor(
+    message = 'Authentication failed',
+    options: {
+      userId?: string;
+      tokenType?: 'access' | 'refresh' | 'api';
+      context?: Record<string, unknown>;
+    } = {},
   ) {
     super(message, options.context);
     this.userId = options.userId;
@@ -86,8 +113,17 @@ export class UnauthorizedError
   extends BaseCustomError
   implements AuthenticationError
 {
-  public readonly name = 'AuthenticationError' as const;public readonly code = 'UNAUTHORIZED' as const;public readonly userId?: string;public readonly tokenType?: 'access' | 'refresh' | 'api';constructor(message = 'Unauthorized access',options: {userId?: string;
-      tokenType?: 'access' | 'refresh' | 'api';context?: Record<string, unknown>;} = {},
+  public readonly name = 'AuthenticationError' as const;
+  public readonly code = 'UNAUTHORIZED' as const;
+  public readonly userId?: string;
+  public readonly tokenType?: 'access' | 'refresh' | 'api';
+  constructor(
+    message = 'Unauthorized access',
+    options: {
+      userId?: string;
+      tokenType?: 'access' | 'refresh' | 'api';
+      context?: Record<string, unknown>;
+    } = {},
   ) {
     super(message, options.context);
     this.userId = options.userId;
@@ -102,12 +138,17 @@ export class ForbiddenError
   extends BaseCustomError
   implements AuthorizationError
 {
-  public readonly name = 'AuthorizationError' as const;public readonly code = 'FORBIDDEN' as const;public readonly userId?: string;public readonly requiredRole?: string;
+  public readonly name = 'AuthorizationError' as const;
+  public readonly code = 'FORBIDDEN' as const;
+  public readonly userId?: string;
+  public readonly requiredRole?: string;
   public readonly currentRole?: string;
   public readonly requiredPermissions?: string[];
 
   constructor(
-    message = 'Access forbidden',options: {userId?: string;
+    message = 'Access forbidden',
+    options: {
+      userId?: string;
       requiredRole?: string;
       currentRole?: string;
       requiredPermissions?: string[];
@@ -126,12 +167,17 @@ export class InsufficientPermissionsError
   extends BaseCustomError
   implements AuthorizationError
 {
-  public readonly name = 'AuthorizationError' as const;public readonly code = 'INSUFFICIENT_PERMISSIONS' as const;public readonly userId?: string;public readonly requiredRole?: string;
+  public readonly name = 'AuthorizationError' as const;
+  public readonly code = 'INSUFFICIENT_PERMISSIONS' as const;
+  public readonly userId?: string;
+  public readonly requiredRole?: string;
   public readonly currentRole?: string;
   public readonly requiredPermissions?: string[];
 
   constructor(
-    message = 'Insufficient permissions for this operation',options: {userId?: string;
+    message = 'Insufficient permissions for this operation',
+    options: {
+      userId?: string;
       requiredRole?: string;
       currentRole?: string;
       requiredPermissions?: string[];
@@ -150,12 +196,17 @@ export class RoleRequiredError
   extends BaseCustomError
   implements AuthorizationError
 {
-  public readonly name = 'AuthorizationError' as const;public readonly code = 'ROLE_REQUIRED' as const;public readonly userId?: string;public readonly requiredRole?: string;
+  public readonly name = 'AuthorizationError' as const;
+  public readonly code = 'ROLE_REQUIRED' as const;
+  public readonly userId?: string;
+  public readonly requiredRole?: string;
   public readonly currentRole?: string;
   public readonly requiredPermissions?: string[];
 
   constructor(
-    message = 'Required role missing for this operation',options: {userId?: string;
+    message = 'Required role missing for this operation',
+    options: {
+      userId?: string;
       requiredRole?: string;
       currentRole?: string;
       requiredPermissions?: string[];
@@ -177,12 +228,17 @@ export class InvalidInputError
   extends BaseCustomError
   implements ValidationError
 {
-  public readonly name = 'ValidationError' as const;public readonly code = 'INVALID_INPUT' as const;public readonly field?: string;public readonly expectedType?: string;
+  public readonly name = 'ValidationError' as const;
+  public readonly code = 'INVALID_INPUT' as const;
+  public readonly field?: string;
+  public readonly expectedType?: string;
   public readonly actualValue?: unknown;
   public readonly validationRules?: string[];
 
   constructor(
-    message = 'Invalid input provided',options: {field?: string;
+    message = 'Invalid input provided',
+    options: {
+      field?: string;
       expectedType?: string;
       actualValue?: unknown;
       validationRules?: string[];
@@ -201,12 +257,17 @@ export class SchemaValidationError
   extends BaseCustomError
   implements ValidationError
 {
-  public readonly name = 'ValidationError' as const;public readonly code = 'SCHEMA_VALIDATION_FAILED' as const;public readonly field?: string;public readonly expectedType?: string;
+  public readonly name = 'ValidationError' as const;
+  public readonly code = 'SCHEMA_VALIDATION_FAILED' as const;
+  public readonly field?: string;
+  public readonly expectedType?: string;
   public readonly actualValue?: unknown;
   public readonly validationRules?: string[];
 
   constructor(
-    message = 'Schema validation failed',options: {field?: string;
+    message = 'Schema validation failed',
+    options: {
+      field?: string;
       expectedType?: string;
       actualValue?: unknown;
       validationRules?: string[];
@@ -228,62 +289,100 @@ export class RateLimitExceededError
   extends BaseCustomError
   implements SecurityError
 {
-  public readonly name = 'SecurityError' as const;public readonly code = 'RATE_LIMIT_EXCEEDED' as const;public readonly clientIp?: string;public readonly userAgent?: string;
+  public readonly name = 'SecurityError' as const;
+  public readonly code = 'RATE_LIMIT_EXCEEDED' as const;
+  public readonly clientIp?: string;
+  public readonly userAgent?: string;
   public readonly attackType?: string;
-  public readonly severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';constructor(message = 'Rate limit exceeded',options: {clientIp?: string;
+  public readonly severity: 'low' | 'medium' | 'high' | 'critical' = 'medium';
+  constructor(
+    message = 'Rate limit exceeded',
+    options: {
+      clientIp?: string;
       userAgent?: string;
       attackType?: string;
-      severity?: 'low' | 'medium' | 'high' | 'critical';context?: Record<string, unknown>;} = {},
+      severity?: 'low' | 'medium' | 'high' | 'critical';
+      context?: Record<string, unknown>;
+    } = {},
   ) {
     super(message, options.context);
     this.clientIp = options.clientIp;
     this.userAgent = options.userAgent;
     this.attackType = options.attackType;
-    this.severity = options.severity ?? 'medium';}}
+    this.severity = options.severity ?? 'medium';
+  }
+}
 
 export class SuspiciousActivityError
   extends BaseCustomError
   implements SecurityError
 {
-  public readonly name = 'SecurityError' as const;public readonly code = 'SUSPICIOUS_ACTIVITY' as const;public readonly clientIp?: string;public readonly userAgent?: string;
+  public readonly name = 'SecurityError' as const;
+  public readonly code = 'SUSPICIOUS_ACTIVITY' as const;
+  public readonly clientIp?: string;
+  public readonly userAgent?: string;
   public readonly attackType?: string;
-  public readonly severity: 'low' | 'medium' | 'high' | 'critical' = 'high';constructor(message = 'Suspicious activity detected',options: {clientIp?: string;
+  public readonly severity: 'low' | 'medium' | 'high' | 'critical' = 'high';
+  constructor(
+    message = 'Suspicious activity detected',
+    options: {
+      clientIp?: string;
       userAgent?: string;
       attackType?: string;
-      severity?: 'low' | 'medium' | 'high' | 'critical';context?: Record<string, unknown>;} = {},
+      severity?: 'low' | 'medium' | 'high' | 'critical';
+      context?: Record<string, unknown>;
+    } = {},
   ) {
     super(message, options.context);
     this.clientIp = options.clientIp;
     this.userAgent = options.userAgent;
     this.attackType = options.attackType;
-    this.severity = options.severity ?? 'high';}}
+    this.severity = options.severity ?? 'high';
+  }
+}
 
 export class AttackDetectedError
   extends BaseCustomError
   implements SecurityError
 {
-  public readonly name = 'SecurityError' as const;public readonly code = 'ATTACK_DETECTED' as const;public readonly clientIp?: string;public readonly userAgent?: string;
+  public readonly name = 'SecurityError' as const;
+  public readonly code = 'ATTACK_DETECTED' as const;
+  public readonly clientIp?: string;
+  public readonly userAgent?: string;
   public readonly attackType?: string;
-  public readonly severity: 'low' | 'medium' | 'high' | 'critical' = 'critical';constructor(message = 'Security attack detected',options: {clientIp?: string;
+  public readonly severity: 'low' | 'medium' | 'high' | 'critical' = 'critical';
+  constructor(
+    message = 'Security attack detected',
+    options: {
+      clientIp?: string;
       userAgent?: string;
       attackType?: string;
-      severity?: 'low' | 'medium' | 'high' | 'critical';context?: Record<string, unknown>;} = {},
+      severity?: 'low' | 'medium' | 'high' | 'critical';
+      context?: Record<string, unknown>;
+    } = {},
   ) {
     super(message, options.context);
     this.clientIp = options.clientIp;
     this.userAgent = options.userAgent;
     this.attackType = options.attackType;
-    this.severity = options.severity ?? 'critical';}}
+    this.severity = options.severity ?? 'critical';
+  }
+}
 
 /**
  * System error implementations
  */
 export class DatabaseError extends BaseCustomError implements SystemError {
-  public readonly name = 'SystemError' as const;public readonly code = 'DATABASE_ERROR' as const;public readonly service?: string;public readonly operation?: string;
+  public readonly name = 'SystemError' as const;
+  public readonly code = 'DATABASE_ERROR' as const;
+  public readonly service?: string;
+  public readonly operation?: string;
   public readonly retryable?: boolean;
 
   constructor(
-    message = 'Database operation failed',options: {service?: string;
+    message = 'Database operation failed',
+    options: {
+      service?: string;
       operation?: string;
       retryable?: boolean;
       context?: Record<string, unknown>;
@@ -297,11 +396,16 @@ export class DatabaseError extends BaseCustomError implements SystemError {
 }
 
 export class NetworkError extends BaseCustomError implements SystemError {
-  public readonly name = 'SystemError' as const;public readonly code = 'NETWORK_ERROR' as const;public readonly service?: string;public readonly operation?: string;
+  public readonly name = 'SystemError' as const;
+  public readonly code = 'NETWORK_ERROR' as const;
+  public readonly service?: string;
+  public readonly operation?: string;
   public readonly retryable?: boolean;
 
   constructor(
-    message = 'Network operation failed',options: {service?: string;
+    message = 'Network operation failed',
+    options: {
+      service?: string;
       operation?: string;
       retryable?: boolean;
       context?: Record<string, unknown>;
@@ -318,11 +422,16 @@ export class ServiceUnavailableError
   extends BaseCustomError
   implements SystemError
 {
-  public readonly name = 'SystemError' as const;public readonly code = 'SERVICE_UNAVAILABLE' as const;public readonly service?: string;public readonly operation?: string;
+  public readonly name = 'SystemError' as const;
+  public readonly code = 'SERVICE_UNAVAILABLE' as const;
+  public readonly service?: string;
+  public readonly operation?: string;
   public readonly retryable?: boolean;
 
   constructor(
-    message = 'Service temporarily unavailable',options: {service?: string;
+    message = 'Service temporarily unavailable',
+    options: {
+      service?: string;
       operation?: string;
       retryable?: boolean;
       context?: Record<string, unknown>;
@@ -356,7 +465,8 @@ export class HttpErrorImpl extends BaseCustomError implements HttpError {
       context?: Record<string, unknown>;
     } = {},
   ) {
-    super(message ?? `HTTP ${statusCode}: ${statusText}`, options.context);this.code = `HTTP${statusCode}`;
+    super(message ?? `HTTP ${statusCode}: ${statusText}`, options.context);
+    this.code = `HTTP${statusCode}`;
     this.statusCode = statusCode;
     this.statusText = statusText;
     this.headers = options.headers;
@@ -437,7 +547,9 @@ export const ErrorFactory = {
   security: {
     rateLimitExceeded: (
       clientIp?: string,
-      severity?: 'low' | 'medium' | 'high' | 'critical',context?: Record<string, unknown>,) => new RateLimitExceededError(undefined, { clientIp, severity, context }),
+      severity?: 'low' | 'medium' | 'high' | 'critical',
+      context?: Record<string, unknown>,
+    ) => new RateLimitExceededError(undefined, { clientIp, severity, context }),
     suspiciousActivity: (
       attackType?: string,
       clientIp?: string,
@@ -452,7 +564,9 @@ export const ErrorFactory = {
       new AttackDetectedError(undefined, {
         attackType,
         clientIp,
-        severity: 'critical',context,}),
+        severity: 'critical',
+        context,
+      }),
   },
 
   /**
@@ -475,7 +589,17 @@ export const ErrorFactory = {
    */
   http: {
     badRequest: (message?: string, context?: Record<string, unknown>) =>
-      new HttpErrorImpl(400, 'Bad Request', message, { context }),unauthorized: (message?: string, context?: Record<string, unknown>) =>new HttpErrorImpl(401, 'Unauthorized', message, { context }),forbidden: (message?: string, context?: Record<string, unknown>) =>new HttpErrorImpl(403, 'Forbidden', message, { context }),notFound: (message?: string, context?: Record<string, unknown>) =>new HttpErrorImpl(404, 'Not Found', message, { context }),tooManyRequests: (message?: string, context?: Record<string, unknown>) =>new HttpErrorImpl(429, 'Too Many Requests', message, { context }),internalServerError: (message?: string,
+      new HttpErrorImpl(400, 'Bad Request', message, { context }),
+    unauthorized: (message?: string, context?: Record<string, unknown>) =>
+      new HttpErrorImpl(401, 'Unauthorized', message, { context }),
+    forbidden: (message?: string, context?: Record<string, unknown>) =>
+      new HttpErrorImpl(403, 'Forbidden', message, { context }),
+    notFound: (message?: string, context?: Record<string, unknown>) =>
+      new HttpErrorImpl(404, 'Not Found', message, { context }),
+    tooManyRequests: (message?: string, context?: Record<string, unknown>) =>
+      new HttpErrorImpl(429, 'Too Many Requests', message, { context }),
+    internalServerError: (
+      message?: string,
       context?: Record<string, unknown>,
     ) => new HttpErrorImpl(500, 'Internal Server Error', message, { context }),
   },

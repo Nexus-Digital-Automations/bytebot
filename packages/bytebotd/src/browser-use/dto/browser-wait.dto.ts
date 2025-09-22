@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsObject, IsNumber, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsObject,
+  IsNumber,
+  IsEnum,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum WaitType {
@@ -22,7 +28,8 @@ export class BrowserWaitDto {
   type: WaitType;
 
   @ApiPropertyOptional({
-    description: 'CSS selector or element to wait for (required for element type)',
+    description:
+      'CSS selector or element to wait for (required for element type)',
     example: '#submit-button',
   })
   @IsOptional()
@@ -47,7 +54,8 @@ export class BrowserWaitDto {
 
   @ApiPropertyOptional({
     description: 'Custom condition function (for condition type)',
-    example: 'return document.querySelector("#data").textContent.includes("loaded")',
+    example:
+      'return document.querySelector("#data").textContent.includes("loaded")',
   })
   @IsOptional()
   @IsString()
@@ -98,7 +106,11 @@ export class BrowserWaitResponseDto {
 
   @ApiPropertyOptional({
     description: 'Wait timing information',
-    example: { startTime: 1695123456789, endTime: 1695123459123, duration: 2334 },
+    example: {
+      startTime: 1695123456789,
+      endTime: 1695123459123,
+      duration: 2334,
+    },
   })
   timing?: {
     startTime: number;

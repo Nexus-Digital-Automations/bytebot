@@ -35,7 +35,7 @@ import {
   Logger,
   HttpStatus,
   HttpException,
-  HttpCode
+  HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -45,7 +45,7 @@ import {
   ApiQuery,
   ApiBody,
   ApiBearerAuth,
-  ApiSecurity
+  ApiSecurity,
 } from '@nestjs/swagger';
 
 // PARLANT Validation Integration
@@ -55,7 +55,7 @@ import {
   ParlantValidated,
   ParlantCached,
   ParlantFast,
-  SecurityLevel
+  SecurityLevel,
 } from '@bytebot/shared/src/decorators/parlant-validation.decorator';
 import { ParlantValidationInterceptor } from '@bytebot/shared/src/interceptors/parlant-validation.interceptor';
 import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
@@ -83,7 +83,7 @@ export const ParlantEnvironmentRead = (description: string) =>
     securityLevel: SecurityLevel._MEDIUM,
     cacheable: true,
     cacheTtl: 120000, // 2 minutes
-    timeout: 5000
+    timeout: 5000,
   });
 
 export const ParlantEnvironmentWrite = (description: string) =>
@@ -91,7 +91,7 @@ export const ParlantEnvironmentWrite = (description: string) =>
     description,
     securityLevel: SecurityLevel._HIGH,
     cacheable: false,
-    timeout: 15000
+    timeout: 15000,
   });
 
 export const ParlantProductionDeployment = (description: string) =>
@@ -99,7 +99,7 @@ export const ParlantProductionDeployment = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 60000
+    timeout: 60000,
   });
 
 export const ParlantInfrastructureConfiguration = (description: string) =>
@@ -107,7 +107,7 @@ export const ParlantInfrastructureConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 45000
+    timeout: 45000,
   });
 
 export const ParlantDeploymentPipeline = (description: string) =>
@@ -115,7 +115,7 @@ export const ParlantDeploymentPipeline = (description: string) =>
     description,
     securityLevel: SecurityLevel._HIGH,
     cacheable: false,
-    timeout: 30000
+    timeout: 30000,
   });
 
 // ===== ENVIRONMENT AND DEPLOYMENT CONFIGURATION DTOS =====
@@ -125,10 +125,20 @@ export const ParlantDeploymentPipeline = (description: string) =>
  */
 export interface EnvironmentConfigurationDto {
   /** Environment name */
-  environment: 'development' | 'staging' | 'uat' | 'production' | 'disaster-recovery';
+  environment:
+    | 'development'
+    | 'staging'
+    | 'uat'
+    | 'production'
+    | 'disaster-recovery';
 
   /** Environment tier */
-  tier: 'DEVELOPMENT' | 'TESTING' | 'STAGING' | 'PRODUCTION' | 'DISASTER_RECOVERY';
+  tier:
+    | 'DEVELOPMENT'
+    | 'TESTING'
+    | 'STAGING'
+    | 'PRODUCTION'
+    | 'DISASTER_RECOVERY';
 
   /** Configuration namespace */
   namespace: string;
@@ -296,7 +306,13 @@ export interface DeploymentConfigurationDto {
   notifications: {
     channels: ('EMAIL' | 'SLACK' | 'TEAMS' | 'WEBHOOK')[];
     recipients: string[];
-    events: ('START' | 'SUCCESS' | 'FAILURE' | 'ROLLBACK' | 'APPROVAL_REQUIRED')[];
+    events: (
+      | 'START'
+      | 'SUCCESS'
+      | 'FAILURE'
+      | 'ROLLBACK'
+      | 'APPROVAL_REQUIRED'
+    )[];
   };
 
   /** Deployment metadata */
@@ -307,7 +323,12 @@ export interface DeploymentConfigurationDto {
     startedAt?: Date;
     completedAt?: Date;
     duration?: number; // seconds
-    status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'ROLLED_BACK';
+    status:
+      | 'SCHEDULED'
+      | 'IN_PROGRESS'
+      | 'COMPLETED'
+      | 'FAILED'
+      | 'ROLLED_BACK';
   };
 
   /** Justification for deployment */
@@ -486,10 +507,14 @@ export interface ReleaseConfigurationDto {
 @ApiBearerAuth()
 @ApiSecurity('bearer')
 export class EnvironmentDeploymentConfigurationApiController {
-  private readonly logger = new Logger(EnvironmentDeploymentConfigurationApiController.name);
+  private readonly logger = new Logger(
+    EnvironmentDeploymentConfigurationApiController.name,
+  );
 
   constructor() {
-    this.logger.log('Environment & Deployment Configuration API Controller initialized with comprehensive PARLANT validation');
+    this.logger.log(
+      'Environment & Deployment Configuration API Controller initialized with comprehensive PARLANT validation',
+    );
   }
 
   // ===== ENVIRONMENT CONFIGURATION MANAGEMENT =====
@@ -499,13 +524,29 @@ export class EnvironmentDeploymentConfigurationApiController {
    */
   @Get('environments')
   @OperatorOrAdmin()
-  @ParlantEnvironmentRead('Retrieve environment configurations with resource and security settings')
+  @ParlantEnvironmentRead(
+    'Retrieve environment configurations with resource and security settings',
+  )
   @ApiOperation({
     summary: 'Get environment configurations',
-    description: 'Retrieve environment configurations with filtering options'
+    description: 'Retrieve environment configurations with filtering options',
   })
-  @ApiQuery({ name: 'environment', required: false, enum: ['development', 'staging', 'uat', 'production', 'disaster-recovery'] })
-  @ApiQuery({ name: 'tier', required: false, enum: ['DEVELOPMENT', 'TESTING', 'STAGING', 'PRODUCTION', 'DISASTER_RECOVERY'] })
+  @ApiQuery({
+    name: 'environment',
+    required: false,
+    enum: ['development', 'staging', 'uat', 'production', 'disaster-recovery'],
+  })
+  @ApiQuery({
+    name: 'tier',
+    required: false,
+    enum: [
+      'DEVELOPMENT',
+      'TESTING',
+      'STAGING',
+      'PRODUCTION',
+      'DISASTER_RECOVERY',
+    ],
+  })
   async getEnvironmentConfigurations(
     @Query('environment') environment?: string,
     @Query('tier') tier?: string,
@@ -516,7 +557,11 @@ export class EnvironmentDeploymentConfigurationApiController {
     metadata: {
       totalEnvironments: number;
       totalResources: {
-        compute: { totalCpuCores: number; totalMemoryGB: number; totalInstances: number };
+        compute: {
+          totalCpuCores: number;
+          totalMemoryGB: number;
+          totalInstances: number;
+        };
         storage: { totalGB: number };
         cost: { estimatedMonthlyCost: number };
       };
@@ -529,7 +574,7 @@ export class EnvironmentDeploymentConfigurationApiController {
       environment,
       tier,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation - would retrieve from environment configuration store
@@ -539,9 +584,9 @@ export class EnvironmentDeploymentConfigurationApiController {
         tier: 'PRODUCTION',
         namespace: 'prod',
         variables: {
-          'NODE_ENV': 'production',
-          'DATABASE_URL': '[ENCRYPTED]',
-          'API_BASE_URL': 'https://api.production.example.com'
+          NODE_ENV: 'production',
+          DATABASE_URL: '[ENCRYPTED]',
+          API_BASE_URL: 'https://api.production.example.com',
         },
         resources: {
           compute: { cpu: 16, memory: 32, storage: 500, instances: 3 },
@@ -549,24 +594,33 @@ export class EnvironmentDeploymentConfigurationApiController {
             bandwidth: 1000,
             vpc: 'vpc-prod-001',
             subnets: ['subnet-prod-web', 'subnet-prod-app', 'subnet-prod-db'],
-            securityGroups: ['sg-prod-web', 'sg-prod-app', 'sg-prod-db']
+            securityGroups: ['sg-prod-web', 'sg-prod-app', 'sg-prod-db'],
           },
           database: {
             engine: 'postgresql',
             version: '14.0',
             instanceType: 'db.r5.2xlarge',
             storage: 1000,
-            replicas: 2
-          }
+            replicas: 2,
+          },
         },
         security: {
-          encryption: { atRest: true, inTransit: true, kmsKeyId: 'kms-prod-001' },
+          encryption: {
+            atRest: true,
+            inTransit: true,
+            kmsKeyId: 'kms-prod-001',
+          },
           access: {
             allowedIPs: ['10.0.0.0/8'],
             vpcEndpoints: ['vpce-prod-001'],
-            iamRoles: ['iam-prod-app-role', 'iam-prod-db-role']
+            iamRoles: ['iam-prod-app-role', 'iam-prod-db-role'],
           },
-          monitoring: { logging: true, metrics: true, alerting: true, auditTrail: true }
+          monitoring: {
+            logging: true,
+            metrics: true,
+            alerting: true,
+            auditTrail: true,
+          },
         },
         scaling: {
           autoScaling: true,
@@ -575,14 +629,14 @@ export class EnvironmentDeploymentConfigurationApiController {
           targetCpuUtilization: 70,
           targetMemoryUtilization: 80,
           scaleOutCooldown: 300,
-          scaleInCooldown: 600
+          scaleInCooldown: 600,
         },
         backup: {
           enabled: true,
           frequency: 'DAILY',
           retention: 30,
           crossRegion: true,
-          encryptionEnabled: true
+          encryptionEnabled: true,
         },
         metadata: {
           createdBy: 'admin',
@@ -590,10 +644,15 @@ export class EnvironmentDeploymentConfigurationApiController {
           lastModified: new Date(),
           modifiedBy: 'admin',
           version: '1.0.0',
-          tags: { environment: 'production', team: 'platform', cost_center: '12345' }
+          tags: {
+            environment: 'production',
+            team: 'platform',
+            cost_center: '12345',
+          },
         },
-        justification: 'Production environment configuration for high availability and security'
-      }
+        justification:
+          'Production environment configuration for high availability and security',
+      },
     ];
 
     return {
@@ -603,9 +662,9 @@ export class EnvironmentDeploymentConfigurationApiController {
         totalResources: {
           compute: { totalCpuCores: 16, totalMemoryGB: 32, totalInstances: 3 },
           storage: { totalGB: 1500 },
-          cost: { estimatedMonthlyCost: 5000 }
-        }
-      }
+          cost: { estimatedMonthlyCost: 5000 },
+        },
+      },
     };
   }
 
@@ -614,10 +673,13 @@ export class EnvironmentDeploymentConfigurationApiController {
    */
   @Put('environments/:environment')
   @AdminOnly()
-  @ParlantEnvironmentWrite('Update environment configuration with resource impact assessment and security validation')
+  @ParlantEnvironmentWrite(
+    'Update environment configuration with resource impact assessment and security validation',
+  )
   @ApiOperation({
     summary: 'Update environment configuration',
-    description: 'Update environment configuration with comprehensive validation'
+    description:
+      'Update environment configuration with comprehensive validation',
   })
   @ApiParam({ name: 'environment', description: 'Environment name' })
   async updateEnvironmentConfiguration(
@@ -644,7 +706,7 @@ export class EnvironmentDeploymentConfigurationApiController {
       tier: configDto.tier,
       namespace: configDto.namespace,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -652,39 +714,54 @@ export class EnvironmentDeploymentConfigurationApiController {
       this.validateEnvironmentConfiguration(configDto);
 
       // Assess impact of changes
-      const impactAssessment = await this.assessEnvironmentImpact(environment, configDto);
+      const impactAssessment = await this.assessEnvironmentImpact(
+        environment,
+        configDto,
+      );
 
       // Create change record
-      const changeId = await this.createEnvironmentChangeRecord(configDto, user.id);
+      const changeId = await this.createEnvironmentChangeRecord(
+        configDto,
+        user.id,
+      );
 
       // Apply environment configuration
-      await this.applyEnvironmentConfiguration(environment, configDto, changeId);
-
-      this.logger.log(`[${operationId}] Environment configuration updated successfully`, {
-        operationId,
+      await this.applyEnvironmentConfiguration(
         environment,
+        configDto,
         changeId,
-        userId: user.id
-      });
+      );
+
+      this.logger.log(
+        `[${operationId}] Environment configuration updated successfully`,
+        {
+          operationId,
+          environment,
+          changeId,
+          userId: user.id,
+        },
+      );
 
       return {
         success: true,
         environment,
         changeId,
-        impactAssessment
+        impactAssessment,
       };
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Environment configuration update failed`, {
-        operationId,
-        environment,
-        error: error instanceof Error ? error.message : String(error),
-        userId: user.id
-      });
+      this.logger.error(
+        `[${operationId}] Environment configuration update failed`,
+        {
+          operationId,
+          environment,
+          error: error instanceof Error ? error.message : String(error),
+          userId: user.id,
+        },
+      );
 
       throw new HttpException(
         `Environment configuration update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -696,10 +773,13 @@ export class EnvironmentDeploymentConfigurationApiController {
    */
   @Post('deployments')
   @DevOpsOnly()
-  @ParlantDeploymentPipeline('Create deployment configuration with pipeline validation and quality gate assessment')
+  @ParlantDeploymentPipeline(
+    'Create deployment configuration with pipeline validation and quality gate assessment',
+  )
   @ApiOperation({
     summary: 'Create deployment configuration',
-    description: 'Create new deployment configuration with pipeline and quality validation'
+    description:
+      'Create new deployment configuration with pipeline and quality validation',
   })
   async createDeploymentConfiguration(
     @Body() deploymentDto: DeploymentConfigurationDto,
@@ -723,7 +803,7 @@ export class EnvironmentDeploymentConfigurationApiController {
       targetEnvironment: deploymentDto.targetEnvironment,
       strategy: deploymentDto.strategy.type,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -731,35 +811,44 @@ export class EnvironmentDeploymentConfigurationApiController {
       this.validateDeploymentConfiguration(deploymentDto);
 
       // Validate pipeline configuration
-      const pipelineValidation = await this.validateDeploymentPipeline(deploymentDto);
+      const pipelineValidation =
+        await this.validateDeploymentPipeline(deploymentDto);
 
       // Create deployment record
-      const deploymentId = await this.createDeploymentRecord(deploymentDto, user.id);
+      const deploymentId = await this.createDeploymentRecord(
+        deploymentDto,
+        user.id,
+      );
 
-      this.logger.log(`[${operationId}] Deployment configuration created successfully`, {
-        operationId,
-        deploymentId,
-        estimatedDuration: pipelineValidation.estimatedDuration,
-        userId: user.id
-      });
+      this.logger.log(
+        `[${operationId}] Deployment configuration created successfully`,
+        {
+          operationId,
+          deploymentId,
+          estimatedDuration: pipelineValidation.estimatedDuration,
+          userId: user.id,
+        },
+      );
 
       return {
         success: true,
         deploymentId,
-        pipelineValidation
+        pipelineValidation,
       };
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Deployment configuration creation failed`, {
-        operationId,
-        deploymentName: deploymentDto.name,
-        error: error instanceof Error ? error.message : String(error),
-        userId: user.id
-      });
+      this.logger.error(
+        `[${operationId}] Deployment configuration creation failed`,
+        {
+          operationId,
+          deploymentName: deploymentDto.name,
+          error: error instanceof Error ? error.message : String(error),
+          userId: user.id,
+        },
+      );
 
       throw new HttpException(
         `Deployment configuration creation failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -769,15 +858,19 @@ export class EnvironmentDeploymentConfigurationApiController {
    */
   @Post('deployments/:deploymentId/execute')
   @AdminOnly()
-  @ParlantProductionDeployment('Execute production deployment with comprehensive safety validation and rollback planning')
+  @ParlantProductionDeployment(
+    'Execute production deployment with comprehensive safety validation and rollback planning',
+  )
   @ApiOperation({
     summary: 'Execute production deployment',
-    description: 'Execute production deployment with safety validation and monitoring'
+    description:
+      'Execute production deployment with safety validation and monitoring',
   })
   @ApiParam({ name: 'deploymentId', description: 'Deployment ID' })
   async executeProductionDeployment(
     @Param('deploymentId') deploymentId: string,
-    @Body() executionParams: { approvalCode: string; emergencyDeployment?: boolean },
+    @Body()
+    executionParams: { approvalCode: string; emergencyDeployment?: boolean },
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
@@ -795,7 +888,7 @@ export class EnvironmentDeploymentConfigurationApiController {
       deploymentId,
       emergencyDeployment: executionParams.emergencyDeployment,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -806,19 +899,25 @@ export class EnvironmentDeploymentConfigurationApiController {
       await this.performPreDeploymentChecks(deploymentId);
 
       // Start deployment execution
-      const executionId = await this.startDeploymentExecution(deploymentId, user.id);
+      const executionId = await this.startDeploymentExecution(
+        deploymentId,
+        user.id,
+      );
 
       // Calculate estimated completion and rollback window
       const estimatedCompletion = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
       const rollbackWindow = 60; // 60 minutes
 
-      this.logger.log(`[${operationId}] Production deployment started successfully`, {
-        operationId,
-        deploymentId,
-        executionId,
-        estimatedCompletion,
-        userId: user.id
-      });
+      this.logger.log(
+        `[${operationId}] Production deployment started successfully`,
+        {
+          operationId,
+          deploymentId,
+          executionId,
+          estimatedCompletion,
+          userId: user.id,
+        },
+      );
 
       return {
         success: true,
@@ -826,20 +925,22 @@ export class EnvironmentDeploymentConfigurationApiController {
         executionId,
         status: 'IN_PROGRESS',
         estimatedCompletion,
-        rollbackWindow
+        rollbackWindow,
       };
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Production deployment execution failed`, {
-        operationId,
-        deploymentId,
-        error: error instanceof Error ? error.message : String(error),
-        userId: user.id
-      });
+      this.logger.error(
+        `[${operationId}] Production deployment execution failed`,
+        {
+          operationId,
+          deploymentId,
+          error: error instanceof Error ? error.message : String(error),
+          userId: user.id,
+        },
+      );
 
       throw new HttpException(
         `Production deployment execution failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -851,10 +952,13 @@ export class EnvironmentDeploymentConfigurationApiController {
    */
   @Post('iac/validate')
   @DevOpsOnly()
-  @ParlantInfrastructureConfiguration('Validate Infrastructure as Code template with security and compliance checking')
+  @ParlantInfrastructureConfiguration(
+    'Validate Infrastructure as Code template with security and compliance checking',
+  )
   @ApiOperation({
     summary: 'Validate IaC template',
-    description: 'Validate Infrastructure as Code template with comprehensive checks'
+    description:
+      'Validate Infrastructure as Code template with comprehensive checks',
   })
   async validateInfrastructureAsCode(
     @Body() iacDto: InfrastructureAsCodeDto,
@@ -866,7 +970,10 @@ export class EnvironmentDeploymentConfigurationApiController {
       syntaxCheck: { passed: boolean; errors: string[] };
       securityScan: { passed: boolean; findings: string[] };
       complianceCheck: { passed: boolean; violations: string[] };
-      costEstimation: { estimatedMonthlyCost: number; breakdown: Record<string, number> };
+      costEstimation: {
+        estimatedMonthlyCost: number;
+        breakdown: Record<string, number>;
+      };
     };
     recommendations: string[];
   }> {
@@ -878,7 +985,7 @@ export class EnvironmentDeploymentConfigurationApiController {
       provider: iacDto.provider,
       environmentCount: iacDto.environments.length,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -886,71 +993,81 @@ export class EnvironmentDeploymentConfigurationApiController {
       const validationResults = await this.performIaCValidation(iacDto);
 
       // Generate recommendations
-      const recommendations = this.generateIaCRecommendations(iacDto, validationResults);
+      const recommendations = this.generateIaCRecommendations(
+        iacDto,
+        validationResults,
+      );
 
-      const isValid = validationResults.syntaxCheck.passed &&
-                     validationResults.securityScan.passed &&
-                     validationResults.complianceCheck.passed;
+      const isValid =
+        validationResults.syntaxCheck.passed &&
+        validationResults.securityScan.passed &&
+        validationResults.complianceCheck.passed;
 
       this.logger.log(`[${operationId}] IaC validation completed`, {
         operationId,
         templateName: iacDto.name,
         isValid,
         estimatedCost: validationResults.costEstimation.estimatedMonthlyCost,
-        userId: user.id
+        userId: user.id,
       });
 
       return {
         valid: isValid,
         validationResults,
-        recommendations
+        recommendations,
       };
-
     } catch (error) {
       this.logger.error(`[${operationId}] IaC validation failed`, {
         operationId,
         templateName: iacDto.name,
         error: error instanceof Error ? error.message : String(error),
-        userId: user.id
+        userId: user.id,
       });
 
       throw new HttpException(
         `IaC validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
   // ===== PRIVATE HELPER METHODS =====
 
-  private validateEnvironmentConfiguration(dto: EnvironmentConfigurationDto): void {
+  private validateEnvironmentConfiguration(
+    dto: EnvironmentConfigurationDto,
+  ): void {
     if (!dto.justification || dto.justification.length < 20) {
       throw new HttpException(
         'Detailed justification required for environment configuration changes',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
     if (dto.tier === 'PRODUCTION' && !dto.security.encryption.atRest) {
       throw new HttpException(
         'Encryption at rest is required for production environments',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
 
-  private validateDeploymentConfiguration(dto: DeploymentConfigurationDto): void {
+  private validateDeploymentConfiguration(
+    dto: DeploymentConfigurationDto,
+  ): void {
     if (!dto.justification || dto.justification.length < 15) {
       throw new HttpException(
         'Detailed justification required for deployment configuration',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
-    if (dto.targetEnvironment === 'production' && !dto.rollback.autoRollbackEnabled) {
+    if (
+      dto.targetEnvironment === 'production' &&
+      !dto.rollback.autoRollbackEnabled
+    ) {
       throw new HttpException(
         'Auto-rollback must be enabled for production deployments',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
@@ -960,34 +1077,42 @@ export class EnvironmentDeploymentConfigurationApiController {
     if (!code || code.length < 8) {
       throw new HttpException(
         'Valid approval code required for production deployment',
-        HttpStatus.UNAUTHORIZED
+        HttpStatus.UNAUTHORIZED,
       );
     }
   }
 
-  private async assessEnvironmentImpact(environment: string, dto: EnvironmentConfigurationDto) {
+  private async assessEnvironmentImpact(
+    environment: string,
+    dto: EnvironmentConfigurationDto,
+  ) {
     // Mock implementation - would perform actual impact assessment
     return {
       resourceChanges: ['CPU: +4 cores', 'Memory: +8GB'],
       securityImpact: ['Enhanced encryption', 'Updated access controls'],
       costImpact: 250, // additional monthly cost in USD
-      downtimeRequired: false
+      downtimeRequired: false,
     };
   }
 
   private async validateDeploymentPipeline(dto: DeploymentConfigurationDto) {
     // Mock implementation - would validate pipeline configuration
-    const estimatedDuration = dto.pipeline.stages.reduce((total, stage) => total + stage.duration, 0);
+    const estimatedDuration = dto.pipeline.stages.reduce(
+      (total, stage) => total + stage.duration,
+      0,
+    );
 
     return {
       stagesValid: true,
       qualityGatesValid: true,
       rollbackPlanValid: true,
-      estimatedDuration
+      estimatedDuration,
     };
   }
 
-  private async performPreDeploymentChecks(deploymentId: string): Promise<void> {
+  private async performPreDeploymentChecks(
+    deploymentId: string,
+  ): Promise<void> {
     // Mock implementation - would perform actual pre-deployment validation
     this.logger.log(`Performing pre-deployment checks for ${deploymentId}`);
   }
@@ -1000,41 +1125,63 @@ export class EnvironmentDeploymentConfigurationApiController {
       complianceCheck: { passed: true, violations: [] },
       costEstimation: {
         estimatedMonthlyCost: 1200,
-        breakdown: { compute: 800, storage: 200, network: 100, other: 100 }
-      }
+        breakdown: { compute: 800, storage: 200, network: 100, other: 100 },
+      },
     };
   }
 
-  private generateIaCRecommendations(dto: InfrastructureAsCodeDto, validationResults: any): string[] {
+  private generateIaCRecommendations(
+    dto: InfrastructureAsCodeDto,
+    validationResults: any,
+  ): string[] {
     const recommendations: string[] = [];
 
     if (validationResults.costEstimation.estimatedMonthlyCost > 1000) {
-      recommendations.push('Consider optimizing resource allocation to reduce costs');
+      recommendations.push(
+        'Consider optimizing resource allocation to reduce costs',
+      );
     }
 
     if (!dto.validation.driftDetection) {
-      recommendations.push('Enable drift detection for better infrastructure monitoring');
+      recommendations.push(
+        'Enable drift detection for better infrastructure monitoring',
+      );
     }
 
     return recommendations;
   }
 
-  private async createEnvironmentChangeRecord(dto: EnvironmentConfigurationDto, userId: string): Promise<string> {
+  private async createEnvironmentChangeRecord(
+    dto: EnvironmentConfigurationDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create change tracking record
     return `env_change_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async applyEnvironmentConfiguration(environment: string, dto: EnvironmentConfigurationDto, changeId: string): Promise<void> {
+  private async applyEnvironmentConfiguration(
+    environment: string,
+    dto: EnvironmentConfigurationDto,
+    changeId: string,
+  ): Promise<void> {
     // Mock implementation - would apply environment configuration
-    this.logger.log(`Applying environment configuration: ${environment} (${changeId})`);
+    this.logger.log(
+      `Applying environment configuration: ${environment} (${changeId})`,
+    );
   }
 
-  private async createDeploymentRecord(dto: DeploymentConfigurationDto, userId: string): Promise<string> {
+  private async createDeploymentRecord(
+    dto: DeploymentConfigurationDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create deployment record
     return `deployment_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async startDeploymentExecution(deploymentId: string, userId: string): Promise<string> {
+  private async startDeploymentExecution(
+    deploymentId: string,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would start deployment execution
     return `execution_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }

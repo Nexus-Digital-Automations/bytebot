@@ -21,7 +21,12 @@
  * @author Integration Testing Team
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
@@ -233,7 +238,11 @@ interface E2EBottleneck {
  */
 interface E2EPerformanceAlert {
   id: string;
-  type: 'THRESHOLD_EXCEEDED' | 'REGRESSION_DETECTED' | 'BOTTLENECK_IDENTIFIED' | 'SYSTEM_OVERLOAD';
+  type:
+    | 'THRESHOLD_EXCEEDED'
+    | 'REGRESSION_DETECTED'
+    | 'BOTTLENECK_IDENTIFIED'
+    | 'SYSTEM_OVERLOAD';
   severity: 'WARNING' | 'ERROR' | 'CRITICAL';
   message: string;
   metricName: string;
@@ -257,7 +266,10 @@ interface E2EPerformanceReport {
 }
 
 @Injectable()
-export class E2EPerformanceMonitorService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class E2EPerformanceMonitorService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(E2EPerformanceMonitorService.name);
   private config: E2EPerformanceConfig;
   private metrics: E2EPerformanceMetric[] = [];
@@ -274,7 +286,10 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
   constructor(private readonly configService: ConfigService) {
     super();
     this.initializeConfiguration();
-    this.reportDirectory = this.configService.get('E2E_REPORT_DIR', './test-reports');
+    this.reportDirectory = this.configService.get(
+      'E2E_REPORT_DIR',
+      './test-reports',
+    );
     this.initializeDirectories();
   }
 
@@ -337,14 +352,14 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
       tags: {
         endpoint: metric.endpoint,
         method: metric.method,
-        status: metric.statusCode.toString()
+        status: metric.statusCode.toString(),
       },
       context: {
         requestSize: metric.requestSize,
         responseSize: metric.responseSize,
         userId: metric.userId,
-        sessionId: metric.sessionId
-      }
+        sessionId: metric.sessionId,
+      },
     };
 
     this.metrics.push(performanceMetric);
@@ -352,7 +367,14 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
 
     // Check if threshold exceeded
     if (metric.responseTime > this.config.alertThresholds.apiResponseTime) {
-      this.createAlert('THRESHOLD_EXCEEDED', 'ERROR', `API response time exceeded threshold: ${metric.responseTime}ms`, 'api_response_time', metric.responseTime, this.config.alertThresholds.apiResponseTime);
+      this.createAlert(
+        'THRESHOLD_EXCEEDED',
+        'ERROR',
+        `API response time exceeded threshold: ${metric.responseTime}ms`,
+        'api_response_time',
+        metric.responseTime,
+        this.config.alertThresholds.apiResponseTime,
+      );
     }
   }
 
@@ -371,13 +393,13 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
       unit: 'ms',
       tags: {
         queryType: metric.queryType,
-        database: metric.databaseName
+        database: metric.databaseName,
       },
       context: {
         query: metric.query.substring(0, 100), // Truncate for storage
         rowsAffected: metric.rowsAffected,
-        sessionId: metric.sessionId
-      }
+        sessionId: metric.sessionId,
+      },
     };
 
     this.metrics.push(performanceMetric);
@@ -385,7 +407,14 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
 
     // Check threshold
     if (metric.executionTime > this.config.alertThresholds.databaseQueryTime) {
-      this.createAlert('THRESHOLD_EXCEEDED', 'WARNING', `Database query time exceeded threshold: ${metric.executionTime}ms`, 'database_query_time', metric.executionTime, this.config.alertThresholds.databaseQueryTime);
+      this.createAlert(
+        'THRESHOLD_EXCEEDED',
+        'WARNING',
+        `Database query time exceeded threshold: ${metric.executionTime}ms`,
+        'database_query_time',
+        metric.executionTime,
+        this.config.alertThresholds.databaseQueryTime,
+      );
     }
   }
 
@@ -405,12 +434,12 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
       tags: {
         messageType: metric.messageType,
         direction: metric.direction,
-        connectionId: metric.connectionId
+        connectionId: metric.connectionId,
       },
       context: {
         messageSize: metric.messageSize,
-        sessionId: metric.sessionId
-      }
+        sessionId: metric.sessionId,
+      },
     };
 
     this.metrics.push(performanceMetric);
@@ -418,7 +447,14 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
 
     // Check threshold
     if (metric.latency > this.config.alertThresholds.websocketLatency) {
-      this.createAlert('THRESHOLD_EXCEEDED', 'WARNING', `WebSocket latency exceeded threshold: ${metric.latency}ms`, 'websocket_latency', metric.latency, this.config.alertThresholds.websocketLatency);
+      this.createAlert(
+        'THRESHOLD_EXCEEDED',
+        'WARNING',
+        `WebSocket latency exceeded threshold: ${metric.latency}ms`,
+        'websocket_latency',
+        metric.latency,
+        this.config.alertThresholds.websocketLatency,
+      );
     }
   }
 
@@ -433,12 +469,15 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
       { name: 'page_load_time', value: metric.loadTime },
       { name: 'dom_content_loaded', value: metric.domContentLoaded },
       { name: 'first_contentful_paint', value: metric.firstContentfulPaint },
-      { name: 'largest_contentful_paint', value: metric.largestContentfulPaint },
+      {
+        name: 'largest_contentful_paint',
+        value: metric.largestContentfulPaint,
+      },
       { name: 'first_input_delay', value: metric.firstInputDelay },
-      { name: 'cumulative_layout_shift', value: metric.cumulativeLayoutShift }
+      { name: 'cumulative_layout_shift', value: metric.cumulativeLayoutShift },
     ];
 
-    metrics.forEach(metricData => {
+    metrics.forEach((metricData) => {
       const performanceMetric: E2EPerformanceMetric = {
         id: `browser-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         timestamp: metric.timestamp,
@@ -447,11 +486,11 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
         value: metricData.value,
         unit: metricData.name === 'cumulative_layout_shift' ? 'score' : 'ms',
         tags: {
-          pageUrl: metric.pageUrl
+          pageUrl: metric.pageUrl,
         },
         context: {
-          sessionId: metric.sessionId
-        }
+          sessionId: metric.sessionId,
+        },
       };
 
       this.metrics.push(performanceMetric);
@@ -461,7 +500,14 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
 
     // Check page load time threshold
     if (metric.loadTime > this.config.alertThresholds.pageLoadTime) {
-      this.createAlert('THRESHOLD_EXCEEDED', 'WARNING', `Page load time exceeded threshold: ${metric.loadTime}ms`, 'page_load_time', metric.loadTime, this.config.alertThresholds.pageLoadTime);
+      this.createAlert(
+        'THRESHOLD_EXCEEDED',
+        'WARNING',
+        `Page load time exceeded threshold: ${metric.loadTime}ms`,
+        'page_load_time',
+        metric.loadTime,
+        this.config.alertThresholds.pageLoadTime,
+      );
     }
   }
 
@@ -487,7 +533,7 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
       errorRate: 0,
       performanceScore: 0,
       bottlenecks: [],
-      recommendations: []
+      recommendations: [],
     };
 
     try {
@@ -501,12 +547,14 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
       await this.analyzeLoadTestResults(results);
 
       // Generate recommendations
-      results.recommendations = this.generatePerformanceRecommendations(results);
+      results.recommendations =
+        this.generatePerformanceRecommendations(results);
 
-      this.logger.log(`Load test completed: ${config.name} - Score: ${results.performanceScore}/100`);
+      this.logger.log(
+        `Load test completed: ${config.name} - Score: ${results.performanceScore}/100`,
+      );
 
       return results;
-
     } catch (error) {
       this.logger.error(`Load test failed: ${config.name}`, error);
       throw error;
@@ -517,64 +565,92 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
    * Get current performance summary
    */
   getCurrentPerformanceSummary(): {
-    apiMetrics: { averageResponseTime: number; requestCount: number; errorRate: number };
+    apiMetrics: {
+      averageResponseTime: number;
+      requestCount: number;
+      errorRate: number;
+    };
     databaseMetrics: { averageQueryTime: number; queryCount: number };
     websocketMetrics: { averageLatency: number; messageCount: number };
-    systemMetrics: { cpuUsage: number; memoryUsage: number; networkLatency: number };
+    systemMetrics: {
+      cpuUsage: number;
+      memoryUsage: number;
+      networkLatency: number;
+    };
     activeAlerts: number;
   } {
     const recentTimeThreshold = new Date(Date.now() - 5 * 60 * 1000); // Last 5 minutes
 
     // Calculate API metrics
-    const recentApiMetrics = this.apiMetrics.filter(m => m.timestamp >= recentTimeThreshold);
-    const apiAverageResponseTime = recentApiMetrics.length > 0
-      ? recentApiMetrics.reduce((sum, m) => sum + m.responseTime, 0) / recentApiMetrics.length
-      : 0;
-    const apiErrorCount = recentApiMetrics.filter(m => m.statusCode >= 400).length;
-    const apiErrorRate = recentApiMetrics.length > 0 ? (apiErrorCount / recentApiMetrics.length) * 100 : 0;
+    const recentApiMetrics = this.apiMetrics.filter(
+      (m) => m.timestamp >= recentTimeThreshold,
+    );
+    const apiAverageResponseTime =
+      recentApiMetrics.length > 0
+        ? recentApiMetrics.reduce((sum, m) => sum + m.responseTime, 0) /
+          recentApiMetrics.length
+        : 0;
+    const apiErrorCount = recentApiMetrics.filter(
+      (m) => m.statusCode >= 400,
+    ).length;
+    const apiErrorRate =
+      recentApiMetrics.length > 0
+        ? (apiErrorCount / recentApiMetrics.length) * 100
+        : 0;
 
     // Calculate database metrics
-    const recentDbMetrics = this.databaseMetrics.filter(m => m.timestamp >= recentTimeThreshold);
-    const dbAverageQueryTime = recentDbMetrics.length > 0
-      ? recentDbMetrics.reduce((sum, m) => sum + m.executionTime, 0) / recentDbMetrics.length
-      : 0;
+    const recentDbMetrics = this.databaseMetrics.filter(
+      (m) => m.timestamp >= recentTimeThreshold,
+    );
+    const dbAverageQueryTime =
+      recentDbMetrics.length > 0
+        ? recentDbMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+          recentDbMetrics.length
+        : 0;
 
     // Calculate WebSocket metrics
-    const recentWsMetrics = this.websocketMetrics.filter(m => m.timestamp >= recentTimeThreshold);
-    const wsAverageLatency = recentWsMetrics.length > 0
-      ? recentWsMetrics.reduce((sum, m) => sum + m.latency, 0) / recentWsMetrics.length
-      : 0;
+    const recentWsMetrics = this.websocketMetrics.filter(
+      (m) => m.timestamp >= recentTimeThreshold,
+    );
+    const wsAverageLatency =
+      recentWsMetrics.length > 0
+        ? recentWsMetrics.reduce((sum, m) => sum + m.latency, 0) /
+          recentWsMetrics.length
+        : 0;
 
     // Get latest system metrics
-    const latestSystemMetrics = this.systemMetrics[this.systemMetrics.length - 1];
+    const latestSystemMetrics =
+      this.systemMetrics[this.systemMetrics.length - 1];
 
     return {
       apiMetrics: {
         averageResponseTime: Math.round(apiAverageResponseTime),
         requestCount: recentApiMetrics.length,
-        errorRate: Math.round(apiErrorRate * 100) / 100
+        errorRate: Math.round(apiErrorRate * 100) / 100,
       },
       databaseMetrics: {
         averageQueryTime: Math.round(dbAverageQueryTime),
-        queryCount: recentDbMetrics.length
+        queryCount: recentDbMetrics.length,
       },
       websocketMetrics: {
         averageLatency: Math.round(wsAverageLatency),
-        messageCount: recentWsMetrics.length
+        messageCount: recentWsMetrics.length,
       },
       systemMetrics: {
         cpuUsage: latestSystemMetrics?.cpu.usagePercent || 0,
         memoryUsage: latestSystemMetrics?.memory.usagePercent || 0,
-        networkLatency: latestSystemMetrics?.network.latencyMs || 0
+        networkLatency: latestSystemMetrics?.network.latencyMs || 0,
       },
-      activeAlerts: this.activeAlerts.filter(a => !a.resolved).length
+      activeAlerts: this.activeAlerts.filter((a) => !a.resolved).length,
     };
   }
 
   /**
    * Generate performance report
    */
-  async generatePerformanceReport(config: E2EPerformanceReport): Promise<string> {
+  async generatePerformanceReport(
+    config: E2EPerformanceReport,
+  ): Promise<string> {
     this.logger.log(`Generating performance report: ${config.reportType}`);
 
     const reportData = {
@@ -582,9 +658,15 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
       generatedAt: new Date(),
       timeRange: config.timeRange,
       summary: this.getCurrentPerformanceSummary(),
-      metrics: this.getMetricsInRange(config.timeRange.start, config.timeRange.end),
-      alerts: this.getAlertsInRange(config.timeRange.start, config.timeRange.end),
-      recommendations: this.generateSystemRecommendations()
+      metrics: this.getMetricsInRange(
+        config.timeRange.start,
+        config.timeRange.end,
+      ),
+      alerts: this.getAlertsInRange(
+        config.timeRange.start,
+        config.timeRange.end,
+      ),
+      recommendations: this.generateSystemRecommendations(),
     };
 
     const reportFileName = `performance-report-${config.reportId}-${Date.now()}.json`;
@@ -600,23 +682,53 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
 
   private initializeConfiguration(): void {
     this.config = {
-      collectInterval: this.configService.get('PERFORMANCE_COLLECT_INTERVAL', 5000),
-      retentionPeriod: this.configService.get('PERFORMANCE_RETENTION_PERIOD', 24 * 60 * 60 * 1000), // 24 hours
+      collectInterval: this.configService.get(
+        'PERFORMANCE_COLLECT_INTERVAL',
+        5000,
+      ),
+      retentionPeriod: this.configService.get(
+        'PERFORMANCE_RETENTION_PERIOD',
+        24 * 60 * 60 * 1000,
+      ), // 24 hours
       alertThresholds: {
-        apiResponseTime: this.configService.get('ALERT_API_RESPONSE_TIME', 1000),
-        databaseQueryTime: this.configService.get('ALERT_DATABASE_QUERY_TIME', 500),
-        websocketLatency: this.configService.get('ALERT_WEBSOCKET_LATENCY', 100),
+        apiResponseTime: this.configService.get(
+          'ALERT_API_RESPONSE_TIME',
+          1000,
+        ),
+        databaseQueryTime: this.configService.get(
+          'ALERT_DATABASE_QUERY_TIME',
+          500,
+        ),
+        websocketLatency: this.configService.get(
+          'ALERT_WEBSOCKET_LATENCY',
+          100,
+        ),
         pageLoadTime: this.configService.get('ALERT_PAGE_LOAD_TIME', 3000),
         cpuUsagePercent: this.configService.get('ALERT_CPU_USAGE', 80),
         memoryUsageMb: this.configService.get('ALERT_MEMORY_USAGE', 1024),
         networkLatencyMs: this.configService.get('ALERT_NETWORK_LATENCY', 200),
         errorRatePercent: this.configService.get('ALERT_ERROR_RATE', 5),
-        throughputRequestsPerSecond: this.configService.get('ALERT_MIN_THROUGHPUT', 10)
+        throughputRequestsPerSecond: this.configService.get(
+          'ALERT_MIN_THROUGHPUT',
+          10,
+        ),
       },
-      enableDetailedMetrics: this.configService.get('ENABLE_DETAILED_METRICS', true),
-      enableResourceMonitoring: this.configService.get('ENABLE_RESOURCE_MONITORING', true),
-      enableNetworkMonitoring: this.configService.get('ENABLE_NETWORK_MONITORING', true),
-      reportGeneration: this.configService.get('ENABLE_REPORT_GENERATION', true)
+      enableDetailedMetrics: this.configService.get(
+        'ENABLE_DETAILED_METRICS',
+        true,
+      ),
+      enableResourceMonitoring: this.configService.get(
+        'ENABLE_RESOURCE_MONITORING',
+        true,
+      ),
+      enableNetworkMonitoring: this.configService.get(
+        'ENABLE_NETWORK_MONITORING',
+        true,
+      ),
+      reportGeneration: this.configService.get(
+        'ENABLE_REPORT_GENERATION',
+        true,
+      ),
     };
   }
 
@@ -637,7 +749,7 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
         usagePercent: Math.random() * 100, // Mock data - replace with actual system monitoring
         loadAverage: [Math.random() * 2, Math.random() * 2, Math.random() * 2],
         activeProcesses: Math.floor(Math.random() * 200) + 50,
-        threadsCount: Math.floor(Math.random() * 1000) + 100
+        threadsCount: Math.floor(Math.random() * 1000) + 100,
       },
       memory: {
         totalMb: 8192,
@@ -645,38 +757,52 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
         freeMb: 0, // Will be calculated
         usagePercent: 0, // Will be calculated
         heapUsedMb: Math.floor(Math.random() * 512) + 128,
-        heapTotalMb: 1024
+        heapTotalMb: 1024,
       },
       network: {
         latencyMs: Math.random() * 50 + 10,
         throughputMbps: Math.random() * 100 + 50,
         packetsPerSecond: Math.floor(Math.random() * 1000) + 500,
         errorRate: Math.random() * 0.01,
-        activeConnections: Math.floor(Math.random() * 100) + 20
+        activeConnections: Math.floor(Math.random() * 100) + 20,
       },
       disk: {
         readMbps: Math.random() * 100 + 20,
         writeMbps: Math.random() * 50 + 10,
         usagePercent: Math.random() * 80 + 10,
         iopsRead: Math.floor(Math.random() * 1000) + 200,
-        iopsWrite: Math.floor(Math.random() * 500) + 100
-      }
+        iopsWrite: Math.floor(Math.random() * 500) + 100,
+      },
     };
 
     // Calculate derived metrics
-    systemMetric.memory.freeMb = systemMetric.memory.totalMb - systemMetric.memory.usedMb;
-    systemMetric.memory.usagePercent = (systemMetric.memory.usedMb / systemMetric.memory.totalMb) * 100;
+    systemMetric.memory.freeMb =
+      systemMetric.memory.totalMb - systemMetric.memory.usedMb;
+    systemMetric.memory.usagePercent =
+      (systemMetric.memory.usedMb / systemMetric.memory.totalMb) * 100;
 
     this.systemMetrics.push(systemMetric);
 
     // Create performance metrics from system data
     const metrics = [
-      { name: 'cpu_usage', value: systemMetric.cpu.usagePercent, unit: 'percent' },
-      { name: 'memory_usage', value: systemMetric.memory.usagePercent, unit: 'percent' },
-      { name: 'network_latency', value: systemMetric.network.latencyMs, unit: 'ms' }
+      {
+        name: 'cpu_usage',
+        value: systemMetric.cpu.usagePercent,
+        unit: 'percent',
+      },
+      {
+        name: 'memory_usage',
+        value: systemMetric.memory.usagePercent,
+        unit: 'percent',
+      },
+      {
+        name: 'network_latency',
+        value: systemMetric.network.latencyMs,
+        unit: 'ms',
+      },
     ];
 
-    metrics.forEach(metric => {
+    metrics.forEach((metric) => {
       const performanceMetric: E2EPerformanceMetric = {
         id: `system-${Date.now()}-${metric.name}`,
         timestamp: systemMetric.timestamp,
@@ -685,7 +811,7 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
         value: metric.value,
         unit: metric.unit,
         tags: {},
-        context: {}
+        context: {},
       };
 
       this.metrics.push(performanceMetric);
@@ -696,33 +822,79 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
     // Detect performance bottlenecks
     const bottlenecks = await this.detectBottlenecks();
 
-    bottlenecks.forEach(bottleneck => {
-      this.createAlert('BOTTLENECK_IDENTIFIED', bottleneck.severity === 'CRITICAL' ? 'CRITICAL' : 'WARNING', bottleneck.description, bottleneck.type.toLowerCase(), 0, 0, { bottleneck });
+    bottlenecks.forEach((bottleneck) => {
+      this.createAlert(
+        'BOTTLENECK_IDENTIFIED',
+        bottleneck.severity === 'CRITICAL' ? 'CRITICAL' : 'WARNING',
+        bottleneck.description,
+        bottleneck.type.toLowerCase(),
+        0,
+        0,
+        { bottleneck },
+      );
     });
 
     // Detect performance regressions
     const regressions = await this.detectPerformanceRegressions();
 
-    regressions.forEach(regression => {
-      this.createAlert('REGRESSION_DETECTED', 'ERROR', regression.description, regression.metric, regression.currentValue, regression.baselineValue);
+    regressions.forEach((regression) => {
+      this.createAlert(
+        'REGRESSION_DETECTED',
+        'ERROR',
+        regression.description,
+        regression.metric,
+        regression.currentValue,
+        regression.baselineValue,
+      );
     });
   }
 
   private async checkThresholds(): Promise<void> {
-    const latestSystemMetric = this.systemMetrics[this.systemMetrics.length - 1];
+    const latestSystemMetric =
+      this.systemMetrics[this.systemMetrics.length - 1];
     if (!latestSystemMetric) return;
 
     // Check system thresholds
-    if (latestSystemMetric.cpu.usagePercent > this.config.alertThresholds.cpuUsagePercent) {
-      this.createAlert('THRESHOLD_EXCEEDED', 'WARNING', `CPU usage exceeded threshold: ${latestSystemMetric.cpu.usagePercent.toFixed(1)}%`, 'cpu_usage', latestSystemMetric.cpu.usagePercent, this.config.alertThresholds.cpuUsagePercent);
+    if (
+      latestSystemMetric.cpu.usagePercent >
+      this.config.alertThresholds.cpuUsagePercent
+    ) {
+      this.createAlert(
+        'THRESHOLD_EXCEEDED',
+        'WARNING',
+        `CPU usage exceeded threshold: ${latestSystemMetric.cpu.usagePercent.toFixed(1)}%`,
+        'cpu_usage',
+        latestSystemMetric.cpu.usagePercent,
+        this.config.alertThresholds.cpuUsagePercent,
+      );
     }
 
-    if (latestSystemMetric.memory.usagePercent > this.config.alertThresholds.memoryUsageMb) {
-      this.createAlert('THRESHOLD_EXCEEDED', 'WARNING', `Memory usage exceeded threshold: ${latestSystemMetric.memory.usagePercent.toFixed(1)}%`, 'memory_usage', latestSystemMetric.memory.usagePercent, this.config.alertThresholds.memoryUsageMb);
+    if (
+      latestSystemMetric.memory.usagePercent >
+      this.config.alertThresholds.memoryUsageMb
+    ) {
+      this.createAlert(
+        'THRESHOLD_EXCEEDED',
+        'WARNING',
+        `Memory usage exceeded threshold: ${latestSystemMetric.memory.usagePercent.toFixed(1)}%`,
+        'memory_usage',
+        latestSystemMetric.memory.usagePercent,
+        this.config.alertThresholds.memoryUsageMb,
+      );
     }
 
-    if (latestSystemMetric.network.latencyMs > this.config.alertThresholds.networkLatencyMs) {
-      this.createAlert('THRESHOLD_EXCEEDED', 'WARNING', `Network latency exceeded threshold: ${latestSystemMetric.network.latencyMs.toFixed(1)}ms`, 'network_latency', latestSystemMetric.network.latencyMs, this.config.alertThresholds.networkLatencyMs);
+    if (
+      latestSystemMetric.network.latencyMs >
+      this.config.alertThresholds.networkLatencyMs
+    ) {
+      this.createAlert(
+        'THRESHOLD_EXCEEDED',
+        'WARNING',
+        `Network latency exceeded threshold: ${latestSystemMetric.network.latencyMs.toFixed(1)}ms`,
+        'network_latency',
+        latestSystemMetric.network.latencyMs,
+        this.config.alertThresholds.networkLatencyMs,
+      );
     }
   }
 
@@ -733,7 +905,7 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
     metricName: string,
     actualValue: number,
     thresholdValue: number,
-    context: Record<string, unknown> = {}
+    context: Record<string, unknown> = {},
   ): void {
     const alert: E2EPerformanceAlert = {
       id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -745,7 +917,7 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
       thresholdValue,
       timestamp: new Date(),
       resolved: false,
-      context
+      context,
     };
 
     this.activeAlerts.push(alert);
@@ -759,35 +931,46 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
     const recentTimeThreshold = new Date(Date.now() - 2 * 60 * 1000); // Last 2 minutes
 
     // Analyze API response times
-    const recentApiMetrics = this.apiMetrics.filter(m => m.timestamp >= recentTimeThreshold);
+    const recentApiMetrics = this.apiMetrics.filter(
+      (m) => m.timestamp >= recentTimeThreshold,
+    );
     if (recentApiMetrics.length > 0) {
-      const avgResponseTime = recentApiMetrics.reduce((sum, m) => sum + m.responseTime, 0) / recentApiMetrics.length;
+      const avgResponseTime =
+        recentApiMetrics.reduce((sum, m) => sum + m.responseTime, 0) /
+        recentApiMetrics.length;
       if (avgResponseTime > this.config.alertThresholds.apiResponseTime * 1.5) {
         bottlenecks.push({
           type: 'API',
           severity: 'HIGH',
           description: `API response times are consistently high (avg: ${avgResponseTime.toFixed(0)}ms)`,
           impact: 'User experience degradation, potential service instability',
-          recommendation: 'Review API implementation, check database queries, consider caching',
+          recommendation:
+            'Review API implementation, check database queries, consider caching',
           metrics: { avgResponseTime, requestCount: recentApiMetrics.length },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     }
 
     // Analyze database query times
-    const recentDbMetrics = this.databaseMetrics.filter(m => m.timestamp >= recentTimeThreshold);
+    const recentDbMetrics = this.databaseMetrics.filter(
+      (m) => m.timestamp >= recentTimeThreshold,
+    );
     if (recentDbMetrics.length > 0) {
-      const avgQueryTime = recentDbMetrics.reduce((sum, m) => sum + m.executionTime, 0) / recentDbMetrics.length;
+      const avgQueryTime =
+        recentDbMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+        recentDbMetrics.length;
       if (avgQueryTime > this.config.alertThresholds.databaseQueryTime * 2) {
         bottlenecks.push({
           type: 'DATABASE',
           severity: 'HIGH',
           description: `Database queries are running slowly (avg: ${avgQueryTime.toFixed(0)}ms)`,
-          impact: 'Application performance degradation, increased resource usage',
-          recommendation: 'Optimize queries, review indexes, consider query caching',
+          impact:
+            'Application performance degradation, increased resource usage',
+          recommendation:
+            'Optimize queries, review indexes, consider query caching',
           metrics: { avgQueryTime, queryCount: recentDbMetrics.length },
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     }
@@ -795,9 +978,21 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
     return bottlenecks;
   }
 
-  private async detectPerformanceRegressions(): Promise<Array<{ description: string; metric: string; currentValue: number; baselineValue: number }>> {
+  private async detectPerformanceRegressions(): Promise<
+    Array<{
+      description: string;
+      metric: string;
+      currentValue: number;
+      baselineValue: number;
+    }>
+  > {
     // Simplified regression detection - compare current metrics with baseline
-    const regressions: Array<{ description: string; metric: string; currentValue: number; baselineValue: number }> = [];
+    const regressions: Array<{
+      description: string;
+      metric: string;
+      currentValue: number;
+      baselineValue: number;
+    }> = [];
 
     // This would normally compare against historical baselines
     // For now, we'll use mock baseline values
@@ -806,28 +1001,38 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
     const mockBaselines = {
       apiResponseTime: 500,
       databaseQueryTime: 200,
-      websocketLatency: 50
+      websocketLatency: 50,
     };
 
-    if (currentSummary.apiMetrics.averageResponseTime > mockBaselines.apiResponseTime * 1.3) {
+    if (
+      currentSummary.apiMetrics.averageResponseTime >
+      mockBaselines.apiResponseTime * 1.3
+    ) {
       regressions.push({
         description: `API response time regression detected`,
         metric: 'api_response_time',
         currentValue: currentSummary.apiMetrics.averageResponseTime,
-        baselineValue: mockBaselines.apiResponseTime
+        baselineValue: mockBaselines.apiResponseTime,
       });
     }
 
     return regressions;
   }
 
-  private async simulateLoadTest(config: E2ELoadTestConfig, results: E2ELoadTestResult): Promise<void> {
+  private async simulateLoadTest(
+    config: E2ELoadTestConfig,
+    results: E2ELoadTestResult,
+  ): Promise<void> {
     // Simulate load test execution with realistic metrics
     const testDuration = config.duration;
     const maxRequests = config.concurrentUsers * (testDuration / 1000) * 2; // Rough estimate
 
-    results.totalRequests = Math.floor(maxRequests * (0.9 + Math.random() * 0.2)); // 90-110% of estimate
-    results.successfulRequests = Math.floor(results.totalRequests * (0.95 + Math.random() * 0.05)); // 95-100% success
+    results.totalRequests = Math.floor(
+      maxRequests * (0.9 + Math.random() * 0.2),
+    ); // 90-110% of estimate
+    results.successfulRequests = Math.floor(
+      results.totalRequests * (0.95 + Math.random() * 0.05),
+    ); // 95-100% success
     results.failedRequests = results.totalRequests - results.successfulRequests;
 
     results.averageResponseTime = Math.floor(200 + Math.random() * 800); // 200-1000ms
@@ -838,10 +1043,14 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
     results.errorRate = (results.failedRequests / results.totalRequests) * 100;
 
     // Simulate test execution delay
-    await new Promise(resolve => setTimeout(resolve, Math.min(testDuration, 5000))); // Cap simulation time
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(testDuration, 5000)),
+    ); // Cap simulation time
   }
 
-  private async analyzeLoadTestResults(results: E2ELoadTestResult): Promise<void> {
+  private async analyzeLoadTestResults(
+    results: E2ELoadTestResult,
+  ): Promise<void> {
     // Calculate performance score
     let score = 100;
 
@@ -871,28 +1080,38 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
         impact: 'Poor user experience under load',
         recommendation: 'Optimize API endpoints and database queries',
         metrics: { responseTime: results.averageResponseTime },
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
 
-  private generatePerformanceRecommendations(results: E2ELoadTestResult): string[] {
+  private generatePerformanceRecommendations(
+    results: E2ELoadTestResult,
+  ): string[] {
     const recommendations: string[] = [];
 
     if (results.averageResponseTime > 800) {
-      recommendations.push('Consider implementing response caching to reduce API response times');
+      recommendations.push(
+        'Consider implementing response caching to reduce API response times',
+      );
     }
 
     if (results.errorRate > 2) {
-      recommendations.push('Investigate and fix sources of errors to improve system reliability');
+      recommendations.push(
+        'Investigate and fix sources of errors to improve system reliability',
+      );
     }
 
     if (results.throughput < 30) {
-      recommendations.push('Consider scaling infrastructure to handle higher request volumes');
+      recommendations.push(
+        'Consider scaling infrastructure to handle higher request volumes',
+      );
     }
 
     if (results.performanceScore < 70) {
-      recommendations.push('Performance optimization required before production deployment');
+      recommendations.push(
+        'Performance optimization required before production deployment',
+      );
     }
 
     return recommendations;
@@ -903,28 +1122,39 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
     const summary = this.getCurrentPerformanceSummary();
 
     if (summary.apiMetrics.averageResponseTime > 800) {
-      recommendations.push('API response times are high - consider implementing caching strategies');
+      recommendations.push(
+        'API response times are high - consider implementing caching strategies',
+      );
     }
 
     if (summary.databaseMetrics.averageQueryTime > 400) {
-      recommendations.push('Database queries are slow - review query optimization and indexing');
+      recommendations.push(
+        'Database queries are slow - review query optimization and indexing',
+      );
     }
 
     if (summary.systemMetrics.cpuUsage > 70) {
-      recommendations.push('High CPU usage detected - consider optimizing algorithms or scaling resources');
+      recommendations.push(
+        'High CPU usage detected - consider optimizing algorithms or scaling resources',
+      );
     }
 
     if (summary.systemMetrics.memoryUsage > 80) {
-      recommendations.push('High memory usage detected - review memory management and potential leaks');
+      recommendations.push(
+        'High memory usage detected - review memory management and potential leaks',
+      );
     }
 
     return recommendations;
   }
 
   private startCleanupScheduler(): void {
-    this.cleanupInterval = setInterval(() => {
-      this.cleanupOldMetrics();
-    }, 60 * 60 * 1000); // Run cleanup every hour
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanupOldMetrics();
+      },
+      60 * 60 * 1000,
+    ); // Run cleanup every hour
   }
 
   private stopCleanupScheduler(): void {
@@ -937,25 +1167,39 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
   private cleanupOldMetrics(): void {
     const cutoffTime = new Date(Date.now() - this.config.retentionPeriod);
 
-    this.metrics = this.metrics.filter(m => m.timestamp >= cutoffTime);
-    this.systemMetrics = this.systemMetrics.filter(m => m.timestamp >= cutoffTime);
-    this.apiMetrics = this.apiMetrics.filter(m => m.timestamp >= cutoffTime);
-    this.databaseMetrics = this.databaseMetrics.filter(m => m.timestamp >= cutoffTime);
-    this.websocketMetrics = this.websocketMetrics.filter(m => m.timestamp >= cutoffTime);
-    this.browserMetrics = this.browserMetrics.filter(m => m.timestamp >= cutoffTime);
+    this.metrics = this.metrics.filter((m) => m.timestamp >= cutoffTime);
+    this.systemMetrics = this.systemMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
+    this.apiMetrics = this.apiMetrics.filter((m) => m.timestamp >= cutoffTime);
+    this.databaseMetrics = this.databaseMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
+    this.websocketMetrics = this.websocketMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
+    this.browserMetrics = this.browserMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
 
     // Clean up resolved alerts older than retention period
-    this.activeAlerts = this.activeAlerts.filter(a => !a.resolved || a.timestamp >= cutoffTime);
+    this.activeAlerts = this.activeAlerts.filter(
+      (a) => !a.resolved || a.timestamp >= cutoffTime,
+    );
 
     this.logger.log('Performance metrics cleanup completed');
   }
 
   private getMetricsInRange(start: Date, end: Date): E2EPerformanceMetric[] {
-    return this.metrics.filter(m => m.timestamp >= start && m.timestamp <= end);
+    return this.metrics.filter(
+      (m) => m.timestamp >= start && m.timestamp <= end,
+    );
   }
 
   private getAlertsInRange(start: Date, end: Date): E2EPerformanceAlert[] {
-    return this.activeAlerts.filter(a => a.timestamp >= start && a.timestamp <= end);
+    return this.activeAlerts.filter(
+      (a) => a.timestamp >= start && a.timestamp <= end,
+    );
   }
 
   private async generateFinalReport(): Promise<void> {
@@ -971,7 +1215,7 @@ export class E2EPerformanceMonitorService extends EventEmitter implements OnModu
         timeRange: { start: startTime, end: endTime },
         includeGraphs: false,
         includeRecommendations: true,
-        exportFormat: 'JSON'
+        exportFormat: 'JSON',
       };
 
       await this.generatePerformanceReport(reportConfig);

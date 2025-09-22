@@ -56,8 +56,12 @@ describe('JobCancellationController', () => {
       .useValue({ canActivate: () => true }) // Mock throttler guard
       .compile();
 
-    controller = module.get<JobCancellationController>(JobCancellationController);
-    cancellationService = module.get<JobCancellationTimeoutService>(JobCancellationTimeoutService);
+    controller = module.get<JobCancellationController>(
+      JobCancellationController,
+    );
+    cancellationService = module.get<JobCancellationTimeoutService>(
+      JobCancellationTimeoutService,
+    );
 
     // Reset mocks
     jest.clearAllMocks();
@@ -115,7 +119,7 @@ describe('JobCancellationController', () => {
             requestedAt: expect.any(String),
             userAgent: 'JobCancellationController',
           }),
-        })
+        }),
       );
     });
 
@@ -161,7 +165,7 @@ describe('JobCancellationController', () => {
             priority: 'urgent',
             requestedAt: expect.any(String),
           }),
-        })
+        }),
       );
     });
 
@@ -171,8 +175,12 @@ describe('JobCancellationController', () => {
         reason: 'Test reason',
       };
 
-      await expect(controller.cancelJob('', cancelRequest)).rejects.toThrow(BadRequestException);
-      await expect(controller.cancelJob('   ', cancelRequest)).rejects.toThrow(BadRequestException);
+      await expect(controller.cancelJob('', cancelRequest)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(controller.cancelJob('   ', cancelRequest)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for invalid cancellation strategy', async () => {
@@ -181,29 +189,39 @@ describe('JobCancellationController', () => {
         reason: 'Test reason',
       };
 
-      await expect(controller.cancelJob(testJobId, cancelRequest)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.cancelJob(testJobId, cancelRequest),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw NotFoundException when job is not found', async () => {
-      mockCancellationService.cancelJob.mockRejectedValue(new Error('Job not found: ' + testJobId));
+      mockCancellationService.cancelJob.mockRejectedValue(
+        new Error('Job not found: ' + testJobId),
+      );
 
       const cancelRequest: CancelJobDto = {
         strategy: CancellationStrategy.GRACEFUL,
         reason: 'Test reason',
       };
 
-      await expect(controller.cancelJob(testJobId, cancelRequest)).rejects.toThrow(NotFoundException);
+      await expect(
+        controller.cancelJob(testJobId, cancelRequest),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException for other cancellation errors', async () => {
-      mockCancellationService.cancelJob.mockRejectedValue(new Error('Cancellation failed: invalid state'));
+      mockCancellationService.cancelJob.mockRejectedValue(
+        new Error('Cancellation failed: invalid state'),
+      );
 
       const cancelRequest: CancelJobDto = {
         strategy: CancellationStrategy.GRACEFUL,
         reason: 'Test reason',
       };
 
-      await expect(controller.cancelJob(testJobId, cancelRequest)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.cancelJob(testJobId, cancelRequest),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle service success with cleanup errors', async () => {
@@ -254,12 +272,14 @@ describe('JobCancellationController', () => {
             cancelledAt: new Date(),
             duration: 150,
             reason: 'Bulk cancellation',
-            cleanup: { resourcesReleased: [], dependentsNotified: 0, errors: [] },
+            cleanup: {
+              resourcesReleased: [],
+              dependentsNotified: 0,
+              errors: [],
+            },
           },
         ],
-        failures: [
-          { jobId: 'job2', error: 'Job not found' },
-        ],
+        failures: [{ jobId: 'job2', error: 'Job not found' }],
         duration: 1200,
         dryRun: false,
       };
@@ -280,7 +300,7 @@ describe('JobCancellationController', () => {
           criteria: { status: [JobStatus.PENDING] },
           strategy: CancellationStrategy.GRACEFUL,
           reason: 'Bulk cancellation',
-        })
+        }),
       );
     });
 
@@ -312,7 +332,7 @@ describe('JobCancellationController', () => {
       expect(result.dryRun).toBe(true);
       expect(result.cancelled).toEqual([]);
       expect(mockCancellationService.cancelJobsBulk).toHaveBeenCalledWith(
-        expect.objectContaining({ dryRun: true })
+        expect.objectContaining({ dryRun: true }),
       );
     });
 
@@ -349,7 +369,7 @@ describe('JobCancellationController', () => {
             olderThan: new Date('2023-12-31T12:00:00.000Z'),
             longerThan: 300000,
           }),
-        })
+        }),
       );
     });
 
@@ -360,7 +380,9 @@ describe('JobCancellationController', () => {
         reason: 'Test reason',
       };
 
-      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(BadRequestException);
+      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for invalid maxJobs', async () => {
@@ -371,7 +393,9 @@ describe('JobCancellationController', () => {
         maxJobs: 0,
       };
 
-      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(BadRequestException);
+      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for negative longerThan', async () => {
@@ -384,7 +408,9 @@ describe('JobCancellationController', () => {
         reason: 'Test reason',
       };
 
-      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(BadRequestException);
+      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for invalid date format', async () => {
@@ -397,11 +423,15 @@ describe('JobCancellationController', () => {
         reason: 'Test reason',
       };
 
-      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(BadRequestException);
+      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should handle service errors', async () => {
-      mockCancellationService.cancelJobsBulk.mockRejectedValue(new Error('Service error'));
+      mockCancellationService.cancelJobsBulk.mockRejectedValue(
+        new Error('Service error'),
+      );
 
       const bulkRequest: BulkCancelJobsDto = {
         criteria: { status: [JobStatus.PENDING] },
@@ -409,7 +439,9 @@ describe('JobCancellationController', () => {
         reason: 'Test reason',
       };
 
-      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(BadRequestException);
+      await expect(controller.cancelJobsBulk(bulkRequest)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -434,7 +466,10 @@ describe('JobCancellationController', () => {
         ],
       };
 
-      const result = await controller.configureJobTimeout(testJobId, timeoutConfig);
+      const result = await controller.configureJobTimeout(
+        testJobId,
+        timeoutConfig,
+      );
 
       expect(result).toEqual({
         message: 'Timeout configuration applied successfully',
@@ -453,7 +488,7 @@ describe('JobCancellationController', () => {
               action: TimeoutEscalation.WARNING,
             }),
           ]),
-        })
+        }),
       );
     });
 
@@ -464,7 +499,9 @@ describe('JobCancellationController', () => {
         escalationSteps: [],
       };
 
-      await expect(controller.configureJobTimeout('', timeoutConfig)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.configureJobTimeout('', timeoutConfig),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException for non-positive timeout values', async () => {
@@ -472,22 +509,30 @@ describe('JobCancellationController', () => {
         {
           softTimeoutMs: 0,
           hardTimeoutMs: 60000,
-          escalationSteps: [{ delayMs: 1000, action: TimeoutEscalation.WARNING }],
+          escalationSteps: [
+            { delayMs: 1000, action: TimeoutEscalation.WARNING },
+          ],
         },
         {
           softTimeoutMs: -1000,
           hardTimeoutMs: 60000,
-          escalationSteps: [{ delayMs: 1000, action: TimeoutEscalation.WARNING }],
+          escalationSteps: [
+            { delayMs: 1000, action: TimeoutEscalation.WARNING },
+          ],
         },
         {
           softTimeoutMs: 30000,
           hardTimeoutMs: 0,
-          escalationSteps: [{ delayMs: 1000, action: TimeoutEscalation.WARNING }],
+          escalationSteps: [
+            { delayMs: 1000, action: TimeoutEscalation.WARNING },
+          ],
         },
       ];
 
       for (const config of invalidConfigs) {
-        await expect(controller.configureJobTimeout(testJobId, config)).rejects.toThrow(BadRequestException);
+        await expect(
+          controller.configureJobTimeout(testJobId, config),
+        ).rejects.toThrow(BadRequestException);
       }
     });
 
@@ -498,7 +543,9 @@ describe('JobCancellationController', () => {
         escalationSteps: [{ delayMs: 1000, action: TimeoutEscalation.WARNING }],
       };
 
-      await expect(controller.configureJobTimeout(testJobId, timeoutConfig)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.configureJobTimeout(testJobId, timeoutConfig),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException for empty escalation steps', async () => {
@@ -508,7 +555,9 @@ describe('JobCancellationController', () => {
         escalationSteps: [],
       };
 
-      await expect(controller.configureJobTimeout(testJobId, timeoutConfig)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.configureJobTimeout(testJobId, timeoutConfig),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException for invalid escalation step delays', async () => {
@@ -523,7 +572,9 @@ describe('JobCancellationController', () => {
         ],
       };
 
-      await expect(controller.configureJobTimeout(testJobId, timeoutConfig)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.configureJobTimeout(testJobId, timeoutConfig),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException for invalid escalation actions', async () => {
@@ -538,11 +589,15 @@ describe('JobCancellationController', () => {
         ],
       };
 
-      await expect(controller.configureJobTimeout(testJobId, timeoutConfig)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.configureJobTimeout(testJobId, timeoutConfig),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle service configuration errors', async () => {
-      mockCancellationService.configureJobTimeout.mockRejectedValue(new Error('Configuration failed'));
+      mockCancellationService.configureJobTimeout.mockRejectedValue(
+        new Error('Configuration failed'),
+      );
 
       const timeoutConfig: TimeoutConfigurationDto = {
         softTimeoutMs: 30000,
@@ -550,7 +605,9 @@ describe('JobCancellationController', () => {
         escalationSteps: [{ delayMs: 1000, action: TimeoutEscalation.WARNING }],
       };
 
-      await expect(controller.configureJobTimeout(testJobId, timeoutConfig)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.configureJobTimeout(testJobId, timeoutConfig),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -573,22 +630,30 @@ describe('JobCancellationController', () => {
         },
       };
 
-      mockCancellationService.getCancellationHistory.mockReturnValue(mockHistory);
+      mockCancellationService.getCancellationHistory.mockReturnValue(
+        mockHistory,
+      );
 
       const result = await controller.getCancellationHistory(testJobId);
 
       expect(result).toEqual(mockHistory);
-      expect(mockCancellationService.getCancellationHistory).toHaveBeenCalledWith(testJobId);
+      expect(
+        mockCancellationService.getCancellationHistory,
+      ).toHaveBeenCalledWith(testJobId);
     });
 
     it('should throw NotFoundException when no history exists', async () => {
       mockCancellationService.getCancellationHistory.mockReturnValue(undefined);
 
-      await expect(controller.getCancellationHistory(testJobId)).rejects.toThrow(NotFoundException);
+      await expect(
+        controller.getCancellationHistory(testJobId),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException for empty job ID', async () => {
-      await expect(controller.getCancellationHistory('')).rejects.toThrow(BadRequestException);
+      await expect(controller.getCancellationHistory('')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -648,7 +713,9 @@ describe('JobCancellationController', () => {
       const result = await controller.emergencyShutdown(shutdownRequest);
 
       expect(result).toEqual(mockResult);
-      expect(mockCancellationService.emergencyShutdown).toHaveBeenCalledWith('System maintenance required');
+      expect(mockCancellationService.emergencyShutdown).toHaveBeenCalledWith(
+        'System maintenance required',
+      );
     });
 
     it('should handle emergency shutdown with confirmation code', async () => {
@@ -682,7 +749,9 @@ describe('JobCancellationController', () => {
         reason: '',
       };
 
-      await expect(controller.emergencyShutdown(shutdownRequest)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.emergencyShutdown(shutdownRequest),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException for invalid confirmation code', async () => {
@@ -691,17 +760,23 @@ describe('JobCancellationController', () => {
         confirmationCode: 'INVALID_CODE',
       };
 
-      await expect(controller.emergencyShutdown(shutdownRequest)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.emergencyShutdown(shutdownRequest),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle service errors during emergency shutdown', async () => {
-      mockCancellationService.emergencyShutdown.mockRejectedValue(new Error('Shutdown failed'));
+      mockCancellationService.emergencyShutdown.mockRejectedValue(
+        new Error('Shutdown failed'),
+      );
 
       const shutdownRequest: EmergencyShutdownDto = {
         reason: 'Test shutdown',
       };
 
-      await expect(controller.emergencyShutdown(shutdownRequest)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.emergencyShutdown(shutdownRequest),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -799,7 +874,7 @@ describe('JobCancellationController', () => {
       expect(mockCancellationService.cancelJob).toHaveBeenCalledWith(
         expect.objectContaining({
           jobId: trimmedJobId,
-        })
+        }),
       );
     });
 
@@ -838,7 +913,7 @@ describe('JobCancellationController', () => {
             requestedAt: expect.any(String),
             userAgent: 'JobCancellationController',
           }),
-        })
+        }),
       );
 
       expect(result.metadata).toEqual({ customField: 'customValue' });

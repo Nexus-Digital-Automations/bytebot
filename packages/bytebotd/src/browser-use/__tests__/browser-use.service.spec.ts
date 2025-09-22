@@ -67,7 +67,9 @@ describe('BrowserUseService', () => {
           success: true,
           message: `Browser action ${action} completed successfully`,
         });
-        expect(loggerSpy).toHaveBeenCalledWith(`Performing browser action: ${action}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Performing browser action: ${action}`,
+        );
       });
 
       it('should handle complex action strings', async () => {
@@ -76,7 +78,9 @@ describe('BrowserUseService', () => {
 
         expect(result.success).toBe(true);
         expect(result.message).toContain(complexAction);
-        expect(loggerSpy).toHaveBeenCalledWith(`Performing browser action: ${complexAction}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Performing browser action: ${complexAction}`,
+        );
       });
 
       it('should handle actions with special characters', async () => {
@@ -92,7 +96,9 @@ describe('BrowserUseService', () => {
         const result = await service.performBrowserAction(emptyAction);
 
         expect(result.success).toBe(true);
-        expect(result.message).toContain('Browser action  completed successfully');
+        expect(result.message).toContain(
+          'Browser action  completed successfully',
+        );
       });
     });
 
@@ -104,7 +110,9 @@ describe('BrowserUseService', () => {
         // Service should still process it (current placeholder implementation)
         // but in real implementation would sanitize
         expect(result.success).toBe(true);
-        expect(loggerSpy).toHaveBeenCalledWith(`Performing browser action: ${maliciousAction}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Performing browser action: ${maliciousAction}`,
+        );
       });
 
       it('should handle SQL injection-like action strings', async () => {
@@ -130,7 +138,9 @@ describe('BrowserUseService', () => {
         const result = await service.performBrowserAction(null);
 
         expect(result.success).toBe(true);
-        expect(loggerSpy).toHaveBeenCalledWith('Performing browser action: null');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Performing browser action: null',
+        );
       });
 
       it('should handle undefined action parameter', async () => {
@@ -138,7 +148,9 @@ describe('BrowserUseService', () => {
         const result = await service.performBrowserAction(undefined);
 
         expect(result.success).toBe(true);
-        expect(loggerSpy).toHaveBeenCalledWith('Performing browser action: undefined');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Performing browser action: undefined',
+        );
       });
 
       it('should handle numeric action parameter', async () => {
@@ -146,7 +158,9 @@ describe('BrowserUseService', () => {
         const result = await service.performBrowserAction(123);
 
         expect(result.success).toBe(true);
-        expect(loggerSpy).toHaveBeenCalledWith('Performing browser action: 123');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Performing browser action: 123',
+        );
       });
 
       it('should handle object action parameter', async () => {
@@ -155,7 +169,9 @@ describe('BrowserUseService', () => {
         const result = await service.performBrowserAction(objectAction);
 
         expect(result.success).toBe(true);
-        expect(loggerSpy).toHaveBeenCalledWith('Performing browser action: [object Object]');
+        expect(loggerSpy).toHaveBeenCalledWith(
+          'Performing browser action: [object Object]',
+        );
       });
     });
 
@@ -175,7 +191,7 @@ describe('BrowserUseService', () => {
 
         const startTime = performance.now();
         const results = await Promise.all(
-          actions.map(action => service.performBrowserAction(action))
+          actions.map((action) => service.performBrowserAction(action)),
         );
         const endTime = performance.now();
 
@@ -211,7 +227,9 @@ describe('BrowserUseService', () => {
 
         for (const action of actions) {
           await service.performBrowserAction(action);
-          expect(loggerSpy).toHaveBeenCalledWith(`Performing browser action: ${action}`);
+          expect(loggerSpy).toHaveBeenCalledWith(
+            `Performing browser action: ${action}`,
+          );
         }
 
         expect(loggerSpy).toHaveBeenCalledTimes(actions.length + 1); // +1 for initialization
@@ -223,7 +241,7 @@ describe('BrowserUseService', () => {
           'type:input[name="email"]:test@example.com',
           'navigate:https://example.com',
           'wait:element[class="loading"]',
-          'scroll:bottom'
+          'scroll:bottom',
         ];
 
         for (const action of complexActions) {
@@ -231,7 +249,9 @@ describe('BrowserUseService', () => {
           await service.performBrowserAction(action);
 
           expect(loggerSpy).toHaveBeenCalledTimes(1);
-          expect(loggerSpy).toHaveBeenCalledWith(`Performing browser action: ${action}`);
+          expect(loggerSpy).toHaveBeenCalledWith(
+            `Performing browser action: ${action}`,
+          );
         }
       });
     });
@@ -246,7 +266,8 @@ describe('BrowserUseService', () => {
         }
 
         const finalMemoryUsage = process.memoryUsage();
-        const memoryIncrease = finalMemoryUsage.heapUsed - initialMemoryUsage.heapUsed;
+        const memoryIncrease =
+          finalMemoryUsage.heapUsed - initialMemoryUsage.heapUsed;
 
         // Memory increase should be reasonable (less than 10MB for 1000 operations)
         expect(memoryIncrease).toBeLessThan(10 * 1024 * 1024);
@@ -263,7 +284,8 @@ describe('BrowserUseService', () => {
         }
 
         // Performance should remain consistent
-        const averageTime = executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
+        const averageTime =
+          executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
         const maxTime = Math.max(...executionTimes);
 
         expect(averageTime).toBeLessThan(50); // Average under 50ms
@@ -301,7 +323,7 @@ describe('BrowserUseService', () => {
       }
 
       expect(results).toHaveLength(3);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.success).toBe(true);
       });
     });
@@ -320,7 +342,7 @@ describe('BrowserUseService', () => {
     it('should maintain service availability during high load', async () => {
       // Simulate high load with concurrent requests
       const concurrentRequests = Array.from({ length: 50 }, (_, i) =>
-        service.performBrowserAction(`concurrent-${i}`)
+        service.performBrowserAction(`concurrent-${i}`),
       );
 
       const results = await Promise.all(concurrentRequests);

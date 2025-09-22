@@ -39,13 +39,16 @@ import { JobStatus, JobPriority } from './async-job.dto';
 export class JobProgressDetailsDto {
   @ApiPropertyOptional({
     description: 'Current execution step description',
-  example: 'Capturing screenshot of target element',})@IsOptional()
+    example: 'Capturing screenshot of target element',
+  })
+  @IsOptional()
   @IsString()
   currentStep?: string;
 
   @ApiPropertyOptional({
     description: 'Total number of execution steps',
-  example: 5,})
+    example: 5,
+  })
   @IsOptional()
   @IsNumber()
   @Min(1)
@@ -53,7 +56,8 @@ export class JobProgressDetailsDto {
 
   @ApiPropertyOptional({
     description: 'Current step index (0-based)',
-  example: 2,})
+    example: 2,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -61,7 +65,8 @@ export class JobProgressDetailsDto {
 
   @ApiPropertyOptional({
     description: 'Estimated time remaining in milliseconds',
-  example: 15000,})
+    example: 15000,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -69,7 +74,8 @@ export class JobProgressDetailsDto {
 
   @ApiPropertyOptional({
     description: 'Subtask progress details',
-  type: [SubtaskProgressDto],})
+    type: [SubtaskProgressDto],
+  })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -83,17 +89,22 @@ export class JobProgressDetailsDto {
 export class SubtaskProgressDto {
   @ApiProperty({
     description: 'Subtask name or identifier',
-  example: 'element-location',})@IsString()
-  name: string = '';@ApiProperty({description: 'Subtask status',
-  enum: JobStatus,
-  example: JobStatus.COMPLETED,
+    example: 'element-location',
+  })
+  @IsString()
+  name: string = '';
+  @ApiProperty({
+    description: 'Subtask status',
+    enum: JobStatus,
+    example: JobStatus.COMPLETED,
   })
   @IsEnum(JobStatus)
   status: JobStatus = JobStatus.PENDING;
 
   @ApiProperty({
     description: 'Subtask progress percentage (0-100)',
-  example: 85,})
+    example: 85,
+  })
   @IsNumber()
   @Min(0)
   @Max(100)
@@ -101,7 +112,8 @@ export class SubtaskProgressDto {
 
   @ApiPropertyOptional({
     description: 'Subtask execution time in milliseconds',
-  example: 1250,})
+    example: 1250,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -109,7 +121,9 @@ export class SubtaskProgressDto {
 
   @ApiPropertyOptional({
     description: 'Subtask error message if failed',
-  example: 'Element not found within timeout',})@IsOptional()
+    example: 'Element not found within timeout',
+  })
+  @IsOptional()
   @IsString()
   errorMessage?: string;
 }
@@ -120,23 +134,37 @@ export class SubtaskProgressDto {
 export class JobTimestampsDto {
   @ApiProperty({
     description: 'Job submission timestamp',
-  example: '2023-12-19T10:30:45.789Z',})@IsDateString()
-  submitted: string = '';@ApiPropertyOptional({description: 'Job execution start timestamp',
-  example: '2023-12-19T10:30:46.123Z',})@IsOptional()
+    example: '2023-12-19T10:30:45.789Z',
+  })
+  @IsDateString()
+  submitted: string = '';
+  @ApiPropertyOptional({
+    description: 'Job execution start timestamp',
+    example: '2023-12-19T10:30:46.123Z',
+  })
+  @IsOptional()
   @IsDateString()
   started?: string;
 
   @ApiProperty({
     description: 'Last status update timestamp',
-  example: '2023-12-19T10:31:10.456Z',})@IsDateString()
-  lastUpdated: string = '';@ApiPropertyOptional({description: 'Job completion timestamp',
-  example: '2023-12-19T10:31:15.789Z',})@IsOptional()
+    example: '2023-12-19T10:31:10.456Z',
+  })
+  @IsDateString()
+  lastUpdated: string = '';
+  @ApiPropertyOptional({
+    description: 'Job completion timestamp',
+    example: '2023-12-19T10:31:15.789Z',
+  })
+  @IsOptional()
   @IsDateString()
   completed?: string;
 
   @ApiPropertyOptional({
     description: 'Next retry attempt timestamp (if applicable)',
-  example: '2023-12-19T10:35:00.000Z',})@IsOptional()
+    example: '2023-12-19T10:35:00.000Z',
+  })
+  @IsOptional()
   @IsDateString()
   nextRetry?: string;
 }
@@ -147,7 +175,8 @@ export class JobTimestampsDto {
 export class JobPerformanceMetricsDto {
   @ApiPropertyOptional({
     description: 'Total execution time in milliseconds',
-  example: 30123,})
+    example: 30123,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -155,7 +184,8 @@ export class JobPerformanceMetricsDto {
 
   @ApiPropertyOptional({
     description: 'Peak memory usage in megabytes',
-  example: 45.7,})
+    example: 45.7,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -163,7 +193,8 @@ export class JobPerformanceMetricsDto {
 
   @ApiPropertyOptional({
     description: 'Average CPU usage percentage',
-  example: 12.5,})
+    example: 12.5,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -172,7 +203,8 @@ export class JobPerformanceMetricsDto {
 
   @ApiPropertyOptional({
     description: 'Network bytes transferred',
-  example: 1048576,})
+    example: 1048576,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -180,7 +212,8 @@ export class JobPerformanceMetricsDto {
 
   @ApiPropertyOptional({
     description: 'Disk I/O operations count',
-  example: 25,})
+    example: 25,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -193,24 +226,36 @@ export class JobPerformanceMetricsDto {
 export class JobErrorDetailsDto {
   @ApiProperty({
     description: 'Error message',
-  example: 'Element not found: Unable to locate target element within timeout',})@IsString()
-  message: string = '';@ApiProperty({description: 'Error code for categorization',
-  example: 'ELEMENT_NOT_FOUND',})@IsString()
-  code: string = '';@ApiPropertyOptional({description: 'Error stack trace (for debugging)',
-  example: 'Error: Element not found\at ComputerUseService.findElement...',})
+    example:
+      'Element not found: Unable to locate target element within timeout',
+  })
+  @IsString()
+  message: string = '';
+  @ApiProperty({
+    description: 'Error code for categorization',
+    example: 'ELEMENT_NOT_FOUND',
+  })
+  @IsString()
+  code: string = '';
+  @ApiPropertyOptional({
+    description: 'Error stack trace (for debugging)',
+    example: 'Error: Element not found\at ComputerUseService.findElement...',
+  })
   @IsOptional()
   @IsString()
   stack?: string;
 
   @ApiProperty({
     description: 'Whether this error is retryable',
-  example: true,})
+    example: true,
+  })
   @IsBoolean()
   retryable: boolean = false;
 
   @ApiPropertyOptional({
     description: 'Suggested retry delay in milliseconds',
-  example: 5000,})
+    example: 5000,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -218,13 +263,21 @@ export class JobErrorDetailsDto {
 
   @ApiPropertyOptional({
     description: 'Recovery suggestions for the user',
-  example: ['Ensure the target element is visible', 'Check element selector accuracy', 'Increase timeout value'],})@IsOptional()
+    example: [
+      'Ensure the target element is visible',
+      'Check element selector accuracy',
+      'Increase timeout value',
+    ],
+  })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   recoverySuggestions?: string[];
 
   @ApiPropertyOptional({
-    description: 'Error context and additional information',})@IsOptional()
+    description: 'Error context and additional information',
+  })
+  @IsOptional()
   @IsObject()
   context?: Record<string, unknown>;
 }
@@ -235,17 +288,23 @@ export class JobErrorDetailsDto {
 export class EnhancedJobStatusResponseDto {
   @ApiProperty({
     description: 'Unique job identifier',
-  example: 'job_1702983456789_abc123',})@IsString()
-  @IsUUID('4')jobId: string = '';@ApiProperty({description: 'Current job status',
-  enum: JobStatus,
-  example: JobStatus.IN_PROGRESS,
+    example: 'job_1702983456789_abc123',
+  })
+  @IsString()
+  @IsUUID('4')
+  jobId: string = '';
+  @ApiProperty({
+    description: 'Current job status',
+    enum: JobStatus,
+    example: JobStatus.IN_PROGRESS,
   })
   @IsEnum(JobStatus)
   status: JobStatus = JobStatus.PENDING;
 
   @ApiProperty({
     description: 'Overall job progress percentage (0-100)',
-  example: 65,})
+    example: 65,
+  })
   @IsNumber()
   @Min(0)
   @Max(100)
@@ -253,7 +312,8 @@ export class EnhancedJobStatusResponseDto {
 
   @ApiPropertyOptional({
     description: 'Detailed progress information with subtasks',
-  type: JobProgressDetailsDto,})
+    type: JobProgressDetailsDto,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => JobProgressDetailsDto)
@@ -261,14 +321,16 @@ export class EnhancedJobStatusResponseDto {
 
   @ApiProperty({
     description: 'Job execution timestamps',
-  type: JobTimestampsDto,})
+    type: JobTimestampsDto,
+  })
   @ValidateNested()
   @Type(() => JobTimestampsDto)
   timestamps: JobTimestampsDto = new JobTimestampsDto();
 
   @ApiPropertyOptional({
     description: 'Real-time performance metrics',
-  type: JobPerformanceMetricsDto,})
+    type: JobPerformanceMetricsDto,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => JobPerformanceMetricsDto)
@@ -276,7 +338,8 @@ export class EnhancedJobStatusResponseDto {
 
   @ApiPropertyOptional({
     description: 'Detailed error information if job failed',
-  type: JobErrorDetailsDto,})
+    type: JobErrorDetailsDto,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => JobErrorDetailsDto)
@@ -284,18 +347,19 @@ export class EnhancedJobStatusResponseDto {
 
   @ApiProperty({
     description: 'Job priority level',
-  enum: JobPriority,
-  example: JobPriority.NORMAL,
+    enum: JobPriority,
+    example: JobPriority.NORMAL,
   })
   @IsEnum(JobPriority)
   priority: JobPriority = JobPriority.NORMAL;
 
   @ApiPropertyOptional({
     description: 'Custom job metadata and context',
-  example: {userId: 'user123',
-  sessionId: 'session456',
-  retryCount: 1,
-  cacheEnabled: true,
+    example: {
+      userId: 'user123',
+      sessionId: 'session456',
+      retryCount: 1,
+      cacheEnabled: true,
     },
   })
   @IsOptional()
@@ -304,20 +368,26 @@ export class EnhancedJobStatusResponseDto {
 
   @ApiPropertyOptional({
     description: 'Job tags for categorization and filtering',
-  example: ['automation', 'screenshot', 'high-priority'],})@IsOptional()
+    example: ['automation', 'screenshot', 'high-priority'],
+  })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
 
   @ApiPropertyOptional({
     description: 'User ID who submitted the job',
-  example: 'user_123',})@IsOptional()
+    example: 'user_123',
+  })
+  @IsOptional()
   @IsString()
   userId?: string;
 
   @ApiPropertyOptional({
     description: 'Session ID for request correlation',
-  example: 'session_456',})@IsOptional()
+    example: 'session_456',
+  })
+  @IsOptional()
   @IsString()
   sessionId?: string;
 }
@@ -328,9 +398,12 @@ export class EnhancedJobStatusResponseDto {
 export class JobAnalyticsDto {
   @ApiProperty({
     description: 'Job identifier',
-  example: 'job_1702983456789_abc123',})@IsString()
-  @IsUUID('4')jobId: string = '';@ApiProperty({description: 'Execution performance metrics',
-  type: Object,})
+    example: 'job_1702983456789_abc123',
+  })
+  @IsString()
+  @IsUUID('4')
+  jobId: string = '';
+  @ApiProperty({ description: 'Execution performance metrics', type: Object })
   @IsObject()
   executionMetrics: {
     totalTimeMs: number;
@@ -348,7 +421,8 @@ export class JobAnalyticsDto {
 
   @ApiProperty({
     description: 'Cache utilization metrics',
-  type: Object,})
+    type: Object,
+  })
   @IsObject()
   cacheMetrics: {
     hitRate: number;
@@ -362,7 +436,8 @@ export class JobAnalyticsDto {
 
   @ApiProperty({
     description: 'Error and retry statistics',
-  type: Object,})
+    type: Object,
+  })
   @IsObject()
   errorMetrics: {
     errorCount: number;
@@ -375,7 +450,8 @@ export class JobAnalyticsDto {
 
   @ApiProperty({
     description: 'Resource utilization metrics',
-  type: Object,})
+    type: Object,
+  })
   @IsObject()
   resourceMetrics: {
     diskUsageMB: number;
@@ -389,7 +465,8 @@ export class JobAnalyticsDto {
 
   @ApiPropertyOptional({
     description: 'Comparison with historical performance',
-  type: Object,})
+    type: Object,
+  })
   @IsOptional()
   @IsObject()
   historicalComparison?: {
@@ -405,17 +482,23 @@ export class JobAnalyticsDto {
 export class JobStatusUpdateNotificationDto {
   @ApiProperty({
     description: 'Job identifier',
-  example: 'job_1702983456789_abc123',})@IsString()
-  @IsUUID('4')jobId: string = '';@ApiProperty({description: 'Updated job status',
-  enum: JobStatus,
-  example: JobStatus.IN_PROGRESS,
+    example: 'job_1702983456789_abc123',
+  })
+  @IsString()
+  @IsUUID('4')
+  jobId: string = '';
+  @ApiProperty({
+    description: 'Updated job status',
+    enum: JobStatus,
+    example: JobStatus.IN_PROGRESS,
   })
   @IsEnum(JobStatus)
   status: JobStatus = JobStatus.PENDING;
 
   @ApiProperty({
     description: 'Updated progress percentage',
-  example: 75,})
+    example: 75,
+  })
   @IsNumber()
   @Min(0)
   @Max(100)
@@ -423,15 +506,23 @@ export class JobStatusUpdateNotificationDto {
 
   @ApiProperty({
     description: 'Update timestamp',
-  example: '2023-12-19T10:31:10.456Z',})@IsDateString()
-  timestamp: string = '';@ApiPropertyOptional({description: 'Update message or description',
-  example: 'Element located successfully, proceeding with interaction',})@IsOptional()
+    example: '2023-12-19T10:31:10.456Z',
+  })
+  @IsDateString()
+  timestamp: string = '';
+  @ApiPropertyOptional({
+    description: 'Update message or description',
+    example: 'Element located successfully, proceeding with interaction',
+  })
+  @IsOptional()
   @IsString()
   message?: string;
 
   @ApiPropertyOptional({
     description: 'Update metadata',
-  example: { step: 'element-interaction', confidence: 0.95 },})@IsOptional()
+    example: { step: 'element-interaction', confidence: 0.95 },
+  })
+  @IsOptional()
   @IsObject()
   metadata?: Record<string, unknown>;
 }
@@ -442,30 +533,67 @@ export class JobStatusUpdateNotificationDto {
 export class JobHistoryEntryDto {
   @ApiProperty({
     description: 'History entry timestamp',
-  example: '2023-12-19T10:30:46.123Z',})@IsDateString()
-  timestamp: string = '';@ApiProperty({description: 'History event type',
-  enum: ['created', 'started', 'progress', 'completed', 'failed', 'cancelled', 'retried'],
-  example: 'started',})@IsEnum(['created', 'started', 'progress', 'completed', 'failed', 'cancelled', 'retried'])event: string = '';@ApiPropertyOptional({description: 'User ID who triggered the event',
-  example: 'user_123',})@IsOptional()
+    example: '2023-12-19T10:30:46.123Z',
+  })
+  @IsDateString()
+  timestamp: string = '';
+  @ApiProperty({
+    description: 'History event type',
+    enum: [
+      'created',
+      'started',
+      'progress',
+      'completed',
+      'failed',
+      'cancelled',
+      'retried',
+    ],
+    example: 'started',
+  })
+  @IsEnum([
+    'created',
+    'started',
+    'progress',
+    'completed',
+    'failed',
+    'cancelled',
+    'retried',
+  ])
+  event: string = '';
+  @ApiPropertyOptional({
+    description: 'User ID who triggered the event',
+    example: 'user_123',
+  })
+  @IsOptional()
   @IsString()
   userId?: string;
 
   @ApiPropertyOptional({
     description: 'Session ID for event correlation',
-  example: 'session_456',})@IsOptional()
+    example: 'session_456',
+  })
+  @IsOptional()
   @IsString()
   sessionId?: string;
 
   @ApiProperty({
     description: 'Event data and context',
-  example: { status: 'in_progress', progress: 25, step: 'initialization' },})@IsObject()
+    example: { status: 'in_progress', progress: 25, step: 'initialization' },
+  })
+  @IsObject()
   data: Record<string, unknown> = {};
 
   @ApiProperty({
     description: 'Event source',
-  enum: ['system', 'user', 'webhook', 'scheduler'],
-  example: 'system',})@IsEnum(['system', 'user', 'webhook', 'scheduler'])source: string = 'system';@ApiPropertyOptional({description: 'Client information for the event',
-  type: Object,})
+    enum: ['system', 'user', 'webhook', 'scheduler'],
+    example: 'system',
+  })
+  @IsEnum(['system', 'user', 'webhook', 'scheduler'])
+  source: string = 'system';
+  @ApiPropertyOptional({
+    description: 'Client information for the event',
+    type: Object,
+  })
   @IsOptional()
   @IsObject()
   clientInfo?: {
@@ -481,12 +609,16 @@ export class JobHistoryEntryDto {
 export class BulkJobStatusRequestDto {
   @ApiProperty({
     description: 'List of job IDs to query',
-  example: ['job_1702983456789_abc123', 'job_1702983456790_def456'],})@IsArray()
+    example: ['job_1702983456789_abc123', 'job_1702983456790_def456'],
+  })
+  @IsArray()
   @IsString({ each: true })
-  @IsUUID('4', { each: true })jobIds: string[] = [];@ApiPropertyOptional({
+  @IsUUID('4', { each: true })
+  jobIds: string[] = [];
+  @ApiPropertyOptional({
     description: 'Include detailed progress information',
-  example: true,
-  default: false,
+    example: true,
+    default: false,
   })
   @IsOptional()
   @IsBoolean()
@@ -494,8 +626,8 @@ export class BulkJobStatusRequestDto {
 
   @ApiPropertyOptional({
     description: 'Include performance metrics',
-  example: true,
-  default: false,
+    example: true,
+    default: false,
   })
   @IsOptional()
   @IsBoolean()
@@ -503,8 +635,8 @@ export class BulkJobStatusRequestDto {
 
   @ApiPropertyOptional({
     description: 'Include job history',
-  example: false,
-  default: false,
+    example: false,
+    default: false,
   })
   @IsOptional()
   @IsBoolean()
@@ -517,7 +649,8 @@ export class BulkJobStatusRequestDto {
 export class BulkJobStatusResponseDto {
   @ApiProperty({
     description: 'Job status results',
-  type: [EnhancedJobStatusResponseDto],})
+    type: [EnhancedJobStatusResponseDto],
+  })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => EnhancedJobStatusResponseDto)
@@ -525,23 +658,28 @@ export class BulkJobStatusResponseDto {
 
   @ApiProperty({
     description: 'Request processing timestamp',
-  example: '2023-12-19T10:31:15.789Z',})@IsDateString()
-  timestamp: string = '';@ApiProperty({description: 'Total jobs requested',
-  example: 5,})
+    example: '2023-12-19T10:31:15.789Z',
+  })
+  @IsDateString()
+  timestamp: string = '';
+  @ApiProperty({ description: 'Total jobs requested', example: 5 })
   @IsNumber()
   @Min(0)
   totalRequested: number = 0;
 
   @ApiProperty({
     description: 'Total jobs found',
-  example: 4,})
+    example: 4,
+  })
   @IsNumber()
   @Min(0)
   totalFound: number = 0;
 
   @ApiPropertyOptional({
     description: 'Job IDs not found',
-  example: ['job_1702983456791_ghi789'],})@IsOptional()
+    example: ['job_1702983456791_ghi789'],
+  })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   notFound?: string[];

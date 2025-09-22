@@ -34,7 +34,10 @@ export interface UserEntity extends BaseEntity {
 export interface TaskEntity extends BaseEntity {
   title: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';priority: 'low' | 'medium' | 'high' | 'critical';assignedUserId?: string;metadata?: Record<string, unknown>;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  assignedUserId?: string;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -88,8 +91,12 @@ export interface DatabaseTransaction {
 export interface Repository<T extends BaseEntity> {
   findById(id: string): Promise<T | null>;
   findMany(criteria: Partial<T>): Promise<T[]>;
-  create(data: Omit<T, 'id' | 'createdAt'>): Promise<T>;update(id: string,
-    data: Partial<Omit<T, 'id' | 'createdAt'>>,): Promise<T | null>;delete(id: string): Promise<boolean>;
+  create(data: Omit<T, 'id' | 'createdAt'>): Promise<T>;
+  update(
+    id: string,
+    data: Partial<Omit<T, 'id' | 'createdAt'>>,
+  ): Promise<T | null>;
+  delete(id: string): Promise<boolean>;
   count(criteria?: Partial<T>): Promise<number>;
 }
 
@@ -157,7 +164,9 @@ export interface MockDatabaseService {
  */
 export interface DatabaseError extends Error {
   code: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';query?: string;parameters?: unknown[];
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  query?: string;
+  parameters?: unknown[];
   table?: string;
 }
 
@@ -167,7 +176,9 @@ export interface DatabaseError extends Error {
 export interface QueryBuilder<T> {
   select(fields: (keyof T)[]): QueryBuilder<T>;
   where(criteria: Partial<T>): QueryBuilder<T>;
-  orderBy(field: keyof T, direction: 'ASC' | 'DESC'): QueryBuilder<T>;limit(count: number): QueryBuilder<T>;offset(count: number): QueryBuilder<T>;
+  orderBy(field: keyof T, direction: 'ASC' | 'DESC'): QueryBuilder<T>;
+  limit(count: number): QueryBuilder<T>;
+  offset(count: number): QueryBuilder<T>;
   execute(): Promise<T[]>;
   count(): Promise<number>;
 }
@@ -177,15 +188,36 @@ export interface QueryBuilder<T> {
  */
 export function isUserEntity(entity: unknown): entity is UserEntity {
   return (
-    typeof entity === 'object' &&entity !== null &&'email' in entity &&'passwordHash' in entity &&'role' in entity &&'isActive' in entity);}
+    typeof entity === 'object' &&
+    entity !== null &&
+    'email' in entity &&
+    'passwordHash' in entity &&
+    'role' in entity &&
+    'isActive' in entity
+  );
+}
 
 export function isTaskEntity(entity: unknown): entity is TaskEntity {
   return (
-    typeof entity === 'object' &&entity !== null &&'title' in entity &&'description' in entity &&'status' in entity &&'priority' in entity);}
+    typeof entity === 'object' &&
+    entity !== null &&
+    'title' in entity &&
+    'description' in entity &&
+    'status' in entity &&
+    'priority' in entity
+  );
+}
 
 export function isSessionEntity(entity: unknown): entity is SessionEntity {
   return (
-    typeof entity === 'object' &&entity !== null &&'userId' in entity &&'token' in entity &&'expiresAt' in entity &&'isActive' in entity);}
+    typeof entity === 'object' &&
+    entity !== null &&
+    'userId' in entity &&
+    'token' in entity &&
+    'expiresAt' in entity &&
+    'isActive' in entity
+  );
+}
 
 /**
  * Type assertion helpers for test files
@@ -194,13 +226,17 @@ export function assertUserEntity(
   entity: unknown,
 ): asserts entity is UserEntity {
   if (!isUserEntity(entity)) {
-    throw new Error('Object is not a valid UserEntity');}}
+    throw new Error('Object is not a valid UserEntity');
+  }
+}
 
 export function assertTaskEntity(
   entity: unknown,
 ): asserts entity is TaskEntity {
   if (!isTaskEntity(entity)) {
-    throw new Error('Object is not a valid TaskEntity');}}
+    throw new Error('Object is not a valid TaskEntity');
+  }
+}
 
 export function assertSessionEntity(
   entity: unknown,

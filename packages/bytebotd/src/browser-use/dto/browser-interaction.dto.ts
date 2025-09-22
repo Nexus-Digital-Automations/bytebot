@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsObject, IsEnum, IsArray, IsNumber, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsObject,
+  IsEnum,
+  IsArray,
+  IsNumber,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum InteractionType {
@@ -138,7 +146,11 @@ export class BrowserInteractionResponseDto {
 
   @ApiPropertyOptional({
     description: 'Interaction timing information',
-    example: { startTime: 1695123456789, endTime: 1695123459123, duration: 2334 },
+    example: {
+      startTime: 1695123456789,
+      endTime: 1695123459123,
+      duration: 2334,
+    },
   })
   timing?: {
     startTime: number;

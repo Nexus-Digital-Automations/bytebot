@@ -241,8 +241,10 @@ export const PARLANT_CHAOS_EXPERIMENTS: ChaosExperiment[] = [
   {
     id: 'parlant-conversation-overload',
     name: 'Parlant Conversation Session Overload',
-    description: 'Test system behavior under extreme conversational session load',
-    hypothesis: 'System maintains conversation quality and response times under 10x normal load',
+    description:
+      'Test system behavior under extreme conversational session load',
+    hypothesis:
+      'System maintains conversation quality and response times under 10x normal load',
     steadyStateDefinition: {
       title: 'Conversation sessions respond within 2 seconds',
       tolerance: {
@@ -310,7 +312,11 @@ export const PARLANT_CHAOS_EXPERIMENTS: ChaosExperiment[] = [
     duration: 900000, // 15 minutes
     blast_radius: {
       scope: 'service',
-      components: ['parlant-integration', 'conversation-cache', 'session-manager'],
+      components: [
+        'parlant-integration',
+        'conversation-cache',
+        'session-manager',
+      ],
       percentage: 100,
       isolation: false,
     },
@@ -319,8 +325,10 @@ export const PARLANT_CHAOS_EXPERIMENTS: ChaosExperiment[] = [
   {
     id: 'parlant-validation-latency',
     name: 'Parlant Validation Service Latency Injection',
-    description: 'Inject high latency into Parlant validation service to test timeout handling',
-    hypothesis: 'System gracefully handles validation timeouts and provides fallback responses',
+    description:
+      'Inject high latency into Parlant validation service to test timeout handling',
+    hypothesis:
+      'System gracefully handles validation timeouts and provides fallback responses',
     steadyStateDefinition: {
       title: 'Function validation completes within 3 seconds',
       tolerance: {
@@ -392,8 +400,10 @@ export const PARLANT_CHAOS_EXPERIMENTS: ChaosExperiment[] = [
   {
     id: 'parlant-cache-destruction',
     name: 'Parlant Conversation Cache Destruction',
-    description: 'Test system resilience when conversation cache is completely flushed',
-    hypothesis: 'System rebuilds conversation context efficiently after cache loss',
+    description:
+      'Test system resilience when conversation cache is completely flushed',
+    hypothesis:
+      'System rebuilds conversation context efficiently after cache loss',
     steadyStateDefinition: {
       title: 'Cache hit rate remains above 80%',
       tolerance: {
@@ -462,8 +472,10 @@ export const PARLANT_CHAOS_EXPERIMENTS: ChaosExperiment[] = [
   {
     id: 'parlant-memory-pressure',
     name: 'Parlant Service Memory Pressure',
-    description: 'Create extreme memory pressure to test garbage collection and memory management',
-    hypothesis: 'System maintains performance under memory pressure through efficient GC',
+    description:
+      'Create extreme memory pressure to test garbage collection and memory management',
+    hypothesis:
+      'System maintains performance under memory pressure through efficient GC',
     steadyStateDefinition: {
       title: 'Memory usage remains below 85% of available',
       tolerance: {
@@ -540,8 +552,10 @@ export const PARLANT_CHAOS_EXPERIMENTS: ChaosExperiment[] = [
   {
     id: 'parlant-database-connection-exhaustion',
     name: 'Parlant Database Connection Pool Exhaustion',
-    description: 'Exhaust database connection pool to test connection management',
-    hypothesis: 'System queues requests gracefully when connection pool is exhausted',
+    description:
+      'Exhaust database connection pool to test connection management',
+    hypothesis:
+      'System queues requests gracefully when connection pool is exhausted',
     steadyStateDefinition: {
       title: 'Database operations complete within 5 seconds',
       tolerance: {
@@ -619,15 +633,24 @@ export const PARLANT_CHAOS_EXPERIMENTS: ChaosExperiment[] = [
 // ===== CHAOS ENGINEERING SERVICE =====
 
 @Injectable()
-export class ChaosEngineeringService extends EventEmitter implements OnApplicationShutdown {
+export class ChaosEngineeringService
+  extends EventEmitter
+  implements OnApplicationShutdown
+{
   private readonly logger = new Logger(ChaosEngineeringService.name);
-  private readonly activeExperiments = new Map<string, ChaosExperimentExecution>();
+  private readonly activeExperiments = new Map<
+    string,
+    ChaosExperimentExecution
+  >();
   private readonly experimentHistory: ChaosExperimentResult[] = [];
   private readonly chaosEnabled: boolean;
 
   constructor(private readonly configService: ConfigService) {
     super();
-    this.chaosEnabled = this.configService.get<boolean>('CHAOS_ENGINEERING_ENABLED', false);
+    this.chaosEnabled = this.configService.get<boolean>(
+      'CHAOS_ENGINEERING_ENABLED',
+      false,
+    );
 
     this.logger.log(`🔥 [CHAOS] Chaos Engineering Service initialized`, {
       enabled: this.chaosEnabled,
@@ -638,7 +661,9 @@ export class ChaosEngineeringService extends EventEmitter implements OnApplicati
   /**
    * Execute a single chaos experiment
    */
-  async executeExperiment(experiment: ChaosExperiment): Promise<ChaosExperimentResult> {
+  async executeExperiment(
+    experiment: ChaosExperiment,
+  ): Promise<ChaosExperimentResult> {
     if (!this.chaosEnabled) {
       throw new Error('Chaos engineering is disabled');
     }
@@ -652,25 +677,46 @@ export class ChaosEngineeringService extends EventEmitter implements OnApplicati
       blastRadius: experiment.blast_radius.scope,
     });
 
-    const execution = new ChaosExperimentExecution(experiment, executionId, this.logger);
+    const execution = new ChaosExperimentExecution(
+      experiment,
+      executionId,
+      this.logger,
+    );
     this.activeExperiments.set(executionId, execution);
 
     try {
       // Phase 1: Establish steady state baseline
-      this.logger.log(`📊 [CHAOS] Phase 1: Measuring steady state baseline`, { executionId });
-      const steadyStateBefore = await this.measureSteadyState(experiment, execution);
+      this.logger.log(`📊 [CHAOS] Phase 1: Measuring steady state baseline`, {
+        executionId,
+      });
+      const steadyStateBefore = await this.measureSteadyState(
+        experiment,
+        execution,
+      );
 
       // Phase 2: Execute chaos method(s)
-      this.logger.log(`💥 [CHAOS] Phase 2: Executing chaos methods`, { executionId });
+      this.logger.log(`💥 [CHAOS] Phase 2: Executing chaos methods`, {
+        executionId,
+      });
       const runResults = await this.executeChaosMethods(experiment, execution);
 
       // Phase 3: Monitor during experiment (if applicable)
-      this.logger.log(`👁️ [CHAOS] Phase 3: Monitoring during experiment`, { executionId });
-      const steadyStateDuring = await this.monitorDuringExperiment(experiment, execution);
+      this.logger.log(`👁️ [CHAOS] Phase 3: Monitoring during experiment`, {
+        executionId,
+      });
+      const steadyStateDuring = await this.monitorDuringExperiment(
+        experiment,
+        execution,
+      );
 
       // Phase 4: Verify steady state recovery
-      this.logger.log(`🔄 [CHAOS] Phase 4: Verifying steady state recovery`, { executionId });
-      const steadyStateAfter = await this.measureSteadyState(experiment, execution);
+      this.logger.log(`🔄 [CHAOS] Phase 4: Verifying steady state recovery`, {
+        executionId,
+      });
+      const steadyStateAfter = await this.measureSteadyState(
+        experiment,
+        execution,
+      );
 
       // Phase 5: Analyze results and determine experiment status
       const endTime = new Date();
@@ -693,19 +739,24 @@ export class ChaosEngineeringService extends EventEmitter implements OnApplicati
         executionId,
         status: result.status,
         duration: result.duration,
-        steadyStateRecovered: this.didSteadyStateRecover(steadyStateBefore, steadyStateAfter),
+        steadyStateRecovered: this.didSteadyStateRecover(
+          steadyStateBefore,
+          steadyStateAfter,
+        ),
       });
 
       this.emit('experimentCompleted', result);
       return result;
-
     } catch (error) {
-      this.logger.error(`❌ [CHAOS] Experiment failed: ${error instanceof Error ? error.message : String(error)}`, {
-        experimentId: experiment.id,
-        executionId,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      this.logger.error(
+        `❌ [CHAOS] Experiment failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          experimentId: experiment.id,
+          executionId,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+      );
 
       // Execute rollback procedures
       await this.executeRollback(experiment, execution);
@@ -723,7 +774,9 @@ export class ChaosEngineeringService extends EventEmitter implements OnApplicati
    */
   async executeParlantChaosExperiments(): Promise<ChaosExperimentResult[]> {
     if (!this.chaosEnabled) {
-      this.logger.warn(`⚠️ [CHAOS] Chaos engineering is disabled - skipping PARLANT experiments`);
+      this.logger.warn(
+        `⚠️ [CHAOS] Chaos engineering is disabled - skipping PARLANT experiments`,
+      );
       return [];
     }
 
@@ -742,7 +795,9 @@ export class ChaosEngineeringService extends EventEmitter implements OnApplicati
         this.logger.log(`😴 [CHAOS] Cooldown period before next experiment...`);
         await this.sleep(60000); // 1 minute
       } catch (error) {
-        this.logger.error(`❌ [CHAOS] Experiment ${experiment.name} failed: ${error instanceof Error ? error.message : String(error)}`);
+        this.logger.error(
+          `❌ [CHAOS] Experiment ${experiment.name} failed: ${error instanceof Error ? error.message : String(error)}`,
+        );
 
         // Continue with next experiment
         results.push({
@@ -767,8 +822,9 @@ export class ChaosEngineeringService extends EventEmitter implements OnApplicati
 
     this.logger.log(`🏁 [CHAOS] All PARLANT chaos experiments completed`, {
       totalExperiments: results.length,
-      successfulExperiments: results.filter(r => r.status === 'completed').length,
-      failedExperiments: results.filter(r => r.status === 'failed').length,
+      successfulExperiments: results.filter((r) => r.status === 'completed')
+        .length,
+      failedExperiments: results.filter((r) => r.status === 'failed').length,
     });
 
     return results;
@@ -781,14 +837,16 @@ export class ChaosEngineeringService extends EventEmitter implements OnApplicati
    * Sleep utility for controlled delays
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * Cleanup experiment resources
    */
   private async cleanupExperiment(executionId: string): Promise<void> {
-    this.logger.log(`🧹 [CHAOS] Cleaning up experiment resources for ${executionId}`);
+    this.logger.log(
+      `🧹 [CHAOS] Cleaning up experiment resources for ${executionId}`,
+    );
     // Implementation for cleanup
   }
 
@@ -822,7 +880,7 @@ class ChaosExperimentExecution {
   constructor(
     public readonly experiment: ChaosExperiment,
     public readonly executionId: string,
-    public readonly logger: Logger
+    public readonly logger: Logger,
   ) {}
 
   addProbeResult(result: ProbeResult): void {

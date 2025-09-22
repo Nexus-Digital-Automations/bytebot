@@ -20,7 +20,12 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { Logger, UnauthorizedException, ForbiddenException, ExecutionContext } from '@nestjs/common';
+import {
+  Logger,
+  UnauthorizedException,
+  ForbiddenException,
+  ExecutionContext,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { jest } from '@jest/globals';
@@ -59,16 +64,29 @@ interface AuditDetails {
 
 // Mock Parlant Auth Bridge Service (to be implemented)
 interface ParlantAuthBridgeService {
-  syncParlantSession(userId: string, jwtToken: string): Promise<{ sessionId: string }>;
-  validateParlantPermissions(userId: string, resource: string, action: string): Promise<boolean>;
+  syncParlantSession(
+    userId: string,
+    jwtToken: string,
+  ): Promise<{ sessionId: string }>;
+  validateParlantPermissions(
+    userId: string,
+    resource: string,
+    action: string,
+  ): Promise<boolean>;
   createParlantSecurityContext(user: User): Promise<SecurityContext>;
-  auditAuthEvent(event: string, userId: string, details: AuditDetails): Promise<void>;
+  auditAuthEvent(
+    event: string,
+    userId: string,
+    details: AuditDetails,
+  ): Promise<void>;
 }
 
 // Mock Enterprise Auth Service (to be implemented)
 interface EnterpriseAuthService {
   validateJwtToken(token: string): Promise<TokenValidationResult>;
-  refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>;
+  refreshToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }>;
   revokeToken(token: string): Promise<void>;
   getUserPermissions(userId: string): Promise<string[]>;
   validateSecurityPolicy(user: User, resource: string): Promise<boolean>;
@@ -76,29 +94,33 @@ interface EnterpriseAuthService {
 
 // ===== MOCK IMPLEMENTATIONS =====
 
-const createMockParlantAuthBridge = (): jest.Mocked<ParlantAuthBridgeService> => ({
-  syncParlantSession: jest.fn(),
-  validateParlantPermissions: jest.fn(),
-  createParlantSecurityContext: jest.fn(),
-  auditAuthEvent: jest.fn()
-});
+const createMockParlantAuthBridge =
+  (): jest.Mocked<ParlantAuthBridgeService> => ({
+    syncParlantSession: jest.fn(),
+    validateParlantPermissions: jest.fn(),
+    createParlantSecurityContext: jest.fn(),
+    auditAuthEvent: jest.fn(),
+  });
 
-const createMockEnterpriseAuthService = (): jest.Mocked<EnterpriseAuthService> => ({
-  validateJwtToken: jest.fn(),
-  refreshToken: jest.fn(),
-  revokeToken: jest.fn(),
-  getUserPermissions: jest.fn(),
-  validateSecurityPolicy: jest.fn()
-});
+const createMockEnterpriseAuthService =
+  (): jest.Mocked<EnterpriseAuthService> => ({
+    validateJwtToken: jest.fn(),
+    refreshToken: jest.fn(),
+    revokeToken: jest.fn(),
+    getUserPermissions: jest.fn(),
+    validateSecurityPolicy: jest.fn(),
+  });
 
-const createMockExecutionContext = (request: Record<string, unknown> = {}): ExecutionContext => ({
+const createMockExecutionContext = (
+  request: Record<string, unknown> = {},
+): ExecutionContext => ({
   switchToHttp: () => ({
     getRequest: () => ({
       headers: { authorization: 'Bearer valid-jwt-token' },
       user: null,
-      ...request
+      ...request,
     }),
-    getResponse: () => ({})
+    getResponse: () => ({}),
   }),
   getClass: () => ({}),
   getHandler: () => ({}),
@@ -106,7 +128,7 @@ const createMockExecutionContext = (request: Record<string, unknown> = {}): Exec
   getArgByIndex: () => ({}),
   switchToRpc: () => ({}),
   switchToWs: () => ({}),
-  getType: () => 'http' as const
+  getType: () => 'http' as const,
 });
 
 // ===== JWT AUTH GUARD TESTS =====
@@ -142,7 +164,7 @@ describe('JwtAuthGuard', () => {
       error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
-      verbose: jest.fn()
+      verbose: jest.fn(),
     } as jest.Mocked<Logger>;
 
     parlantAuthBridge = createMockParlantAuthBridge();
@@ -160,11 +182,11 @@ describe('JwtAuthGuard', () => {
         },
         {
           provide: Logger,
-          useValue: mockLogger
+          useValue: mockLogger,
         },
         {
           provide: 'ParlantAuthBridgeService',
-          useValue: parlantAuthBridge
+          useValue: parlantAuthBridge,
         },
       ],
     }).compile();
@@ -176,21 +198,20 @@ describe('JwtAuthGuard', () => {
     jest.clearAllMocks();
   });
 
-    describe('canActivate', () => {
-  it('should allow access with valid JWT token', async () => {
-        // Arrange
-        const mockUser = {
-          id: 'user-123',
-          email: 'test@example.com',
-          roles: ['user'],
-          permissions: ['read'],
-        
-};
-        jwtService.verify.mockReturnValue(mockUser);
-        parlantAuthBridge.syncParlantSession.mockResolvedValue({
-          sessionId: 'parlant-session-123'
-        });
-        const context = createMockExecutionContext();
+  describe('canActivate', () => {
+    it('should allow access with valid JWT token', async () => {
+      // Arrange
+      const mockUser = {
+        id: 'user-123',
+        email: 'test@example.com',
+        roles: ['user'],
+        permissions: ['read'],
+      };
+      jwtService.verify.mockReturnValue(mockUser);
+      parlantAuthBridge.syncParlantSession.mockResolvedValue({
+        sessionId: 'parlant-session-123',
+      });
+      const context = createMockExecutionContext();
 
       // Act
       const result = await guard.canActivate(context);
@@ -198,13 +219,20 @@ describe('JwtAuthGuard', () => {
       // Assert
       expect(result).toBe(true);
       expect(jwtService.verify).toHaveBeenCalledWith('valid-jwt-token');
-      expect(parlantAuthBridge.syncParlantSession).toHaveBeenCalledWith('user-123', 'valid-jwt-token');
+      expect(parlantAuthBridge.syncParlantSession).toHaveBeenCalledWith(
+        'user-123',
+        'valid-jwt-token',
+      );
       // Verify user is attached to request
-      const request = context.switchToHttp().getRequest() as { user?: { id: string; parlantSessionId: string } };
-      expect(request.user).toEqual(expect.objectContaining({
-        id: 'user-123',
-        parlantSessionId: 'parlant-session-123'
-      }));
+      const request = context.switchToHttp().getRequest() as {
+        user?: { id: string; parlantSessionId: string };
+      };
+      expect(request.user).toEqual(
+        expect.objectContaining({
+          id: 'user-123',
+          parlantSessionId: 'parlant-session-123',
+        }),
+      );
     });
 
     it('should reject access with invalid JWT token', async () => {
@@ -215,10 +243,12 @@ describe('JwtAuthGuard', () => {
       const context = createMockExecutionContext();
 
       // Act & Assert
-      await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Authentication failed'),
-        expect.any(String)
+        expect.any(String),
       );
     });
 
@@ -229,19 +259,23 @@ describe('JwtAuthGuard', () => {
       });
 
       // Act & Assert
-      await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject access with malformed authorization header', async () => {
-  // Arrange
+      // Arrange
       const context = createMockExecutionContext({
         headers: {
           authorization: 'InvalidFormat token', // Should be "Bearer token"
-        }
+        },
       });
 
       // Act & Assert
-      await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should handle expired JWT tokens', async () => {
@@ -255,10 +289,12 @@ describe('JwtAuthGuard', () => {
       const context = createMockExecutionContext();
 
       // Act & Assert
-      await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Token expired'),
-        expect.any(String)
+        expect.any(String),
       );
     });
 
@@ -271,7 +307,8 @@ describe('JwtAuthGuard', () => {
       };
       jwtService.verify.mockReturnValue(mockUser);
       parlantAuthBridge.syncParlantSession.mockRejectedValue(
-        new Error('Parlant service unavailable'));
+        new Error('Parlant service unavailable'),
+      );
       const context = createMockExecutionContext();
 
       // Act
@@ -281,10 +318,12 @@ describe('JwtAuthGuard', () => {
       expect(result).toBe(true);
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Parlant sync failed'),
-        expect.any(String)
+        expect.any(String),
       );
 
-      const request = context.switchToHttp().getRequest() as { user?: { parlantSessionId?: string } };
+      const request = context.switchToHttp().getRequest() as {
+        user?: { parlantSessionId?: string };
+      };
       expect(request.user?.parlantSessionId).toBeUndefined();
     });
 
@@ -301,8 +340,8 @@ describe('JwtAuthGuard', () => {
       expect(jwtService.verify).toHaveBeenCalledWith(
         'valid-jwt-token',
         expect.objectContaining({
-          secret: 'test-secret'
-        })
+          secret: 'test-secret',
+        }),
       );
     });
 
@@ -315,9 +354,8 @@ describe('JwtAuthGuard', () => {
       };
       jwtService.verify.mockReturnValue(mockUser);
       parlantAuthBridge.syncParlantSession.mockResolvedValue({
-  sessionId: 'parlant-session-123'
-      
-});
+        sessionId: 'parlant-session-123',
+      });
       const context = createMockExecutionContext();
 
       // Act
@@ -329,8 +367,8 @@ describe('JwtAuthGuard', () => {
         'user-123',
         expect.objectContaining({
           timestamp: expect.any(Date) as Date,
-          sessionId: 'parlant-session-123'
-        })
+          sessionId: 'parlant-session-123',
+        }),
       );
     });
   });
@@ -341,7 +379,7 @@ describe('JwtAuthGuard', () => {
       const mockUser = { id: 'user-123', email: 'test@example.com' };
       jwtService.verify.mockReturnValue(mockUser);
       parlantAuthBridge.syncParlantSession.mockResolvedValue({
-        sessionId: 'parlant-session-123'
+        sessionId: 'parlant-session-123',
       });
       const context = createMockExecutionContext();
 
@@ -359,19 +397,21 @@ describe('JwtAuthGuard', () => {
       const mockUser = { id: 'user-123', email: 'test@example.com' };
       jwtService.verify.mockReturnValue(mockUser);
       parlantAuthBridge.syncParlantSession.mockResolvedValue({
-        sessionId: 'parlant-session-123'
+        sessionId: 'parlant-session-123',
       });
-      const contexts = Array.from({ length: 10 }, () => createMockExecutionContext());
+      const contexts = Array.from({ length: 10 }, () =>
+        createMockExecutionContext(),
+      );
 
       // Act
       const startTime = Date.now();
       const results = await Promise.all(
-        contexts.map(context => guard.canActivate(context))
+        contexts.map((context) => guard.canActivate(context)),
       );
       const endTime = Date.now();
 
       // Assert
-      expect(results.every(result => result === true)).toBe(true);
+      expect(results.every((result) => result === true)).toBe(true);
       expect(endTime - startTime).toBeLessThan(500); // 10 concurrent auths in <500ms
     });
   });
@@ -390,7 +430,7 @@ describe('RolesGuard', () => {
       get: jest.fn(),
       getAll: jest.fn(),
       getAllAndMerge: jest.fn(),
-      getAllAndOverride: jest.fn()
+      getAllAndOverride: jest.fn(),
     } as jest.Mocked<Reflector>;
 
     mockLogger = {
@@ -398,7 +438,7 @@ describe('RolesGuard', () => {
       error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
-      verbose: jest.fn()
+      verbose: jest.fn(),
     } as jest.Mocked<Logger>;
 
     parlantAuthBridge = createMockParlantAuthBridge();
@@ -408,15 +448,15 @@ describe('RolesGuard', () => {
         RolesGuard,
         {
           provide: Reflector,
-          useValue: reflector
+          useValue: reflector,
         },
         {
           provide: Logger,
-          useValue: mockLogger
+          useValue: mockLogger,
         },
         {
           provide: 'ParlantAuthBridgeService',
-          useValue: parlantAuthBridge
+          useValue: parlantAuthBridge,
         },
       ],
     }).compile();
@@ -428,13 +468,13 @@ describe('RolesGuard', () => {
     jest.clearAllMocks();
   });
 
-    describe('canActivate', () => {
+  describe('canActivate', () => {
     it('should allow access when user has required role', async () => {
       // Arrange
       const user = {
         id: 'user-123',
         roles: ['admin', 'user'],
-        permissions: ['read', 'write']
+        permissions: ['read', 'write'],
       };
       reflector.get.mockReturnValue(['admin']); // Required roles
       parlantAuthBridge.validateParlantPermissions.mockResolvedValue(true);
@@ -448,7 +488,7 @@ describe('RolesGuard', () => {
       expect(parlantAuthBridge.validateParlantPermissions).toHaveBeenCalledWith(
         'user-123',
         expect.any(String),
-        expect.any(String)
+        expect.any(String),
       );
     });
 
@@ -457,17 +497,19 @@ describe('RolesGuard', () => {
       const user = {
         id: 'user-123',
         roles: ['user'],
-        permissions: ['read']
+        permissions: ['read'],
       };
       reflector.get.mockReturnValue(['admin']); // Required roles
       parlantAuthBridge.validateParlantPermissions.mockResolvedValue(false);
       const context = createMockExecutionContext({ user });
 
       // Act & Assert
-      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        ForbiddenException,
+      );
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Access denied'),
-        expect.any(String)
+        expect.any(String),
       );
     });
 
@@ -482,7 +524,9 @@ describe('RolesGuard', () => {
 
       // Assert
       expect(result).toBe(true);
-      expect(parlantAuthBridge.validateParlantPermissions).not.toHaveBeenCalled();
+      expect(
+        parlantAuthBridge.validateParlantPermissions,
+      ).not.toHaveBeenCalled();
     });
 
     it('should handle multiple required roles (OR logic)', async () => {
@@ -490,7 +534,7 @@ describe('RolesGuard', () => {
       const user = {
         id: 'user-123',
         roles: ['moderator'],
-        permissions: ['moderate']
+        permissions: ['moderate'],
       };
       reflector.get.mockReturnValue(['admin', 'moderator']); // User needs admin OR moderator
       parlantAuthBridge.validateParlantPermissions.mockResolvedValue(true);
@@ -508,7 +552,7 @@ describe('RolesGuard', () => {
       const user = {
         id: 'user-123',
         roles: ['user'],
-        permissions: ['read', 'write', 'delete']
+        permissions: ['read', 'write', 'delete'],
       };
       reflector.get
         .mockReturnValueOnce(['admin']) // Required roles (user doesn't have)
@@ -528,7 +572,7 @@ describe('RolesGuard', () => {
       const user = {
         id: 'user-123',
         roles: ['admin'],
-        permissions: ['all']
+        permissions: ['all'],
       };
       reflector.get.mockReturnValue(['admin']);
       parlantAuthBridge.validateParlantPermissions.mockResolvedValue(true);
@@ -544,9 +588,8 @@ describe('RolesGuard', () => {
         expect.objectContaining({
           requiredRoles: ['admin'],
           userRoles: ['admin'],
-          resource: expect.any(String) as string
-      
-})
+          resource: expect.any(String) as string,
+        }),
       );
     });
 
@@ -554,17 +597,21 @@ describe('RolesGuard', () => {
       // Arrange
       const user = {
         id: 'user-123',
-        roles: ['admin']
+        roles: ['admin'],
       };
       reflector.get.mockReturnValue(['admin']);
-      parlantAuthBridge.validateParlantPermissions.mockRejectedValue(new Error('Parlant validation failed'));
+      parlantAuthBridge.validateParlantPermissions.mockRejectedValue(
+        new Error('Parlant validation failed'),
+      );
       const context = createMockExecutionContext({ user });
 
       // Act & Assert
-      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        ForbiddenException,
+      );
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Parlant validation error'),
-        expect.any(String)
+        expect.any(String),
       );
     });
   });
@@ -588,7 +635,7 @@ describe('RolesGuard', () => {
       expect(parlantAuthBridge.validateParlantPermissions).toHaveBeenCalledWith(
         'user-123',
         'UserController',
-        'deleteUser'
+        'deleteUser',
       );
     });
   });
@@ -658,8 +705,12 @@ describe('JwtStrategy', () => {
         clearanceLevel: 'SECRET',
       };
 
-      enterpriseAuthService.getUserPermissions.mockResolvedValue(userPermissions);
-      parlantAuthBridge.createParlantSecurityContext.mockResolvedValue(securityContext);
+      enterpriseAuthService.getUserPermissions.mockResolvedValue(
+        userPermissions,
+      );
+      parlantAuthBridge.createParlantSecurityContext.mockResolvedValue(
+        securityContext,
+      );
 
       // Act
       const result = await strategy.validate(payload);
@@ -670,10 +721,12 @@ describe('JwtStrategy', () => {
           id: 'user-123',
           email: 'test@example.com',
           permissions: userPermissions,
-          securityContext
-        })
+          securityContext,
+        }),
       );
-      expect(enterpriseAuthService.getUserPermissions).toHaveBeenCalledWith('user-123');
+      expect(enterpriseAuthService.getUserPermissions).toHaveBeenCalledWith(
+        'user-123',
+      );
       expect(parlantAuthBridge.createParlantSecurityContext).toHaveBeenCalled();
     });
 
@@ -681,14 +734,16 @@ describe('JwtStrategy', () => {
       // Arrange
       const payload = {
         sub: 'invalid-user',
-        email: 'invalid@example.com'
+        email: 'invalid@example.com',
       };
       enterpriseAuthService.getUserPermissions.mockRejectedValue(
-        new Error('User not found')
+        new Error('User not found'),
       );
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow('User not found');
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        'User not found',
+      );
     });
 
     it('should validate token claims and metadata', async () => {
@@ -699,7 +754,7 @@ describe('JwtStrategy', () => {
         iss: 'bytebot-ai',
         aud: 'bytebot-users',
         scope: 'read write',
-        role: 'admin'
+        role: 'admin',
       };
       enterpriseAuthService.getUserPermissions.mockResolvedValue(['admin']);
       parlantAuthBridge.createParlantSecurityContext.mockResolvedValue({});
@@ -713,8 +768,8 @@ describe('JwtStrategy', () => {
           id: 'user-123',
           email: 'test@example.com',
           scope: 'read write',
-          role: 'admin'
-        })
+          role: 'admin',
+        }),
       );
     });
 
@@ -722,10 +777,12 @@ describe('JwtStrategy', () => {
       // Arrange
       const payload = {
         sub: 'user-123',
-        email: 'test@example.com'
+        email: 'test@example.com',
       };
       enterpriseAuthService.getUserPermissions.mockResolvedValue(['read']);
-      parlantAuthBridge.createParlantSecurityContext.mockRejectedValue(new Error('Security context creation failed'));
+      parlantAuthBridge.createParlantSecurityContext.mockRejectedValue(
+        new Error('Security context creation failed'),
+      );
 
       // Act
       const result = await strategy.validate(payload);
@@ -735,8 +792,8 @@ describe('JwtStrategy', () => {
         expect.objectContaining({
           id: 'user-123',
           email: 'test@example.com',
-          permissions: ['read']
-        })
+          permissions: ['read'],
+        }),
       );
       expect(result.securityContext).toBeUndefined();
     });
@@ -763,7 +820,7 @@ describe('Authentication Integration', () => {
             verify: jest.fn().mockReturnValue({
               sub: 'user-123',
               email: 'test@example.com',
-              roles: ['admin']
+              roles: ['admin'],
             }),
           },
         },
@@ -818,9 +875,11 @@ describe('Authentication Integration', () => {
     const context = createMockExecutionContext();
 
     // Mock Parlant services
-    const parlantBridge = module.get('ParlantAuthBridgeService') as jest.Mocked<ParlantAuthBridgeService>;
+    const parlantBridge = module.get(
+      'ParlantAuthBridgeService',
+    ) as jest.Mocked<ParlantAuthBridgeService>;
     parlantBridge.syncParlantSession.mockResolvedValue({
-      sessionId: 'parlant-123'
+      sessionId: 'parlant-123',
     });
     parlantBridge.validateParlantPermissions.mockResolvedValue(true);
 
@@ -833,40 +892,47 @@ describe('Authentication Integration', () => {
     expect(roleResult).toBe(true);
 
     // Assert
-    const request = context.switchToHttp().getRequest() as { user?: { id: string; parlantSessionId: string } };
+    const request = context.switchToHttp().getRequest() as {
+      user?: { id: string; parlantSessionId: string };
+    };
     expect(request.user).toEqual(
       expect.objectContaining({
         id: 'user-123',
-        parlantSessionId: 'parlant-123'
-      })
+        parlantSessionId: 'parlant-123',
+      }),
     );
   });
 
   it('should maintain performance under load', async () => {
     // Arrange
-    const contexts = Array.from({ length: 50 }, () => createMockExecutionContext());
+    const contexts = Array.from({ length: 50 }, () =>
+      createMockExecutionContext(),
+    );
 
-    const parlantBridge = module.get('ParlantAuthBridgeService') as jest.Mocked<ParlantAuthBridgeService>;
-    parlantBridge.syncParlantSession.mockResolvedValue({ sessionId: 'parlant-123' });
+    const parlantBridge = module.get(
+      'ParlantAuthBridgeService',
+    ) as jest.Mocked<ParlantAuthBridgeService>;
+    parlantBridge.syncParlantSession.mockResolvedValue({
+      sessionId: 'parlant-123',
+    });
     parlantBridge.validateParlantPermissions.mockResolvedValue(true);
 
     // Act
     const startTime = Date.now();
 
     const authResults = await Promise.all(
-      contexts.map(context => jwtAuthGuard.canActivate(context))
+      contexts.map((context) => jwtAuthGuard.canActivate(context)),
     );
 
     const roleResults = await Promise.all(
-      contexts.map(context => rolesGuard.canActivate(context))
+      contexts.map((context) => rolesGuard.canActivate(context)),
     );
 
     const endTime = Date.now();
 
     // Assert
-    expect(authResults.every(result => result === true)).toBe(true);
-    expect(roleResults.every(result => result === true)).toBe(true);
+    expect(authResults.every((result) => result === true)).toBe(true);
+    expect(roleResults.every((result) => result === true)).toBe(true);
     expect(endTime - startTime).toBeLessThan(2000); // 50 auth cycles in <2s
   });
-
 });

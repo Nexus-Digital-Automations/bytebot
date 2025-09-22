@@ -49,7 +49,9 @@ export class ErrorHandlerService extends EventEmitter {
     super();
     this.maxErrorHistory = parseInt(process.env.MAX_ERROR_HISTORY || '1000');
     this.initializeStatistics();
-    this.logger.log('ErrorHandlerService initialized with comprehensive error tracking');
+    this.logger.log(
+      'ErrorHandlerService initialized with comprehensive error tracking',
+    );
   }
 
   /**
@@ -59,10 +61,15 @@ export class ErrorHandlerService extends EventEmitter {
     service: string,
     operation: string,
     error: any,
-    context?: any
+    context?: any,
   ): IBrowserError {
     const browserError = this.normalizeToBrowserError(error, context);
-    const errorReport = this.createErrorReport(service, operation, browserError, context);
+    const errorReport = this.createErrorReport(
+      service,
+      operation,
+      browserError,
+      context,
+    );
 
     // Store error report
     this.errorReports.set(errorReport.id, errorReport);
@@ -127,7 +134,7 @@ export class ErrorHandlerService extends EventEmitter {
     resolution: {
       method: string;
       notes: string;
-    }
+    },
   ): ServiceResponseDto<ErrorReport> {
     const errorReport = this.errorReports.get(errorId);
 
@@ -136,7 +143,7 @@ export class ErrorHandlerService extends EventEmitter {
         success: false,
         error: this.normalizeToBrowserError(
           new Error(`Error report ${errorId} not found`),
-          { errorId }
+          { errorId },
         ),
       };
     }
@@ -174,7 +181,7 @@ export class ErrorHandlerService extends EventEmitter {
         success: false,
         error: this.normalizeToBrowserError(
           new Error(`Error report ${errorId} not found`),
-          { errorId }
+          { errorId },
         ),
       };
     }
@@ -216,15 +223,15 @@ export class ErrorHandlerService extends EventEmitter {
 
     // Apply filters
     if (options?.service) {
-      errors = errors.filter(err => err.service === options.service);
+      errors = errors.filter((err) => err.service === options.service);
     }
 
     if (options?.severity) {
-      errors = errors.filter(err => err.error.severity === options.severity);
+      errors = errors.filter((err) => err.error.severity === options.severity);
     }
 
     if (options?.resolved !== undefined) {
-      errors = errors.filter(err => err.resolved === options.resolved);
+      errors = errors.filter((err) => err.resolved === options.resolved);
     }
 
     // Sort by timestamp (newest first)
@@ -258,35 +265,42 @@ export class ErrorHandlerService extends EventEmitter {
 
     // Filter by resolution status
     if (options?.includeResolved === false) {
-      filteredErrors = filteredErrors.filter(err => !err.resolved);
+      filteredErrors = filteredErrors.filter((err) => !err.resolved);
     }
 
     // Filter by time range
     if (options?.timeRange) {
-      filteredErrors = filteredErrors.filter(err =>
-        err.timestamp >= options.timeRange!.start &&
-        err.timestamp <= options.timeRange!.end
+      filteredErrors = filteredErrors.filter(
+        (err) =>
+          err.timestamp >= options.timeRange!.start &&
+          err.timestamp <= options.timeRange!.end,
       );
     }
 
     // Group errors by service
-    const errorsByService = filteredErrors.reduce((acc, err) => {
-      if (!acc[err.service]) {
-        acc[err.service] = [];
-      }
-      acc[err.service].push(err);
-      return acc;
-    }, {} as { [service: string]: ErrorReport[] });
+    const errorsByService = filteredErrors.reduce(
+      (acc, err) => {
+        if (!acc[err.service]) {
+          acc[err.service] = [];
+        }
+        acc[err.service].push(err);
+        return acc;
+      },
+      {} as { [service: string]: ErrorReport[] },
+    );
 
     // Group errors by code
-    const errorsByCode = filteredErrors.reduce((acc, err) => {
-      const code = err.error.code;
-      if (!acc[code]) {
-        acc[code] = [];
-      }
-      acc[code].push(err);
-      return acc;
-    }, {} as { [code: string]: ErrorReport[] });
+    const errorsByCode = filteredErrors.reduce(
+      (acc, err) => {
+        const code = err.error.code;
+        if (!acc[code]) {
+          acc[code] = [];
+        }
+        acc[code].push(err);
+        return acc;
+      },
+      {} as { [code: string]: ErrorReport[] },
+    );
 
     // Calculate trends
     const trends = this.calculateErrorTrends(filteredErrors);
@@ -294,16 +308,18 @@ export class ErrorHandlerService extends EventEmitter {
     const report = {
       summary: {
         totalErrors: filteredErrors.length,
-        resolvedErrors: filteredErrors.filter(err => err.resolved).length,
-        unresolvedErrors: filteredErrors.filter(err => !err.resolved).length,
-        criticalErrors: filteredErrors.filter(err => err.error.severity === 'critical').length,
+        resolvedErrors: filteredErrors.filter((err) => err.resolved).length,
+        unresolvedErrors: filteredErrors.filter((err) => !err.resolved).length,
+        criticalErrors: filteredErrors.filter(
+          (err) => err.error.severity === 'critical',
+        ).length,
         timeRange: options?.timeRange,
       },
       errorsByService,
       errorsByCode,
       trends,
       recentCriticalErrors: filteredErrors
-        .filter(err => err.error.severity === 'critical' && !err.resolved)
+        .filter((err) => err.error.severity === 'critical' && !err.resolved)
         .slice(0, 10),
       statistics: this.errorStatistics,
     };
@@ -321,7 +337,9 @@ export class ErrorHandlerService extends EventEmitter {
   /**
    * Clear resolved errors older than specified time
    */
-  clearOldResolvedErrors(olderThanHours: number = 24): ServiceResponseDto<number> {
+  clearOldResolvedErrors(
+    olderThanHours: number = 24,
+  ): ServiceResponseDto<number> {
     const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);
     let clearedCount = 0;
 
@@ -334,7 +352,9 @@ export class ErrorHandlerService extends EventEmitter {
 
     this.updateStatisticsCalculations();
 
-    this.logger.log(`Cleared ${clearedCount} resolved errors older than ${olderThanHours} hours`);
+    this.logger.log(
+      `Cleared ${clearedCount} resolved errors older than ${olderThanHours} hours`,
+    );
 
     return {
       success: true,
@@ -354,7 +374,7 @@ export class ErrorHandlerService extends EventEmitter {
     service: string,
     operation: string,
     browserError: IBrowserError,
-    context?: any
+    context?: any,
   ): ErrorReport {
     const id = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -415,7 +435,10 @@ export class ErrorHandlerService extends EventEmitter {
   /**
    * Infer error severity from error and context
    */
-  private inferErrorSeverity(error: Error, context?: any): 'info' | 'warning' | 'error' | 'critical' {
+  private inferErrorSeverity(
+    error: Error,
+    context?: any,
+  ): 'info' | 'warning' | 'error' | 'critical' {
     const message = error.message.toLowerCase();
 
     // Critical errors
@@ -429,7 +452,10 @@ export class ErrorHandlerService extends EventEmitter {
     }
 
     // Permission and authentication issues are critical
-    if (message.includes('permission denied') || message.includes('unauthorized')) {
+    if (
+      message.includes('permission denied') ||
+      message.includes('unauthorized')
+    ) {
       return 'critical';
     }
 
@@ -597,11 +623,15 @@ export class ErrorHandlerService extends EventEmitter {
 
     // Update by severity
     this.errorStatistics.errorsBySeverity[errorReport.error.severity] =
-      (this.errorStatistics.errorsBySeverity[errorReport.error.severity] || 0) + 1;
+      (this.errorStatistics.errorsBySeverity[errorReport.error.severity] || 0) +
+      1;
 
     // Update recent errors (keep last 50)
     this.errorStatistics.recentErrors.unshift(errorReport);
-    this.errorStatistics.recentErrors = this.errorStatistics.recentErrors.slice(0, 50);
+    this.errorStatistics.recentErrors = this.errorStatistics.recentErrors.slice(
+      0,
+      50,
+    );
   }
 
   /**
@@ -609,22 +639,27 @@ export class ErrorHandlerService extends EventEmitter {
    */
   private updateResolutionStatistics(): void {
     const allErrors = Array.from(this.errorReports.values());
-    const resolvedErrors = allErrors.filter(err => err.resolved);
+    const resolvedErrors = allErrors.filter((err) => err.resolved);
 
     if (allErrors.length > 0) {
-      this.errorStatistics.resolutionRate = resolvedErrors.length / allErrors.length;
+      this.errorStatistics.resolutionRate =
+        resolvedErrors.length / allErrors.length;
     }
 
     // Calculate average resolution time for resolved errors
     if (resolvedErrors.length > 0) {
       const totalResolutionTime = resolvedErrors.reduce((total, err) => {
         if (err.resolution) {
-          return total + (err.resolution.timestamp.getTime() - err.timestamp.getTime());
+          return (
+            total +
+            (err.resolution.timestamp.getTime() - err.timestamp.getTime())
+          );
         }
         return total;
       }, 0);
 
-      this.errorStatistics.averageResolutionTime = totalResolutionTime / resolvedErrors.length;
+      this.errorStatistics.averageResolutionTime =
+        totalResolutionTime / resolvedErrors.length;
     }
   }
 
@@ -643,19 +678,25 @@ export class ErrorHandlerService extends EventEmitter {
     const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const last24HoursErrors = errors.filter(err => err.timestamp >= last24Hours);
-    const last7DaysErrors = errors.filter(err => err.timestamp >= last7Days);
+    const last24HoursErrors = errors.filter(
+      (err) => err.timestamp >= last24Hours,
+    );
+    const last7DaysErrors = errors.filter((err) => err.timestamp >= last7Days);
 
     return {
       last24Hours: {
         total: last24HoursErrors.length,
-        critical: last24HoursErrors.filter(err => err.error.severity === 'critical').length,
-        resolved: last24HoursErrors.filter(err => err.resolved).length,
+        critical: last24HoursErrors.filter(
+          (err) => err.error.severity === 'critical',
+        ).length,
+        resolved: last24HoursErrors.filter((err) => err.resolved).length,
       },
       last7Days: {
         total: last7DaysErrors.length,
-        critical: last7DaysErrors.filter(err => err.error.severity === 'critical').length,
-        resolved: last7DaysErrors.filter(err => err.resolved).length,
+        critical: last7DaysErrors.filter(
+          (err) => err.error.severity === 'critical',
+        ).length,
+        resolved: last7DaysErrors.filter((err) => err.resolved).length,
       },
     };
   }
@@ -669,11 +710,15 @@ export class ErrorHandlerService extends EventEmitter {
     }
 
     // Get all errors sorted by timestamp (oldest first)
-    const allErrors = Array.from(this.errorReports.entries())
-      .sort(([, a], [, b]) => a.timestamp.getTime() - b.timestamp.getTime());
+    const allErrors = Array.from(this.errorReports.entries()).sort(
+      ([, a], [, b]) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
 
     // Remove oldest errors until we're under the limit
-    const toRemove = allErrors.slice(0, this.errorReports.size - this.maxErrorHistory);
+    const toRemove = allErrors.slice(
+      0,
+      this.errorReports.size - this.maxErrorHistory,
+    );
 
     for (const [id] of toRemove) {
       this.errorReports.delete(id);

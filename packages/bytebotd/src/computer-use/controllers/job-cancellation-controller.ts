@@ -76,7 +76,7 @@ export class BulkCancelJobsDto {
     priority?: JobPriority[];
     olderThan?: string; // ISO date string
     longerThan?: number; // milliseconds
-    pattern?: string;    // regex pattern
+    pattern?: string; // regex pattern
   } = {};
   strategy: CancellationStrategy = CancellationStrategy.GRACEFUL;
   reason: string = 'Bulk cancellation requested';
@@ -126,7 +126,8 @@ export class JobCancellationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Cancel a specific job',
-    description: 'Cancel a job using the specified strategy with comprehensive cleanup and notification options',
+    description:
+      'Cancel a job using the specified strategy with comprehensive cleanup and notification options',
   })
   @ApiParam({
     name: 'jobId',
@@ -146,7 +147,10 @@ export class JobCancellationController {
         jobId: { type: 'string' },
         success: { type: 'boolean' },
         strategy: { type: 'string', enum: Object.values(CancellationStrategy) },
-        actualStrategy: { type: 'string', enum: Object.values(CancellationStrategy) },
+        actualStrategy: {
+          type: 'string',
+          enum: Object.values(CancellationStrategy),
+        },
         cancelledAt: { type: 'string', format: 'date-time' },
         duration: { type: 'number' },
         reason: { type: 'string' },
@@ -184,7 +188,9 @@ export class JobCancellationController {
     }
 
     if (!Object.values(CancellationStrategy).includes(cancelRequest.strategy)) {
-      throw new BadRequestException(`Invalid cancellation strategy: ${cancelRequest.strategy}`);
+      throw new BadRequestException(
+        `Invalid cancellation strategy: ${cancelRequest.strategy}`,
+      );
     }
 
     try {
@@ -213,7 +219,8 @@ export class JobCancellationController {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to cancel job ${jobId}: ${errorMessage}`, {
         jobId,
         error: errorMessage,
@@ -234,7 +241,8 @@ export class JobCancellationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Cancel multiple jobs based on criteria',
-    description: 'Cancel jobs in bulk using flexible criteria with support for dry-run mode and concurrency control',
+    description:
+      'Cancel jobs in bulk using flexible criteria with support for dry-run mode and concurrency control',
   })
   @ApiBody({
     type: BulkCancelJobsDto,
@@ -274,14 +282,19 @@ export class JobCancellationController {
     });
 
     if (!Object.values(CancellationStrategy).includes(bulkRequest.strategy)) {
-      throw new BadRequestException(`Invalid cancellation strategy: ${bulkRequest.strategy}`);
+      throw new BadRequestException(
+        `Invalid cancellation strategy: ${bulkRequest.strategy}`,
+      );
     }
 
     if (bulkRequest.maxJobs && bulkRequest.maxJobs < 1) {
       throw new BadRequestException('maxJobs must be greater than 0');
     }
 
-    if (bulkRequest.criteria.longerThan && bulkRequest.criteria.longerThan < 0) {
+    if (
+      bulkRequest.criteria.longerThan &&
+      bulkRequest.criteria.longerThan < 0
+    ) {
       throw new BadRequestException('longerThan must be non-negative');
     }
 
@@ -318,13 +331,16 @@ export class JobCancellationController {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Bulk cancellation failed: ${errorMessage}`, {
         error: errorMessage,
         criteria: bulkRequest.criteria,
       });
 
-      throw new BadRequestException(`Bulk cancellation failed: ${errorMessage}`);
+      throw new BadRequestException(
+        `Bulk cancellation failed: ${errorMessage}`,
+      );
     }
   }
 
@@ -335,7 +351,8 @@ export class JobCancellationController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Configure timeout behavior for a job',
-    description: 'Set up timeout escalation policies with custom warning thresholds and automatic cancellation',
+    description:
+      'Set up timeout escalation policies with custom warning thresholds and automatic cancellation',
   })
   @ApiParam({
     name: 'jobId',
@@ -374,21 +391,30 @@ export class JobCancellationController {
     }
 
     if (timeoutConfig.softTimeoutMs >= timeoutConfig.hardTimeoutMs) {
-      throw new BadRequestException('Soft timeout must be less than hard timeout');
+      throw new BadRequestException(
+        'Soft timeout must be less than hard timeout',
+      );
     }
 
-    if (!timeoutConfig.escalationSteps || timeoutConfig.escalationSteps.length === 0) {
+    if (
+      !timeoutConfig.escalationSteps ||
+      timeoutConfig.escalationSteps.length === 0
+    ) {
       throw new BadRequestException('At least one escalation step is required');
     }
 
     // Validate escalation steps
     for (const step of timeoutConfig.escalationSteps) {
       if (step.delayMs <= 0) {
-        throw new BadRequestException('Escalation step delays must be positive');
+        throw new BadRequestException(
+          'Escalation step delays must be positive',
+        );
       }
 
       if (!Object.values(TimeoutEscalation).includes(step.action)) {
-        throw new BadRequestException(`Invalid escalation action: ${step.action}`);
+        throw new BadRequestException(
+          `Invalid escalation action: ${step.action}`,
+        );
       }
     }
 
@@ -410,13 +436,19 @@ export class JobCancellationController {
         configured: true,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to configure timeout for job ${jobId}: ${errorMessage}`, {
-        jobId,
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Failed to configure timeout for job ${jobId}: ${errorMessage}`,
+        {
+          jobId,
+          error: errorMessage,
+        },
+      );
 
-      throw new BadRequestException(`Timeout configuration failed: ${errorMessage}`);
+      throw new BadRequestException(
+        `Timeout configuration failed: ${errorMessage}`,
+      );
     }
   }
 
@@ -426,7 +458,8 @@ export class JobCancellationController {
   @Get(':jobId/cancellation-history')
   @ApiOperation({
     summary: 'Get cancellation history for a job',
-    description: 'Retrieve detailed cancellation history including strategy used, cleanup results, and performance metrics',
+    description:
+      'Retrieve detailed cancellation history including strategy used, cleanup results, and performance metrics',
   })
   @ApiParam({
     name: 'jobId',
@@ -448,10 +481,14 @@ export class JobCancellationController {
       throw new BadRequestException('Job ID is required');
     }
 
-    const history = this.cancellationService.getCancellationHistory(jobId.trim());
+    const history = this.cancellationService.getCancellationHistory(
+      jobId.trim(),
+    );
 
     if (!history) {
-      throw new NotFoundException(`No cancellation history found for job ${jobId}`);
+      throw new NotFoundException(
+        `No cancellation history found for job ${jobId}`,
+      );
     }
 
     return history;
@@ -463,7 +500,8 @@ export class JobCancellationController {
   @Get('active-jobs')
   @ApiOperation({
     summary: 'Get all active jobs being tracked',
-    description: 'Retrieve list of all jobs currently being monitored for cancellation and timeout management',
+    description:
+      'Retrieve list of all jobs currently being monitored for cancellation and timeout management',
   })
   @ApiResponse({
     status: 200,
@@ -480,7 +518,9 @@ export class JobCancellationController {
       },
     },
   })
-  async getActiveJobs(): Promise<{ jobId: string; startedAt: Date; hasTimeout: boolean }[]> {
+  async getActiveJobs(): Promise<
+    { jobId: string; startedAt: Date; hasTimeout: boolean }[]
+  > {
     const activeJobs = this.cancellationService.getActiveJobs();
 
     this.logger.debug(`Retrieved ${activeJobs.length} active jobs`, {
@@ -497,7 +537,8 @@ export class JobCancellationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Emergency shutdown - cancel all jobs',
-    description: 'Immediately cancel all pending and in-progress jobs using forced cancellation strategy',
+    description:
+      'Immediately cancel all pending and in-progress jobs using forced cancellation strategy',
   })
   @ApiBody({
     type: EmergencyShutdownDto,
@@ -524,12 +565,19 @@ export class JobCancellationController {
     }
 
     // Optional: Add confirmation code validation for extra security
-    if (shutdownRequest.confirmationCode && shutdownRequest.confirmationCode !== 'EMERGENCY_SHUTDOWN_CONFIRMED') {
-      throw new BadRequestException('Invalid confirmation code for emergency shutdown');
+    if (
+      shutdownRequest.confirmationCode &&
+      shutdownRequest.confirmationCode !== 'EMERGENCY_SHUTDOWN_CONFIRMED'
+    ) {
+      throw new BadRequestException(
+        'Invalid confirmation code for emergency shutdown',
+      );
     }
 
     try {
-      const result = await this.cancellationService.emergencyShutdown(shutdownRequest.reason);
+      const result = await this.cancellationService.emergencyShutdown(
+        shutdownRequest.reason,
+      );
 
       this.logger.warn('Emergency shutdown completed', {
         requestId: result.requestId,
@@ -541,13 +589,16 @@ export class JobCancellationController {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Emergency shutdown failed: ${errorMessage}`, {
         error: errorMessage,
         reason: shutdownRequest.reason,
       });
 
-      throw new BadRequestException(`Emergency shutdown failed: ${errorMessage}`);
+      throw new BadRequestException(
+        `Emergency shutdown failed: ${errorMessage}`,
+      );
     }
   }
 
@@ -557,7 +608,8 @@ export class JobCancellationController {
   @Get('health')
   @ApiOperation({
     summary: 'Health check for cancellation service',
-    description: 'Check the health status of the job cancellation and timeout management service',
+    description:
+      'Check the health status of the job cancellation and timeout management service',
   })
   @ApiResponse({
     status: 200,

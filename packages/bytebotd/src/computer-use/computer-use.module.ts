@@ -36,7 +36,7 @@ import { SecurityModule } from '../common/security/security.module';
     EnhancedJobMonitoringController,
     JobStatusResultController,
     PriorityQueueController,
-    JobCancellationController
+    JobCancellationController,
   ],
   providers: [
     ComputerUseService,

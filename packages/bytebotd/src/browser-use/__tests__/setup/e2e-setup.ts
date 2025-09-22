@@ -49,7 +49,7 @@ global.testMetrics = {
   sessionIds: new Set(),
   requestCounts: new Map(),
   errorCounts: new Map(),
-  performanceMarks: []
+  performanceMarks: [],
 };
 
 /**
@@ -59,18 +59,21 @@ global.testMetrics = {
 // Matcher for browser automation API responses
 expect.extend({
   toBeBrowserAutomationResponse(received: any) {
-    const pass = received &&
+    const pass =
+      received &&
       typeof received === 'object' &&
       (received.success !== undefined || received.error !== undefined);
 
     if (pass) {
       return {
-        message: () => `Expected response not to be a browser automation response`,
+        message: () =>
+          `Expected response not to be a browser automation response`,
         pass: true,
       };
     } else {
       return {
-        message: () => `Expected response to be a browser automation response with 'success' or 'error' property`,
+        message: () =>
+          `Expected response to be a browser automation response with 'success' or 'error' property`,
         pass: false,
       };
     }
@@ -78,7 +81,8 @@ expect.extend({
 
   toBeValidSessionId(received: string) {
     const sessionIdPattern = /^[a-zA-Z0-9\-_]{8,64}$/;
-    const pass = typeof received === 'string' && sessionIdPattern.test(received);
+    const pass =
+      typeof received === 'string' && sessionIdPattern.test(received);
 
     if (pass) {
       return {
@@ -87,24 +91,28 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `Expected "${received}" to be a valid session ID (8-64 alphanumeric characters)`,
+        message: () =>
+          `Expected "${received}" to be a valid session ID (8-64 alphanumeric characters)`,
         pass: false,
       };
     }
   },
 
   toHaveExecutedWithinTime(received: any, maxTime: number) {
-    const executionTime = received?.executionTime || received?.loadTime || received?.duration;
+    const executionTime =
+      received?.executionTime || received?.loadTime || received?.duration;
     const pass = typeof executionTime === 'number' && executionTime <= maxTime;
 
     if (pass) {
       return {
-        message: () => `Expected execution time ${executionTime}ms to exceed ${maxTime}ms`,
+        message: () =>
+          `Expected execution time ${executionTime}ms to exceed ${maxTime}ms`,
         pass: true,
       };
     } else {
       return {
-        message: () => `Expected execution time ${executionTime}ms to be within ${maxTime}ms`,
+        message: () =>
+          `Expected execution time ${executionTime}ms to be within ${maxTime}ms`,
         pass: false,
       };
     }
@@ -113,7 +121,8 @@ expect.extend({
   toHaveValidScreenshot(received: any) {
     const screenshot = received?.screenshot || received?.image;
     const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
-    const pass = typeof screenshot === 'string' &&
+    const pass =
+      typeof screenshot === 'string' &&
       screenshot.length > 100 &&
       base64Pattern.test(screenshot);
 
@@ -124,7 +133,8 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `Expected screenshot to be valid base64 encoded image data`,
+        message: () =>
+          `Expected screenshot to be valid base64 encoded image data`,
         pass: false,
       };
     }
@@ -132,7 +142,8 @@ expect.extend({
 
   toHaveCleanedUpResources(received: any) {
     const resourceMetrics = received?.resources || received?.cleanup;
-    const pass = resourceMetrics &&
+    const pass =
+      resourceMetrics &&
       resourceMetrics.sessionsDestroyed >= 0 &&
       resourceMetrics.memoryFreed >= 0;
 
@@ -143,7 +154,8 @@ expect.extend({
       };
     } else {
       return {
-        message: () => `Expected resources to be properly cleaned up with valid metrics`,
+        message: () =>
+          `Expected resources to be properly cleaned up with valid metrics`,
         pass: false,
       };
     }
@@ -159,7 +171,7 @@ beforeAll(async () => {
   // Record test suite start time
   global.testMetrics.performanceMarks.push({
     name: 'test-suite-start',
-    timestamp: performance.now()
+    timestamp: performance.now(),
   });
 
   // Set extended timeout for E2E tests
@@ -170,8 +182,10 @@ beforeAll(async () => {
   console.error = (...args) => {
     // Filter out known non-critical warnings
     const message = args.join(' ');
-    if (!message.includes('ExperimentalWarning') &&
-        !message.includes('DeprecationWarning')) {
+    if (
+      !message.includes('ExperimentalWarning') &&
+      !message.includes('DeprecationWarning')
+    ) {
       originalConsoleError.apply(console, args);
     }
   };
@@ -190,28 +204,32 @@ afterAll(async () => {
   global.testMetrics.performanceMarks.push({
     name: 'test-suite-end',
     timestamp: endTime,
-    duration: endTime - global.testMetrics.startTime
+    duration: endTime - global.testMetrics.startTime,
   });
 
   // Generate test metrics report
   const totalDuration = endTime - global.testMetrics.startTime;
   const totalSessions = global.testMetrics.sessionIds.size;
-  const totalRequests = Array.from(global.testMetrics.requestCounts.values())
-    .reduce((sum, count) => sum + count, 0);
-  const totalErrors = Array.from(global.testMetrics.errorCounts.values())
-    .reduce((sum, count) => sum + count, 0);
+  const totalRequests = Array.from(
+    global.testMetrics.requestCounts.values(),
+  ).reduce((sum, count) => sum + count, 0);
+  const totalErrors = Array.from(
+    global.testMetrics.errorCounts.values(),
+  ).reduce((sum, count) => sum + count, 0);
 
   console.log('\n📊 E2E Test Suite Metrics:');
   console.log(`   Total Duration: ${(totalDuration / 1000).toFixed(2)}s`);
   console.log(`   Sessions Created: ${totalSessions}`);
   console.log(`   Total Requests: ${totalRequests}`);
   console.log(`   Total Errors: ${totalErrors}`);
-  console.log(`   Success Rate: ${((totalRequests - totalErrors) / totalRequests * 100).toFixed(1)}%`);
+  console.log(
+    `   Success Rate: ${(((totalRequests - totalErrors) / totalRequests) * 100).toFixed(1)}%`,
+  );
 
   // Log performance marks
   if (global.testMetrics.performanceMarks.length > 2) {
     console.log('\n⏱️  Performance Marks:');
-    global.testMetrics.performanceMarks.forEach(mark => {
+    global.testMetrics.performanceMarks.forEach((mark) => {
       if (mark.duration) {
         console.log(`   ${mark.name}: ${(mark.duration / 1000).toFixed(2)}s`);
       }
@@ -234,7 +252,7 @@ beforeEach(async () => {
   const testName = expect.getState().currentTestName || 'unknown-test';
   global.testMetrics.performanceMarks.push({
     name: `test-start-${testName}`,
-    timestamp: performance.now()
+    timestamp: performance.now(),
   });
 });
 
@@ -243,19 +261,20 @@ afterEach(async () => {
   const testName = expect.getState().currentTestName || 'unknown-test';
   const endTime = performance.now();
 
-  const startMark = global.testMetrics.performanceMarks
-    .find(mark => mark.name === `test-start-${testName}`);
+  const startMark = global.testMetrics.performanceMarks.find(
+    (mark) => mark.name === `test-start-${testName}`,
+  );
 
   if (startMark) {
     global.testMetrics.performanceMarks.push({
       name: `test-end-${testName}`,
       timestamp: endTime,
-      duration: endTime - startMark.timestamp
+      duration: endTime - startMark.timestamp,
     });
   }
 
   // Allow some time for async cleanup
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 100));
 });
 
 /**
@@ -295,35 +314,37 @@ export const TestDataGenerators = {
   sessionOptions: {
     basic: () => ({
       headless: true,
-      viewport: { width: 1280, height: 720 }
+      viewport: { width: 1280, height: 720 },
     }),
 
     mobile: () => ({
       headless: true,
       viewport: { width: 375, height: 667 },
-      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15'
+      userAgent:
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15',
     }),
 
     highRes: () => ({
       headless: true,
-      viewport: { width: 1920, height: 1080 }
+      viewport: { width: 1920, height: 1080 },
     }),
 
     slowNetwork: () => ({
       headless: true,
       networkConditions: {
         downloadThroughput: 100 * 1024, // 100 KB/s
-        uploadThroughput: 50 * 1024,    // 50 KB/s
-        latency: 200 // 200ms
-      }
-    })
+        uploadThroughput: 50 * 1024, // 50 KB/s
+        latency: 200, // 200ms
+      },
+    }),
   },
 
   /**
    * Generate random test data
    */
   randomText: (length: number = 10): string => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
     for (let i = 0; i < length; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -340,8 +361,8 @@ export const TestDataGenerators = {
     forms: 'https://httpbin.org/forms/post',
     slow: 'https://httpbin.org/delay/2',
     error: 'https://httpbin.org/status/404',
-    large: 'https://httpbin.org/base64/SFRUUEJJTiBpcyBhd2Vzb21l' // Large base64 response
-  }
+    large: 'https://httpbin.org/base64/SFRUUEJJTiBpcyBhd2Vzb21l', // Large base64 response
+  },
 };
 
 /**
@@ -351,20 +372,32 @@ export const PerformanceAssertions = {
   /**
    * Assert operation completed within time limit
    */
-  assertExecutionTime: (startTime: number, maxMs: number, operation: string) => {
+  assertExecutionTime: (
+    startTime: number,
+    maxMs: number,
+    operation: string,
+  ) => {
     const duration = performance.now() - startTime;
     expect(duration).toBeLessThan(maxMs);
-    console.log(`✓ ${operation} completed in ${duration.toFixed(2)}ms (limit: ${maxMs}ms)`);
+    console.log(
+      `✓ ${operation} completed in ${duration.toFixed(2)}ms (limit: ${maxMs}ms)`,
+    );
   },
 
   /**
    * Assert memory usage is within acceptable range
    */
-  assertMemoryUsage: (beforeMB: number, afterMB: number, maxIncreaseMB: number) => {
+  assertMemoryUsage: (
+    beforeMB: number,
+    afterMB: number,
+    maxIncreaseMB: number,
+  ) => {
     const increase = afterMB - beforeMB;
     expect(increase).toBeLessThan(maxIncreaseMB);
-    console.log(`✓ Memory usage increased by ${increase.toFixed(2)}MB (limit: ${maxIncreaseMB}MB)`);
-  }
+    console.log(
+      `✓ Memory usage increased by ${increase.toFixed(2)}MB (limit: ${maxIncreaseMB}MB)`,
+    );
+  },
 };
 
 /**
@@ -379,22 +412,22 @@ export const SecurityTestHelpers = {
       '<script>alert("XSS")</script>',
       '"><script>alert("XSS")</script>',
       'javascript:alert("XSS")',
-      'onload="alert(\'XSS\')"'
+      'onload="alert(\'XSS\')"',
     ],
 
     sqlInjection: [
       "'; DROP TABLE users; --",
       "' OR '1'='1",
       "'; SELECT * FROM users WHERE 't' = 't",
-      "admin'--"
+      "admin'--",
     ],
 
     pathTraversal: [
       '../../../etc/passwd',
       '..\\..\\..\\windows\\system32\\drivers\\etc\\hosts',
       '/etc/shadow',
-      '../../../../../../../../var/log/apache/access.log'
-    ]
+      '../../../../../../../../var/log/apache/access.log',
+    ],
   },
 
   /**
@@ -405,10 +438,10 @@ export const SecurityTestHelpers = {
     expect(response.body).toMatchObject({
       error: expect.objectContaining({
         type: 'SecurityError',
-        code: expectedCode
-      })
+        code: expectedCode,
+      }),
     });
-  }
+  },
 };
 
 console.log('✅ Browser Automation E2E Test Setup Loaded');

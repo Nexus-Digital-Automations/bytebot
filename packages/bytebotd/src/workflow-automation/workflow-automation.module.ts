@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';import { WorkflowAutomationController } from './workflow-automation.controller';import { WorkflowAutomationService } from './workflow-automation.service';import { FormAutomationModule } from '../form-automation/form-automation.module';import { DataExtractionModule } from '../data-extraction/data-extraction.module';import { ComputerUseModule } from '../computer-use/computer-use.module';
+import { Module } from '@nestjs/common';
+import { WorkflowAutomationController } from './workflow-automation.controller';
+import { WorkflowAutomationService } from './workflow-automation.service';
+import { FormAutomationModule } from '../form-automation/form-automation.module';
+import { DataExtractionModule } from '../data-extraction/data-extraction.module';
+import { ComputerUseModule } from '../computer-use/computer-use.module';
 
 /**
  * Workflow Automation Module
@@ -20,11 +25,7 @@ import { Module } from '@nestjs/common';import { WorkflowAutomationController } 
  * - Common modules: Security, validation, and authentication
  */
 @Module({
-  imports: [
-    FormAutomationModule,
-    DataExtractionModule,
-    ComputerUseModule,
-  ],
+  imports: [FormAutomationModule, DataExtractionModule, ComputerUseModule],
   controllers: [WorkflowAutomationController],
   providers: [WorkflowAutomationService],
   exports: [WorkflowAutomationService],

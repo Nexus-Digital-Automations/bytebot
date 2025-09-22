@@ -14,9 +14,7 @@
  *
  * @author Claude Code
  * @version 2.0.0
- */;
-
-import { Test, TestingModule } from '@nestjs/testing';
+ */ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import * as WebSocket from 'ws';
 import { performance } from 'perf_hooks';
@@ -31,7 +29,6 @@ import {
   ValidationAction,
   SecurityContext,
   ActionImpact,
-
 } from '../conversational-websocket-bridge.service';
 
 // ===== TEST UTILITIES =====
@@ -57,7 +54,9 @@ class MockWebSocketClient {
 
   emit(event: string, ...args: unknown[]): void {
     const listeners = this.eventListeners.get(event) ?? [];
-    listeners.forEach(listener => (listener as (...args: unknown[]) => void)(...args));
+    listeners.forEach((listener) =>
+      (listener as (...args: unknown[]) => void)(...args),
+    );
   }
 
   close(code?: number, reason?: string): void {
@@ -70,15 +69,14 @@ class MockWebSocketClient {
  * Test configuration provider
  */
 const mockConfigService = {
-
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000,https://app.example.com',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-
-};
-return config[key] ?? defaultValue;
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      CONVERSATIONAL_ALLOWED_ORIGINS:
+        'http://localhost:3000,https://app.example.com',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+    };
+    return config[key] ?? defaultValue;
   }),
 };
 
@@ -90,34 +88,32 @@ class PerformanceTestHelper {
     const start = performance.now();
     await operation();
     return performance.now() - start;
-  
-}
+  }
 
   static async testConcurrentOperations(
     operations: (() => Promise<void>)[],
-    concurrencyLimit: number
+    concurrencyLimit: number,
   ): Promise<{ totalTime: number; averageTime: number; maxTime: number }> {
-  const startTime = performance.now();
+    const startTime = performance.now();
     const batches: (() => Promise<void>)[][] = [];
 
     // Split operations into batches
     for (let i = 0; i < operations.length; i += concurrencyLimit) {
       batches.push(operations.slice(i, i + concurrencyLimit));
-    
-}
+    }
 
     const times: number[] = [];
 
     // Execute batches sequentially, operations within each batch concurrently
     for (const batch of batches) {
-  const batchStart = performance.now();
+      const batchStart = performance.now();
       await Promise.all(batch.map(async (op) => await op()));
       times.push(performance.now() - batchStart);
-    
-}
+    }
 
     const totalTime = performance.now() - startTime;
-    const averageTime = times.reduce((sum, time) => sum + time, 0) / times.length;
+    const averageTime =
+      times.reduce((sum, time) => sum + time, 0) / times.length;
     const maxTime = Math.max(...times);
 
     return { totalTime, averageTime, maxTime };
@@ -127,7 +123,6 @@ class PerformanceTestHelper {
 // ===== TEST SUITE =====
 
 describe('ConversationalWebSocketBridgeService', () => {
-
   let service: ConversationalWebSocketBridgeService;
   let module: TestingModule;
 
@@ -138,49 +133,42 @@ describe('ConversationalWebSocketBridgeService', () => {
         {
           provide: ConfigService,
           useValue: mockConfigService,
-        
-},
+        },
       ],
     }).compile();
 
-    service = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
+    service = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
   });
 
   afterEach(async () => {
-  await service.onApplicationShutdown();
+    await service.onApplicationShutdown();
     await module.close();
-  
-});
+  });
 
   // ===== CORE FUNCTIONALITY TESTS =====
 
   describe('Service Initialization', () => {
-
-  it('should initialize service successfully', () => {
+    it('should initialize service successfully', () => {
       expect(service).toBeDefined();
       expect(service.getServerStatistics).toBeDefined();
     });
 
-
-
     it('should get initial server statistics', () => {
-  const stats = service.getServerStatistics();
-expect(stats).toHaveProperty('server');
-expect(stats).toHaveProperty('performance');
-expect(stats).toHaveProperty('sessions');
-expect(stats.server.activeSessions).toBe(0);
-expect(stats.server.activeConnections).toBe(0);
-    
-});
-
-
+      const stats = service.getServerStatistics();
+      expect(stats).toHaveProperty('server');
+      expect(stats).toHaveProperty('performance');
+      expect(stats).toHaveProperty('sessions');
+      expect(stats.server.activeSessions).toBe(0);
+      expect(stats.server.activeConnections).toBe(0);
+    });
 
     it('should have correct performance targets', () => {
-  const stats = service.getServerStatistics();
-expect(stats.performance.maxConcurrentSessions).toBe(1000);
+      const stats = service.getServerStatistics();
+      expect(stats.performance.maxConcurrentSessions).toBe(1000);
       expect(stats.performance.targetLatency).toBe(50);
-    
-});
+    });
   });
 
   // ===== SESSION MANAGEMENT TESTS =====
@@ -196,19 +184,21 @@ expect(stats.performance.maxConcurrentSessions).toBe(1000);
           authenticationLevel: 'basic',
           permissions: ['read', 'write'],
           auditRequired: true,
-      complianceFlags: ['GDPR'],} as SecurityContext,};
+          complianceFlags: ['GDPR'],
+        } as SecurityContext,
+      };
 
       const _mockAction: ValidationAction = {
         actionType: 'file_write',
-      parameters: { path: '/tmp/test.txt', content: 'test' },expectedOutcome: 'File written successfully',
-      reversible: true,
-      impact: {
-  scope: 'local',
-      dataAccess: true,
-      stateChanges: true,
+        parameters: { path: '/tmp/test.txt', content: 'test' },
+        expectedOutcome: 'File written successfully',
+        reversible: true,
+        impact: {
+          scope: 'local',
+          dataAccess: true,
+          stateChanges: true,
           userInteraction: false,
-        
-} as ActionImpact,
+        } as ActionImpact,
       };
 
       // Note: This would require a real session to test properly
@@ -216,10 +206,7 @@ expect(stats.performance.maxConcurrentSessions).toBe(1000);
       expect(service.createValidationRequest).toBeDefined();
     });
 
-
-
     it('should broadcast messages to all sessions', async () => {
-
       const message = {
         type: ConversationalMessageType.HEARTBEAT,
         timestamp: Date.now(),
@@ -233,15 +220,18 @@ expect(stats.performance.maxConcurrentSessions).toBe(1000);
       };
 
       // Test that broadcast method exists and doesn't throw
-      await expect(service.broadcastToAllSessions(message)).resolves.toBeUndefined();
+      await expect(
+        service.broadcastToAllSessions(message),
+      ).resolves.toBeUndefined();
     });
   });
 
   // ===== MESSAGE PROTOCOL TESTS =====
 
   describe('Message Protocol Validation', () => {
-
-    const createValidMessage = (type: ConversationalMessageType): ConversationalMessage => ({
+    const createValidMessage = (
+      type: ConversationalMessageType,
+    ): ConversationalMessage => ({
       type,
       messageId: `msg_${Date.now()}`,
       sessionId: `session_${Date.now()}`,
@@ -256,105 +246,109 @@ expect(stats.performance.maxConcurrentSessions).toBe(1000);
       },
     });
 
-
-
     it('should validate required message fields', () => {
-  const validMessage = createValidMessage(ConversationalMessageType.HEARTBEAT);// Test message structure
+      const validMessage = createValidMessage(
+        ConversationalMessageType.HEARTBEAT,
+      ); // Test message structure
       expect(validMessage).toHaveProperty('type');
-expect(validMessage).toHaveProperty('messageId');
-expect(validMessage).toHaveProperty('sessionId');
-expect(validMessage).toHaveProperty('timestamp');
-expect(validMessage).toHaveProperty('sequence');
-expect(validMessage).toHaveProperty('payload');
-expect(validMessage).toHaveProperty('metadata');
-});
-
-
-it('should support all message types', () => {
-  const messageTypes = Object.values(ConversationalMessageType);messageTypes.forEach(type => {
-        const message = createValidMessage(type);
-        expect(message.type).toBe(type);
-      
-});
+      expect(validMessage).toHaveProperty('messageId');
+      expect(validMessage).toHaveProperty('sessionId');
+      expect(validMessage).toHaveProperty('timestamp');
+      expect(validMessage).toHaveProperty('sequence');
+      expect(validMessage).toHaveProperty('payload');
+      expect(validMessage).toHaveProperty('metadata');
     });
 
-
+    it('should support all message types', () => {
+      const messageTypes = Object.values(ConversationalMessageType);
+      messageTypes.forEach((type) => {
+        const message = createValidMessage(type);
+        expect(message.type).toBe(type);
+      });
+    });
 
     it('should create validation request message', () => {
-  const validationMessage: ValidationRequestMessage = {type: ConversationalMessageType.VALIDATION_REQUEST,
+      const validationMessage: ValidationRequestMessage = {
+        type: ConversationalMessageType.VALIDATION_REQUEST,
         messageId: 'test-msg-id',
-      sessionId: 'test-session-id',
-      timestamp: Date.now(),
-      sequence: 1,
+        sessionId: 'test-session-id',
+        timestamp: Date.now(),
+        sequence: 1,
         payload: {
-  validationId: 'test-validation-id',
-      context: {userId: 'test-user',
-      applicationContext: 'test-app',
-      environmentInfo: {
-},previousActions: [],
+          validationId: 'test-validation-id',
+          context: {
+            userId: 'test-user',
+            applicationContext: 'test-app',
+            environmentInfo: {},
+            previousActions: [],
             securityContext: {
-  authenticationLevel: 'basic',
-      permissions: [],
-      auditRequired: true,
+              authenticationLevel: 'basic',
+              permissions: [],
+              auditRequired: true,
               complianceFlags: [],
-            
-},
+            },
           },
           action: {
             actionType: 'test-action',
-      parameters: {},expectedOutcome: 'test outcome',
-      reversible: true,
-      impact: {
-  scope: 'local',
-      dataAccess: false,
-      stateChanges: false,
+            parameters: {},
+            expectedOutcome: 'test outcome',
+            reversible: true,
+            impact: {
+              scope: 'local',
+              dataAccess: false,
+              stateChanges: false,
               userInteraction: false,
-            
-},
+            },
           },
           riskLevel: 'low',
-      streamingOptions: {
-  enableProgressUpdates: true,
+          streamingOptions: {
+            enableProgressUpdates: true,
             updateInterval: 1000,
             maxUpdateCount: 10,
             compressionEnabled: true,
             priorityBoost: false,
-          
-},
+          },
         },
         metadata: {
-  priority: 'high',
-      requiresAck: true,
-      compression: true,
+          priority: 'high',
+          requiresAck: true,
+          compression: true,
           routingHints: ['validation'],
-},};
+        },
+      };
 
-      expect(validationMessage.type).toBe(ConversationalMessageType.VALIDATION_REQUEST);
+      expect(validationMessage.type).toBe(
+        ConversationalMessageType.VALIDATION_REQUEST,
+      );
       expect(validationMessage.payload.validationId).toBe('test-validation-id');
-expect(validationMessage.payload.context.userId).toBe('test-user');});
+      expect(validationMessage.payload.context.userId).toBe('test-user');
+    });
 
-
-it('should create user confirmation message', () => {
-  const confirmationMessage: UserConfirmationMessage = {type: ConversationalMessageType.USER_CONFIRMATION,
+    it('should create user confirmation message', () => {
+      const confirmationMessage: UserConfirmationMessage = {
+        type: ConversationalMessageType.USER_CONFIRMATION,
         messageId: 'test-confirmation-msg',
-      sessionId: 'test-session-id',
-      timestamp: Date.now(),
-      sequence: 2,
+        sessionId: 'test-session-id',
+        timestamp: Date.now(),
+        sequence: 2,
         payload: {
-  confirmationId: 'test-confirmation-id',
-      validationId: 'test-validation-id',
-      approved: true,
-      reasoning: 'User approved the action',
-      confidence: 0.95,
-},
+          confirmationId: 'test-confirmation-id',
+          validationId: 'test-validation-id',
+          approved: true,
+          reasoning: 'User approved the action',
+          confidence: 0.95,
+        },
         metadata: {
-  priority: 'high',
-      requiresAck: true,
-      compression: false,
+          priority: 'high',
+          requiresAck: true,
+          compression: false,
           routingHints: ['confirmation'],
-},};
+        },
+      };
 
-      expect(confirmationMessage.type).toBe(ConversationalMessageType.USER_CONFIRMATION);
+      expect(confirmationMessage.type).toBe(
+        ConversationalMessageType.USER_CONFIRMATION,
+      );
       expect(confirmationMessage.payload.approved).toBe(true);
       expect(confirmationMessage.payload.confidence).toBe(0.95);
     });
@@ -363,7 +357,6 @@ it('should create user confirmation message', () => {
   // ===== PERFORMANCE TESTS =====
 
   describe('Performance Requirements', () => {
-
     jest.setTimeout(30000); // 30 seconds for performance tests
 
     it('should meet sub-50ms message delivery target', async () => {
@@ -376,29 +369,34 @@ it('should create user confirmation message', () => {
         const latency = await PerformanceTestHelper.measureLatency(async () => {
           // Simulate message processing
           const _message = JSON.stringify({
-  type: 'test',
-      payload: { data: 'test'.repeat(100) 
-}, // ~400 bytes
-      timestamp: Date.now(),
-    });
+            type: 'test',
+            payload: { data: 'test'.repeat(100) }, // ~400 bytes
+            timestamp: Date.now(),
+          });
 
           // Simulate compression and serialization time
-          await new Promise(resolve => setTimeout(resolve, 1));
+          await new Promise((resolve) => setTimeout(resolve, 1));
         });
 
         latencies.push(latency);
       }
 
-      const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+      const averageLatency =
+        latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
       const maxLatency = Math.max(...latencies);
-      const ninetyNinthPercentile = latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.99)] ?? 0;
+      const ninetyNinthPercentile =
+        latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.99)] ??
+        0;
 
       // Log performance results
       console.log('Message Delivery Performance:', {
         averageLatency: `${averageLatency.toFixed(2)}
-ms`,maxLatency: `${maxLatency.toFixed(2)}
-ms`,p99Latency: `${ninetyNinthPercentile.toFixed(2)}
-ms`,target: `${targetLatency}
+ms`,
+        maxLatency: `${maxLatency.toFixed(2)}
+ms`,
+        p99Latency: `${ninetyNinthPercentile.toFixed(2)}
+ms`,
+        target: `${targetLatency}
 ms`,
       });
 
@@ -407,11 +405,8 @@ ms`,
       expect(ninetyNinthPercentile).toBeLessThan(targetLatency * 2); // Allow 2x target for P99
     });
 
-
-
     it('should handle concurrent session simulation', async () => {
-
-  const targetConcurrentSessions = 1000;
+      const targetConcurrentSessions = 1000;
       const batchSize = 100;
       const sessionOperations: (() => Promise<void>)[] = [];
 
@@ -421,14 +416,16 @@ ms`,
           // Simulate session creation and message processing
           const sessionId = `perf-test-session-${i}`;
           const message = {
-  sessionId,
+            sessionId,
             messageId: `msg-${i}`,
             timestamp: Date.now(),
             data: 'test-data',
           };
 
           // Simulate message processing time
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.random() * 10),
+          );
 
           // Simulate serialization
           JSON.stringify(message);
@@ -437,7 +434,7 @@ ms`,
 
       const results = await PerformanceTestHelper.testConcurrentOperations(
         sessionOperations,
-        batchSize
+        batchSize,
       );
 
       console.log('Concurrent Session Performance:', {
@@ -445,7 +442,9 @@ ms`,
         totalTime: `${results.totalTime.toFixed(2)}ms`,
         averageBatchTime: `${results.averageTime.toFixed(2)}ms`,
         maxBatchTime: `${results.maxTime.toFixed(2)}ms`,
-        sessionsPerSecond: Math.floor(targetConcurrentSessions / (results.totalTime / 1000)),
+        sessionsPerSecond: Math.floor(
+          targetConcurrentSessions / (results.totalTime / 1000),
+        ),
       });
 
       // Verify concurrent handling capability
@@ -453,11 +452,15 @@ ms`,
       expect(results.averageTime).toBeLessThan(5000); // Average batch should complete within 5 seconds
     });
 
-
-
-    it('should validate message compression effectiveness', () => {const testMessage = {type: 'progress_update',
-      payload: {data: 'This is a test message that should compress well due to repetitive content. '.repeat(50),
-      metadata: { large: true, test: true, compression: true },},
+    it('should validate message compression effectiveness', () => {
+      const testMessage = {
+        type: 'progress_update',
+        payload: {
+          data: 'This is a test message that should compress well due to repetitive content. '.repeat(
+            50,
+          ),
+          metadata: { large: true, test: true, compression: true },
+        },
         timestamp: Date.now(),
       };
 
@@ -468,10 +471,12 @@ ms`,
       const shouldCompress = uncompressedSize > compressionThreshold;
 
       console.log('Compression Test:', {
-        messageSize: `${uncompressedSize} bytes`,threshold: `${compressionThreshold} bytes`,
+        messageSize: `${uncompressedSize} bytes`,
+        threshold: `${compressionThreshold} bytes`,
         shouldCompress,
-        compressionRatio: shouldCompress ? 'Estimated 60-80%' : 'N/A',});
-expect(uncompressedSize).toBeGreaterThan(compressionThreshold);
+        compressionRatio: shouldCompress ? 'Estimated 60-80%' : 'N/A',
+      });
+      expect(uncompressedSize).toBeGreaterThan(compressionThreshold);
       expect(shouldCompress).toBe(true);
     });
   });
@@ -479,7 +484,7 @@ expect(uncompressedSize).toBeGreaterThan(compressionThreshold);
   // ===== ERROR HANDLING TESTS =====
 
   describe('Error Handling and Recovery', () => {
-it('should handle invalid message format gracefully', () => {
+    it('should handle invalid message format gracefully', () => {
       const invalidMessages = [
         '{ invalid json',
         '{}', // Empty object
@@ -499,11 +504,8 @@ it('should handle invalid message format gracefully', () => {
       });
     });
 
-
-
     it('should handle connection failures gracefully', () => {
-
-  const mockClient = new MockWebSocketClient();// Simulate connection error
+      const mockClient = new MockWebSocketClient(); // Simulate connection error
       mockClient.readyState = WebSocket.WebSocket.CLOSED;
 
       // Test that sending to closed connection is handled
@@ -512,24 +514,21 @@ it('should handle invalid message format gracefully', () => {
       }).not.toThrow();
     });
 
-
-
     it('should handle heartbeat timeout recovery', () => {
-  const heartbeatInterval = 30000; // 30 secondsconst heartbeatTimeout = heartbeatInterval * 2; // 60 seconds
+      const heartbeatInterval = 30000; // 30 secondsconst heartbeatTimeout = heartbeatInterval * 2; // 60 seconds
 
       // Simulate heartbeat timing
       const lastHeartbeat = Date.now() - heartbeatTimeout - 1000; // 1 second past timeout
       const isTimedOut = Date.now() - lastHeartbeat > heartbeatTimeout;
 
       expect(isTimedOut).toBe(true);
-    
-});
+    });
   });
 
   // ===== SECURITY TESTS =====
 
   describe('Security and Compliance', () => {
-it('should validate security context requirements', () => {
+    it('should validate security context requirements', () => {
       const securityContext: SecurityContext = {
         authenticationLevel: 'enterprise',
         permissions: ['admin', 'audit'],
@@ -542,207 +541,207 @@ it('should validate security context requirements', () => {
       expect(securityContext.complianceFlags).toContain('GDPR');
     });
 
-
-it('should validate action impact assessment', () => {
-  const highImpactAction: ActionImpact = {scope: 'external',
-      dataAccess: true,
-      stateChanges: true,
+    it('should validate action impact assessment', () => {
+      const highImpactAction: ActionImpact = {
+        scope: 'external',
+        dataAccess: true,
+        stateChanges: true,
         userInteraction: true,
-      
-};
+      };
 
       const lowImpactAction: ActionImpact = {
-  scope: 'local',
-      dataAccess: false,
-      stateChanges: false,
+        scope: 'local',
+        dataAccess: false,
+        stateChanges: false,
         userInteraction: false,
-      
-};
+      };
 
       // High impact should trigger stricter validation
       expect(highImpactAction.scope).toBe('external');
-expect(highImpactAction.dataAccess).toBe(true);// Low impact should allow more permissive validation
+      expect(highImpactAction.dataAccess).toBe(true); // Low impact should allow more permissive validation
       expect(lowImpactAction.scope).toBe('local');
-expect(lowImpactAction.dataAccess).toBe(false);});
-
-
+      expect(lowImpactAction.dataAccess).toBe(false);
+    });
 
     it('should enforce audit trail requirements', () => {
-  const auditEntry = {timestamp: Date.now(),
+      const auditEntry = {
+        timestamp: Date.now(),
         event: 'validation_request',
-      actor: 'test-user',
-      details: {actionType: 'file_write',
-      target: '/tmp/test.txt',
-},complianceFlags: ['audit_required'],};
-expect(auditEntry.timestamp).toBeDefined();
+        actor: 'test-user',
+        details: { actionType: 'file_write', target: '/tmp/test.txt' },
+        complianceFlags: ['audit_required'],
+      };
+      expect(auditEntry.timestamp).toBeDefined();
       expect(auditEntry.event).toBe('validation_request');
-expect(auditEntry.complianceFlags).toContain('audit_required');});});
+      expect(auditEntry.complianceFlags).toContain('audit_required');
+    });
+  });
 
   // ===== INTEGRATION TESTS =====
 
   describe('Integration Compatibility', () => {
-
-  it('should be compatible with existing WebSocket types', () => {
-    // Test compatibility with base WebSocket types
-    const webSocketReadyState = WebSocket.WebSocket.OPEN;
-    expect(webSocketReadyState).toBe(1);
-  });
-
-
+    it('should be compatible with existing WebSocket types', () => {
+      // Test compatibility with base WebSocket types
+      const webSocketReadyState = WebSocket.WebSocket.OPEN;
+      expect(webSocketReadyState).toBe(1);
+    });
 
     it('should support existing parlant message format', () => {
-    // Test compatibility with existing Parlant message structure
-    const parlantMessage = {
-      type: 'conversation_start',
-      conversation_id: 'test-conv-123',
-      session_id: 'test-session-123',
-      payload: { test: 'data' },
-      timestamp: Date.now(),
-    };
+      // Test compatibility with existing Parlant message structure
+      const parlantMessage = {
+        type: 'conversation_start',
+        conversation_id: 'test-conv-123',
+        session_id: 'test-session-123',
+        payload: { test: 'data' },
+        timestamp: Date.now(),
+      };
 
-    expect(parlantMessage.type).toBe('conversation_start');
-    expect(parlantMessage.conversation_id).toBeDefined();
-  });
+      expect(parlantMessage.type).toBe('conversation_start');
+      expect(parlantMessage.conversation_id).toBeDefined();
+    });
   });
 
   // ===== REAL-TIME STREAMING TESTS =====
 
   describe('Real-time Streaming Validation', () => {
-
-  it('should support progress update streaming', () => {
-    const progressUpdate: ProgressUpdateMessage = {type: ConversationalMessageType.PROGRESS_UPDATE,
+    it('should support progress update streaming', () => {
+      const progressUpdate: ProgressUpdateMessage = {
+        type: ConversationalMessageType.PROGRESS_UPDATE,
         messageId: 'progress-msg-123',
-      sessionId: 'session-123',
-      timestamp: Date.now(),
-      sequence: 5,
+        sessionId: 'session-123',
+        timestamp: Date.now(),
+        sequence: 5,
         payload: {
-  operationId: 'validation-op-123',
-      stage: 'processing',
-      progress: 75,
-      status: 'active',
-      details: {currentStep: 'Analyzing action impact',
-      totalSteps: 10,
-      completedSteps: 7,
+          operationId: 'validation-op-123',
+          stage: 'processing',
+          progress: 75,
+          status: 'active',
+          details: {
+            currentStep: 'Analyzing action impact',
+            totalSteps: 10,
+            completedSteps: 7,
             errors: [],
             warnings: ['Low confidence in risk assessment'],
-      metrics: {processingTime: 1500,
+            metrics: {
+              processingTime: 1500,
               memoryUsage: 1024 * 1024, // 1MB,
-  networkLatency: 25,
+              networkLatency: 25,
               throughput: 100,
-            
-},
+            },
           },
         },
         metadata: {
-  priority: 'normal',
-      requiresAck: false,
-      compression: true,
+          priority: 'normal',
+          requiresAck: false,
+          compression: true,
           routingHints: ['progress'],
-},};
+        },
+      };
 
-      expect(progressUpdate.type).toBe(ConversationalMessageType.PROGRESS_UPDATE);
+      expect(progressUpdate.type).toBe(
+        ConversationalMessageType.PROGRESS_UPDATE,
+      );
       expect(progressUpdate.payload.progress).toBe(75);
       expect(progressUpdate.payload.details.completedSteps).toBe(7);
     });
 
-
-
     it('should handle streaming completion', () => {
-  const streamingComplete = {type: ConversationalMessageType.STREAMING_COMPLETE,
+      const streamingComplete = {
+        type: ConversationalMessageType.STREAMING_COMPLETE,
         operationId: 'validation-op-123',
-      completedAt: Date.now(),
-      totalUpdates: 10,
+        completedAt: Date.now(),
+        totalUpdates: 10,
         finalResult: 'approved',
-};
-      expect(streamingComplete.type).toBe(ConversationalMessageType.STREAMING_COMPLETE);
+      };
+      expect(streamingComplete.type).toBe(
+        ConversationalMessageType.STREAMING_COMPLETE,
+      );
       expect(streamingComplete.operationId).toBe('validation-op-123');
     });
   });
 
   // Additional test suites should be inside the main describe block
 
-// ===== BENCHMARK TESTS =====
+  // ===== BENCHMARK TESTS =====
 
-describe('Performance Benchmarks', () => {
+  describe('Performance Benchmarks', () => {
+    jest.setTimeout(60000); // 60 seconds for benchmark tests
 
-  jest.setTimeout(60000); // 60 seconds for benchmark tests
+    it('should benchmark message serialization performance', () => {
+      const iterations = 10000;
+      const message = {
+        type: 'validation_request',
+        payload: {
+          data: 'test'.repeat(1000), // ~4KB message
+          metadata: { complex: true },
+        },
+        timestamp: Date.now(),
+      };
 
-  it('should benchmark message serialization performance', () => {
-    const iterations = 10000;
-    const message = {
-  type: 'validation_request',
-      payload: {
-        data: 'test'.repeat(1000), // ~4KB message
-        metadata: { complex: true }
-      },
-      timestamp: Date.now(),
-    };
+      const start = performance.now();
 
-    const start = performance.now();
+      for (let i = 0; i < iterations; i++) {
+        JSON.stringify(message);
+      }
 
-    for (let i = 0; i < iterations; i++) {
-  JSON.stringify(message);
-    
-}
+      const end = performance.now();
+      const totalTime = end - start;
+      const averageTime = totalTime / iterations;
+      const messagesPerSecond = 1000 / averageTime;
 
-    const end = performance.now();
-    const totalTime = end - start;
-    const averageTime = totalTime / iterations;
-    const messagesPerSecond = 1000 / averageTime;
+      console.log('Serialization Benchmark:', {
+        iterations,
+        totalTime: `${totalTime.toFixed(2)}ms`,
+        averageTime: `${averageTime.toFixed(4)}ms`,
+        messagesPerSecond: Math.floor(messagesPerSecond),
+      });
 
-    console.log('Serialization Benchmark:', {
-  iterations,
-      totalTime: `${totalTime.toFixed(2)}ms`,
-      averageTime: `${averageTime.toFixed(4)}ms`,
-      messagesPerSecond: Math.floor(messagesPerSecond),
+      // Performance expectations
+      expect(averageTime).toBeLessThan(1); // Less than 1ms per serialization
+      expect(messagesPerSecond).toBeGreaterThan(1000); // More than 1000 messages/second
     });
 
-    // Performance expectations
-    expect(averageTime).toBeLessThan(1); // Less than 1ms per serialization
-    expect(messagesPerSecond).toBeGreaterThan(1000); // More than 1000 messages/second
-  });
+    it('should benchmark concurrent validation processing', async () => {
+      const concurrentValidations = 100;
+      const validationPromises: Promise<void>[] = [];
 
+      const start = performance.now();
 
+      for (let i = 0; i < concurrentValidations; i++) {
+        validationPromises.push(
+          new Promise((resolve) => {
+            // Simulate validation processing
+            setTimeout(
+              () => {
+                // Mock validation logic
+                const _approved = Math.random() > 0.3; // 70% approval rate
+                const _confidence = 0.5 + Math.random() * 0.5; // 50-100% confidence
+                resolve();
+              },
+              Math.random() * 100 + 50,
+            ); // 50-150ms processing time
+          }),
+        );
+      }
 
-  it('should benchmark concurrent validation processing', async () => {
+      await Promise.all(validationPromises);
 
-    const concurrentValidations = 100;
-    const validationPromises: Promise<void>[] = [];
+      const end = performance.now();
+      const totalTime = end - start;
+      const averageTime = totalTime / concurrentValidations;
 
-    const start = performance.now();
+      console.log('Concurrent Validation Benchmark:', {
+        concurrentValidations,
+        totalTime: `${totalTime.toFixed(2)}ms`,
+        averageTime: `${averageTime.toFixed(2)}ms`,
+        validationsPerSecond: Math.floor(
+          concurrentValidations / (totalTime / 1000),
+        ),
+      });
 
-    for (let i = 0; i < concurrentValidations; i++) {
-      validationPromises.push(
-        new Promise(resolve => {
-          // Simulate validation processing
-          setTimeout(() => {
-            // Mock validation logic
-            const _approved = Math.random() > 0.3; // 70% approval rate
-            const _confidence = 0.5 + Math.random() * 0.5; // 50-100% confidence
-            resolve();
-          
-}, Math.random() * 100 + 50); // 50-150ms processing time
-        })
-      );
-    }
-
-    await Promise.all(validationPromises);
-
-    const end = performance.now();
-    const totalTime = end - start;
-    const averageTime = totalTime / concurrentValidations;
-
-    console.log('Concurrent Validation Benchmark:', {
-  concurrentValidations,
-      totalTime: `${totalTime.toFixed(2)}ms`,
-      averageTime: `${averageTime.toFixed(2)}ms`,
-      validationsPerSecond: Math.floor(concurrentValidations / (totalTime / 1000)),
+      // Performance expectations for concurrent processing
+      expect(totalTime).toBeLessThan(10000); // Complete within 10 seconds
+      expect(averageTime).toBeLessThan(200); // Average validation under 200ms
     });
-
-    // Performance expectations for concurrent processing
-    expect(totalTime).toBeLessThan(10000); // Complete within 10 seconds
-    expect(averageTime).toBeLessThan(200); // Average validation under 200ms
   });
-});
-
 });

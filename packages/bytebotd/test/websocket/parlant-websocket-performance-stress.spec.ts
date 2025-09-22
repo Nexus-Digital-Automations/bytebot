@@ -66,7 +66,7 @@ class HighPerformanceStressTestClient extends EventEmitter {
   constructor(
     private url: string,
     clientIdentifier: string,
-    private options: StressTestClientOptions = {}
+    private options: StressTestClientOptions = {},
   ) {
     super();
     this.clientId = `stress_client_${clientIdentifier}`;
@@ -104,8 +104,8 @@ class HighPerformanceStressTestClient extends EventEmitter {
             'User-Agent': 'PARLANT-Stress-Test-Client/1.0',
             'X-Client-ID': this.clientId,
             'X-Test-Type': 'stress-performance',
-            'Connection': 'Upgrade',
-            'Upgrade': 'websocket',
+            Connection: 'Upgrade',
+            Upgrade: 'websocket',
             ...(this.options.headers || {}),
           },
           // Optimize for high performance
@@ -115,7 +115,8 @@ class HighPerformanceStressTestClient extends EventEmitter {
 
         this.ws.on('open', () => {
           this.connected = true;
-          this.stressMetrics.connectionTime = performance.now() - this.connectionStartTime;
+          this.stressMetrics.connectionTime =
+            performance.now() - this.connectionStartTime;
           this.emit('connected', {
             clientId: this.clientId,
             connectionTime: this.stressMetrics.connectionTime,
@@ -145,7 +146,6 @@ class HighPerformanceStressTestClient extends EventEmitter {
             metrics: this.getStressMetrics(),
           });
         });
-
       } catch (error) {
         reject(error);
       }
@@ -180,7 +180,6 @@ class HighPerformanceStressTestClient extends EventEmitter {
         message,
         latency: this.messageLatencies[this.messageLatencies.length - 1],
       });
-
     } catch (error) {
       this.stressMetrics.errors++;
       this.emit('messageError', { clientId: this.clientId, error });
@@ -192,7 +191,7 @@ class HighPerformanceStressTestClient extends EventEmitter {
    */
   async sendMessageBurst(
     messageCount: number,
-    messageTemplate?: Partial<ConversationalMessage>
+    messageTemplate?: Partial<ConversationalMessage>,
   ): Promise<BurstTestResult> {
     if (!this.ws || !this.connected) {
       throw new Error(`WebSocket not connected for client ${this.clientId}`);
@@ -246,9 +245,8 @@ class HighPerformanceStressTestClient extends EventEmitter {
 
         // Micro-delay to prevent overwhelming the system
         if (i % 100 === 0 && i > 0) {
-          await new Promise(resolve => setImmediate(resolve));
+          await new Promise((resolve) => setImmediate(resolve));
         }
-
       } catch (error) {
         errors.push(error as Error);
       }
@@ -272,7 +270,7 @@ class HighPerformanceStressTestClient extends EventEmitter {
    */
   async performSustainedLoadTest(
     duration: number,
-    messagesPerSecond: number
+    messagesPerSecond: number,
   ): Promise<SustainedLoadResult> {
     const startTime = performance.now();
     const interval = 1000 / messagesPerSecond; // Interval between messages in milliseconds
@@ -301,7 +299,7 @@ class HighPerformanceStressTestClient extends EventEmitter {
     }, interval);
 
     // Wait for test completion
-    await new Promise(resolve => setTimeout(resolve, duration + 1000));
+    await new Promise((resolve) => setTimeout(resolve, duration + 1000));
 
     const actualDuration = performance.now() - startTime;
 
@@ -354,7 +352,10 @@ class HighPerformanceStressTestClient extends EventEmitter {
       this.stressMetrics.messagesSent / (connectionDuration / 1000);
 
     this.stressMetrics.throughputMBps =
-      (this.stressMetrics.bytesTransferred / 1024 / 1024) / (connectionDuration / 1000);
+      this.stressMetrics.bytesTransferred /
+      1024 /
+      1024 /
+      (connectionDuration / 1000);
 
     // Get memory usage
     const memUsage = process.memoryUsage();
@@ -417,7 +418,7 @@ class ConcurrentStressTestManager extends EventEmitter {
 
   constructor(
     private baseUrl: string,
-    private maxConcurrentConnections: number
+    private maxConcurrentConnections: number,
   ) {
     super();
     this.globalMetrics = {
@@ -442,7 +443,7 @@ class ConcurrentStressTestManager extends EventEmitter {
   async establishConcurrentConnections(
     connectionCount: number,
     batchSize: number = 100,
-    delayBetweenBatches: number = 50
+    delayBetweenBatches: number = 50,
   ): Promise<ConcurrentConnectionResult> {
     this.globalMetrics.testStartTime = performance.now();
     this.globalMetrics.totalConnections = connectionCount;
@@ -469,14 +470,15 @@ class ConcurrentStressTestManager extends EventEmitter {
               'X-Batch-Number': batch.toString(),
               'X-Client-Index': i.toString(),
             },
-          }
+          },
         );
 
         this.clients.set(clientId, client);
         this.setupClientEventHandlers(client);
 
         batchPromises.push(
-          client.connect()
+          client
+            .connect()
             .then(() => {
               const metrics = client.getStressMetrics();
               connectionTimes.push(metrics.connectionTime);
@@ -485,14 +487,16 @@ class ConcurrentStressTestManager extends EventEmitter {
             .catch((error) => {
               errors.push(error);
               this.emit('connectionFailed', { clientId, error });
-            })
+            }),
         );
       }
 
       await Promise.allSettled(batchPromises);
 
       if (batch < batches - 1) {
-        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayBetweenBatches),
+        );
       }
 
       this.emit('batchCompleted', {
@@ -505,7 +509,8 @@ class ConcurrentStressTestManager extends EventEmitter {
 
     const totalTime = performance.now() - this.globalMetrics.testStartTime;
     this.globalMetrics.averageConnectionTime =
-      connectionTimes.reduce((sum, time) => sum + time, 0) / connectionTimes.length;
+      connectionTimes.reduce((sum, time) => sum + time, 0) /
+      connectionTimes.length;
 
     return {
       targetConnections: connectionCount,
@@ -524,9 +529,11 @@ class ConcurrentStressTestManager extends EventEmitter {
    */
   async performConcurrentStressTest(
     messagesPerClient: number,
-    testDuration: number
+    testDuration: number,
   ): Promise<ConcurrentStressResult> {
-    const activeClients = Array.from(this.clients.values()).filter(client => client.isConnected());
+    const activeClients = Array.from(this.clients.values()).filter((client) =>
+      client.isConnected(),
+    );
 
     if (activeClients.length === 0) {
       throw new Error('No active connections available for stress testing');
@@ -537,7 +544,10 @@ class ConcurrentStressTestManager extends EventEmitter {
     // Start sustained load test on all clients simultaneously
     const stressPromises = activeClients.map(async (client) => {
       try {
-        return await client.performSustainedLoadTest(testDuration, messagesPerClient / (testDuration / 1000));
+        return await client.performSustainedLoadTest(
+          testDuration,
+          messagesPerClient / (testDuration / 1000),
+        );
       } catch (error) {
         return {
           clientId: client.getClientId(),
@@ -553,13 +563,24 @@ class ConcurrentStressTestManager extends EventEmitter {
 
     // Aggregate results
     const successfulResults = results
-      .filter(result => result.status === 'fulfilled')
-      .map(result => (result as PromiseFulfilledResult<SustainedLoadResult>).value)
-      .filter(result => !('error' in result));
+      .filter((result) => result.status === 'fulfilled')
+      .map(
+        (result) =>
+          (result as PromiseFulfilledResult<SustainedLoadResult>).value,
+      )
+      .filter((result) => !('error' in result));
 
-    const totalMessagesSent = successfulResults.reduce((sum, result) => sum + result.actualMessagesSent, 0);
-    const totalErrors = successfulResults.reduce((sum, result) => sum + result.errorCount, 0);
-    const averageSuccessRate = successfulResults.reduce((sum, result) => sum + result.successRate, 0) / successfulResults.length;
+    const totalMessagesSent = successfulResults.reduce(
+      (sum, result) => sum + result.actualMessagesSent,
+      0,
+    );
+    const totalErrors = successfulResults.reduce(
+      (sum, result) => sum + result.errorCount,
+      0,
+    );
+    const averageSuccessRate =
+      successfulResults.reduce((sum, result) => sum + result.successRate, 0) /
+      successfulResults.length;
 
     // Update global metrics
     this.updateGlobalMetrics();
@@ -581,9 +602,11 @@ class ConcurrentStressTestManager extends EventEmitter {
    * Perform latency benchmark under stress
    */
   async performLatencyBenchmarkUnderStress(
-    sampleSize: number = 1000
+    sampleSize: number = 1000,
   ): Promise<StressLatencyBenchmark> {
-    const activeClients = Array.from(this.clients.values()).filter(client => client.isConnected());
+    const activeClients = Array.from(this.clients.values()).filter((client) =>
+      client.isConnected(),
+    );
 
     if (activeClients.length === 0) {
       throw new Error('No active connections for latency benchmark');
@@ -607,17 +630,16 @@ class ConcurrentStressTestManager extends EventEmitter {
           });
 
           // Wait for response (simplified - in real scenario would wait for actual response)
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
 
           const latency = performance.now() - messageStart;
           clientLatencies.push(latency);
-
         } catch (_error) {
           // Skip failed samples
         }
 
         // Small delay between samples to avoid overwhelming
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise((resolve) => setTimeout(resolve, 5));
       }
 
       return clientLatencies;
@@ -626,7 +648,7 @@ class ConcurrentStressTestManager extends EventEmitter {
     const clientLatencyResults = await Promise.allSettled(benchmarkPromises);
 
     // Aggregate all latencies
-    clientLatencyResults.forEach(result => {
+    clientLatencyResults.forEach((result) => {
       if (result.status === 'fulfilled') {
         latencyResults.push(...result.value);
       }
@@ -642,7 +664,9 @@ class ConcurrentStressTestManager extends EventEmitter {
       testDuration: totalTime,
       participatingClients: activeClients.length,
       latencyStatistics: {
-        average: latencyResults.reduce((sum, lat) => sum + lat, 0) / latencyResults.length,
+        average:
+          latencyResults.reduce((sum, lat) => sum + lat, 0) /
+          latencyResults.length,
         median: latencyResults[Math.floor(latencyResults.length / 2)] || 0,
         p95: latencyResults[Math.floor(latencyResults.length * 0.95)] || 0,
         p99: latencyResults[Math.floor(latencyResults.length * 0.99)] || 0,
@@ -651,9 +675,14 @@ class ConcurrentStressTestManager extends EventEmitter {
         standardDeviation: this.calculateStandardDeviation(latencyResults),
       },
       performsUnderStress: {
-        averageUnder100ms: (latencyResults.filter(lat => lat < 100).length / latencyResults.length) >= 0.95,
-        p95Under100ms: (latencyResults[Math.floor(latencyResults.length * 0.95)] || 0) < 100,
-        p99Under150ms: (latencyResults[Math.floor(latencyResults.length * 0.99)] || 0) < 150,
+        averageUnder100ms:
+          latencyResults.filter((lat) => lat < 100).length /
+            latencyResults.length >=
+          0.95,
+        p95Under100ms:
+          (latencyResults[Math.floor(latencyResults.length * 0.95)] || 0) < 100,
+        p99Under150ms:
+          (latencyResults[Math.floor(latencyResults.length * 0.99)] || 0) < 150,
       },
     };
   }
@@ -661,7 +690,9 @@ class ConcurrentStressTestManager extends EventEmitter {
   /**
    * Setup event handlers for individual clients
    */
-  private setupClientEventHandlers(client: HighPerformanceStressTestClient): void {
+  private setupClientEventHandlers(
+    client: HighPerformanceStressTestClient,
+  ): void {
     client.on('connected', (data) => {
       this.emit('clientConnected', data);
     });
@@ -686,19 +717,34 @@ class ConcurrentStressTestManager extends EventEmitter {
    */
   private updateGlobalMetrics(): void {
     const allMetrics = Array.from(this.clients.values())
-      .filter(client => client.isConnected())
-      .map(client => client.getStressMetrics());
+      .filter((client) => client.isConnected())
+      .map((client) => client.getStressMetrics());
 
-    this.globalMetrics.totalMessagesSent = allMetrics.reduce((sum, metrics) => sum + metrics.messagesSent, 0);
-    this.globalMetrics.totalMessagesReceived = allMetrics.reduce((sum, metrics) => sum + metrics.messagesReceived, 0);
-    this.globalMetrics.totalBytesTransferred = allMetrics.reduce((sum, metrics) => sum + metrics.bytesTransferred, 0);
-    this.globalMetrics.totalErrors = allMetrics.reduce((sum, metrics) => sum + metrics.errors, 0);
+    this.globalMetrics.totalMessagesSent = allMetrics.reduce(
+      (sum, metrics) => sum + metrics.messagesSent,
+      0,
+    );
+    this.globalMetrics.totalMessagesReceived = allMetrics.reduce(
+      (sum, metrics) => sum + metrics.messagesReceived,
+      0,
+    );
+    this.globalMetrics.totalBytesTransferred = allMetrics.reduce(
+      (sum, metrics) => sum + metrics.bytesTransferred,
+      0,
+    );
+    this.globalMetrics.totalErrors = allMetrics.reduce(
+      (sum, metrics) => sum + metrics.errors,
+      0,
+    );
 
     const totalTime = performance.now() - this.globalMetrics.testStartTime;
     this.globalMetrics.testDuration = totalTime;
-    this.globalMetrics.globalThroughput = this.globalMetrics.totalMessagesSent / (totalTime / 1000);
+    this.globalMetrics.globalThroughput =
+      this.globalMetrics.totalMessagesSent / (totalTime / 1000);
 
-    const avgLatency = allMetrics.reduce((sum, metrics) => sum + metrics.averageLatency, 0) / allMetrics.length;
+    const avgLatency =
+      allMetrics.reduce((sum, metrics) => sum + metrics.averageLatency, 0) /
+      allMetrics.length;
     this.globalMetrics.globalLatency = avgLatency || 0;
 
     this.globalMetrics.memoryUsage = process.memoryUsage().heapUsed;
@@ -711,8 +757,9 @@ class ConcurrentStressTestManager extends EventEmitter {
     if (values.length === 0) return 0;
 
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const squaredDifferences = values.map(val => Math.pow(val - mean, 2));
-    const variance = squaredDifferences.reduce((sum, val) => sum + val, 0) / values.length;
+    const squaredDifferences = values.map((val) => Math.pow(val - mean, 2));
+    const variance =
+      squaredDifferences.reduce((sum, val) => sum + val, 0) / values.length;
 
     return Math.sqrt(variance);
   }
@@ -745,8 +792,8 @@ class ConcurrentStressTestManager extends EventEmitter {
    */
   async disconnectAll(): Promise<void> {
     const disconnectPromises = Array.from(this.clients.values())
-      .filter(client => client.isConnected())
-      .map(client => client.disconnect());
+      .filter((client) => client.isConnected())
+      .map((client) => client.disconnect());
 
     await Promise.allSettled(disconnectPromises);
     this.clients.clear();
@@ -757,7 +804,9 @@ class ConcurrentStressTestManager extends EventEmitter {
    * Get connection count
    */
   getActiveConnectionCount(): number {
-    return Array.from(this.clients.values()).filter(client => client.isConnected()).length;
+    return Array.from(this.clients.values()).filter((client) =>
+      client.isConnected(),
+    ).length;
   }
 }
 
@@ -887,12 +936,12 @@ interface StressLatencyBenchmark {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
     };
     return config[key] ?? defaultValue;
   }),
@@ -924,17 +973,24 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
 
     // Initialize services
     await integrationService.onModuleInit();
 
     // Give services time to start
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // Initialize stress test manager
-    stressManager = new ConcurrentStressTestManager(TEST_URL, MAX_CONCURRENT_CONNECTIONS);
+    stressManager = new ConcurrentStressTestManager(
+      TEST_URL,
+      MAX_CONCURRENT_CONNECTIONS,
+    );
   });
 
   afterAll(async () => {
@@ -955,13 +1011,16 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
     it('should establish 1000+ concurrent WebSocket connections', async () => {
       const targetConnections = Math.min(MAX_CONCURRENT_CONNECTIONS, 1000);
 
-      const connectionResult = await stressManager.establishConcurrentConnections(
-        targetConnections,
-        100, // Batch size
-        100  // Delay between batches (ms)
-      );
+      const connectionResult =
+        await stressManager.establishConcurrentConnections(
+          targetConnections,
+          100, // Batch size
+          100, // Delay between batches (ms)
+        );
 
-      expect(connectionResult.establishedConnections).toBeGreaterThanOrEqual(targetConnections * 0.95); // 95% success rate
+      expect(connectionResult.establishedConnections).toBeGreaterThanOrEqual(
+        targetConnections * 0.95,
+      ); // 95% success rate
       expect(connectionResult.averageConnectionTime).toBeLessThan(1000); // <1 second average connection time
       expect(connectionResult.successRate).toBeGreaterThanOrEqual(0.95);
 
@@ -992,13 +1051,20 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         globalMetrics.push(stressManager.getGlobalMetrics());
       }, 1000);
 
-      await new Promise(resolve => setTimeout(resolve, monitoringDuration));
+      await new Promise((resolve) => setTimeout(resolve, monitoringDuration));
       clearInterval(monitorInterval);
 
       // Analyze connection stability
-      const averageConnections = connectionCounts.reduce((sum, count) => sum + count, 0) / connectionCounts.length;
-      const connectionVariance = connectionCounts.reduce((sum, count) => sum + Math.pow(count - averageConnections, 2), 0) / connectionCounts.length;
-      const connectionStability = 1 - (Math.sqrt(connectionVariance) / averageConnections);
+      const averageConnections =
+        connectionCounts.reduce((sum, count) => sum + count, 0) /
+        connectionCounts.length;
+      const connectionVariance =
+        connectionCounts.reduce(
+          (sum, count) => sum + Math.pow(count - averageConnections, 2),
+          0,
+        ) / connectionCounts.length;
+      const connectionStability =
+        1 - Math.sqrt(connectionVariance) / averageConnections;
 
       expect(connectionStability).toBeGreaterThan(0.95); // 95% stability
       expect(averageConnections).toBeGreaterThan(90); // Maintain >90% of connections
@@ -1022,7 +1088,8 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         await stressManager.establishConcurrentConnections(500, 100, 100);
       }
 
-      const latencyBenchmark = await stressManager.performLatencyBenchmarkUnderStress(2000);
+      const latencyBenchmark =
+        await stressManager.performLatencyBenchmarkUnderStress(2000);
 
       expect(latencyBenchmark.latencyStatistics.average).toBeLessThan(75); // Average <75ms
       expect(latencyBenchmark.latencyStatistics.p95).toBeLessThan(100); // P95 <100ms
@@ -1037,7 +1104,9 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         p95Latency: `${latencyBenchmark.latencyStatistics.p95.toFixed(2)}ms`,
         p99Latency: `${latencyBenchmark.latencyStatistics.p99.toFixed(2)}ms`,
         standardDeviation: `${latencyBenchmark.latencyStatistics.standardDeviation.toFixed(2)}ms`,
-        performanceGrade: latencyBenchmark.performsUnderStress.p95Under100ms ? 'EXCELLENT' : 'NEEDS_IMPROVEMENT',
+        performanceGrade: latencyBenchmark.performsUnderStress.p95Under100ms
+          ? 'EXCELLENT'
+          : 'NEEDS_IMPROVEMENT',
       });
     });
 
@@ -1051,7 +1120,7 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
       // Perform concurrent stress test with high message volume
       const stressResult = await stressManager.performConcurrentStressTest(
         100, // Messages per client
-        10000 // 10 second test duration
+        10000, // 10 second test duration
       );
 
       expect(stressResult.averageSuccessRate).toBeGreaterThanOrEqual(0.95); // 95% success rate
@@ -1067,7 +1136,8 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         globalThroughput: `${stressResult.globalThroughput.toFixed(2)} msg/sec`,
         averageSuccessRate: `${(stressResult.averageSuccessRate * 100).toFixed(1)}%`,
         globalLatency: `${stressResult.globalMetrics.globalLatency.toFixed(2)}ms`,
-        performanceGrade: stressResult.globalMetrics.globalLatency < 100 ? 'EXCELLENT' : 'GOOD',
+        performanceGrade:
+          stressResult.globalMetrics.globalLatency < 100 ? 'EXCELLENT' : 'GOOD',
       });
     });
   });
@@ -1085,12 +1155,14 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
       // Perform high-throughput test
       const throughputTest = await stressManager.performConcurrentStressTest(
         500, // Messages per client (total = 100 * 500 = 50,000 messages)
-        5000 // 5 second test duration
+        5000, // 5 second test duration
       );
 
       expect(throughputTest.globalThroughput).toBeGreaterThan(10000); // >10,000 msg/sec
-      expect(throughputTest.averageSuccessRate).toBeGreaterThanOrEqual(0.90); // 90% success rate
-      expect(throughputTest.totalErrors / throughputTest.totalMessagesSent).toBeLessThan(0.05); // <5% error rate
+      expect(throughputTest.averageSuccessRate).toBeGreaterThanOrEqual(0.9); // 90% success rate
+      expect(
+        throughputTest.totalErrors / throughputTest.totalMessagesSent,
+      ).toBeLessThan(0.05); // <5% error rate
 
       console.log('Throughput Optimization Results:', {
         targetThroughput: '10,000 msg/sec',
@@ -1098,7 +1170,8 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         totalMessages: throughputTest.totalMessagesSent,
         testDuration: `${throughputTest.testDuration.toFixed(2)}ms`,
         errorRate: `${((throughputTest.totalErrors / throughputTest.totalMessagesSent) * 100).toFixed(2)}%`,
-        performanceGrade: throughputTest.globalThroughput > 10000 ? 'EXCELLENT' : 'GOOD',
+        performanceGrade:
+          throughputTest.globalThroughput > 10000 ? 'EXCELLENT' : 'GOOD',
       });
     });
 
@@ -1128,7 +1201,7 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
 
         const stressResult = await stressManager.performConcurrentStressTest(
           20, // Fewer messages for large payloads
-          3000 // 3 second test
+          3000, // 3 second test
         );
 
         bottleneckResults.push({
@@ -1139,22 +1212,27 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         });
 
         // Small delay between tests
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
 
       // Analyze bottleneck patterns
-      const throughputDecline = (bottleneckResults[0].throughput - bottleneckResults[bottleneckResults.length - 1].throughput) / bottleneckResults[0].throughput;
-      const latencyIncrease = bottleneckResults[bottleneckResults.length - 1].latency / bottleneckResults[0].latency;
+      const throughputDecline =
+        (bottleneckResults[0].throughput -
+          bottleneckResults[bottleneckResults.length - 1].throughput) /
+        bottleneckResults[0].throughput;
+      const latencyIncrease =
+        bottleneckResults[bottleneckResults.length - 1].latency /
+        bottleneckResults[0].latency;
 
       // Performance should degrade gracefully, not drastically
       expect(throughputDecline).toBeLessThan(0.8); // <80% throughput decline
       expect(latencyIncrease).toBeLessThan(5); // <5x latency increase
 
       console.log('Bottleneck Analysis Results:', {
-        messageSizes: messageSizes.map(size => `${size / 1024}KB`),
+        messageSizes: messageSizes.map((size) => `${size / 1024}KB`),
         throughputDecline: `${(throughputDecline * 100).toFixed(1)}%`,
         latencyIncrease: `${latencyIncrease.toFixed(1)}x`,
-        results: bottleneckResults.map(result => ({
+        results: bottleneckResults.map((result) => ({
           size: `${result.messageSize / 1024}KB`,
           throughput: `${result.throughput.toFixed(0)} msg/sec`,
           latency: `${result.latency.toFixed(1)}ms`,
@@ -1174,7 +1252,7 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         await stressManager.establishConcurrentConnections(
           Math.min(1000, MAX_CONCURRENT_CONNECTIONS),
           100,
-          100
+          100,
         );
       }
 
@@ -1188,19 +1266,25 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
       }, 5000); // Every 5 seconds
 
       // Generate some load during monitoring
-      const loadPromise = stressManager.performConcurrentStressTest(50, monitoringDuration);
+      const loadPromise = stressManager.performConcurrentStressTest(
+        50,
+        monitoringDuration,
+      );
 
       await Promise.all([
-        new Promise(resolve => setTimeout(resolve, monitoringDuration)),
-        loadPromise.catch(() => {}) // Don't fail if load test has issues
+        new Promise((resolve) => setTimeout(resolve, monitoringDuration)),
+        loadPromise.catch(() => {}), // Don't fail if load test has issues
       ]);
 
       clearInterval(memoryMonitor);
 
       // Analyze memory usage
-      const averageMemoryUsage = memorySnapshots.reduce((sum, mem) => sum + mem, 0) / memorySnapshots.length;
+      const averageMemoryUsage =
+        memorySnapshots.reduce((sum, mem) => sum + mem, 0) /
+        memorySnapshots.length;
       const maxMemoryUsage = Math.max(...memorySnapshots);
-      const memoryGrowth = memorySnapshots[memorySnapshots.length - 1] / memorySnapshots[0];
+      const memoryGrowth =
+        memorySnapshots[memorySnapshots.length - 1] / memorySnapshots[0];
 
       const averageMemoryMB = averageMemoryUsage / 1024 / 1024;
       const maxMemoryMB = maxMemoryUsage / 1024 / 1024;
@@ -1239,12 +1323,15 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
           await stressManager.establishConcurrentConnections(
             targetConnections - currentConnections,
             50,
-            50
+            50,
           );
         }
 
         // Perform consistent load test
-        const testResult = await stressManager.performConcurrentStressTest(30, 5000);
+        const testResult = await stressManager.performConcurrentStressTest(
+          30,
+          5000,
+        );
         const metrics = stressManager.getGlobalMetrics();
 
         const memoryUsageMB = metrics.memoryUsage / 1024 / 1024;
@@ -1258,13 +1345,19 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
           resourceEfficiency,
         });
 
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Cool down between tests
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // Cool down between tests
       }
 
       // Analyze scaling efficiency
-      const memoryScaling = scalingResults[scalingResults.length - 1].memoryUsage / scalingResults[0].memoryUsage;
-      const throughputScaling = scalingResults[scalingResults.length - 1].throughput / scalingResults[0].throughput;
-      const connectionScaling = scalingResults[scalingResults.length - 1].connections / scalingResults[0].connections;
+      const memoryScaling =
+        scalingResults[scalingResults.length - 1].memoryUsage /
+        scalingResults[0].memoryUsage;
+      const throughputScaling =
+        scalingResults[scalingResults.length - 1].throughput /
+        scalingResults[0].throughput;
+      const connectionScaling =
+        scalingResults[scalingResults.length - 1].connections /
+        scalingResults[0].connections;
 
       const memoryEfficiency = memoryScaling / connectionScaling; // Should be close to 1.0 for linear scaling
       const throughputEfficiency = throughputScaling / connectionScaling; // Should be close to 1.0 for linear scaling
@@ -1279,7 +1372,7 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         connectionScaling: `${connectionScaling.toFixed(2)}x`,
         memoryEfficiency: memoryEfficiency.toFixed(3),
         throughputEfficiency: throughputEfficiency.toFixed(3),
-        scalingResults: scalingResults.map(result => ({
+        scalingResults: scalingResults.map((result) => ({
           connections: result.connections,
           memory: `${result.memoryUsage.toFixed(1)}MB`,
           throughput: `${result.throughput.toFixed(0)} msg/sec`,
@@ -1304,14 +1397,17 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
       const networkStressTest = async () => {
         const burstPromises = [];
         const clients = Array.from(stressManager['clients'].values())
-          .filter(client => client.isConnected())
+          .filter((client) => client.isConnected())
           .slice(0, 50); // Use 50 clients for stress
 
         for (const client of clients) {
           burstPromises.push(
-            client.sendMessageBurst(200, { // 200 messages per client burst
-              payload: { networkStressTest: true },
-            }).catch(() => {}) // Don't fail the test on individual client errors
+            client
+              .sendMessageBurst(200, {
+                // 200 messages per client burst
+                payload: { networkStressTest: true },
+              })
+              .catch(() => {}), // Don't fail the test on individual client errors
           );
         }
 
@@ -1322,13 +1418,13 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
 
       // Perform multiple stress bursts
       await networkStressTest();
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       await networkStressTest();
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       await networkStressTest();
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Longer recovery time
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Longer recovery time
 
       const finalConnections = stressManager.getActiveConnectionCount();
       const connectionRetention = finalConnections / initialConnections;
@@ -1340,7 +1436,12 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         finalConnections,
         connectionRetention: `${(connectionRetention * 100).toFixed(1)}%`,
         connectionsLost: initialConnections - finalConnections,
-        performanceGrade: connectionRetention > 0.9 ? 'EXCELLENT' : connectionRetention > 0.8 ? 'GOOD' : 'NEEDS_IMPROVEMENT',
+        performanceGrade:
+          connectionRetention > 0.9
+            ? 'EXCELLENT'
+            : connectionRetention > 0.8
+              ? 'GOOD'
+              : 'NEEDS_IMPROVEMENT',
       });
     });
   });
@@ -1356,14 +1457,14 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         await stressManager.establishConcurrentConnections(
           targetConnections,
           100,
-          100
+          100,
         );
       }
 
       // Perform comprehensive enterprise-grade test
       const enterpriseTest = await stressManager.performConcurrentStressTest(
         100, // Messages per client
-        30000 // 30 second test duration
+        30000, // 30 second test duration
       );
 
       const finalMetrics = stressManager.getGlobalMetrics();
@@ -1374,11 +1475,14 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         throughput: enterpriseTest.globalThroughput > 5000, // >5000 msg/sec
         latency: finalMetrics.globalLatency < 100, // <100ms average
         successRate: enterpriseTest.averageSuccessRate > 0.95, // >95% success
-        memoryEfficiency: (finalMetrics.memoryUsage / 1024 / 1024) < 1000, // <1GB
-        stability: enterpriseTest.totalErrors / enterpriseTest.totalMessagesSent < 0.05, // <5% error rate
+        memoryEfficiency: finalMetrics.memoryUsage / 1024 / 1024 < 1000, // <1GB
+        stability:
+          enterpriseTest.totalErrors / enterpriseTest.totalMessagesSent < 0.05, // <5% error rate
       };
 
-      const passedRequirements = Object.values(requirements).filter(req => req).length;
+      const passedRequirements = Object.values(requirements).filter(
+        (req) => req,
+      ).length;
       const totalRequirements = Object.keys(requirements).length;
       const enterpriseReadiness = passedRequirements / totalRequirements;
 
@@ -1393,9 +1497,16 @@ describe('PARLANT WebSocket Performance and Stress Testing', () => {
         errorRate: `${((enterpriseTest.totalErrors / enterpriseTest.totalMessagesSent) * 100).toFixed(2)}%`,
         enterpriseReadiness: `${(enterpriseReadiness * 100).toFixed(1)}%`,
         requirementsPassed: `${passedRequirements}/${totalRequirements}`,
-        certification: enterpriseReadiness >= 0.9 ? 'ENTERPRISE_READY' : enterpriseReadiness >= 0.8 ? 'PRODUCTION_READY' : 'NEEDS_OPTIMIZATION',
+        certification:
+          enterpriseReadiness >= 0.9
+            ? 'ENTERPRISE_READY'
+            : enterpriseReadiness >= 0.8
+              ? 'PRODUCTION_READY'
+              : 'NEEDS_OPTIMIZATION',
         requirements: {
-          '≥500 Concurrent Connections': requirements.concurrentConnections ? '✓' : '✗',
+          '≥500 Concurrent Connections': requirements.concurrentConnections
+            ? '✓'
+            : '✗',
           '>5000 msg/sec Throughput': requirements.throughput ? '✓' : '✗',
           '<100ms Average Latency': requirements.latency ? '✓' : '✗',
           '>95% Success Rate': requirements.successRate ? '✓' : '✗',

@@ -31,16 +31,17 @@ import {
   Logger,
   HttpStatus,
   HttpException,
-  HttpCode
+  HttpCode,
 } from '@nestjs/common';
-import {ApiTags,
+import {
+  ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
   ApiBearerAuth,
-  ApiSecurity
+  ApiSecurity,
 } from '@nestjs/swagger';
 
 // PARLANT Validation Integration - local implementations to bypass import issues
@@ -53,25 +54,33 @@ const ParlantValidated = (config: {
   timeout: number;
 }) => {
   // Mock decorator implementation - would integrate with Parlant in production
-  return function(target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: unknown,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     return descriptor;
   };
 };
 
 const ParlantCritical = (description: string) => {
   // Mock decorator implementation - would integrate with Parlant in production
-  return function(target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: unknown,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     return descriptor;
   };
 };
 
 // Local SecurityLevel constants
 enum SecurityLevel {
-  _MINIMAL = "minimal",
-  _LOW = "low",
-  _MEDIUM = "medium",
-  _HIGH = "high",
-  _CRITICAL = "critical",
+  _MINIMAL = 'minimal',
+  _LOW = 'low',
+  _MEDIUM = 'medium',
+  _HIGH = 'high',
+  _CRITICAL = 'critical',
 }
 
 // Enhanced Configuration-Specific PARLANT Decorators
@@ -81,7 +90,7 @@ export const ParlantConfigurationRead = (description: string) =>
     securityLevel: SecurityLevel._MEDIUM,
     cacheable: true,
     cacheTtl: 300000, // 5 minutes
-    timeout: 3000
+    timeout: 3000,
   });
 
 export const ParlantConfigurationWrite = (description: string) =>
@@ -92,7 +101,7 @@ export const ParlantSecurityConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 60000
+    timeout: 60000,
   });
 
 export const ParlantSystemConfiguration = (description: string) =>
@@ -100,7 +109,7 @@ export const ParlantSystemConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 45000
+    timeout: 45000,
   });
 
 export const ParlantIntegrationConfiguration = (description: string) =>
@@ -108,7 +117,7 @@ export const ParlantIntegrationConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._HIGH,
     cacheable: false,
-    timeout: 25000
+    timeout: 25000,
   });
 
 // Conversation context type
@@ -151,7 +160,13 @@ export interface ConfigurationSettingDto {
   environment?: 'development' | 'staging' | 'production' | 'all';
 
   /** Setting category */
-  category: 'SYSTEM' | 'SECURITY' | 'PERFORMANCE' | 'INTEGRATION' | 'UI' | 'API';
+  category:
+    | 'SYSTEM'
+    | 'SECURITY'
+    | 'PERFORMANCE'
+    | 'INTEGRATION'
+    | 'UI'
+    | 'API';
 
   /** Sensitivity level */
   sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
@@ -250,7 +265,13 @@ export interface IntegrationConfigurationDto {
   name: string;
 
   /** Integration type */
-  type: 'API' | 'DATABASE' | 'WEBHOOK' | 'MESSAGE_QUEUE' | 'FILE_SYSTEM' | 'THIRD_PARTY';
+  type:
+    | 'API'
+    | 'DATABASE'
+    | 'WEBHOOK'
+    | 'MESSAGE_QUEUE'
+    | 'FILE_SYSTEM'
+    | 'THIRD_PARTY';
 
   /** Configuration parameters */
   configuration: {
@@ -306,10 +327,11 @@ export interface IntegrationConfigurationDto {
 export class ConfigurationApiController {
   private readonly logger = new Logger(ConfigurationApiController.name);
 
-  constructor(
-    // Configuration services would be injected here
-  ) {
-    this.logger.log('Configuration API Controller initialized with comprehensive PARLANT validation');
+  constructor() // Configuration services would be injected here
+  {
+    this.logger.log(
+      'Configuration API Controller initialized with comprehensive PARLANT validation',
+    );
   }
 
   // ===== CONFIGURATION RETRIEVAL (Low Risk) =====
@@ -320,13 +342,24 @@ export class ConfigurationApiController {
    */
   @Get()
   @OperatorOrAdmin()
-  @ParlantConfigurationRead('Retrieve system configuration settings for monitoring and administration')
+  @ParlantConfigurationRead(
+    'Retrieve system configuration settings for monitoring and administration',
+  )
   @ApiOperation({
     summary: 'Get all configuration settings',
-    description: 'Retrieve all system configuration settings with PARLANT validation'
+    description:
+      'Retrieve all system configuration settings with PARLANT validation',
   })
-  @ApiQuery({ name: 'category', required: false, enum: ['SYSTEM', 'SECURITY', 'PERFORMANCE', 'INTEGRATION', 'UI', 'API'] })
-  @ApiQuery({ name: 'environment', required: false, enum: ['development', 'staging', 'production', 'all'] })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    enum: ['SYSTEM', 'SECURITY', 'PERFORMANCE', 'INTEGRATION', 'UI', 'API'],
+  })
+  @ApiQuery({
+    name: 'environment',
+    required: false,
+    enum: ['development', 'staging', 'production', 'all'],
+  })
   @ApiQuery({ name: 'includeSecrets', required: false, type: 'boolean' })
   @ApiResponse({
     status: 200,
@@ -340,11 +373,11 @@ export class ConfigurationApiController {
           properties: {
             totalSettings: { type: 'number' },
             categories: { type: 'array', items: { type: 'string' } },
-            lastModified: { type: 'string', format: 'date-time' }
-          }
-        }
-      }
-    }
+            lastModified: { type: 'string', format: 'date-time' },
+          },
+        },
+      },
+    },
   })
   async getAllSettings(
     @Query('category') category?: string,
@@ -369,7 +402,7 @@ export class ConfigurationApiController {
       includeSecrets,
       userId: user.id,
       conversationId: conversationContext?.conversationId,
-      validationApproved: true
+      validationApproved: true,
     });
 
     // Mock implementation - would retrieve actual configuration
@@ -378,8 +411,8 @@ export class ConfigurationApiController {
       metadata: {
         totalSettings: 0,
         categories: ['SYSTEM', 'SECURITY', 'PERFORMANCE'],
-        lastModified: new Date()
-      }
+        lastModified: new Date(),
+      },
     };
   }
 
@@ -391,7 +424,7 @@ export class ConfigurationApiController {
   @ParlantConfigurationRead('Retrieve specific configuration setting by key')
   @ApiOperation({
     summary: 'Get configuration setting',
-    description: 'Retrieve specific configuration setting by key'
+    description: 'Retrieve specific configuration setting by key',
   })
   @ApiParam({ name: 'key', description: 'Configuration key' })
   async getSetting(
@@ -414,7 +447,7 @@ export class ConfigurationApiController {
       operationId,
       key,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation
@@ -425,8 +458,8 @@ export class ConfigurationApiController {
         category: 'SYSTEM',
         environment: 'all',
         lastModified: new Date(),
-        modifiedBy: 'system'
-      }
+        modifiedBy: 'system',
+      },
     };
   }
 
@@ -438,12 +471,47 @@ export class ConfigurationApiController {
    */
   @Put(':key')
   @OperatorOrAdmin()
-  @ParlantConfigurationWrite('Update system configuration setting with comprehensive validation and impact assessment')
+  @ParlantConfigurationWrite(
+    'Update system configuration setting with comprehensive validation and impact assessment',
+  )
   @ApiOperation({
     summary: 'Update configuration setting',
-      description: 'Update configuration setting with comprehensive PARLANT validation'})@ApiParam({ name: 'key', description: 'Configuration key to update' })@ApiBody({schema: {
+    description:
+      'Update configuration setting with comprehensive PARLANT validation',
+  })
+  @ApiParam({ name: 'key', description: 'Configuration key to update' })
+  @ApiBody({
+    schema: {
       type: 'object',
-      properties: {key: { type: 'string' },value: {},description: { type: 'string' },environment: { type: 'string', enum: ['development', 'staging', 'production', 'all'] },category: { type: 'string', enum: ['SYSTEM', 'SECURITY', 'PERFORMANCE', 'INTEGRATION', 'UI', 'API'] },sensitivity: { type: 'string', enum: ['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'SECRET'] },requiresRestart: { type: 'boolean' },justification: { type: 'string' }},required: ['key', 'value', 'category', 'sensitivity', 'justification']}})
+      properties: {
+        key: { type: 'string' },
+        value: {},
+        description: { type: 'string' },
+        environment: {
+          type: 'string',
+          enum: ['development', 'staging', 'production', 'all'],
+        },
+        category: {
+          type: 'string',
+          enum: [
+            'SYSTEM',
+            'SECURITY',
+            'PERFORMANCE',
+            'INTEGRATION',
+            'UI',
+            'API',
+          ],
+        },
+        sensitivity: {
+          type: 'string',
+          enum: ['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'SECRET'],
+        },
+        requiresRestart: { type: 'boolean' },
+        justification: { type: 'string' },
+      },
+      required: ['key', 'value', 'category', 'sensitivity', 'justification'],
+    },
+  })
   async updateSetting(
     @Param('key') key: string,
     @Body() settingDto: ConfigurationSettingDto,
@@ -459,7 +527,9 @@ export class ConfigurationApiController {
   }> {
     const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Configuration update request`, {operationId,key,
+    this.logger.log(`[${operationId}] Configuration update request`, {
+      operationId,
+      key,
       category: settingDto.category,
       sensitivity: settingDto.sensitivity,
       environment: settingDto.environment,
@@ -468,7 +538,7 @@ export class ConfigurationApiController {
       userId: user.id,
       conversationId: conversationContext?.conversationId,
       validationApproved: true,
-      securityLevel: conversationContext?.securityLevel
+      securityLevel: conversationContext?.securityLevel,
     });
 
     try {
@@ -479,15 +549,20 @@ export class ConfigurationApiController {
       const previousValue = await this.getCurrentConfigValue(key);
 
       // Create change record
-      const changeId = await this.createConfigurationChangeRecord(settingDto, user.id);
+      const changeId = await this.createConfigurationChangeRecord(
+        settingDto,
+        user.id,
+      );
 
       // Apply configuration change
       await this.applyConfigurationChange(key, settingDto.value, changeId);
 
-      this.logger.log(`[${operationId}] Configuration updated successfully`, {operationId,key,
+      this.logger.log(`[${operationId}] Configuration updated successfully`, {
+        operationId,
+        key,
         changeId,
         requiresRestart: settingDto.requiresRestart,
-        userId: user.id
+        userId: user.id,
       });
 
       return {
@@ -496,18 +571,19 @@ export class ConfigurationApiController {
         previousValue,
         newValue: settingDto.value,
         changeId,
-        requiresRestart: settingDto.requiresRestart || false
+        requiresRestart: settingDto.requiresRestart || false,
       };
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Configuration update failed`, {operationId,key,
+      this.logger.error(`[${operationId}] Configuration update failed`, {
+        operationId,
+        key,
         error: error instanceof Error ? error.message : String(error),
-        userId: user.id
+        userId: user.id,
       });
 
       throw new HttpException(
         `Configuration update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -518,10 +594,17 @@ export class ConfigurationApiController {
    */
   @Put('security/:policyName')
   @AdminOnly()
-  @ParlantSecurityConfiguration('Update security configuration policy with comprehensive validation and audit trail')
+  @ParlantSecurityConfiguration(
+    'Update security configuration policy with comprehensive validation and audit trail',
+  )
   @ApiOperation({
     summary: 'Update security configuration',
-      description: 'Update security policy configuration with critical validation requirements'})@ApiParam({ name: 'policyName', description: 'Security policy name' })async updateSecurityConfiguration(@Param('policyName') policyName: string,
+    description:
+      'Update security policy configuration with critical validation requirements',
+  })
+  @ApiParam({ name: 'policyName', description: 'Security policy name' })
+  async updateSecurityConfiguration(
+    @Param('policyName') policyName: string,
     @Body() securityDto: SecurityConfigurationDto,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
@@ -533,12 +616,14 @@ export class ConfigurationApiController {
   }> {
     const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Security configuration update request`, {operationId,policyName,
+    this.logger.log(`[${operationId}] Security configuration update request`, {
+      operationId,
+      policyName,
       effectiveDate: securityDto.effectiveDate,
       justification: securityDto.justification,
       userId: user.id,
       conversationId: conversationContext?.conversationId,
-      validationApproved: true
+      validationApproved: true,
     });
 
     try {
@@ -546,32 +631,42 @@ export class ConfigurationApiController {
       this.validateSecurityConfiguration(securityDto);
 
       // Create security change record
-      const changeId = await this.createSecurityChangeRecord(policyName, securityDto, user.id);
+      const changeId = await this.createSecurityChangeRecord(
+        policyName,
+        securityDto,
+        user.id,
+      );
 
       // Apply security configuration
       await this.applySecurityConfiguration(policyName, securityDto, changeId);
 
-      this.logger.log(`[${operationId}] Security configuration updated`, {operationId,policyName,
+      this.logger.log(`[${operationId}] Security configuration updated`, {
+        operationId,
+        policyName,
         changeId,
-        userId: user.id
+        userId: user.id,
       });
 
       return {
         success: true,
         policyName,
         changeId,
-        effectiveDate: securityDto.effectiveDate || new Date()
+        effectiveDate: securityDto.effectiveDate || new Date(),
       };
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Security configuration update failed`, {operationId,policyName,
-        error: error instanceof Error ? error.message : String(error),
-        userId: user.id
-      });
+      this.logger.error(
+        `[${operationId}] Security configuration update failed`,
+        {
+          operationId,
+          policyName,
+          error: error instanceof Error ? error.message : String(error),
+          userId: user.id,
+        },
+      );
 
       throw new HttpException(
         `Security configuration update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -581,10 +676,15 @@ export class ConfigurationApiController {
    */
   @Put('system/:namespace')
   @AdminOnly()
-  @ParlantSystemConfiguration('Update system configuration namespace with version control and rollback capabilities')
+  @ParlantSystemConfiguration(
+    'Update system configuration namespace with version control and rollback capabilities',
+  )
   @ApiOperation({
     summary: 'Update system configuration',
-      description: 'Update system configuration namespace with versioning and rollback support'})async updateSystemConfiguration(
+    description:
+      'Update system configuration namespace with versioning and rollback support',
+  })
+  async updateSystemConfiguration(
     @Param('namespace') namespace: string,
     @Body() systemDto: SystemConfigurationDto,
     @CurrentUser() user: ByteBotdUser,
@@ -598,15 +698,18 @@ export class ConfigurationApiController {
   }> {
     const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] System configuration update request`, {operationId,namespace,
+    this.logger.log(`[${operationId}] System configuration update request`, {
+      operationId,
+      namespace,
       impact: systemDto.impact,
       testingRequired: systemDto.testingRequired,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation
-    const version = `v${Date.now()}`;const changeId = `change_${Date.now()}
+    const version = `v${Date.now()}`;
+    const changeId = `change_${Date.now()}
 _${Math.random().toString(36).substring(7)}`;
 
     return {
@@ -614,7 +717,7 @@ _${Math.random().toString(36).substring(7)}`;
       namespace,
       version,
       changeId,
-      rollbackVersion: systemDto.previousVersion
+      rollbackVersion: systemDto.previousVersion,
     };
   }
 
@@ -623,10 +726,15 @@ _${Math.random().toString(36).substring(7)}`;
    */
   @Put('integration/:name')
   @OperatorOrAdmin()
-  @ParlantIntegrationConfiguration('Update integration configuration with connection and security parameter validation')
+  @ParlantIntegrationConfiguration(
+    'Update integration configuration with connection and security parameter validation',
+  )
   @ApiOperation({
     summary: 'Update integration configuration',
-      description: 'Update integration configuration with security and performance validation'})async updateIntegrationConfiguration(
+    description:
+      'Update integration configuration with security and performance validation',
+  })
+  async updateIntegrationConfiguration(
     @Param('name') name: string,
     @Body() integrationDto: IntegrationConfigurationDto,
     @CurrentUser() user: ByteBotdUser,
@@ -639,11 +747,13 @@ _${Math.random().toString(36).substring(7)}`;
   }> {
     const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Integration configuration update`, {operationId,integrationName: name,
+    this.logger.log(`[${operationId}] Integration configuration update`, {
+      operationId,
+      integrationName: name,
       type: integrationDto.type,
       enabled: integrationDto.enabled,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation
@@ -654,7 +764,8 @@ _${Math.random().toString(36).substring(7)}`;
       success: true,
       integrationName: name,
       status: integrationDto.enabled ? 'enabled' : 'disabled',
-      changeId};
+      changeId,
+    };
   }
 
   // ===== CONFIGURATION MANAGEMENT OPERATIONS =====
@@ -664,11 +775,16 @@ _${Math.random().toString(36).substring(7)}`;
    */
   @Get('history/:key')
   @OperatorOrAdmin()
-  @ParlantConfigurationRead('Retrieve configuration change history for audit and compliance tracking')
+  @ParlantConfigurationRead(
+    'Retrieve configuration change history for audit and compliance tracking',
+  )
   @ApiOperation({
     summary: 'Get configuration change history',
-      description: 'Retrieve change history for configuration setting'})async getConfigurationHistory(
-    @Param('key') key: string,@Query('limit') limit: number = 50,
+    description: 'Retrieve change history for configuration setting',
+  })
+  async getConfigurationHistory(
+    @Param('key') key: string,
+    @Query('limit') limit: number = 50,
     @CurrentUser() user: ByteBotdUser,
     @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
@@ -690,13 +806,13 @@ _${Math.random().toString(36).substring(7)}`;
       key,
       limit,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     return {
       key,
       changes: [],
-      totalChanges: 0
+      totalChanges: 0,
     };
   }
 
@@ -705,10 +821,14 @@ _${Math.random().toString(36).substring(7)}`;
    */
   @Post('rollback/:changeId')
   @AdminOnly()
-  @ParlantConfigurationWrite('Rollback configuration change to previous state with comprehensive validation')
+  @ParlantConfigurationWrite(
+    'Rollback configuration change to previous state with comprehensive validation',
+  )
   @ApiOperation({
     summary: 'Rollback configuration change',
-      description: 'Rollback configuration to previous state'})async rollbackConfigurationChange(
+    description: 'Rollback configuration to previous state',
+  })
+  async rollbackConfigurationChange(
     @Param('changeId') changeId: string,
     @Body() rollbackJustification: { justification: string },
     @CurrentUser() user: ByteBotdUser,
@@ -721,10 +841,12 @@ _${Math.random().toString(36).substring(7)}`;
   }> {
     const operationId = this.generateOperationId();
 
-    this.logger.log(`[${operationId}] Configuration rollback request`, {operationId,changeId,
+    this.logger.log(`[${operationId}] Configuration rollback request`, {
+      operationId,
+      changeId,
       justification: rollbackJustification.justification,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation
@@ -735,7 +857,7 @@ _${Math.random().toString(36).substring(7)}`;
       success: true,
       changeId,
       rollbackId,
-      restoredValue: null
+      restoredValue: null,
     };
   }
 
@@ -745,10 +867,15 @@ _${Math.random().toString(36).substring(7)}`;
     if (!dto.justification || dto.justification.length < 10) {
       throw new HttpException(
         'Business justification required for all configuration changes',
-      HttpStatus.BAD_REQUEST);
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-  if(dto.sensitivity === 'SECRET' && dto.environment === 'all') {throw new HttpException('Secret configurations cannot be applied to all environments',HttpStatus.BAD_REQUEST);
+    if (dto.sensitivity === 'SECRET' && dto.environment === 'all') {
+      throw new HttpException(
+        'Secret configurations cannot be applied to all environments',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -756,7 +883,7 @@ _${Math.random().toString(36).substring(7)}`;
     if (!dto.justification || dto.justification.length < 20) {
       throw new HttpException(
         'Detailed justification required for security configuration changes',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
@@ -766,29 +893,38 @@ _${Math.random().toString(36).substring(7)}`;
     return null;
   }
 
-  private async createConfigurationChangeRecord(dto: ConfigurationSettingDto, userId: string): Promise<string> {
+  private async createConfigurationChangeRecord(
+    dto: ConfigurationSettingDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create change tracking record in database
     return `change_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
   private async createSecurityChangeRecord(
     policyName: string,
     dto: SecurityConfigurationDto,
-    userId: string
+    userId: string,
   ): Promise<string> {
     // Mock implementation - would create security change record in database
     return `sec_change_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
-  private async applyConfigurationChange(key: string, value: unknown, changeId: string): Promise<void> {
+  private async applyConfigurationChange(
+    key: string,
+    value: unknown,
+    changeId: string,
+  ): Promise<void> {
     // Mock implementation - would apply actual configuration change to database
     this.logger.log(`Applying configuration change: ${key} (${changeId})`);
   }
   private async applySecurityConfiguration(
     policyName: string,
     dto: SecurityConfigurationDto,
-    changeId: string
+    changeId: string,
   ): Promise<void> {
     // Mock implementation - would apply security configuration to database
-    this.logger.log(`Applying security configuration: ${policyName} (${changeId})`);
+    this.logger.log(
+      `Applying security configuration: ${policyName} (${changeId})`,
+    );
   }
 
   private generateOperationId(): string {

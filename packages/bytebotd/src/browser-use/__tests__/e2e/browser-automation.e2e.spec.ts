@@ -44,10 +44,17 @@ describe('Browser Automation E2E Tests', () => {
 
     // Get service instances for direct validation
     browserUseService = moduleFixture.get<BrowserUseService>(BrowserUseService);
-    browserInteractionService = moduleFixture.get<BrowserInteractionService>(BrowserInteractionService);
-    browserSessionService = moduleFixture.get<BrowserSessionService>(BrowserSessionService);
-    pythonIntegrationService = moduleFixture.get<PythonIntegrationService>(PythonIntegrationService);
-    errorHandlerService = moduleFixture.get<ErrorHandlerService>(ErrorHandlerService);
+    browserInteractionService = moduleFixture.get<BrowserInteractionService>(
+      BrowserInteractionService,
+    );
+    browserSessionService = moduleFixture.get<BrowserSessionService>(
+      BrowserSessionService,
+    );
+    pythonIntegrationService = moduleFixture.get<PythonIntegrationService>(
+      PythonIntegrationService,
+    );
+    errorHandlerService =
+      moduleFixture.get<ErrorHandlerService>(ErrorHandlerService);
   });
 
   afterAll(async () => {
@@ -67,8 +74,8 @@ describe('Browser Automation E2E Tests', () => {
           options: {
             headless: true,
             viewport: { width: 1920, height: 1080 },
-            timeout: 30000
-          }
+            timeout: 30000,
+          },
         })
         .expect(201);
 
@@ -77,8 +84,8 @@ describe('Browser Automation E2E Tests', () => {
         status: 'created',
         configuration: expect.objectContaining({
           headless: true,
-          viewport: { width: 1920, height: 1080 }
-        })
+          viewport: { width: 1920, height: 1080 },
+        }),
       });
 
       sessionId = createResponse.body.sessionId;
@@ -88,7 +95,7 @@ describe('Browser Automation E2E Tests', () => {
         .post(`/browser-use/sessions/${sessionId}/navigate`)
         .send({
           url: 'https://example.com',
-          waitFor: 'networkidle0'
+          waitFor: 'networkidle0',
         })
         .expect(200);
 
@@ -96,7 +103,7 @@ describe('Browser Automation E2E Tests', () => {
         success: true,
         url: 'https://example.com',
         title: expect.any(String),
-        loadTime: expect.any(Number)
+        loadTime: expect.any(Number),
       });
 
       // Step 3: Perform multiple interactions
@@ -104,7 +111,7 @@ describe('Browser Automation E2E Tests', () => {
         .post(`/browser-use/sessions/${sessionId}/click`)
         .send({
           selector: 'body',
-          options: { waitFor: 'visible', timeout: 5000 }
+          options: { waitFor: 'visible', timeout: 5000 },
         })
         .expect(200);
 
@@ -112,7 +119,7 @@ describe('Browser Automation E2E Tests', () => {
         success: true,
         selector: 'body',
         timestamp: expect.any(String),
-        executionTime: expect.any(Number)
+        executionTime: expect.any(Number),
       });
 
       // Step 4: Extract page data
@@ -121,8 +128,8 @@ describe('Browser Automation E2E Tests', () => {
         .send({
           queries: [
             { name: 'title', selector: 'title', attribute: 'textContent' },
-            { name: 'url', selector: null, attribute: 'url' }
-          ]
+            { name: 'url', selector: null, attribute: 'url' },
+          ],
         })
         .expect(200);
 
@@ -130,9 +137,9 @@ describe('Browser Automation E2E Tests', () => {
         success: true,
         data: expect.objectContaining({
           title: expect.any(String),
-          url: expect.any(String)
+          url: expect.any(String),
         }),
-        extractionTime: expect.any(Number)
+        extractionTime: expect.any(Number),
       });
 
       // Step 5: Take screenshot for validation
@@ -141,8 +148,8 @@ describe('Browser Automation E2E Tests', () => {
         .send({
           options: {
             fullPage: true,
-            quality: 80
-          }
+            quality: 80,
+          },
         })
         .expect(200);
 
@@ -151,8 +158,8 @@ describe('Browser Automation E2E Tests', () => {
         screenshot: expect.any(String), // Base64 encoded
         dimensions: expect.objectContaining({
           width: expect.any(Number),
-          height: expect.any(Number)
-        })
+          height: expect.any(Number),
+        }),
       });
 
       // Step 6: Get session status and metrics
@@ -167,8 +174,8 @@ describe('Browser Automation E2E Tests', () => {
         metrics: expect.objectContaining({
           totalRequests: expect.any(Number),
           successfulRequests: expect.any(Number),
-          averageResponseTime: expect.any(Number)
-        })
+          averageResponseTime: expect.any(Number),
+        }),
       });
 
       // Step 7: Clean destroy session
@@ -179,7 +186,7 @@ describe('Browser Automation E2E Tests', () => {
       expect(destroyResponse.body).toMatchObject({
         success: true,
         sessionId,
-        cleanupTime: expect.any(Number)
+        cleanupTime: expect.any(Number),
       });
 
       // Validate total workflow performance
@@ -199,15 +206,15 @@ describe('Browser Automation E2E Tests', () => {
         .send({
           options: {
             headless: true,
-            timeout: 2000 // 2 seconds
-          }
+            timeout: 2000, // 2 seconds
+          },
         })
         .expect(201);
 
       const sessionId = createResponse.body.sessionId;
 
       // Wait for timeout
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       // Session should be automatically cleaned up
       await request(app.getHttpServer())
@@ -225,8 +232,8 @@ describe('Browser Automation E2E Tests', () => {
         .send({
           options: {
             headless: true,
-            viewport: { width: 1920, height: 1080 }
-          }
+            viewport: { width: 1920, height: 1080 },
+          },
         })
         .expect(201);
 
@@ -256,7 +263,7 @@ describe('Browser Automation E2E Tests', () => {
         .send({
           selector: 'input[name="custname"]',
           text: 'Test User',
-          options: { delay: 10 }
+          options: { delay: 10 },
         })
         .expect(200);
 
@@ -265,7 +272,7 @@ describe('Browser Automation E2E Tests', () => {
         .send({
           selector: 'input[name="custemail"]',
           text: 'test@example.com',
-          options: { delay: 10 }
+          options: { delay: 10 },
         })
         .expect(200);
 
@@ -274,7 +281,7 @@ describe('Browser Automation E2E Tests', () => {
         .post(`/browser-use/sessions/${sessionId}/select`)
         .send({
           selector: 'select[name="size"]',
-          value: 'medium'
+          value: 'medium',
         })
         .expect(200);
 
@@ -283,7 +290,7 @@ describe('Browser Automation E2E Tests', () => {
         .post(`/browser-use/sessions/${sessionId}/click`)
         .send({
           selector: 'input[type="submit"]',
-          options: { waitFor: 'navigation' }
+          options: { waitFor: 'navigation' },
         })
         .expect(200);
 
@@ -292,8 +299,8 @@ describe('Browser Automation E2E Tests', () => {
         .post(`/browser-use/sessions/${sessionId}/extract`)
         .send({
           queries: [
-            { name: 'title', selector: 'title', attribute: 'textContent' }
-          ]
+            { name: 'title', selector: 'title', attribute: 'textContent' },
+          ],
         })
         .expect(200);
 
@@ -304,7 +311,7 @@ describe('Browser Automation E2E Tests', () => {
       const pages = [
         'https://example.com',
         'https://httpbin.org',
-        'https://jsonplaceholder.typicode.com'
+        'https://jsonplaceholder.typicode.com',
       ];
 
       const results = [];
@@ -315,7 +322,7 @@ describe('Browser Automation E2E Tests', () => {
           .post(`/browser-use/sessions/${sessionId}/navigate`)
           .send({
             url,
-            waitFor: 'networkidle0'
+            waitFor: 'networkidle0',
           })
           .expect(200);
 
@@ -325,15 +332,15 @@ describe('Browser Automation E2E Tests', () => {
           .send({
             queries: [
               { name: 'title', selector: 'title', attribute: 'textContent' },
-              { name: 'url', selector: null, attribute: 'url' }
-            ]
+              { name: 'url', selector: null, attribute: 'url' },
+            ],
           })
           .expect(200);
 
         results.push({
           url,
           title: extractResponse.body.data.title,
-          loadTime: navigateResponse.body.loadTime
+          loadTime: navigateResponse.body.loadTime,
         });
       }
 
@@ -359,14 +366,14 @@ describe('Browser Automation E2E Tests', () => {
           script: `
             document.body.innerHTML += '<div id="test-element">Dynamic Content</div>';
             return document.getElementById('test-element').textContent;
-          `
+          `,
         })
         .expect(200);
 
       expect(executeResponse.body).toMatchObject({
         success: true,
         result: 'Dynamic Content',
-        executionTime: expect.any(Number)
+        executionTime: expect.any(Number),
       });
 
       // Verify dynamic content exists
@@ -374,8 +381,12 @@ describe('Browser Automation E2E Tests', () => {
         .post(`/browser-use/sessions/${sessionId}/extract`)
         .send({
           queries: [
-            { name: 'dynamicContent', selector: '#test-element', attribute: 'textContent' }
-          ]
+            {
+              name: 'dynamicContent',
+              selector: '#test-element',
+              attribute: 'textContent',
+            },
+          ],
         })
         .expect(200);
 
@@ -392,8 +403,8 @@ describe('Browser Automation E2E Tests', () => {
         .send({
           options: {
             headless: true,
-            viewport: { width: 1920, height: 1080 }
-          }
+            viewport: { width: 1920, height: 1080 },
+          },
         })
         .expect(201);
 
@@ -415,7 +426,7 @@ describe('Browser Automation E2E Tests', () => {
       const response = await request(app.getHttpServer())
         .post(`/browser-use/sessions/${sessionId}/navigate`)
         .send({
-          url: 'https://invalid-domain-that-does-not-exist.com'
+          url: 'https://invalid-domain-that-does-not-exist.com',
         })
         .expect(400);
 
@@ -424,10 +435,10 @@ describe('Browser Automation E2E Tests', () => {
           type: 'NavigationError',
           message: expect.stringContaining('navigation'),
           code: expect.any(String),
-          timestamp: expect.any(String)
+          timestamp: expect.any(String),
         }),
         sessionId,
-        correlationId: expect.any(String)
+        correlationId: expect.any(String),
       });
 
       // Verify session is still active after error
@@ -447,7 +458,7 @@ describe('Browser Automation E2E Tests', () => {
         .post(`/browser-use/sessions/${sessionId}/click`)
         .send({
           selector: '#non-existent-element',
-          options: { timeout: 1000 }
+          options: { timeout: 1000 },
         })
         .expect(404);
 
@@ -458,9 +469,9 @@ describe('Browser Automation E2E Tests', () => {
           code: 'ELEMENT_NOT_FOUND',
           details: expect.objectContaining({
             selector: '#non-existent-element',
-            timeout: 1000
-          })
-        })
+            timeout: 1000,
+          }),
+        }),
       });
     });
 
@@ -475,19 +486,19 @@ describe('Browser Automation E2E Tests', () => {
       const response = await request(app.getHttpServer())
         .post(`/browser-use/sessions/${sessionId}/execute`)
         .send({
-          script: 'throw new Error("Simulated browser crash");'
+          script: 'throw new Error("Simulated browser crash");',
         })
         .expect(500);
 
       expect(response.body).toMatchObject({
         error: expect.objectContaining({
           type: 'JavaScriptExecutionError',
-          code: 'SCRIPT_EXECUTION_FAILED'
-        })
+          code: 'SCRIPT_EXECUTION_FAILED',
+        }),
       });
 
       // Session should attempt automatic recovery
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Verify session can still handle requests after recovery
       await request(app.getHttpServer())
@@ -512,20 +523,26 @@ describe('Browser Automation E2E Tests', () => {
           .send({ selector: 'body', text: 'test' }),
         request(app.getHttpServer())
           .post(`/browser-use/sessions/${sessionId}/extract`)
-          .send({ queries: [{ name: 'title', selector: 'title', attribute: 'textContent' }] })
+          .send({
+            queries: [
+              { name: 'title', selector: 'title', attribute: 'textContent' },
+            ],
+          }),
       ];
 
       const results = await Promise.allSettled(promises);
 
       // At least one should succeed, others may be queued or rejected with proper error
-      const successes = results.filter(r => r.status === 'fulfilled').length;
-      const rejections = results.filter(r => r.status === 'rejected').length;
+      const successes = results.filter((r) => r.status === 'fulfilled').length;
+      const rejections = results.filter((r) => r.status === 'rejected').length;
 
       expect(successes).toBeGreaterThanOrEqual(1);
 
       // Rejections should be due to concurrency control, not crashes
       if (rejections > 0) {
-        const rejectedResult = results.find(r => r.status === 'rejected') as PromiseRejectedResult;
+        const rejectedResult = results.find(
+          (r) => r.status === 'rejected',
+        ) as PromiseRejectedResult;
         expect(rejectedResult.reason.message).toMatch(/concurrent|queue|busy/i);
       }
     });
@@ -544,8 +561,8 @@ describe('Browser Automation E2E Tests', () => {
           .send({
             options: {
               headless: true,
-              viewport: { width: 800, height: 600 }
-            }
+              viewport: { width: 800, height: 600 },
+            },
           })
           .expect(201);
 
@@ -553,10 +570,10 @@ describe('Browser Automation E2E Tests', () => {
       }
 
       // Destroy all sessions
-      const destroyPromises = sessions.map(sessionId =>
+      const destroyPromises = sessions.map((sessionId) =>
         request(app.getHttpServer())
           .delete(`/browser-use/sessions/${sessionId}`)
-          .expect(200)
+          .expect(200),
       );
 
       await Promise.all(destroyPromises);
@@ -572,7 +589,7 @@ describe('Browser Automation E2E Tests', () => {
       const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -592,9 +609,13 @@ describe('Browser Automation E2E Tests', () => {
               .post(`/browser-use/sessions/${sessionId}/extract`)
               .send({
                 queries: [
-                  { name: 'title', selector: 'title', attribute: 'textContent' }
-                ]
-              })
+                  {
+                    name: 'title',
+                    selector: 'title',
+                    attribute: 'textContent',
+                  },
+                ],
+              }),
           );
         }
 
@@ -602,7 +623,9 @@ describe('Browser Automation E2E Tests', () => {
         const results = await Promise.allSettled(operations);
         const totalTime = Date.now() - startTime;
 
-        const successCount = results.filter(r => r.status === 'fulfilled').length;
+        const successCount = results.filter(
+          (r) => r.status === 'fulfilled',
+        ).length;
         const averageTime = totalTime / operations.length;
 
         expect(successCount).toBeGreaterThanOrEqual(40); // 80% success rate
@@ -627,19 +650,19 @@ describe('Browser Automation E2E Tests', () => {
           memoryUsage: expect.objectContaining({
             used: expect.any(Number),
             total: expect.any(Number),
-            percentage: expect.any(Number)
-          })
+            percentage: expect.any(Number),
+          }),
         }),
         performance: expect.objectContaining({
           averageResponseTime: expect.any(Number),
           requestsPerMinute: expect.any(Number),
-          errorRate: expect.any(Number)
+          errorRate: expect.any(Number),
         }),
         health: expect.objectContaining({
           status: expect.stringMatching(/^(healthy|degraded|unhealthy)$/),
           uptime: expect.any(Number),
-          lastHealthCheck: expect.any(String)
-        })
+          lastHealthCheck: expect.any(String),
+        }),
       });
     });
   });
@@ -651,7 +674,7 @@ describe('Browser Automation E2E Tests', () => {
       const createResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions')
         .send({
-          options: { headless: true }
+          options: { headless: true },
         })
         .expect(201);
 
@@ -679,7 +702,7 @@ describe('Browser Automation E2E Tests', () => {
         .post(`/browser-use/sessions/${sessionId}/click`)
         .send({
           selector: '<script>alert("XSS")</script>',
-          options: { timeout: 1000 }
+          options: { timeout: 1000 },
         })
         .expect(400);
 
@@ -687,8 +710,8 @@ describe('Browser Automation E2E Tests', () => {
         error: expect.objectContaining({
           type: 'ValidationError',
           code: 'INVALID_SELECTOR',
-          message: expect.stringContaining('selector')
-        })
+          message: expect.stringContaining('selector'),
+        }),
       });
     });
 
@@ -702,7 +725,8 @@ describe('Browser Automation E2E Tests', () => {
       const response = await request(app.getHttpServer())
         .post(`/browser-use/sessions/${sessionId}/execute`)
         .send({
-          script: 'window.location.href = "https://malicious-site.com"; document.cookie;'
+          script:
+            'window.location.href = "https://malicious-site.com"; document.cookie;',
         })
         .expect(403);
 
@@ -710,8 +734,8 @@ describe('Browser Automation E2E Tests', () => {
         error: expect.objectContaining({
           type: 'SecurityError',
           code: 'FORBIDDEN_OPERATION',
-          message: expect.stringContaining('security')
-        })
+          message: expect.stringContaining('security'),
+        }),
       });
     });
 
@@ -720,7 +744,7 @@ describe('Browser Automation E2E Tests', () => {
       const response = await request(app.getHttpServer())
         .post(`/browser-use/sessions/${sessionId}/navigate`)
         .send({
-          url: 'javascript:alert("XSS")'
+          url: 'javascript:alert("XSS")',
         })
         .expect(400);
 
@@ -728,8 +752,8 @@ describe('Browser Automation E2E Tests', () => {
         error: expect.objectContaining({
           type: 'ValidationError',
           code: 'INVALID_URL',
-          message: expect.stringContaining('url')
-        })
+          message: expect.stringContaining('url'),
+        }),
       });
     });
 
@@ -748,15 +772,15 @@ describe('Browser Automation E2E Tests', () => {
       const response = await request(app.getHttpServer())
         .post(`/browser-use/sessions/${sessionId}/execute`)
         .send({
-          script: largeDataScript
+          script: largeDataScript,
         })
         .expect(413);
 
       expect(response.body).toMatchObject({
         error: expect.objectContaining({
           type: 'ResourceLimitError',
-          code: 'PAYLOAD_TOO_LARGE'
-        })
+          code: 'PAYLOAD_TOO_LARGE',
+        }),
       });
     });
   });
@@ -772,27 +796,27 @@ describe('Browser Automation E2E Tests', () => {
           total: expect.any(Number),
           active: expect.any(Number),
           completed: expect.any(Number),
-          failed: expect.any(Number)
+          failed: expect.any(Number),
         }),
         operations: expect.objectContaining({
           totalRequests: expect.any(Number),
           successRate: expect.any(Number),
           averageExecutionTime: expect.any(Number),
-          errorDistribution: expect.any(Object)
+          errorDistribution: expect.any(Object),
         }),
         performance: expect.objectContaining({
           throughput: expect.any(Number),
           latency: expect.objectContaining({
             p50: expect.any(Number),
             p95: expect.any(Number),
-            p99: expect.any(Number)
+            p99: expect.any(Number),
           }),
           resourceUtilization: expect.objectContaining({
             cpu: expect.any(Number),
-            memory: expect.any(Number)
-          })
+            memory: expect.any(Number),
+          }),
         }),
-        timestamp: expect.any(String)
+        timestamp: expect.any(String),
       });
     });
 
@@ -807,17 +831,17 @@ describe('Browser Automation E2E Tests', () => {
           browserService: expect.any(String),
           sessionManager: expect.any(String),
           pythonIntegration: expect.any(String),
-          errorHandler: expect.any(String)
+          errorHandler: expect.any(String),
         }),
         checks: expect.arrayContaining([
           expect.objectContaining({
             name: expect.any(String),
             status: expect.any(String),
-            duration: expect.any(Number)
-          })
+            duration: expect.any(Number),
+          }),
         ]),
         uptime: expect.any(Number),
-        timestamp: expect.any(String)
+        timestamp: expect.any(String),
       });
     });
 
@@ -854,17 +878,17 @@ describe('Browser Automation E2E Tests', () => {
           errorTypes: expect.any(Object),
           timeRange: expect.objectContaining({
             start: expect.any(String),
-            end: expect.any(String)
-          })
+            end: expect.any(String),
+          }),
         }),
         errors: expect.arrayContaining([
           expect.objectContaining({
             type: expect.any(String),
             message: expect.any(String),
             timestamp: expect.any(String),
-            context: expect.any(Object)
-          })
-        ])
+            context: expect.any(Object),
+          }),
+        ]),
       });
 
       // Cleanup
@@ -884,15 +908,13 @@ describe('Browser Automation E2E Tests', () => {
         pythonFramework: expect.objectContaining({
           version: expect.any(String),
           status: expect.stringMatching(/^(connected|disconnected|error)$/),
-          capabilities: expect.arrayContaining([
-            expect.any(String)
-          ])
+          capabilities: expect.arrayContaining([expect.any(String)]),
         }),
         integration: expect.objectContaining({
           status: expect.any(String),
           lastSync: expect.any(String),
-          syncErrors: expect.any(Number)
-        })
+          syncErrors: expect.any(Number),
+        }),
       });
     });
 
@@ -916,7 +938,7 @@ describe('Browser Automation E2E Tests', () => {
       expect(shutdownResponse.body).toMatchObject({
         success: true,
         message: expect.stringContaining('shutdown'),
-        cleanedSessions: sessionIds.length
+        cleanedSessions: sessionIds.length,
       });
 
       // Verify all sessions are cleaned up

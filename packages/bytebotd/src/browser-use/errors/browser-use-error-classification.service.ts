@@ -25,7 +25,7 @@ import {
   AutomationErrorCategory,
   ErrorSeverity,
   AutomationError,
-  RecoveryStrategy
+  RecoveryStrategy,
 } from '../../common/error-handling/automation-error-handler.service';
 
 /**
@@ -88,7 +88,7 @@ export enum BrowserUseErrorCategory {
   INVALID_TASK_CONFIGURATION = 'invalid_task_configuration',
   TASK_EXECUTION_TIMEOUT = 'task_execution_timeout',
   CONCURRENT_TASK_LIMIT = 'concurrent_task_limit',
-  TASK_QUEUE_FULL = 'task_queue_full'
+  TASK_QUEUE_FULL = 'task_queue_full',
 }
 
 /**
@@ -147,13 +147,15 @@ interface ErrorPattern {
  */
 @Injectable()
 export class BrowserUseErrorClassificationService {
-  private readonly logger = new Logger(BrowserUseErrorClassificationService.name);
+  private readonly logger = new Logger(
+    BrowserUseErrorClassificationService.name,
+  );
   private readonly errorPatterns: Map<string, ErrorPattern> = new Map();
   private readonly errorHistory: Map<string, BrowserUseError[]> = new Map();
   private readonly sessionErrorCounts: Map<string, number> = new Map();
 
   constructor(
-    private readonly automationErrorHandler: AutomationErrorHandlerService
+    private readonly automationErrorHandler: AutomationErrorHandlerService,
   ) {
     this.initializeErrorPatterns();
     this.logger.log('Browser-Use Error Classification Service initialized');
@@ -172,7 +174,7 @@ export class BrowserUseErrorClassificationService {
       operation?: string;
       browserInfo?: any;
       performanceMetrics?: any;
-    }
+    },
   ): Promise<BrowserUseError> {
     const operationId = `error_classify_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -183,7 +185,7 @@ export class BrowserUseErrorClassificationService {
       sessionId: context.sessionId,
       taskId: context.taskId,
       operation: context.operation,
-      pageUrl: context.pageUrl
+      pageUrl: context.pageUrl,
     });
 
     try {
@@ -191,10 +193,17 @@ export class BrowserUseErrorClassificationService {
       const browserUseCategory = this.detectBrowserUseCategory(error, context);
 
       // Determine error severity
-      const severity = this.determineSeverity(browserUseCategory, error, context);
+      const severity = this.determineSeverity(
+        browserUseCategory,
+        error,
+        context,
+      );
 
       // Get recovery attempts count
-      const recoveryAttempts = this.getRecoveryAttempts(context.sessionId, browserUseCategory);
+      const recoveryAttempts = this.getRecoveryAttempts(
+        context.sessionId,
+        browserUseCategory,
+      );
 
       // Create enhanced browser-use error
       const browserUseError: BrowserUseError = {
@@ -207,7 +216,7 @@ export class BrowserUseErrorClassificationService {
         context: {
           ...context,
           operation: context.operation ?? 'unknown',
-          errorClassificationTime: Date.now() - startTime
+          errorClassificationTime: Date.now() - startTime,
         },
         timestamp: new Date(),
         operationId: context.taskId,
@@ -227,8 +236,8 @@ export class BrowserUseErrorClassificationService {
           userAgent: context.browserInfo?.userAgent,
           browserVersion: context.browserInfo?.version,
           retryCount: recoveryAttempts,
-          maxRetries: this.getMaxRecoveryAttempts(browserUseCategory)
-        }
+          maxRetries: this.getMaxRecoveryAttempts(browserUseCategory),
+        },
       };
 
       // Store error in history
@@ -236,7 +245,8 @@ export class BrowserUseErrorClassificationService {
 
       // Update session error count
       if (context.sessionId) {
-        const currentCount = this.sessionErrorCounts.get(context.sessionId) || 0;
+        const currentCount =
+          this.sessionErrorCounts.get(context.sessionId) || 0;
         this.sessionErrorCounts.set(context.sessionId, currentCount + 1);
       }
 
@@ -246,19 +256,21 @@ export class BrowserUseErrorClassificationService {
         browserUseCategory,
         severity,
         recoveryAttempts,
-        duration
+        duration,
       });
 
       return browserUseError;
-
     } catch (classificationError) {
       const duration = Date.now() - startTime;
 
       this.logger.error(`[${operationId}] Error classification failed`, {
         operationId,
         originalError: error.message,
-        classificationError: classificationError instanceof Error ? classificationError.message : String(classificationError),
-        duration
+        classificationError:
+          classificationError instanceof Error
+            ? classificationError.message
+            : String(classificationError),
+        duration,
       });
 
       // Return minimal error if classification fails
@@ -279,8 +291,8 @@ export class BrowserUseErrorClassificationService {
           component: 'browser-use-api',
           method: context.operation ?? 'unknown',
           retryCount: 0,
-          maxRetries: 3
-        }
+          maxRetries: 3,
+        },
       };
     }
   }
@@ -303,7 +315,7 @@ export class BrowserUseErrorClassificationService {
           maxBackoffMs: 8000,
           browserRelaunch: true,
           clearCache: recoveryAttempts > 1,
-          changeUserAgent: recoveryAttempts > 2
+          changeUserAgent: recoveryAttempts > 2,
         };
 
       case BrowserUseErrorCategory.SESSION_CREATE_FAILED:
@@ -314,7 +326,7 @@ export class BrowserUseErrorClassificationService {
           backoffMs: 1000,
           maxBackoffMs: 5000,
           sessionRestart: true,
-          clearCache: recoveryAttempts > 0
+          clearCache: recoveryAttempts > 0,
         };
 
       case BrowserUseErrorCategory.NAVIGATION_FAILED:
@@ -325,7 +337,7 @@ export class BrowserUseErrorClassificationService {
           backoffMs: 1500,
           maxBackoffMs: 10000,
           waitForStability: true,
-          retryWithProxy: recoveryAttempts > 1
+          retryWithProxy: recoveryAttempts > 1,
         };
 
       case BrowserUseErrorCategory.ELEMENT_NOT_FOUND:
@@ -336,7 +348,7 @@ export class BrowserUseErrorClassificationService {
           backoffMs: 500,
           maxBackoffMs: 3000,
           waitForStability: true,
-          customActions: ['scroll_to_element', 'wait_for_element']
+          customActions: ['scroll_to_element', 'wait_for_element'],
         };
 
       case BrowserUseErrorCategory.BOT_DETECTION:
@@ -346,7 +358,7 @@ export class BrowserUseErrorClassificationService {
           maxRetries: 0,
           changeUserAgent: true,
           retryWithProxy: true,
-          customActions: ['human_verification_required']
+          customActions: ['human_verification_required'],
         };
 
       case BrowserUseErrorCategory.MEMORY_EXHAUSTED:
@@ -356,7 +368,7 @@ export class BrowserUseErrorClassificationService {
           maxRetries: 1,
           sessionRestart: true,
           clearCache: true,
-          customActions: ['reduce_concurrent_sessions', 'garbage_collect']
+          customActions: ['reduce_concurrent_sessions', 'garbage_collect'],
         };
 
       case BrowserUseErrorCategory.RATE_LIMIT_DETECTED:
@@ -366,7 +378,7 @@ export class BrowserUseErrorClassificationService {
           backoffMs: 5000,
           maxBackoffMs: 30000,
           retryWithProxy: recoveryAttempts > 1,
-          changeUserAgent: recoveryAttempts > 2
+          changeUserAgent: recoveryAttempts > 2,
         };
 
       default:
@@ -375,7 +387,7 @@ export class BrowserUseErrorClassificationService {
           maxRetries: 2,
           backoffMs: 1000,
           maxBackoffMs: 5000,
-          waitForStability: true
+          waitForStability: true,
         };
     }
   }
@@ -388,7 +400,11 @@ export class BrowserUseErrorClassificationService {
     errorsByCategory: Record<string, number>;
     errorsBySeverity: Record<string, number>;
     sessionErrorRates: Record<string, number>;
-    topErrorPatterns: Array<{ pattern: string; count: number; category: string }>;
+    topErrorPatterns: Array<{
+      pattern: string;
+      count: number;
+      category: string;
+    }>;
     recoverySuccessRates: Record<string, number>;
     performanceImpact: {
       averageErrorResolutionTime: number;
@@ -400,7 +416,9 @@ export class BrowserUseErrorClassificationService {
 
     // Filter by time range if provided
     const filteredErrors = timeRange
-      ? allErrors.filter(e => e.timestamp >= timeRange.start && e.timestamp <= timeRange.end)
+      ? allErrors.filter(
+          (e) => e.timestamp >= timeRange.start && e.timestamp <= timeRange.end,
+        )
       : allErrors;
 
     const analytics = {
@@ -410,14 +428,18 @@ export class BrowserUseErrorClassificationService {
       sessionErrorRates: this.calculateSessionErrorRates(filteredErrors),
       topErrorPatterns: this.getTopErrorPatterns(filteredErrors),
       recoverySuccessRates: this.calculateRecoverySuccessRates(filteredErrors),
-      performanceImpact: this.calculatePerformanceImpact(filteredErrors)
+      performanceImpact: this.calculatePerformanceImpact(filteredErrors),
     };
 
     this.logger.debug('Browser-Use error analytics generated', {
       totalErrors: analytics.totalErrors,
-      timeRange: timeRange ? `${timeRange.start.toISOString()} - ${timeRange.end.toISOString()}` : 'all time',
-      topCategory: Object.entries(analytics.errorsByCategory)
-        .sort(([,a], [,b]) => b - a)[0]?.[0] || 'none'
+      timeRange: timeRange
+        ? `${timeRange.start.toISOString()} - ${timeRange.end.toISOString()}`
+        : 'all time',
+      topCategory:
+        Object.entries(analytics.errorsByCategory).sort(
+          ([, a], [, b]) => b - a,
+        )[0]?.[0] || 'none',
     });
 
     return analytics;
@@ -438,7 +460,8 @@ export class BrowserUseErrorClassificationService {
   private initializeErrorPatterns(): void {
     // Browser engine patterns
     this.errorPatterns.set('browser_launch', {
-      pattern: /browser.*launch.*failed|could not start browser|browser not found/i,
+      pattern:
+        /browser.*launch.*failed|could not start browser|browser not found/i,
       category: BrowserUseErrorCategory.BROWSER_LAUNCH_FAILED,
       severity: ErrorSeverity.HIGH,
       indicators: ['browser_launch_failure', 'binary_not_found'],
@@ -446,8 +469,8 @@ export class BrowserUseErrorClassificationService {
         strategy: RecoveryStrategy.RETRY,
         maxRetries: 3,
         backoffMs: 2000,
-        browserRelaunch: true
-      }
+        browserRelaunch: true,
+      },
     });
 
     // Session management patterns
@@ -459,13 +482,14 @@ export class BrowserUseErrorClassificationService {
       recoveryAction: {
         strategy: RecoveryStrategy.RETRY,
         maxRetries: 2,
-        sessionRestart: true
-      }
+        sessionRestart: true,
+      },
     });
 
     // Navigation patterns
     this.errorPatterns.set('navigation_timeout', {
-      pattern: /navigation.*timeout|page.*load.*timeout|timeout.*waiting.*page/i,
+      pattern:
+        /navigation.*timeout|page.*load.*timeout|timeout.*waiting.*page/i,
       category: BrowserUseErrorCategory.PAGE_LOAD_TIMEOUT,
       severity: ErrorSeverity.MEDIUM,
       indicators: ['page_load_slow', 'network_delay'],
@@ -473,13 +497,14 @@ export class BrowserUseErrorClassificationService {
         strategy: RecoveryStrategy.RETRY_WITH_BACKOFF,
         maxRetries: 3,
         backoffMs: 2000,
-        waitForStability: true
-      }
+        waitForStability: true,
+      },
     });
 
     // Element interaction patterns
     this.errorPatterns.set('element_not_found', {
-      pattern: /element.*not.*found|no.*such.*element|element.*does.*not.*exist/i,
+      pattern:
+        /element.*not.*found|no.*such.*element|element.*does.*not.*exist/i,
       category: BrowserUseErrorCategory.ELEMENT_NOT_FOUND,
       severity: ErrorSeverity.MEDIUM,
       indicators: ['selector_mismatch', 'dom_not_ready'],
@@ -487,8 +512,8 @@ export class BrowserUseErrorClassificationService {
         strategy: RecoveryStrategy.RETRY,
         maxRetries: 5,
         backoffMs: 500,
-        waitForStability: true
-      }
+        waitForStability: true,
+      },
     });
 
     // Security and bot detection patterns
@@ -500,8 +525,8 @@ export class BrowserUseErrorClassificationService {
       recoveryAction: {
         strategy: RecoveryStrategy.MANUAL_INTERVENTION,
         maxRetries: 0,
-        changeUserAgent: true
-      }
+        changeUserAgent: true,
+      },
     });
 
     this.logger.log(`Initialized ${this.errorPatterns.size} error patterns`);
@@ -509,7 +534,7 @@ export class BrowserUseErrorClassificationService {
 
   private detectBrowserUseCategory(
     error: Error,
-    context: { operation?: string; pageUrl?: string; selector?: string }
+    context: { operation?: string; pageUrl?: string; selector?: string },
   ): BrowserUseErrorCategory {
     const message = error.message.toLowerCase();
     const operation = context.operation?.toLowerCase() || '';
@@ -517,7 +542,9 @@ export class BrowserUseErrorClassificationService {
     // Check predefined patterns first
     for (const [key, pattern] of this.errorPatterns.entries()) {
       if (pattern.pattern.test(message)) {
-        this.logger.debug(`Error matched pattern: ${key}`, { pattern: pattern.category });
+        this.logger.debug(`Error matched pattern: ${key}`, {
+          pattern: pattern.category,
+        });
         return pattern.category;
       }
     }
@@ -535,7 +562,11 @@ export class BrowserUseErrorClassificationService {
       return BrowserUseErrorCategory.NAVIGATION_FAILED;
     }
 
-    if (operation.includes('click') || operation.includes('type') || operation.includes('interact')) {
+    if (
+      operation.includes('click') ||
+      operation.includes('type') ||
+      operation.includes('interact')
+    ) {
       return BrowserUseErrorCategory.ELEMENT_NOT_INTERACTABLE;
     }
 
@@ -567,13 +598,13 @@ export class BrowserUseErrorClassificationService {
   private determineSeverity(
     category: BrowserUseErrorCategory,
     error: Error,
-    context: any
+    context: any,
   ): ErrorSeverity {
     // Critical errors that require immediate attention
     const criticalCategories = [
       BrowserUseErrorCategory.BROWSER_CRASH,
       BrowserUseErrorCategory.MEMORY_EXHAUSTED,
-      BrowserUseErrorCategory.SECURITY_CHALLENGE
+      BrowserUseErrorCategory.SECURITY_CHALLENGE,
     ];
 
     if (criticalCategories.includes(category)) {
@@ -585,7 +616,7 @@ export class BrowserUseErrorClassificationService {
       BrowserUseErrorCategory.BOT_DETECTION,
       BrowserUseErrorCategory.CAPTCHA_DETECTED,
       BrowserUseErrorCategory.SESSION_RESOURCE_EXHAUSTED,
-      BrowserUseErrorCategory.AUTHENTICATION_REQUIRED
+      BrowserUseErrorCategory.AUTHENTICATION_REQUIRED,
     ];
 
     if (highSeverityCategories.includes(category)) {
@@ -597,7 +628,7 @@ export class BrowserUseErrorClassificationService {
       BrowserUseErrorCategory.NAVIGATION_FAILED,
       BrowserUseErrorCategory.PAGE_LOAD_TIMEOUT,
       BrowserUseErrorCategory.SESSION_EXPIRED,
-      BrowserUseErrorCategory.FORM_VALIDATION_FAILED
+      BrowserUseErrorCategory.FORM_VALIDATION_FAILED,
     ];
 
     if (mediumSeverityCategories.includes(category)) {
@@ -608,7 +639,9 @@ export class BrowserUseErrorClassificationService {
     return ErrorSeverity.LOW;
   }
 
-  private mapToAutomationCategory(browserUseCategory: BrowserUseErrorCategory): AutomationErrorCategory {
+  private mapToAutomationCategory(
+    browserUseCategory: BrowserUseErrorCategory,
+  ): AutomationErrorCategory {
     switch (browserUseCategory) {
       case BrowserUseErrorCategory.BROWSER_LAUNCH_FAILED:
       case BrowserUseErrorCategory.BROWSER_CRASH:
@@ -647,11 +680,15 @@ export class BrowserUseErrorClassificationService {
     }
   }
 
-  private getRecoveryAttempts(sessionId?: string, category?: BrowserUseErrorCategory): number {
+  private getRecoveryAttempts(
+    sessionId?: string,
+    category?: BrowserUseErrorCategory,
+  ): number {
     if (!sessionId) return 0;
 
     const sessionErrors = this.errorHistory.get(sessionId) || [];
-    return sessionErrors.filter(e => e.browserUseCategory === category).length;
+    return sessionErrors.filter((e) => e.browserUseCategory === category)
+      .length;
   }
 
   private getMaxRecoveryAttempts(category: BrowserUseErrorCategory): number {
@@ -664,7 +701,7 @@ export class BrowserUseErrorClassificationService {
       [BrowserUseErrorCategory.SESSION_CREATE_FAILED]: 2,
       [BrowserUseErrorCategory.BOT_DETECTION]: 0,
       [BrowserUseErrorCategory.CAPTCHA_DETECTED]: 0,
-      [BrowserUseErrorCategory.MEMORY_EXHAUSTED]: 1
+      [BrowserUseErrorCategory.MEMORY_EXHAUSTED]: 1,
     };
 
     return maxAttempts[category] || 2;
@@ -686,59 +723,99 @@ export class BrowserUseErrorClassificationService {
     }
   }
 
-  private groupErrorsByBrowserUseCategory(errors: BrowserUseError[]): Record<string, number> {
-    return errors.reduce((acc, error) => {
-      acc[error.browserUseCategory] = (acc[error.browserUseCategory] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+  private groupErrorsByBrowserUseCategory(
+    errors: BrowserUseError[],
+  ): Record<string, number> {
+    return errors.reduce(
+      (acc, error) => {
+        acc[error.browserUseCategory] =
+          (acc[error.browserUseCategory] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
   }
 
-  private groupErrorsBySeverity(errors: BrowserUseError[]): Record<string, number> {
-    return errors.reduce((acc, error) => {
-      acc[error.severity] = (acc[error.severity] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+  private groupErrorsBySeverity(
+    errors: BrowserUseError[],
+  ): Record<string, number> {
+    return errors.reduce(
+      (acc, error) => {
+        acc[error.severity] = (acc[error.severity] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
   }
 
-  private calculateSessionErrorRates(errors: BrowserUseError[]): Record<string, number> {
+  private calculateSessionErrorRates(
+    errors: BrowserUseError[],
+  ): Record<string, number> {
     const sessionCounts = new Map<string, number>();
 
-    errors.forEach(error => {
+    errors.forEach((error) => {
       if (error.sessionId) {
-        sessionCounts.set(error.sessionId, (sessionCounts.get(error.sessionId) || 0) + 1);
+        sessionCounts.set(
+          error.sessionId,
+          (sessionCounts.get(error.sessionId) || 0) + 1,
+        );
       }
     });
 
     return Object.fromEntries(sessionCounts);
   }
 
-  private getTopErrorPatterns(errors: BrowserUseError[]): Array<{ pattern: string; count: number; category: string }> {
-    const patternCounts = new Map<string, { count: number; category: string }>();
+  private getTopErrorPatterns(
+    errors: BrowserUseError[],
+  ): Array<{ pattern: string; count: number; category: string }> {
+    const patternCounts = new Map<
+      string,
+      { count: number; category: string }
+    >();
 
-    errors.forEach(error => {
+    errors.forEach((error) => {
       const key = error.message.substring(0, 100); // First 100 chars as pattern
-      const current = patternCounts.get(key) || { count: 0, category: error.browserUseCategory };
-      patternCounts.set(key, { count: current.count + 1, category: current.category });
+      const current = patternCounts.get(key) || {
+        count: 0,
+        category: error.browserUseCategory,
+      };
+      patternCounts.set(key, {
+        count: current.count + 1,
+        category: current.category,
+      });
     });
 
     return Array.from(patternCounts.entries())
-      .map(([pattern, data]) => ({ pattern, count: data.count, category: data.category }))
+      .map(([pattern, data]) => ({
+        pattern,
+        count: data.count,
+        category: data.category,
+      }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
   }
 
-  private calculateRecoverySuccessRates(errors: BrowserUseError[]): Record<string, number> {
+  private calculateRecoverySuccessRates(
+    errors: BrowserUseError[],
+  ): Record<string, number> {
     // Mock implementation - in real implementation, track recovery outcomes
-    const categories = [...new Set(errors.map(e => e.browserUseCategory))];
+    const categories = [...new Set(errors.map((e) => e.browserUseCategory))];
 
-    return categories.reduce((acc, category) => {
-      // Simulate success rates based on category type
-      const mockSuccessRate = category.includes('timeout') ? 0.7 :
-                             category.includes('not_found') ? 0.8 :
-                             category.includes('crash') ? 0.4 : 0.75;
-      acc[category] = mockSuccessRate;
-      return acc;
-    }, {} as Record<string, number>);
+    return categories.reduce(
+      (acc, category) => {
+        // Simulate success rates based on category type
+        const mockSuccessRate = category.includes('timeout')
+          ? 0.7
+          : category.includes('not_found')
+            ? 0.8
+            : category.includes('crash')
+              ? 0.4
+              : 0.75;
+        acc[category] = mockSuccessRate;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
   }
 
   private calculatePerformanceImpact(errors: BrowserUseError[]): {
@@ -749,8 +826,12 @@ export class BrowserUseErrorClassificationService {
     // Mock implementation - in real implementation, track actual metrics
     return {
       averageErrorResolutionTime: 2500, // ms
-      sessionRestarts: errors.filter(e => e.browserUseCategory.includes('session')).length,
-      browserRelaunches: errors.filter(e => e.browserUseCategory.includes('browser')).length
+      sessionRestarts: errors.filter((e) =>
+        e.browserUseCategory.includes('session'),
+      ).length,
+      browserRelaunches: errors.filter((e) =>
+        e.browserUseCategory.includes('browser'),
+      ).length,
     };
   }
 }

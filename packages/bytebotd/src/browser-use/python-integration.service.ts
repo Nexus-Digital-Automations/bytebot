@@ -3,7 +3,12 @@
  * Service Layer Implementation for Browser-Use API Endpoints
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { spawn, ChildProcess } from 'child_process';
 import { promises as fs } from 'fs';
 import { join } from 'path';
@@ -19,7 +24,10 @@ import {
 import { ServiceResponseDto } from './dto/browser-automation.dto';
 
 @Injectable()
-export class PythonIntegrationService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class PythonIntegrationService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(PythonIntegrationService.name);
   private readonly pythonPath: string;
   private readonly browserUsePath: string;
@@ -35,12 +43,20 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
 
     // Initialize configuration
     this.pythonPath = process.env.PYTHON_PATH || 'python3';
-    this.browserUsePath = process.env.BROWSER_USE_PATH || '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
+    this.browserUsePath =
+      process.env.BROWSER_USE_PATH ||
+      '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
     this.virtualEnvPath = process.env.BROWSER_USE_VENV_PATH;
-    this.maxConcurrentProcesses = parseInt(process.env.MAX_PYTHON_PROCESSES || '10');
-    this.defaultTimeout = parseInt(process.env.PYTHON_DEFAULT_TIMEOUT || '60000'); // 1 minute
+    this.maxConcurrentProcesses = parseInt(
+      process.env.MAX_PYTHON_PROCESSES || '10',
+    );
+    this.defaultTimeout = parseInt(
+      process.env.PYTHON_DEFAULT_TIMEOUT || '60000',
+    ); // 1 minute
 
-    this.logger.log('PythonIntegrationService initialized for browser-use framework communication');
+    this.logger.log(
+      'PythonIntegrationService initialized for browser-use framework communication',
+    );
   }
 
   async onModuleInit() {
@@ -50,7 +66,9 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
   }
 
   async onModuleDestroy() {
-    this.logger.log('PythonIntegrationService module destroying - cleaning up processes');
+    this.logger.log(
+      'PythonIntegrationService module destroying - cleaning up processes',
+    );
     await this.cleanup();
   }
 
@@ -59,7 +77,9 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
    */
   async validateEnvironment(): Promise<ServiceResponseDto<any>> {
     try {
-      this.logger.log('Validating Python environment and browser-use framework');
+      this.logger.log(
+        'Validating Python environment and browser-use framework',
+      );
 
       // Check Python version
       const pythonVersionResult = await this.executeCommand({
@@ -69,7 +89,9 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
       });
 
       if (!pythonVersionResult.success) {
-        throw new Error(`Python not found or invalid: ${pythonVersionResult.stderr}`);
+        throw new Error(
+          `Python not found or invalid: ${pythonVersionResult.stderr}`,
+        );
       }
 
       // Check browser-use installation
@@ -81,7 +103,9 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
       });
 
       if (!browserUseCheckResult.success) {
-        throw new Error(`Browser-use framework not found: ${browserUseCheckResult.stderr}`);
+        throw new Error(
+          `Browser-use framework not found: ${browserUseCheckResult.stderr}`,
+        );
       }
 
       // Check required dependencies
@@ -96,7 +120,10 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
         timestamp: new Date(),
       };
 
-      this.logger.log('Python environment validation successful', validationResult);
+      this.logger.log(
+        'Python environment validation successful',
+        validationResult,
+      );
 
       return {
         success: true,
@@ -105,7 +132,6 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
       this.logger.error('Python environment validation failed', error);
 
@@ -121,7 +147,9 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
   /**
    * Execute Python command with enhanced error handling and process management
    */
-  async executeCommand(command: IPythonBrowserUseCommand): Promise<IPythonProcessResult> {
+  async executeCommand(
+    command: IPythonBrowserUseCommand,
+  ): Promise<IPythonProcessResult> {
     const commandId = `cmd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     try {
@@ -141,7 +169,6 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
       });
 
       return result;
-
     } catch (error) {
       this.logger.error(`Python command ${commandId} failed`, error);
 
@@ -164,7 +191,9 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
     headless?: boolean;
   }): Promise<ServiceResponseDto<any>> {
     try {
-      this.logger.log(`Executing browser-use task for session ${task.sessionId || 'default'}`);
+      this.logger.log(
+        `Executing browser-use task for session ${task.sessionId || 'default'}`,
+      );
 
       const pythonScript = this.generateBrowserUseTaskScript(task);
 
@@ -191,9 +220,11 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
           sessionId: task.sessionId,
         },
       };
-
     } catch (error) {
-      this.logger.error(`Browser-use task failed for session ${task.sessionId}`, error);
+      this.logger.error(
+        `Browser-use task failed for session ${task.sessionId}`,
+        error,
+      );
 
       return {
         success: false,
@@ -214,7 +245,9 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
     args?: any[];
   }): Promise<ServiceResponseDto<any>> {
     try {
-      this.logger.log(`Executing custom Python script for session ${script.sessionId || 'default'}`);
+      this.logger.log(
+        `Executing custom Python script for session ${script.sessionId || 'default'}`,
+      );
 
       // Wrap custom script with browser-use imports and error handling
       const wrappedScript = this.wrapCustomScript(script.code, script.args);
@@ -242,9 +275,11 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
           sessionId: script.sessionId,
         },
       };
-
     } catch (error) {
-      this.logger.error(`Custom script execution failed for session ${script.sessionId}`, error);
+      this.logger.error(
+        `Custom script execution failed for session ${script.sessionId}`,
+        error,
+      );
 
       return {
         success: false,
@@ -276,7 +311,9 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
         installArgs.push('--pre');
       }
 
-      const packageName = options?.version ? `browser-use==${options.version}` : 'browser-use';
+      const packageName = options?.version
+        ? `browser-use==${options.version}`
+        : 'browser-use';
       installArgs.push(packageName);
 
       const result = await this.executeCommand({
@@ -304,7 +341,6 @@ export class PythonIntegrationService extends EventEmitter implements OnModuleIn
           duration: result.duration,
         },
       };
-
     } catch (error) {
       this.logger.error('Browser-use installation failed', error);
 
@@ -365,7 +401,6 @@ except Exception as e:
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
       this.logger.error('Failed to get browser-use info', error);
 
@@ -381,8 +416,17 @@ except Exception as e:
   /**
    * Check required dependencies
    */
-  private async checkDependencies(): Promise<{ [key: string]: string | boolean }> {
-    const dependencies = ['playwright', 'anthropic', 'openai', 'asyncio', 'json', 'base64'];
+  private async checkDependencies(): Promise<{
+    [key: string]: string | boolean;
+  }> {
+    const dependencies = [
+      'playwright',
+      'anthropic',
+      'openai',
+      'asyncio',
+      'json',
+      'base64',
+    ];
     const results: { [key: string]: string | boolean } = {};
 
     for (const dep of dependencies) {
@@ -516,7 +560,10 @@ if __name__ == "__main__":
   /**
    * Spawn and manage Python process
    */
-  private async spawnProcess(commandId: string, command: IPythonBrowserUseCommand): Promise<IPythonProcessResult> {
+  private async spawnProcess(
+    commandId: string,
+    command: IPythonBrowserUseCommand,
+  ): Promise<IPythonProcessResult> {
     return new Promise((resolve) => {
       const startTime = Date.now();
 
@@ -540,12 +587,20 @@ if __name__ == "__main__":
 
       process.stdout?.on('data', (data) => {
         stdout += data.toString();
-        this.emit('processOutput', { commandId, type: 'stdout', data: data.toString() });
+        this.emit('processOutput', {
+          commandId,
+          type: 'stdout',
+          data: data.toString(),
+        });
       });
 
       process.stderr?.on('data', (data) => {
         stderr += data.toString();
-        this.emit('processOutput', { commandId, type: 'stderr', data: data.toString() });
+        this.emit('processOutput', {
+          commandId,
+          type: 'stderr',
+          data: data.toString(),
+        });
       });
 
       // Store running process
@@ -613,7 +668,10 @@ if __name__ == "__main__":
     this.isProcessingQueue = true;
 
     const processNext = async () => {
-      if (this.processQueue.length === 0 || this.runningProcesses.size >= this.maxConcurrentProcesses) {
+      if (
+        this.processQueue.length === 0 ||
+        this.runningProcesses.size >= this.maxConcurrentProcesses
+      ) {
         setTimeout(processNext, 100);
         return;
       }
@@ -627,7 +685,9 @@ if __name__ == "__main__":
     };
 
     processNext();
-    this.logger.log(`Process queue started with max ${this.maxConcurrentProcesses} concurrent processes`);
+    this.logger.log(
+      `Process queue started with max ${this.maxConcurrentProcesses} concurrent processes`,
+    );
   }
 
   /**
@@ -657,7 +717,10 @@ if __name__ == "__main__":
    */
   private createPythonError(
     error: any,
-    options: { context?: any; severity?: 'info' | 'warning' | 'error' | 'critical' } = {}
+    options: {
+      context?: any;
+      severity?: 'info' | 'warning' | 'error' | 'critical';
+    } = {},
   ): IBrowserError {
     return {
       code: error.code || 'PYTHON_INTEGRATION_ERROR',
@@ -724,7 +787,7 @@ if __name__ == "__main__":
         success: false,
         error: this.createPythonError(
           new Error(`Process ${commandId} not found`),
-          { context: { commandId } }
+          { context: { commandId } },
         ),
       };
     }
@@ -742,7 +805,6 @@ if __name__ == "__main__":
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
       this.logger.error(`Failed to kill process ${commandId}`, error);
 

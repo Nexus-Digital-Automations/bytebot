@@ -117,19 +117,19 @@ interface IntegrationTestResults {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
-      'CONCURRENT_SESSION_MAX_CONNECTIONS': 150,
-      'CONCURRENT_SESSION_BATCH_SIZE': 25,
-      'CONCURRENT_SESSION_MEMORY_THRESHOLD': 500 * 1024 * 1024,
-      'PERFORMANCE_BENCHMARK_ENABLED': true,
-      'SESSION_ISOLATION_VALIDATION_ENABLED': true,
-      'RESOURCE_MONITORING_ENABLED': true,
-      'PARLANT_VALIDATION_TESTING_ENABLED': true,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
+      CONCURRENT_SESSION_MAX_CONNECTIONS: 150,
+      CONCURRENT_SESSION_BATCH_SIZE: 25,
+      CONCURRENT_SESSION_MEMORY_THRESHOLD: 500 * 1024 * 1024,
+      PERFORMANCE_BENCHMARK_ENABLED: true,
+      SESSION_ISOLATION_VALIDATION_ENABLED: true,
+      RESOURCE_MONITORING_ENABLED: true,
+      PARLANT_VALIDATION_TESTING_ENABLED: true,
     };
     return config[key] ?? defaultValue;
   }),
@@ -159,11 +159,15 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
 
     await integrationService.onModuleInit();
-    await new Promise(resolve => setTimeout(resolve, 5000)); // Extended initialization time
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // Extended initialization time
   });
 
   afterAll(async () => {
@@ -190,7 +194,10 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
         memoryLeakThreshold: 200 * 1024 * 1024,
       };
 
-      const orchestrator = new ConcurrentSessionTestOrchestrator(TEST_URL, config);
+      const orchestrator = new ConcurrentSessionTestOrchestrator(
+        TEST_URL,
+        config,
+      );
 
       let sessionsEstablished = 0;
       orchestrator.on('sessionEstablished', () => {
@@ -200,14 +207,22 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
       const results = await orchestrator.executeConcurrentSessionTest();
 
       // Validate basic concurrent session requirements
-      expect(results.executionSummary.successfulSessions).toBeGreaterThanOrEqual(100);
+      expect(
+        results.executionSummary.successfulSessions,
+      ).toBeGreaterThanOrEqual(100);
       expect(results.executionSummary.overallSuccessRate).toBeGreaterThan(0.8);
       expect(results.complianceReport.overallCompliance).toBe(true);
 
       console.log('\n=== Phase 1: Basic Concurrency Results ===');
-      console.log(`Sessions Established: ${results.executionSummary.successfulSessions}`);
-      console.log(`Success Rate: ${(results.executionSummary.overallSuccessRate * 100).toFixed(2)}%`);
-      console.log(`Compliance: ${results.complianceReport.overallCompliance ? 'PASS' : 'FAIL'}`);
+      console.log(
+        `Sessions Established: ${results.executionSummary.successfulSessions}`,
+      );
+      console.log(
+        `Success Rate: ${(results.executionSummary.overallSuccessRate * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Compliance: ${results.complianceReport.overallCompliance ? 'PASS' : 'FAIL'}`,
+      );
       console.log('=========================================\n');
     });
   });
@@ -235,7 +250,13 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
         const userId = `user_${i}`;
         const clientId = `client_${i}`;
 
-        isolationValidator.registerSession(sessionId, conversationId, userId, clientId, 'strict');
+        isolationValidator.registerSession(
+          sessionId,
+          conversationId,
+          userId,
+          clientId,
+          'strict',
+        );
       }
 
       // Simulate concurrent message validation
@@ -274,7 +295,9 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
 
       console.log('\n=== Phase 2: Session Isolation Results ===');
       console.log(`Total Violations: ${results.totalViolations}`);
-      console.log(`Isolation Score: ${(results.sessionIsolationScore * 100).toFixed(2)}%`);
+      console.log(
+        `Isolation Score: ${(results.sessionIsolationScore * 100).toFixed(2)}%`,
+      );
       console.log(`Compliance Level: ${results.complianceLevel}`);
       console.log('=========================================\n');
     });
@@ -301,33 +324,44 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
       // Simulate resource-intensive concurrent operations
       const operations = [];
       for (let i = 0; i < 100; i++) {
-        operations.push(new Promise(resolve => {
-          // Simulate session with memory allocation
-          const data = new Array(10000).fill(`session_${i}_data`);
-          setTimeout(() => {
-            data.length = 0; // Clear data
-            resolve(data);
-          }, 5000);
-        }));
+        operations.push(
+          new Promise((resolve) => {
+            // Simulate session with memory allocation
+            const data = new Array(10000).fill(`session_${i}_data`);
+            setTimeout(() => {
+              data.length = 0; // Clear data
+              resolve(data);
+            }, 5000);
+          }),
+        );
       }
 
       await Promise.all(operations);
 
       // Monitor for additional time to detect leaks
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise((resolve) => setTimeout(resolve, 10000));
 
       const results = resourceMonitor.stopMonitoring();
 
       // Validate resource management
       expect(results.complianceStatus).not.toBe('critical');
-      expect(results.resourceLeaks.filter(leak => leak.severity === 'critical').length).toBe(0);
+      expect(
+        results.resourceLeaks.filter((leak) => leak.severity === 'critical')
+          .length,
+      ).toBe(0);
       expect(results.efficiencyAnalysis.overallEfficiency).toBeGreaterThan(0.6);
 
       console.log('\n=== Phase 3: Resource Management Results ===');
       console.log(`Compliance Status: ${results.complianceStatus}`);
-      console.log(`Critical Leaks: ${results.resourceLeaks.filter(l => l.severity === 'critical').length}`);
-      console.log(`Overall Efficiency: ${(results.efficiencyAnalysis.overallEfficiency * 100).toFixed(2)}%`);
-      console.log(`Memory Leak: ${(results.resourceUsage.memoryUsage.leaked / 1024 / 1024).toFixed(2)}MB`);
+      console.log(
+        `Critical Leaks: ${results.resourceLeaks.filter((l) => l.severity === 'critical').length}`,
+      );
+      console.log(
+        `Overall Efficiency: ${(results.efficiencyAnalysis.overallEfficiency * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Memory Leak: ${(results.resourceUsage.memoryUsage.leaked / 1024 / 1024).toFixed(2)}MB`,
+      );
       console.log('==========================================\n');
     });
   });
@@ -357,12 +391,24 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
       expect(results.resilienceScore).toBeGreaterThan(0.9);
 
       console.log('\n=== Phase 4: PARLANT Validation Results ===');
-      console.log(`Successful Validations: ${results.successfulValidations}/${results.totalValidations}`);
-      console.log(`Accuracy Score: ${(results.accuracyScore * 100).toFixed(2)}%`);
-      console.log(`Performance Score: ${(results.performanceScore * 100).toFixed(2)}%`);
-      console.log(`Resilience Score: ${(results.resilienceScore * 100).toFixed(2)}%`);
-      console.log(`Average Response Time: ${results.averageResponseTime.toFixed(2)}ms`);
-      console.log(`Throughput: ${results.throughput.toFixed(2)} validations/sec`);
+      console.log(
+        `Successful Validations: ${results.successfulValidations}/${results.totalValidations}`,
+      );
+      console.log(
+        `Accuracy Score: ${(results.accuracyScore * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Performance Score: ${(results.performanceScore * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Resilience Score: ${(results.resilienceScore * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Average Response Time: ${results.averageResponseTime.toFixed(2)}ms`,
+      );
+      console.log(
+        `Throughput: ${results.throughput.toFixed(2)} validations/sec`,
+      );
       console.log('=========================================\n');
     });
   });
@@ -396,15 +442,29 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
 
       // Validate performance and scalability
       expect(results.testSummary.testPointsCompleted).toBeGreaterThan(3);
-      expect(results.conclusionsAndRecommendations.overallScore).toBeGreaterThan(0.6);
-      expect(results.scalabilityAnalysis.linearScalingLimit).toBeGreaterThanOrEqual(50);
+      expect(
+        results.conclusionsAndRecommendations.overallScore,
+      ).toBeGreaterThan(0.6);
+      expect(
+        results.scalabilityAnalysis.linearScalingLimit,
+      ).toBeGreaterThanOrEqual(50);
 
       console.log('\n=== Phase 5: Performance Benchmarking Results ===');
-      console.log(`Test Points Completed: ${results.testSummary.testPointsCompleted}`);
-      console.log(`Overall Score: ${(results.conclusionsAndRecommendations.overallScore * 100).toFixed(2)}%`);
-      console.log(`Linear Scaling Limit: ${results.scalabilityAnalysis.linearScalingLimit} sessions`);
-      console.log(`Recommended Max Sessions: ${results.scalabilityAnalysis.capacityRecommendations.recommendedMaxSessions}`);
-      console.log(`Compliance Rate: ${(results.testSummary.overallComplianceRate * 100).toFixed(2)}%`);
+      console.log(
+        `Test Points Completed: ${results.testSummary.testPointsCompleted}`,
+      );
+      console.log(
+        `Overall Score: ${(results.conclusionsAndRecommendations.overallScore * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Linear Scaling Limit: ${results.scalabilityAnalysis.linearScalingLimit} sessions`,
+      );
+      console.log(
+        `Recommended Max Sessions: ${results.scalabilityAnalysis.capacityRecommendations.recommendedMaxSessions}`,
+      );
+      console.log(
+        `Compliance Rate: ${(results.testSummary.overallComplianceRate * 100).toFixed(2)}%`,
+      );
       console.log('============================================\n');
     });
   });
@@ -440,29 +500,37 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
 
       try {
         // Execute all phases sequentially
-        for (const [phaseName, enabled] of Object.entries(integrationConfig.phases)) {
+        for (const [phaseName, enabled] of Object.entries(
+          integrationConfig.phases,
+        )) {
           if (enabled) {
             console.log(`\nExecuting Phase: ${phaseName}`);
 
             try {
               switch (phaseName) {
                 case 'basicConcurrency':
-                  phaseResults[phaseName] = await this.executeBasicConcurrencyPhase();
+                  phaseResults[phaseName] =
+                    await this.executeBasicConcurrencyPhase();
                   break;
                 case 'sessionIsolation':
-                  phaseResults[phaseName] = await this.executeSessionIsolationPhase();
+                  phaseResults[phaseName] =
+                    await this.executeSessionIsolationPhase();
                   break;
                 case 'resourceManagement':
-                  phaseResults[phaseName] = await this.executeResourceManagementPhase();
+                  phaseResults[phaseName] =
+                    await this.executeResourceManagementPhase();
                   break;
                 case 'parlantValidation':
-                  phaseResults[phaseName] = await this.executeParlantValidationPhase();
+                  phaseResults[phaseName] =
+                    await this.executeParlantValidationPhase();
                   break;
                 case 'performanceBenchmarking':
-                  phaseResults[phaseName] = await this.executePerformanceBenchmarkingPhase();
+                  phaseResults[phaseName] =
+                    await this.executePerformanceBenchmarkingPhase();
                   break;
                 case 'endToEndIntegration':
-                  phaseResults[phaseName] = await this.executeEndToEndIntegrationPhase();
+                  phaseResults[phaseName] =
+                    await this.executeEndToEndIntegrationPhase();
                   break;
               }
               phasesCompleted.push(phaseName);
@@ -490,9 +558,13 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
           overallCompliance: {
             phase1RequirementsMet: phasesCompleted.length >= 5,
             concurrentSessionsSupported: 120, // From test results
-            sessionIsolationMaintained: !phasesFailed.includes('sessionIsolation'),
-            performanceTargetsMet: !phasesFailed.includes('performanceBenchmarking'),
-            resourceManagementCompliant: !phasesFailed.includes('resourceManagement'),
+            sessionIsolationMaintained:
+              !phasesFailed.includes('sessionIsolation'),
+            performanceTargetsMet: !phasesFailed.includes(
+              'performanceBenchmarking',
+            ),
+            resourceManagementCompliant:
+              !phasesFailed.includes('resourceManagement'),
             parlantValidationAccuracy: 0.85, // From test results
           },
           recommendations: [
@@ -513,31 +585,62 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
 
         // Write comprehensive report
         if (integrationConfig.generateComprehensiveReport) {
-          const reportPath = join(__dirname, '../../reports/parlant-phase1-integration-test-report.json');
-          await fs.writeFile(reportPath, JSON.stringify(integrationResults, null, 2));
-          console.log(`\nComprehensive integration report written to: ${reportPath}`);
+          const reportPath = join(
+            __dirname,
+            '../../reports/parlant-phase1-integration-test-report.json',
+          );
+          await fs.writeFile(
+            reportPath,
+            JSON.stringify(integrationResults, null, 2),
+          );
+          console.log(
+            `\nComprehensive integration report written to: ${reportPath}`,
+          );
         }
 
         // Validate overall integration success
         expect(phasesCompleted.length).toBeGreaterThanOrEqual(5);
-        expect(integrationResults.overallCompliance.phase1RequirementsMet).toBe(true);
-        expect(integrationResults.overallCompliance.concurrentSessionsSupported).toBeGreaterThanOrEqual(100);
-        expect(integrationResults.overallCompliance.sessionIsolationMaintained).toBe(true);
+        expect(integrationResults.overallCompliance.phase1RequirementsMet).toBe(
+          true,
+        );
+        expect(
+          integrationResults.overallCompliance.concurrentSessionsSupported,
+        ).toBeGreaterThanOrEqual(100);
+        expect(
+          integrationResults.overallCompliance.sessionIsolationMaintained,
+        ).toBe(true);
 
         console.log('\n=== PARLANT Phase 1 Integration Test Summary ===');
-        console.log(`Total Test Duration: ${(integrationResults.testExecution.totalDuration / 1000).toFixed(2)} seconds`);
-        console.log(`Phases Completed: ${phasesCompleted.length}/${Object.keys(integrationConfig.phases).length}`);
+        console.log(
+          `Total Test Duration: ${(integrationResults.testExecution.totalDuration / 1000).toFixed(2)} seconds`,
+        );
+        console.log(
+          `Phases Completed: ${phasesCompleted.length}/${Object.keys(integrationConfig.phases).length}`,
+        );
         console.log(`Phases Failed: ${phasesFailed.length}`);
-        console.log(`Phase 1 Requirements Met: ${integrationResults.overallCompliance.phase1RequirementsMet ? 'YES' : 'NO'}`);
-        console.log(`Concurrent Sessions Supported: ${integrationResults.overallCompliance.concurrentSessionsSupported}`);
-        console.log(`Session Isolation Maintained: ${integrationResults.overallCompliance.sessionIsolationMaintained ? 'YES' : 'NO'}`);
-        console.log(`Performance Targets Met: ${integrationResults.overallCompliance.performanceTargetsMet ? 'YES' : 'NO'}`);
-        console.log(`Resource Management Compliant: ${integrationResults.overallCompliance.resourceManagementCompliant ? 'YES' : 'NO'}`);
-        console.log(`PARLANT Validation Accuracy: ${(integrationResults.overallCompliance.parlantValidationAccuracy * 100).toFixed(2)}%`);
+        console.log(
+          `Phase 1 Requirements Met: ${integrationResults.overallCompliance.phase1RequirementsMet ? 'YES' : 'NO'}`,
+        );
+        console.log(
+          `Concurrent Sessions Supported: ${integrationResults.overallCompliance.concurrentSessionsSupported}`,
+        );
+        console.log(
+          `Session Isolation Maintained: ${integrationResults.overallCompliance.sessionIsolationMaintained ? 'YES' : 'NO'}`,
+        );
+        console.log(
+          `Performance Targets Met: ${integrationResults.overallCompliance.performanceTargetsMet ? 'YES' : 'NO'}`,
+        );
+        console.log(
+          `Resource Management Compliant: ${integrationResults.overallCompliance.resourceManagementCompliant ? 'YES' : 'NO'}`,
+        );
+        console.log(
+          `PARLANT Validation Accuracy: ${(integrationResults.overallCompliance.parlantValidationAccuracy * 100).toFixed(2)}%`,
+        );
         console.log('==============================================\n');
 
-        console.log('🎉 PARLANT Phase 1 Concurrent WebSocket Session Testing COMPLETED SUCCESSFULLY! 🎉');
-
+        console.log(
+          '🎉 PARLANT Phase 1 Concurrent WebSocket Session Testing COMPLETED SUCCESSFULLY! 🎉',
+        );
       } catch (error) {
         console.error('Integration test failed:', error);
         throw error;
@@ -547,32 +650,56 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Integration Test Suite', 
     // Helper methods for phase execution
     async function executeBasicConcurrencyPhase(): Promise<PhaseTestResult> {
       // Simplified basic concurrency test
-      return { success: true, sessionsEstablished: 120, message: 'Basic concurrency validated' };
+      return {
+        success: true,
+        sessionsEstablished: 120,
+        message: 'Basic concurrency validated',
+      };
     }
 
     async function executeSessionIsolationPhase(): Promise<PhaseTestResult> {
       // Simplified session isolation test
-      return { success: true, violationsDetected: 0, message: 'Session isolation validated' };
+      return {
+        success: true,
+        violationsDetected: 0,
+        message: 'Session isolation validated',
+      };
     }
 
     async function executeResourceManagementPhase(): Promise<PhaseTestResult> {
       // Simplified resource management test
-      return { success: true, memoryLeakDetected: false, message: 'Resource management validated' };
+      return {
+        success: true,
+        memoryLeakDetected: false,
+        message: 'Resource management validated',
+      };
     }
 
     async function executeParlantValidationPhase(): Promise<PhaseTestResult> {
       // Simplified PARLANT validation test
-      return { success: true, accuracyScore: 0.85, message: 'PARLANT validation validated' };
+      return {
+        success: true,
+        accuracyScore: 0.85,
+        message: 'PARLANT validation validated',
+      };
     }
 
     async function executePerformanceBenchmarkingPhase(): Promise<PhaseTestResult> {
       // Simplified performance benchmarking test
-      return { success: true, performanceScore: 0.8, message: 'Performance benchmarking validated' };
+      return {
+        success: true,
+        performanceScore: 0.8,
+        message: 'Performance benchmarking validated',
+      };
     }
 
     async function executeEndToEndIntegrationPhase(): Promise<PhaseTestResult> {
       // Simplified end-to-end integration test
-      return { success: true, integrationScore: 0.9, message: 'End-to-end integration validated' };
+      return {
+        success: true,
+        integrationScore: 0.9,
+        message: 'End-to-end integration validated',
+      };
     }
   });
 });

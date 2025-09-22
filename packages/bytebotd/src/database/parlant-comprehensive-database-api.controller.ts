@@ -33,7 +33,7 @@ import {
   HttpStatus,
   HttpException,
   HttpCode,
-  Request
+  Request,
 } from '@nestjs/common';
 
 // Request interface for proper typing
@@ -54,7 +54,7 @@ import {
   ApiQuery,
   ApiBody,
   ApiBearerAuth,
-  ApiSecurity
+  ApiSecurity,
 } from '@nestjs/swagger';
 
 // PARLANT Validation Integration
@@ -70,19 +70,19 @@ import {
   PerformanceConstraints,
   QueryPriority,
   CachePolicy,
-  TransactionIsolationLevel
+  TransactionIsolationLevel,
 } from '../../../bytebot-agent/src/database/parlant-database-validation-comprehensive.service';
 
 import {
   SecurityLevel,
-  ConversationalValidationError
+  ConversationalValidationError,
 } from '../../../shared/src/parlant/monitoring/parlant-integration.service';
 
 import {
   RiskLevel,
   ConversationState,
   ConversationPriority,
-  ParlantConversationContext
+  ParlantConversationContext,
 } from '../../../shared/src/types/parlant.types';
 
 // ===== DATABASE API REQUEST/RESPONSE INTERFACES =====
@@ -164,7 +164,12 @@ export interface BulkOperationRequest {
  * Database Administration Request
  */
 export interface DatabaseAdminRequest {
-  readonly operation: 'BACKUP' | 'RESTORE' | 'MIGRATION' | 'INDEX_REBUILD' | 'STATISTICS_UPDATE';
+  readonly operation:
+    | 'BACKUP'
+    | 'RESTORE'
+    | 'MIGRATION'
+    | 'INDEX_REBUILD'
+    | 'STATISTICS_UPDATE';
   readonly parameters: Record<string, unknown>;
   readonly scheduledTime?: Date;
   readonly businessJustification: string;
@@ -178,12 +183,16 @@ export interface DatabaseAdminRequest {
 @ApiBearerAuth()
 @ApiSecurity('parlant-validation')
 export class ParlantComprehensiveDatabaseApiController {
-  private readonly logger = new Logger(ParlantComprehensiveDatabaseApiController.name);
+  private readonly logger = new Logger(
+    ParlantComprehensiveDatabaseApiController.name,
+  );
 
   constructor(
-    private readonly parlantValidationService: ParlantDatabaseValidationComprehensiveService
+    private readonly parlantValidationService: ParlantDatabaseValidationComprehensiveService,
   ) {
-    this.logger.log('PARLANT Comprehensive Database API Controller initialized');
+    this.logger.log(
+      'PARLANT Comprehensive Database API Controller initialized',
+    );
   }
 
   // ===== DATA QUERY OPERATIONS =====
@@ -191,24 +200,50 @@ export class ParlantComprehensiveDatabaseApiController {
   @Get('query/execute')
   @ApiOperation({
     summary: 'Execute database query with PARLANT validation',
-    description: 'Execute a database query with comprehensive PARLANT conversational validation using 10 concurrent agents'
+    description:
+      'Execute a database query with comprehensive PARLANT conversational validation using 10 concurrent agents',
   })
-  @ApiQuery({ name: 'query', description: 'SQL query to execute', type: String })
-  @ApiQuery({ name: 'businessJustification', description: 'Business justification for the query', type: String })
-  @ApiQuery({ name: 'maxRows', description: 'Maximum rows to return', type: Number, required: false })
-  @ApiQuery({ name: 'timeout', description: 'Query timeout in milliseconds', type: Number, required: false })
-  @ApiResponse({ status: 200, description: 'Query executed successfully with validation results' })
-  @ApiResponse({ status: 403, description: 'Query rejected by PARLANT validation' })
+  @ApiQuery({
+    name: 'query',
+    description: 'SQL query to execute',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'businessJustification',
+    description: 'Business justification for the query',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'maxRows',
+    description: 'Maximum rows to return',
+    type: Number,
+    required: false,
+  })
+  @ApiQuery({
+    name: 'timeout',
+    description: 'Query timeout in milliseconds',
+    type: Number,
+    required: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Query executed successfully with validation results',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Query rejected by PARLANT validation',
+  })
   @ApiResponse({ status: 400, description: 'Invalid query or parameters' })
   async executeQuery(
-    @Query() queryParams: {
+    @Query()
+    queryParams: {
       query: string;
       businessJustification: string;
       maxRows?: number;
       timeout?: number;
       securityClassification?: DataClassification;
     },
-    @Request() req: AuthenticatedRequest
+    @Request() req: AuthenticatedRequest,
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
     this.logger.log(`Executing query with PARLANT validation: ${operationId}`);
@@ -223,9 +258,12 @@ export class ParlantComprehensiveDatabaseApiController {
         estimatedRows: queryParams.maxRows || 1000,
         isDestructive: false,
         requiresTransaction: false,
-        securityClassification: queryParams.securityClassification || DataClassification.INTERNAL,
-        complianceRequirements: this.determineComplianceRequirements(queryParams.securityClassification),
-        businessJustification: queryParams.businessJustification
+        securityClassification:
+          queryParams.securityClassification || DataClassification.INTERNAL,
+        complianceRequirements: this.determineComplianceRequirements(
+          queryParams.securityClassification,
+        ),
+        businessJustification: queryParams.businessJustification,
       };
 
       // Build PARLANT validation request
@@ -241,29 +279,40 @@ export class ParlantComprehensiveDatabaseApiController {
           maxExecutionTimeMs: queryParams.timeout || 30000,
           maxResourceUsage: 80,
           priorityLevel: QueryPriority.NORMAL,
-          cachePolicy: CachePolicy.SHORT_TERM
-        }
+          cachePolicy: CachePolicy.SHORT_TERM,
+        },
       };
 
       // Execute comprehensive PARLANT validation with 10 agents
-      const validationResult = await this.parlantValidationService.validateDatabaseOperation(validationRequest);
+      const validationResult =
+        await this.parlantValidationService.validateDatabaseOperation(
+          validationRequest,
+        );
 
       if (!validationResult.approved) {
-        throw new HttpException({
-          statusCode: HttpStatus.FORBIDDEN,
-          message: 'Query execution denied by PARLANT validation',
-          validationResult,
-          operationId,
-          timestamp: new Date()
-        }, HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.FORBIDDEN,
+            message: 'Query execution denied by PARLANT validation',
+            validationResult,
+            operationId,
+            timestamp: new Date(),
+          },
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       // Execute the validated query
       const startTime = Date.now();
-      const queryResult = this.executeValidatedQuery(queryParams.query, validationResult);
+      const queryResult = this.executeValidatedQuery(
+        queryParams.query,
+        validationResult,
+      );
       const executionTime = Date.now() - startTime;
 
-      this.logger.log(`Query executed successfully: ${operationId} (${executionTime}ms)`);
+      this.logger.log(
+        `Query executed successfully: ${operationId} (${executionTime}ms)`,
+      );
 
       return {
         success: true,
@@ -273,50 +322,68 @@ export class ParlantComprehensiveDatabaseApiController {
         validationResult,
         operationId,
         timestamp: new Date(),
-        recommendations: validationResult.performanceRecommendations
+        recommendations: validationResult.performanceRecommendations,
       };
-
     } catch (error) {
       this.logger.error(`Query execution failed: ${operationId}`, error);
 
       if (error instanceof ConversationalValidationError) {
-        throw new HttpException({
-          statusCode: HttpStatus.FORBIDDEN,
-          message: error.message,
-          operationId,
-          timestamp: new Date(),
-          validationError: error.toJSON()
-        }, HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.FORBIDDEN,
+            message: error.message,
+            operationId,
+            timestamp: new Date(),
+            validationError: error.toJSON(),
+          },
+          HttpStatus.FORBIDDEN,
+        );
       }
 
-      throw new HttpException({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Database query execution failed',
-        operationId,
-        timestamp: new Date(),
-        error: error instanceof Error ? error.message : String(error)
-      }, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Database query execution failed',
+          operationId,
+          timestamp: new Date(),
+          error: error instanceof Error ? error.message : String(error),
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Post('query/batch')
   @ApiOperation({
     summary: 'Execute batch queries with PARLANT validation',
-    description: 'Execute multiple queries in a batch with comprehensive validation'
+    description:
+      'Execute multiple queries in a batch with comprehensive validation',
   })
-  @ApiBody({ type: Object, description: 'Batch query request with multiple queries' })
-  @ApiResponse({ status: 200, description: 'Batch queries executed successfully' })
-  @ApiResponse({ status: 403, description: 'One or more queries rejected by validation' })
+  @ApiBody({
+    type: Object,
+    description: 'Batch query request with multiple queries',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Batch queries executed successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'One or more queries rejected by validation',
+  })
   async executeBatchQueries(
-    @Body() batchRequest: {
+    @Body()
+    batchRequest: {
       queries: DatabaseQueryRequest[];
       transactionMode?: 'SINGLE' | 'INDIVIDUAL';
       continueOnError?: boolean;
     },
-    @Request() req: AuthenticatedRequest
+    @Request() req: AuthenticatedRequest,
   ): Promise<DatabaseOperationResponse[]> {
     const operationId = this.generateOperationId();
-    this.logger.log(`Executing batch queries with PARLANT validation: ${operationId}`);
+    this.logger.log(
+      `Executing batch queries with PARLANT validation: ${operationId}`,
+    );
 
     const results: DatabaseOperationResponse[] = [];
 
@@ -325,16 +392,18 @@ export class ParlantComprehensiveDatabaseApiController {
         const query = batchRequest.queries[i];
 
         try {
-          const queryResult = await this.executeQuery({
-            query: query.query,
-            businessJustification: query.businessJustification,
-            maxRows: query.options?.maxRows,
-            timeout: query.options?.timeout,
-            securityClassification: query.options?.securityClassification
-          }, req);
+          const queryResult = await this.executeQuery(
+            {
+              query: query.query,
+              businessJustification: query.businessJustification,
+              maxRows: query.options?.maxRows,
+              timeout: query.options?.timeout,
+              securityClassification: query.options?.securityClassification,
+            },
+            req,
+          );
 
           results.push(queryResult);
-
         } catch (error) {
           if (!batchRequest.continueOnError) {
             throw error;
@@ -358,8 +427,8 @@ export class ParlantComprehensiveDatabaseApiController {
                   level: RiskLevel._HIGH,
                   factors: ['Batch execution error'],
                   score: 90,
-                  mitigations: ['Review query syntax and permissions']
-                }
+                  mitigations: ['Review query syntax and permissions'],
+                },
               },
               performanceRecommendations: [],
               securityRecommendations: [],
@@ -379,7 +448,7 @@ export class ParlantComprehensiveDatabaseApiController {
                   requiresTransaction: false,
                   securityClassification: DataClassification.INTERNAL,
                   complianceRequirements: [],
-                  businessJustification: query.businessJustification
+                  businessJustification: query.businessJustification,
                 },
                 validationResult: {
                   approved: false,
@@ -396,15 +465,15 @@ export class ParlantComprehensiveDatabaseApiController {
                       level: RiskLevel._HIGH,
                       factors: [],
                       score: 90,
-                      mitigations: []
-                    }
-                  }
+                      mitigations: [],
+                    },
+                  },
                 },
                 complianceRecord: {
                   frameworks: [],
                   requirements: [],
                   attestations: [],
-                  exceptions: []
+                  exceptions: [],
                 },
                 businessContext: {
                   businessFunction: 'Database Operations',
@@ -413,19 +482,20 @@ export class ParlantComprehensiveDatabaseApiController {
                   costCenter: 'IT-OPS-001',
                   businessJustification: query.businessJustification,
                   expectedBenefit: 'Data access',
-                  urgencyLevel: 'MEDIUM'
-                }
-              }
+                  urgencyLevel: 'MEDIUM',
+                },
+              },
             },
             operationId: `${operationId}_${i}`,
             timestamp: new Date(),
-            warnings: [`Query ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`]
+            warnings: [
+              `Query ${i + 1} failed: ${error instanceof Error ? error.message : String(error)}`,
+            ],
           });
         }
       }
 
       return results;
-
     } catch (error) {
       this.logger.error(`Batch query execution failed: ${operationId}`, error);
       throw error;
@@ -437,14 +507,21 @@ export class ParlantComprehensiveDatabaseApiController {
   @Post('modify')
   @ApiOperation({
     summary: 'Modify database data with PARLANT validation',
-    description: 'Insert, update, or delete data with comprehensive conversational validation'
+    description:
+      'Insert, update, or delete data with comprehensive conversational validation',
   })
   @ApiBody({ type: Object, description: 'Data modification request' })
-  @ApiResponse({ status: 200, description: 'Data modification completed successfully' })
-  @ApiResponse({ status: 403, description: 'Modification rejected by PARLANT validation' })
+  @ApiResponse({
+    status: 200,
+    description: 'Data modification completed successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Modification rejected by PARLANT validation',
+  })
   async modifyData(
     @Body() modificationRequest: DataModificationRequest,
-    @Request() req: AuthenticatedRequest
+    @Request() req: AuthenticatedRequest,
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
     this.logger.log(`Modifying data with PARLANT validation: ${operationId}`);
@@ -455,15 +532,20 @@ export class ParlantComprehensiveDatabaseApiController {
         operationType: this.mapOperationType(modificationRequest.operation),
         tableName: modificationRequest.tableName,
         queryText: this.buildModificationQuery(modificationRequest),
-        parameters: modificationRequest.data || modificationRequest.conditions || {},
-        estimatedRows: Array.isArray(modificationRequest.data) ? modificationRequest.data.length : 1,
+        parameters:
+          modificationRequest.data || modificationRequest.conditions || {},
+        estimatedRows: Array.isArray(modificationRequest.data)
+          ? modificationRequest.data.length
+          : 1,
         isDestructive: modificationRequest.operation === 'DELETE',
         requiresTransaction: true,
-        securityClassification: this.determineDataClassification(modificationRequest.tableName),
-        complianceRequirements: this.determineComplianceRequirements(
-          this.determineDataClassification(modificationRequest.tableName)
+        securityClassification: this.determineDataClassification(
+          modificationRequest.tableName,
         ),
-        businessJustification: modificationRequest.businessJustification
+        complianceRequirements: this.determineComplianceRequirements(
+          this.determineDataClassification(modificationRequest.tableName),
+        ),
+        businessJustification: modificationRequest.businessJustification,
       };
 
       // Build PARLANT validation request
@@ -479,31 +561,46 @@ export class ParlantComprehensiveDatabaseApiController {
           transactionId: `tx_${operationId}`,
           isolationLevel: TransactionIsolationLevel.REPEATABLE_READ,
           timeoutMs: 60000,
-          rollbackStrategy: databaseOperation.isDestructive ? 'MANUAL_APPROVAL' : 'AUTOMATIC',
+          rollbackStrategy: databaseOperation.isDestructive
+            ? 'MANUAL_APPROVAL'
+            : 'AUTOMATIC',
           backupRequired: databaseOperation.isDestructive,
-          approvalRequired: modificationRequest.approvalRequired || databaseOperation.isDestructive
-        }
+          approvalRequired:
+            modificationRequest.approvalRequired ||
+            databaseOperation.isDestructive,
+        },
       };
 
       // Execute comprehensive PARLANT validation
-      const validationResult = await this.parlantValidationService.validateDatabaseOperation(validationRequest);
+      const validationResult =
+        await this.parlantValidationService.validateDatabaseOperation(
+          validationRequest,
+        );
 
       if (!validationResult.approved) {
-        throw new HttpException({
-          statusCode: HttpStatus.FORBIDDEN,
-          message: 'Data modification denied by PARLANT validation',
-          validationResult,
-          operationId,
-          timestamp: new Date()
-        }, HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.FORBIDDEN,
+            message: 'Data modification denied by PARLANT validation',
+            validationResult,
+            operationId,
+            timestamp: new Date(),
+          },
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       // Execute the validated modification
       const startTime = Date.now();
-      const modificationResult = this.executeValidatedModification(modificationRequest, validationResult);
+      const modificationResult = this.executeValidatedModification(
+        modificationRequest,
+        validationResult,
+      );
       const executionTime = Date.now() - startTime;
 
-      this.logger.log(`Data modification completed successfully: ${operationId} (${executionTime}ms)`);
+      this.logger.log(
+        `Data modification completed successfully: ${operationId} (${executionTime}ms)`,
+      );
 
       return {
         success: true,
@@ -512,9 +609,11 @@ export class ParlantComprehensiveDatabaseApiController {
         validationResult,
         operationId,
         timestamp: new Date(),
-        recommendations: [...validationResult.performanceRecommendations, ...validationResult.securityRecommendations]
+        recommendations: [
+          ...validationResult.performanceRecommendations,
+          ...validationResult.securityRecommendations,
+        ],
       };
-
     } catch (error) {
       this.logger.error(`Data modification failed: ${operationId}`, error);
       throw this.handleDatabaseError(error, operationId);
@@ -524,17 +623,26 @@ export class ParlantComprehensiveDatabaseApiController {
   @Post('bulk')
   @ApiOperation({
     summary: 'Execute bulk database operations with PARLANT validation',
-    description: 'Execute multiple data modifications in bulk with transaction management'
+    description:
+      'Execute multiple data modifications in bulk with transaction management',
   })
   @ApiBody({ type: Object, description: 'Bulk operation request' })
-  @ApiResponse({ status: 200, description: 'Bulk operations completed successfully' })
-  @ApiResponse({ status: 403, description: 'Bulk operation rejected by validation' })
+  @ApiResponse({
+    status: 200,
+    description: 'Bulk operations completed successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Bulk operation rejected by validation',
+  })
   async executeBulkOperations(
     @Body() bulkRequest: BulkOperationRequest,
-    @Request() req: AuthenticatedRequest
+    @Request() req: AuthenticatedRequest,
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
-    this.logger.log(`Executing bulk operations with PARLANT validation: ${operationId}`);
+    this.logger.log(
+      `Executing bulk operations with PARLANT validation: ${operationId}`,
+    );
 
     try {
       // Validate each operation in the bulk request
@@ -546,14 +654,18 @@ export class ParlantComprehensiveDatabaseApiController {
           tableName: operation.tableName,
           queryText: this.buildModificationQuery(operation),
           parameters: operation.data || operation.conditions || {},
-          estimatedRows: Array.isArray(operation.data) ? operation.data.length : 1,
+          estimatedRows: Array.isArray(operation.data)
+            ? operation.data.length
+            : 1,
           isDestructive: operation.operation === 'DELETE',
           requiresTransaction: true,
-          securityClassification: this.determineDataClassification(operation.tableName),
-          complianceRequirements: this.determineComplianceRequirements(
-            this.determineDataClassification(operation.tableName)
+          securityClassification: this.determineDataClassification(
+            operation.tableName,
           ),
-          businessJustification: operation.businessJustification
+          complianceRequirements: this.determineComplianceRequirements(
+            this.determineDataClassification(operation.tableName),
+          ),
+          businessJustification: operation.businessJustification,
         };
 
         const validationRequest: ParlantDatabaseValidationRequest = {
@@ -563,30 +675,41 @@ export class ParlantComprehensiveDatabaseApiController {
           actionDescription: `Bulk ${operation.operation} on ${operation.tableName}`,
           context: this.buildConversationContext(req, operationId),
           riskLevel: this.assessInitialRiskLevel(databaseOperation),
-          databaseOperation
+          databaseOperation,
         };
 
-        const validationResult = await this.parlantValidationService.validateDatabaseOperation(validationRequest);
+        const validationResult =
+          await this.parlantValidationService.validateDatabaseOperation(
+            validationRequest,
+          );
         validationResults.push(validationResult);
 
         if (!validationResult.approved) {
-          throw new HttpException({
-            statusCode: HttpStatus.FORBIDDEN,
-            message: `Bulk operation rejected: ${validationResult.reason}`,
-            operationId,
-            failedOperation: operation,
-            validationResult,
-            timestamp: new Date()
-          }, HttpStatus.FORBIDDEN);
+          throw new HttpException(
+            {
+              statusCode: HttpStatus.FORBIDDEN,
+              message: `Bulk operation rejected: ${validationResult.reason}`,
+              operationId,
+              failedOperation: operation,
+              validationResult,
+              timestamp: new Date(),
+            },
+            HttpStatus.FORBIDDEN,
+          );
         }
       }
 
       // Execute all validated operations
       const startTime = Date.now();
-      const bulkResult = this.executeValidatedBulkOperations(bulkRequest, validationResults);
+      const bulkResult = this.executeValidatedBulkOperations(
+        bulkRequest,
+        validationResults,
+      );
       const executionTime = Date.now() - startTime;
 
-      this.logger.log(`Bulk operations completed successfully: ${operationId} (${executionTime}ms)`);
+      this.logger.log(
+        `Bulk operations completed successfully: ${operationId} (${executionTime}ms)`,
+      );
 
       return {
         success: true,
@@ -595,9 +718,8 @@ export class ParlantComprehensiveDatabaseApiController {
         validationResult: this.combineBulkValidationResults(validationResults),
         operationId,
         timestamp: new Date(),
-        recommendations: this.combineBulkRecommendations(validationResults)
+        recommendations: this.combineBulkRecommendations(validationResults),
       };
-
     } catch (error) {
       this.logger.error(`Bulk operations failed: ${operationId}`, error);
       throw this.handleDatabaseError(error, operationId);
@@ -608,32 +730,47 @@ export class ParlantComprehensiveDatabaseApiController {
 
   @Post('admin')
   @ApiOperation({
-    summary: 'Execute database administration operations with PARLANT validation',
-    description: 'Execute administrative operations like backup, restore, migration with validation'
+    summary:
+      'Execute database administration operations with PARLANT validation',
+    description:
+      'Execute administrative operations like backup, restore, migration with validation',
   })
   @ApiBody({ type: Object, description: 'Database administration request' })
-  @ApiResponse({ status: 200, description: 'Administration operation completed successfully' })
-  @ApiResponse({ status: 403, description: 'Administration operation rejected by validation' })
+  @ApiResponse({
+    status: 200,
+    description: 'Administration operation completed successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Administration operation rejected by validation',
+  })
   async executeAdminOperation(
     @Body() adminRequest: DatabaseAdminRequest,
-    @Request() req: AuthenticatedRequest
+    @Request() req: AuthenticatedRequest,
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
-    this.logger.log(`Executing admin operation with PARLANT validation: ${operationId}`);
+    this.logger.log(
+      `Executing admin operation with PARLANT validation: ${operationId}`,
+    );
 
     try {
       // Build database operation context for admin operation
       const databaseOperation: DatabaseOperationContext = {
         operationType: DatabaseOperationType.ADMIN_OPERATION,
-        tableName: adminRequest.parameters.tableName as string || 'SYSTEM',
+        tableName: (adminRequest.parameters.tableName as string) || 'SYSTEM',
         queryText: `ADMIN OPERATION: ${adminRequest.operation}`,
         parameters: adminRequest.parameters,
         estimatedRows: 0,
-        isDestructive: ['RESTORE', 'MIGRATION'].includes(adminRequest.operation),
+        isDestructive: ['RESTORE', 'MIGRATION'].includes(
+          adminRequest.operation,
+        ),
         requiresTransaction: true,
         securityClassification: DataClassification.RESTRICTED,
-        complianceRequirements: [ComplianceFramework.SOX, ComplianceFramework.ISO_27001],
-        businessJustification: adminRequest.businessJustification
+        complianceRequirements: [
+          ComplianceFramework.SOX,
+          ComplianceFramework.ISO_27001,
+        ],
+        businessJustification: adminRequest.businessJustification,
       };
 
       // Build PARLANT validation request with high security
@@ -651,29 +788,41 @@ export class ParlantComprehensiveDatabaseApiController {
           timeoutMs: 300000, // 5 minutes for admin operations
           rollbackStrategy: 'MANUAL_APPROVAL',
           backupRequired: true,
-          approvalRequired: true
-        }
+          approvalRequired: true,
+        },
       };
 
       // Execute comprehensive PARLANT validation
-      const validationResult = await this.parlantValidationService.validateDatabaseOperation(validationRequest);
+      const validationResult =
+        await this.parlantValidationService.validateDatabaseOperation(
+          validationRequest,
+        );
 
       if (!validationResult.approved) {
-        throw new HttpException({
-          statusCode: HttpStatus.FORBIDDEN,
-          message: 'Database administration operation denied by PARLANT validation',
-          validationResult,
-          operationId,
-          timestamp: new Date()
-        }, HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.FORBIDDEN,
+            message:
+              'Database administration operation denied by PARLANT validation',
+            validationResult,
+            operationId,
+            timestamp: new Date(),
+          },
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       // Execute the validated admin operation
       const startTime = Date.now();
-      const adminResult: unknown = this.executeValidatedAdminOperation(adminRequest, validationResult);
+      const adminResult: unknown = this.executeValidatedAdminOperation(
+        adminRequest,
+        validationResult,
+      );
       const executionTime = Date.now() - startTime;
 
-      this.logger.log(`Admin operation completed successfully: ${operationId} (${executionTime}ms)`);
+      this.logger.log(
+        `Admin operation completed successfully: ${operationId} (${executionTime}ms)`,
+      );
 
       return {
         success: true,
@@ -686,10 +835,9 @@ export class ParlantComprehensiveDatabaseApiController {
           ...validationResult.performanceRecommendations,
           ...validationResult.securityRecommendations,
           'Monitor system performance after administration operation',
-          'Verify backup integrity and recovery procedures'
-        ]
+          'Verify backup integrity and recovery procedures',
+        ],
       };
-
     } catch (error) {
       this.logger.error(`Admin operation failed: ${operationId}`, error);
       throw this.handleDatabaseError(error, operationId);
@@ -701,24 +849,43 @@ export class ParlantComprehensiveDatabaseApiController {
   @Get('schema/:tableName')
   @ApiOperation({
     summary: 'Get table schema with PARLANT validation',
-    description: 'Retrieve table schema information with security validation'
+    description: 'Retrieve table schema information with security validation',
   })
   @ApiParam({ name: 'tableName', description: 'Name of the table' })
-  @ApiQuery({ name: 'includeIndexes', description: 'Include index information', type: Boolean, required: false })
-  @ApiQuery({ name: 'includeConstraints', description: 'Include constraint information', type: Boolean, required: false })
-  @ApiResponse({ status: 200, description: 'Table schema retrieved successfully' })
-  @ApiResponse({ status: 403, description: 'Schema access denied by validation' })
+  @ApiQuery({
+    name: 'includeIndexes',
+    description: 'Include index information',
+    type: Boolean,
+    required: false,
+  })
+  @ApiQuery({
+    name: 'includeConstraints',
+    description: 'Include constraint information',
+    type: Boolean,
+    required: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Table schema retrieved successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Schema access denied by validation',
+  })
   async getTableSchema(
     @Param('tableName') tableName: string,
-    @Query() options: {
+    @Query()
+    options: {
       includeIndexes?: boolean;
       includeConstraints?: boolean;
       includeStatistics?: boolean;
     },
-    @Request() req: AuthenticatedRequest
+    @Request() req: AuthenticatedRequest,
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
-    this.logger.log(`Getting table schema with PARLANT validation: ${operationId}`);
+    this.logger.log(
+      `Getting table schema with PARLANT validation: ${operationId}`,
+    );
 
     try {
       // Build database operation context for schema access
@@ -732,9 +899,10 @@ export class ParlantComprehensiveDatabaseApiController {
         requiresTransaction: false,
         securityClassification: this.determineDataClassification(tableName),
         complianceRequirements: this.determineComplianceRequirements(
-          this.determineDataClassification(tableName)
+          this.determineDataClassification(tableName),
         ),
-        businessJustification: 'Schema information retrieval for development or analysis'
+        businessJustification:
+          'Schema information retrieval for development or analysis',
       };
 
       // Build PARLANT validation request
@@ -745,28 +913,40 @@ export class ParlantComprehensiveDatabaseApiController {
         actionDescription: `Retrieve schema information for table: ${tableName}`,
         context: this.buildConversationContext(req, operationId),
         riskLevel: this.assessInitialRiskLevel(databaseOperation),
-        databaseOperation
+        databaseOperation,
       };
 
       // Execute PARLANT validation
-      const validationResult = await this.parlantValidationService.validateDatabaseOperation(validationRequest);
+      const validationResult =
+        await this.parlantValidationService.validateDatabaseOperation(
+          validationRequest,
+        );
 
       if (!validationResult.approved) {
-        throw new HttpException({
-          statusCode: HttpStatus.FORBIDDEN,
-          message: 'Schema access denied by PARLANT validation',
-          validationResult,
-          operationId,
-          timestamp: new Date()
-        }, HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.FORBIDDEN,
+            message: 'Schema access denied by PARLANT validation',
+            validationResult,
+            operationId,
+            timestamp: new Date(),
+          },
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       // Retrieve the validated schema
       const startTime = Date.now();
-      const schemaResult: unknown = this.getValidatedTableSchema(tableName, options, validationResult);
+      const schemaResult: unknown = this.getValidatedTableSchema(
+        tableName,
+        options,
+        validationResult,
+      );
       const executionTime = Date.now() - startTime;
 
-      this.logger.log(`Table schema retrieved successfully: ${operationId} (${executionTime}ms)`);
+      this.logger.log(
+        `Table schema retrieved successfully: ${operationId} (${executionTime}ms)`,
+      );
 
       return {
         success: true,
@@ -775,9 +955,8 @@ export class ParlantComprehensiveDatabaseApiController {
         validationResult,
         operationId,
         timestamp: new Date(),
-        recommendations: validationResult.securityRecommendations
+        recommendations: validationResult.securityRecommendations,
       };
-
     } catch (error) {
       this.logger.error(`Schema retrieval failed: ${operationId}`, error);
       throw this.handleDatabaseError(error, operationId);
@@ -789,9 +968,12 @@ export class ParlantComprehensiveDatabaseApiController {
   @Get('health')
   @ApiOperation({
     summary: 'Database health check with PARLANT integration',
-    description: 'Check database health and PARLANT validation service status'
+    description: 'Check database health and PARLANT validation service status',
   })
-  @ApiResponse({ status: 200, description: 'Health check completed successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Health check completed successfully',
+  })
   getDatabaseHealth(@Request() req: AuthenticatedRequest): {
     database: 'healthy' | 'degraded' | 'unhealthy';
     parlantValidation: 'healthy' | 'degraded' | 'unhealthy';
@@ -826,11 +1008,10 @@ export class ParlantComprehensiveDatabaseApiController {
             optimizationAgent: 'active',
             performanceAgent: 'active',
             complianceAgent: 'active',
-            executionPlanningAgent: 'active'
-          }
-        }
+            executionPlanningAgent: 'active',
+          },
+        },
       };
-
     } catch (error) {
       this.logger.error(`Health check failed: ${operationId}`, error);
 
@@ -840,8 +1021,8 @@ export class ParlantComprehensiveDatabaseApiController {
         timestamp: new Date(),
         details: {
           operationId,
-          error: error instanceof Error ? error.message : String(error)
-        }
+          error: error instanceof Error ? error.message : String(error),
+        },
       };
     }
   }
@@ -852,7 +1033,10 @@ export class ParlantComprehensiveDatabaseApiController {
     return `db_op_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 
-  private buildConversationContext(req: AuthenticatedRequest, operationId: string): ParlantConversationContext {
+  private buildConversationContext(
+    req: AuthenticatedRequest,
+    operationId: string,
+  ): ParlantConversationContext {
     return {
       conversationId: `db_conv_${operationId}`,
       userId: String(req.user?.id) || 'anonymous',
@@ -869,16 +1053,19 @@ export class ParlantComprehensiveDatabaseApiController {
           userAgent: req.headers?.['user-agent'],
           ipAddress: req.ip,
           endpoint: req.route?.path || req.url,
-          method: req.method
+          method: req.method,
         },
-        history: []
-      }
+        history: [],
+      },
     };
   }
 
-  private assessInitialRiskLevel(operation: DatabaseOperationContext): RiskLevel {
+  private assessInitialRiskLevel(
+    operation: DatabaseOperationContext,
+  ): RiskLevel {
     if (operation.isDestructive) return RiskLevel._HIGH;
-    if (operation.securityClassification === DataClassification.RESTRICTED) return RiskLevel._HIGH;
+    if (operation.securityClassification === DataClassification.RESTRICTED)
+      return RiskLevel._HIGH;
     if (operation.estimatedRows > 50000) return RiskLevel._MODERATE;
     return RiskLevel._LOW;
   }
@@ -891,24 +1078,43 @@ export class ParlantComprehensiveDatabaseApiController {
 
   private determineDataClassification(tableName: string): DataClassification {
     // Determine data classification based on table name patterns
-    const confidentialTables = ['users', 'accounts', 'payments', 'personal_data'];
+    const confidentialTables = [
+      'users',
+      'accounts',
+      'payments',
+      'personal_data',
+    ];
     const restrictedTables = ['admin', 'security', 'audit', 'credentials'];
 
-    if (restrictedTables.some(pattern => tableName.toLowerCase().includes(pattern))) {
+    if (
+      restrictedTables.some((pattern) =>
+        tableName.toLowerCase().includes(pattern),
+      )
+    ) {
       return DataClassification.RESTRICTED;
     }
 
-    if (confidentialTables.some(pattern => tableName.toLowerCase().includes(pattern))) {
+    if (
+      confidentialTables.some((pattern) =>
+        tableName.toLowerCase().includes(pattern),
+      )
+    ) {
       return DataClassification.CONFIDENTIAL;
     }
 
     return DataClassification.INTERNAL;
   }
 
-  private determineComplianceRequirements(classification: DataClassification): ComplianceFramework[] {
+  private determineComplianceRequirements(
+    classification: DataClassification,
+  ): ComplianceFramework[] {
     switch (classification) {
       case DataClassification.RESTRICTED:
-        return [ComplianceFramework.SOX, ComplianceFramework.ISO_27001, ComplianceFramework.NIST];
+        return [
+          ComplianceFramework.SOX,
+          ComplianceFramework.ISO_27001,
+          ComplianceFramework.NIST,
+        ];
       case DataClassification.CONFIDENTIAL:
         return [ComplianceFramework.GDPR, ComplianceFramework.SOC2];
       default:
@@ -918,10 +1124,14 @@ export class ParlantComprehensiveDatabaseApiController {
 
   private mapOperationType(operation: string): DatabaseOperationType {
     switch (operation.toUpperCase()) {
-      case 'INSERT': return DatabaseOperationType.INSERT;
-      case 'UPDATE': return DatabaseOperationType.UPDATE;
-      case 'DELETE': return DatabaseOperationType.DELETE;
-      default: return DatabaseOperationType.SELECT;
+      case 'INSERT':
+        return DatabaseOperationType.INSERT;
+      case 'UPDATE':
+        return DatabaseOperationType.UPDATE;
+      case 'DELETE':
+        return DatabaseOperationType.DELETE;
+      default:
+        return DatabaseOperationType.SELECT;
     }
   }
 
@@ -939,63 +1149,80 @@ export class ParlantComprehensiveDatabaseApiController {
     }
   }
 
-  private executeValidatedQuery(query: string, validationResult: ParlantDatabaseValidationResponse): {
+  private executeValidatedQuery(
+    query: string,
+    validationResult: ParlantDatabaseValidationResponse,
+  ): {
     rows: Record<string, unknown>[];
     rowCount: number;
   } {
     // Mock query execution - in production, this would use actual database connection
-    this.logger.debug(`Executing validated query with optimization: ${validationResult.optimizedQuery || query}`);
+    this.logger.debug(
+      `Executing validated query with optimization: ${validationResult.optimizedQuery || query}`,
+    );
 
     return {
       rows: [{ id: 1, name: 'Sample Data', timestamp: new Date() }],
-      rowCount: 1
+      rowCount: 1,
     };
   }
 
   private executeValidatedModification(
     request: DataModificationRequest,
-    validationResult: ParlantDatabaseValidationResponse
+    validationResult: ParlantDatabaseValidationResponse,
   ): { rowsAffected: number } {
     // Mock modification execution - in production, this would use actual database connection
-    this.logger.debug(`Executing validated modification: ${request.operation} on ${request.tableName}`);
+    this.logger.debug(
+      `Executing validated modification: ${request.operation} on ${request.tableName}`,
+    );
 
     return {
-      rowsAffected: Array.isArray(request.data) ? request.data.length : 1
+      rowsAffected: Array.isArray(request.data) ? request.data.length : 1,
     };
   }
 
   private executeValidatedBulkOperations(
     request: BulkOperationRequest,
-    validationResults: ParlantDatabaseValidationResponse[]
+    validationResults: ParlantDatabaseValidationResponse[],
   ): { totalRowsAffected: number } {
     // Mock bulk execution - in production, this would use actual database transaction
-    this.logger.debug(`Executing validated bulk operations: ${request.operations.length} operations`);
+    this.logger.debug(
+      `Executing validated bulk operations: ${request.operations.length} operations`,
+    );
 
     return {
-      totalRowsAffected: request.operations.reduce((sum, op) =>
-        sum + (Array.isArray(op.data) ? op.data.length : 1), 0)
+      totalRowsAffected: request.operations.reduce(
+        (sum, op) => sum + (Array.isArray(op.data) ? op.data.length : 1),
+        0,
+      ),
     };
   }
 
   private executeValidatedAdminOperation(
     request: DatabaseAdminRequest,
-    validationResult: ParlantDatabaseValidationResponse
+    validationResult: ParlantDatabaseValidationResponse,
   ): Record<string, unknown> {
     // Mock admin operation execution - in production, this would execute actual admin commands
-    this.logger.debug(`Executing validated admin operation: ${request.operation}`);
+    this.logger.debug(
+      `Executing validated admin operation: ${request.operation}`,
+    );
 
     return {
       operation: request.operation,
       status: 'completed',
       timestamp: new Date(),
-      parameters: request.parameters
+      parameters: request.parameters,
     };
   }
 
   private getValidatedTableSchema(
     tableName: string,
-    options: { includeIndexes?: boolean; includeConstraints?: boolean; includeStatistics?: boolean },
-    validationResult: ParlantDatabaseValidationResponse
+    options: {
+      includeIndexes?: boolean;
+      includeConstraints?: boolean;
+      includeStatistics?: boolean;
+    },
+    validationResult: ParlantDatabaseValidationResponse,
   ): Record<string, unknown> {
     // Mock schema retrieval - in production, this would query information schema
     this.logger.debug(`Retrieving validated table schema: ${tableName}`);
@@ -1005,31 +1232,42 @@ export class ParlantComprehensiveDatabaseApiController {
       columns: [
         { name: 'id', type: 'integer', nullable: false, primaryKey: true },
         { name: 'name', type: 'varchar(255)', nullable: false },
-        { name: 'created_at', type: 'timestamp', nullable: false }
+        { name: 'created_at', type: 'timestamp', nullable: false },
       ],
-      indexes: options.includeIndexes ? [
-        { name: 'pk_id', type: 'primary', columns: ['id'] },
-        { name: 'idx_name', type: 'index', columns: ['name'] }
-      ] : undefined,
-      constraints: options.includeConstraints ? [
-        { name: 'pk_constraint', type: 'primary_key', columns: ['id'] }
-      ] : undefined
+      indexes: options.includeIndexes
+        ? [
+            { name: 'pk_id', type: 'primary', columns: ['id'] },
+            { name: 'idx_name', type: 'index', columns: ['name'] },
+          ]
+        : undefined,
+      constraints: options.includeConstraints
+        ? [{ name: 'pk_constraint', type: 'primary_key', columns: ['id'] }]
+        : undefined,
     };
   }
 
-  private combineBulkValidationResults(results: ParlantDatabaseValidationResponse[]): ParlantDatabaseValidationResponse {
+  private combineBulkValidationResults(
+    results: ParlantDatabaseValidationResponse[],
+  ): ParlantDatabaseValidationResponse {
     // Combine multiple validation results into a single summary
-    const approved = results.every(r => r.approved);
-    const avgConfidence = results.reduce((sum, r) => sum + r.confidence, 0) / results.length;
+    const approved = results.every((r) => r.approved);
+    const avgConfidence =
+      results.reduce((sum, r) => sum + r.confidence, 0) / results.length;
 
     return {
       approved,
       conversationId: `bulk_${Date.now()}`,
-      reason: approved ? 'All bulk operations approved' : 'One or more bulk operations rejected',
+      reason: approved
+        ? 'All bulk operations approved'
+        : 'One or more bulk operations rejected',
       confidence: avgConfidence,
-      performanceRecommendations: results.flatMap(r => r.performanceRecommendations),
-      securityRecommendations: results.flatMap(r => r.securityRecommendations),
-      complianceNotes: results.flatMap(r => r.complianceNotes),
+      performanceRecommendations: results.flatMap(
+        (r) => r.performanceRecommendations,
+      ),
+      securityRecommendations: results.flatMap(
+        (r) => r.securityRecommendations,
+      ),
+      complianceNotes: results.flatMap((r) => r.complianceNotes),
       auditTrail: results[0].auditTrail, // Use first audit trail as representative
       metadata: {
         startTime: new Date(),
@@ -1041,22 +1279,30 @@ export class ParlantComprehensiveDatabaseApiController {
           level: approved ? RiskLevel._LOW : RiskLevel._HIGH,
           factors: ['Bulk operation'],
           score: approved ? 25 : 75,
-          mitigations: ['Individual operation validation']
-        }
-      }
+          mitigations: ['Individual operation validation'],
+        },
+      },
     };
   }
 
-  private combineBulkRecommendations(results: ParlantDatabaseValidationResponse[]): string[] {
+  private combineBulkRecommendations(
+    results: ParlantDatabaseValidationResponse[],
+  ): string[] {
     const recommendations = new Set<string>();
 
-    results.forEach(result => {
-      result.performanceRecommendations.forEach(rec => recommendations.add(rec));
-      result.securityRecommendations.forEach(rec => recommendations.add(rec));
+    results.forEach((result) => {
+      result.performanceRecommendations.forEach((rec) =>
+        recommendations.add(rec),
+      );
+      result.securityRecommendations.forEach((rec) => recommendations.add(rec));
     });
 
-    recommendations.add('Monitor bulk operation performance and resource usage');
-    recommendations.add('Consider batch size optimization for large bulk operations');
+    recommendations.add(
+      'Monitor bulk operation performance and resource usage',
+    );
+    recommendations.add(
+      'Consider batch size optimization for large bulk operations',
+    );
 
     return Array.from(recommendations);
   }
@@ -1072,8 +1318,8 @@ export class ParlantComprehensiveDatabaseApiController {
         connectionPool: 'active',
         responseTime: '< 10ms',
         activeConnections: 5,
-        maxConnections: 100
-      }
+        maxConnections: 100,
+      },
     };
   }
 
@@ -1090,40 +1336,49 @@ export class ParlantComprehensiveDatabaseApiController {
           validationService: 'active',
           agentCount: 10,
           averageValidationTime: '< 500ms',
-          cacheHitRate: '85%'
-        }
+          cacheHitRate: '85%',
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: {
-          error: error instanceof Error ? error.message : String(error)
-        }
+          error: error instanceof Error ? error.message : String(error),
+        },
       };
     }
   }
 
-  private handleDatabaseError(error: unknown, operationId: string): HttpException {
+  private handleDatabaseError(
+    error: unknown,
+    operationId: string,
+  ): HttpException {
     if (error instanceof ConversationalValidationError) {
-      return new HttpException({
-        statusCode: HttpStatus.FORBIDDEN,
-        message: error.message,
-        operationId,
-        timestamp: new Date(),
-        validationError: error.toJSON()
-      }, HttpStatus.FORBIDDEN);
+      return new HttpException(
+        {
+          statusCode: HttpStatus.FORBIDDEN,
+          message: error.message,
+          operationId,
+          timestamp: new Date(),
+          validationError: error.toJSON(),
+        },
+        HttpStatus.FORBIDDEN,
+      );
     }
 
     if (error instanceof HttpException) {
       return error;
     }
 
-    return new HttpException({
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Database operation failed',
-      operationId,
-      timestamp: new Date(),
-      error: error instanceof Error ? error.message : String(error)
-    }, HttpStatus.INTERNAL_SERVER_ERROR);
+    return new HttpException(
+      {
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Database operation failed',
+        operationId,
+        timestamp: new Date(),
+        error: error instanceof Error ? error.message : String(error),
+      },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 }

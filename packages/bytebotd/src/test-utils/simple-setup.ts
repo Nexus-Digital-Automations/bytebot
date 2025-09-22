@@ -8,7 +8,7 @@
  * @version 1.0.0
  */
 
-import 'reflect-metadata';// Set test environmentprocess.env.NODE_ENV = 'test';process.env.BYTEBOT_TEST_MODE = 'true';
+import 'reflect-metadata'; // Set test environmentprocess.env.NODE_ENV = 'test';process.env.BYTEBOT_TEST_MODE = 'true';
 
 // Global test timeout
 jest.setTimeout(30000);

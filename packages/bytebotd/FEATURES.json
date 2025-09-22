@@ -1,0 +1,183 @@
+{
+  "project": "bytebotd",
+  "features": [
+    {
+      "id": "feature_1758529670578_b23ffff60f79",
+      "title": "Fix import/export and module syntax errors in bytebotd package",
+      "description": "Fix critical TypeScript compilation errors including malformed import/export statements, missing module declarations, export syntax issues, and circular dependencies across the bytebotd package",
+      "business_value": "Resolve compilation errors to enable successful builds and prevent deployment failures",
+      "category": "bug-fix",
+      "status": "approved",
+      "created_at": "2025-09-22T08:27:50.579Z",
+      "updated_at": "2025-09-22T08:27:58.443Z",
+      "suggested_by": "system",
+      "metadata": {},
+      "approved_by": "system",
+      "approval_date": "2025-09-22T08:27:58.443Z",
+      "approval_notes": ""
+    },
+    {
+      "id": "feature_1758529675082_8382f1768075",
+      "title": "Fix Service & Provider TypeScript Syntax Errors",
+      "description": "Fix critical TypeScript compilation errors in service classes and providers across bytebotd package. Target: Service class method syntax, Injectable decorators, dependency injection patterns, async/await implementation, provider configurations. Success: All service/provider syntax errors resolved, TypeScript compilation passes, business logic preserved.",
+      "business_value": "Enable TypeScript compilation to pass by resolving all service and provider syntax errors, ensuring system can build and deploy successfully",
+      "category": "bug-fix",
+      "status": "approved",
+      "created_at": "2025-09-22T08:27:55.082Z",
+      "updated_at": "2025-09-22T08:27:58.431Z",
+      "suggested_by": "system",
+      "metadata": {},
+      "approved_by": "system",
+      "approval_date": "2025-09-22T08:27:58.431Z",
+      "approval_notes": ""
+    },
+    {
+      "id": "feature_1758529680753_42769c04789d",
+      "title": "Fix interface and type definition syntax errors in bytebotd package",
+      "description": "Comprehensive fix for TypeScript compilation errors caused by malformed interface declarations, type alias syntax errors, generic type parameter issues, and enum declaration syntax problems throughout the bytebotd package",
+      "business_value": "Ensures TypeScript compilation passes, maintains type safety, prevents runtime errors, and enables proper development tooling support",
+      "category": "bug-fix",
+      "status": "approved",
+      "created_at": "2025-09-22T08:28:00.753Z",
+      "updated_at": "2025-09-22T08:28:06.986Z",
+      "suggested_by": "system",
+      "metadata": {},
+      "approved_by": "system",
+      "approval_date": "2025-09-22T08:28:06.987Z",
+      "approval_notes": ""
+    },
+    {
+      "id": "feature_1758529706773_14a7b65d3506",
+      "title": "Fix template literal and string syntax errors in security.decorators.ts",
+      "description": "Critical TypeScript compilation errors due to unterminated template literals, missing closing braces, parentheses, and malformed string concatenations at lines 119, 132, 146, 167, 180, 192, 201, 210, 231, 233, 256, 260, 261, 313, 349, 371, 373, 388, 401, 420, 421, 442, 463, and 497",
+      "business_value": "Enables TypeScript compilation to succeed by resolving critical syntax errors that prevent the build process from completing",
+      "category": "bug-fix",
+      "status": "approved",
+      "created_at": "2025-09-22T08:28:26.773Z",
+      "updated_at": "2025-09-22T08:28:33.067Z",
+      "suggested_by": "system",
+      "metadata": {},
+      "approved_by": "system",
+      "approval_date": "2025-09-22T08:28:33.067Z",
+      "approval_notes": ""
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2025-09-22T08:27:26.063Z",
+    "updated": "2025-09-22T08:28:33.067Z",
+    "total_features": 4,
+    "approval_history": [
+      {
+        "feature_id": "feature_1758529675082_8382f1768075",
+        "action": "approved",
+        "timestamp": "2025-09-22T08:27:58.431Z",
+        "approved_by": "system",
+        "notes": ""
+      },
+      {
+        "feature_id": "feature_1758529670578_b23ffff60f79",
+        "action": "approved",
+        "timestamp": "2025-09-22T08:27:58.443Z",
+        "approved_by": "system",
+        "notes": ""
+      },
+      {
+        "feature_id": "feature_1758529680753_42769c04789d",
+        "action": "approved",
+        "timestamp": "2025-09-22T08:28:06.987Z",
+        "approved_by": "system",
+        "notes": ""
+      },
+      {
+        "feature_id": "feature_1758529706773_14a7b65d3506",
+        "action": "approved",
+        "timestamp": "2025-09-22T08:28:33.067Z",
+        "approved_by": "system",
+        "notes": ""
+      }
+    ]
+  },
+  "workflow_config": {
+    "require_approval": true,
+    "auto_reject_timeout_hours": 168,
+    "allowed_statuses": [
+      "suggested",
+      "approved",
+      "rejected",
+      "implemented"
+    ],
+    "required_fields": [
+      "title",
+      "description",
+      "business_value",
+      "category"
+    ]
+  },
+  "agents": {
+    "import-export-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:35.811Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:27:35.811Z",
+      "sessionId": "628c6c4edf8f41fe"
+    },
+    "template-literal-fix-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:39.170Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:27:39.170Z",
+      "sessionId": "3fcc87f50b5fb315"
+    },
+    "object-literal-syntax-fix-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:27.111Z",
+      "status": "active",
+      "reinitialized": "2025-09-22T08:27:27.111Z",
+      "sessionId": "451abb4b1a989da5",
+      "previousSessions": []
+    },
+    "decorator-syntax-fix-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:27.137Z",
+      "status": "active",
+      "reinitialized": "2025-09-22T08:27:27.137Z",
+      "sessionId": "c70b47c10b97d4f3",
+      "previousSessions": []
+    },
+    "function-syntax-fix-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:27.296Z",
+      "status": "active",
+      "reinitialized": "2025-09-22T08:27:27.296Z",
+      "sessionId": "374955ab721c2499",
+      "previousSessions": []
+    },
+    "interface-type-fix-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:39.126Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:27:39.126Z",
+      "sessionId": "3c479f066f0fd283"
+    },
+    "guard-pipe-syntax-fix-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:27.347Z",
+      "status": "active",
+      "reinitialized": "2025-09-22T08:27:27.347Z",
+      "sessionId": "fcd6b9bab2404185",
+      "previousSessions": []
+    },
+    "TestFileSyntaxFixAgent": {
+      "lastHeartbeat": "2025-09-22T08:27:37.093Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:27:37.093Z",
+      "sessionId": "0338537c96810cc8"
+    },
+    "controller-syntax-fix-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:44.049Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:27:44.049Z",
+      "sessionId": "3da5f5c85304a167"
+    },
+    "service-provider-syntax-agent": {
+      "lastHeartbeat": "2025-09-22T08:27:38.250Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:27:38.250Z",
+      "sessionId": "6936251f7058cb7a"
+    }
+  }
+}

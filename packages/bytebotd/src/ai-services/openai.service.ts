@@ -1,10 +1,10 @@
 /**
  * OpenAI Service - MAXIMUM Parlant Integration
- * 
+ *
  * Provides comprehensive OpenAI GPT integration with full Parlant conversational
  * validation for all AI model interactions. Every OpenAI API call is wrapped with
  * conversational validation to ensure AI execution aligns with user intent.
- * 
+ *
  * Features:
  * - Complete OpenAI GPT API integration (Chat, Streaming, Function Calling, Assistants)
  * - Pre-execution conversational validation for ALL AI operations
@@ -12,7 +12,7 @@
  * - Comprehensive audit trails for AI model interactions
  * - Performance optimization with intelligent caching
  * - Enterprise-grade error handling and recovery
- * 
+ *
  * Architecture: Parlant-validated OpenAI service with conversation-first approach
  * Security: Every AI interaction validated through conversational authentication
  * Performance: Sub-500ms validation with multi-level caching for AI operations
@@ -21,7 +21,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RiskLevel } from '@bytebot/shared';
-import { ParlantIntegrationService, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
+import {
+  ParlantIntegrationService,
+  ParlantValidationRequest,
+  ParlantConversationContext,
+} from '../parlant/parlant-integration.service';
 
 // ===== OPENAI INTEGRATION INTERFACES =====
 /**
@@ -57,7 +61,10 @@ export interface OpenAIChatRequest {
   readonly config: GPTModelConfig;
   readonly functions?: OpenAIFunction[];
   readonly tools?: OpenAITool[];
-  readonly toolChoice?: 'auto' | 'none' | { type: 'function'; function: { name: string } };
+  readonly toolChoice?:
+    | 'auto'
+    | 'none'
+    | { type: 'function'; function: { name: string } };
   readonly context: ParlantConversationContext;
   readonly operationId: string;
 }
@@ -119,7 +126,12 @@ export interface OpenAIChatResponse {
 export interface OpenAIChoice {
   readonly index: number;
   readonly message: OpenAIMessage;
-  readonly finishReason: 'stop' | 'length' | 'function_call' | 'tool_calls' | 'content_filter';
+  readonly finishReason:
+    | 'stop'
+    | 'length'
+    | 'function_call'
+    | 'tool_calls'
+    | 'content_filter';
 }
 
 /**
@@ -170,7 +182,7 @@ export class OpenAIService {
   private readonly logger = new Logger(OpenAIService.name);
   private readonly apiKey: string;
   private readonly baseUrl: string = 'https://api.openai.com/v1';
-  
+
   // Performance metrics
   private requestCount = 0;
   private validationCount = 0;
@@ -179,20 +191,25 @@ export class OpenAIService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly parlantIntegration: ParlantIntegrationService
+    private readonly parlantIntegration: ParlantIntegrationService,
   ) {
     const operationId = `openai_init${Date.now()}${Math.random().toString(36).substring(7)}`;
-    
+
     this.apiKey = this.configService.get<string>('OPENAI_API_KEY', '');
     if (!this.apiKey) {
-      this.logger.warn(`[${operationId}] OpenAI API key not configured - service will operate in validation-only mode`);
+      this.logger.warn(
+        `[${operationId}] OpenAI API key not configured - service will operate in validation-only mode`,
+      );
     }
-    this.logger.log(`[${operationId}] OpenAI Service initialized with MAXIMUM Parlant integration`, {
-      parlantEnabled: true,
-      validationRequired: true,
-      auditTrailEnabled: true,
-      baseUrl: this.baseUrl,
-    });
+    this.logger.log(
+      `[${operationId}] OpenAI Service initialized with MAXIMUM Parlant integration`,
+      {
+        parlantEnabled: true,
+        validationRequired: true,
+        auditTrailEnabled: true,
+        baseUrl: this.baseUrl,
+      },
+    );
 
     // Initialize performance monitoring
     setInterval(() => this.logPerformanceMetrics(), 60000); // Every minute
@@ -200,15 +217,17 @@ export class OpenAIService {
 
   /**
    * Execute OpenAI chat completion with COMPREHENSIVE Parlant validation
-   * 
+   *
    * This method represents HIGH-risk AI model interaction requiring conversational
    * validation to ensure AI responses align with user intent and safety guidelines.
-   * 
+   *
    * @param request - Complete OpenAI chat request with context
    * @returns Promise with validated OpenAI response
    * @throws ConversationalValidationError if validation fails
    */
-  async executeChatCompletion(request: OpenAIChatRequest): Promise<OpenAIChatResponse> {
+  async executeChatCompletion(
+    request: OpenAIChatRequest,
+  ): Promise<OpenAIChatResponse> {
     const startTime = Date.now();
     this.requestCount++;
 
@@ -221,7 +240,7 @@ export class OpenAIService {
         userId: request.context.userId,
         functionsCount: request.functions?.length ?? 0,
         toolsCount: request.tools?.length ?? 0,
-      }
+      },
     );
 
     try {
@@ -241,8 +260,13 @@ export class OpenAIService {
         operationId: request.operationId,
       };
 
-      this.logger.log(`[${request.operationId}] Requesting Parlant validation for OpenAI interaction`);
-      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
+      this.logger.log(
+        `[${request.operationId}] Requesting Parlant validation for OpenAI interaction`,
+      );
+      const validationResponse =
+        await this.parlantIntegration.validateFunctionExecution(
+          validationRequest,
+        );
       this.validationCount++;
 
       if (!validationResponse.approved) {
@@ -252,13 +276,17 @@ export class OpenAIService {
             operationId: request.operationId,
             reasoning: validationResponse.reasoning,
             alternatives: validationResponse.suggestedAlternatives,
-          }
+          },
         );
 
-        throw new Error(`AI operation blocked by conversational validation: ${validationResponse.reasoning}`);
+        throw new Error(
+          `AI operation blocked by conversational validation: ${validationResponse.reasoning}`,
+        );
       }
 
-      this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with OpenAI API call`);
+      this.logger.log(
+        `[${request.operationId}] Parlant validation approved - proceeding with OpenAI API call`,
+      );
 
       // Execute OpenAI API call with validated parameters
       const response = await this.performOpenAIAPICall(request);
@@ -279,14 +307,13 @@ export class OpenAIService {
           finishReason: response.choices[0]?.finishReason,
           duration,
           validationId: validationResponse.conversationId,
-        }
+        },
       );
 
       return response;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       this.logger.error(
         `[${request.operationId}] OpenAI chat completion failed: ${error instanceof Error ? error.message : String(error)}`,
         {
@@ -294,7 +321,7 @@ export class OpenAIService {
           error: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           duration,
-        }
+        },
       );
 
       const serviceError: OpenAIServiceError = {
@@ -307,7 +334,9 @@ export class OpenAIService {
           messageCount: request.messages.length,
           duration,
         },
-        validationFailure: error instanceof Error && error.message.includes('conversational validation'),
+        validationFailure:
+          error instanceof Error &&
+          error.message.includes('conversational validation'),
       };
 
       throw serviceError;
@@ -316,13 +345,13 @@ export class OpenAIService {
 
   /**
    * Execute OpenAI streaming chat with Parlant validation
-   * 
+   *
    * Provides real-time streaming responses with conversational validation
    * for continuous AI interactions with safety monitoring.
    */
   async executeStreamingChat(
     request: OpenAIChatRequest,
-    onChunk: (chunk: OpenAIStreamChunk) => void
+    onChunk: (chunk: OpenAIStreamChunk) => void,
   ): Promise<void> {
     const operationId = `${request.operationId}_stream`;
     const startTime = Date.now();
@@ -332,7 +361,7 @@ export class OpenAIService {
         operationId,
         model: request.config.model,
         messageCount: request.messages.length,
-      }
+      },
     );
 
     try {
@@ -350,40 +379,52 @@ export class OpenAIService {
         operationId,
       };
 
-      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegration.validateFunctionExecution(
+          validationRequest,
+        );
 
       if (!validationResponse.approved) {
-        throw new Error(`Streaming AI operation blocked: ${validationResponse.reasoning}`);
+        throw new Error(
+          `Streaming AI operation blocked: ${validationResponse.reasoning}`,
+        );
       }
       // Execute streaming with validation approval
       await this.performStreamingOpenAICall(request, onChunk);
 
       const duration = Date.now() - startTime;
-      this.logger.log(`[${operationId}] OpenAI streaming completed successfully`, {
-        operationId,
-        duration,
-        validationId: validationResponse.conversationId,
-      });
-
+      this.logger.log(
+        `[${operationId}] OpenAI streaming completed successfully`,
+        {
+          operationId,
+          duration,
+          validationId: validationResponse.conversationId,
+        },
+      );
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] OpenAI streaming failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        duration,
-      });
+      this.logger.error(
+        `[${operationId}] OpenAI streaming failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          duration,
+        },
+      );
       throw error;
     }
   }
 
   /**
    * Execute OpenAI function calling with Parlant validation
-   * 
+   *
    * Validates and executes OpenAI function calling capabilities with
    * conversational approval for tool usage and function execution.
    */
   async executeFunctionCalling(
-    request: OpenAIChatRequest & { functionCall?: 'auto' | 'none' | { name: string } }
+    request: OpenAIChatRequest & {
+      functionCall?: 'auto' | 'none' | { name: string };
+    },
   ): Promise<OpenAIChatResponse> {
     const operationId = `${request.operationId}_functions`;
     const startTime = Date.now();
@@ -394,7 +435,7 @@ export class OpenAIService {
         model: request.config.model,
         functionsCount: request.functions?.length ?? 0,
         functionCall: request.functionCall,
-      }
+      },
     );
 
     try {
@@ -405,7 +446,7 @@ export class OpenAIService {
           model: request.config.model,
           functionsCount: request.functions?.length ?? 0,
           functionCall: request.functionCall,
-          functionNames: request.functions?.map(f => f.name) ?? [],
+          functionNames: request.functions?.map((f) => f.name) ?? [],
         },
         actionDescription: `Execute OpenAI function calling with ${request.functions?.length ?? 0} available functions`,
         context: request.context,
@@ -413,40 +454,51 @@ export class OpenAIService {
         operationId,
       };
 
-      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegration.validateFunctionExecution(
+          validationRequest,
+        );
 
       if (!validationResponse.approved) {
-        throw new Error(`Function calling operation blocked: ${validationResponse.reasoning}`);}// Execute OpenAI function calling with validation approval
+        throw new Error(
+          `Function calling operation blocked: ${validationResponse.reasoning}`,
+        );
+      } // Execute OpenAI function calling with validation approval
       const response = await this.performOpenAIFunctionCall(request);
 
       const duration = Date.now() - startTime;
       this.updatePerformanceMetrics(duration, response.usage);
 
-      this.logger.log(`[${operationId}] OpenAI function calling completed successfully`, {
-        operationId,
-        responseId: response.id,
-        functionCalls: response.choices[0]?.message.functionCall ? 1 : 0,
-        toolCalls: response.choices[0]?.message.toolCalls?.length ?? 0,
-        duration,
-        validationId: validationResponse.conversationId,
-      });
+      this.logger.log(
+        `[${operationId}] OpenAI function calling completed successfully`,
+        {
+          operationId,
+          responseId: response.id,
+          functionCalls: response.choices[0]?.message.functionCall ? 1 : 0,
+          toolCalls: response.choices[0]?.message.toolCalls?.length ?? 0,
+          duration,
+          validationId: validationResponse.conversationId,
+        },
+      );
 
       return response;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] OpenAI function calling failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        duration,
-      });
+      this.logger.error(
+        `[${operationId}] OpenAI function calling failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          duration,
+        },
+      );
       throw error;
     }
   }
 
   /**
    * Create and manage OpenAI Assistant with Parlant validation
-   * 
+   *
    * Validates assistant creation and management operations with
    * conversational approval for advanced AI agent setup.
    */
@@ -460,7 +512,7 @@ export class OpenAIService {
       metadata?: Record<string, unknown>;
     },
     context: ParlantConversationContext,
-    operationId: string
+    operationId: string,
   ): Promise<OpenAIAssistant> {
     const startTime = Date.now();
 
@@ -471,7 +523,7 @@ export class OpenAIService {
         assistantName: assistantConfig.name,
         model: assistantConfig.model,
         toolsCount: assistantConfig.tools?.length ?? 0,
-      }
+      },
     );
 
     try {
@@ -490,10 +542,15 @@ export class OpenAIService {
         operationId,
       };
 
-      const validationResponse = await this.parlantIntegration.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegration.validateFunctionExecution(
+          validationRequest,
+        );
 
       if (!validationResponse.approved) {
-        throw new Error(`Assistant creation blocked: ${validationResponse.reasoning}`);
+        throw new Error(
+          `Assistant creation blocked: ${validationResponse.reasoning}`,
+        );
       }
 
       // Execute Assistant creation with validation approval
@@ -501,23 +558,28 @@ export class OpenAIService {
 
       const duration = Date.now() - startTime;
 
-      this.logger.log(`[${operationId}] OpenAI Assistant creation completed successfully`, {
-        operationId,
-        assistantId: assistant.id,
-        assistantName: assistant.name,
-        duration,
-        validationId: validationResponse.conversationId,
-      });
+      this.logger.log(
+        `[${operationId}] OpenAI Assistant creation completed successfully`,
+        {
+          operationId,
+          assistantId: assistant.id,
+          assistantName: assistant.name,
+          duration,
+          validationId: validationResponse.conversationId,
+        },
+      );
 
       return assistant;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger.error(`[${operationId}] OpenAI Assistant creation failed: ${error instanceof Error ? error.message : String(error)}`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        duration,
-      });
+      this.logger.error(
+        `[${operationId}] OpenAI Assistant creation failed: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          duration,
+        },
+      );
       throw error;
     }
   }
@@ -527,23 +589,27 @@ export class OpenAIService {
   /**
    * Perform actual OpenAI API call (mock implementation - replace with real OpenAI SDK)
    */
-  private async performOpenAIAPICall(request: OpenAIChatRequest): Promise<OpenAIChatResponse> {
+  private async performOpenAIAPICall(
+    request: OpenAIChatRequest,
+  ): Promise<OpenAIChatResponse> {
     // TODO: Implement actual OpenAI SDK integration
     // For now, return mock response to demonstrate structure
-    
+
     const mockResponse: OpenAIChatResponse = {
       id: `chatcmpl${Date.now()}${Math.random().toString(36).substring(7)}`,
       object: 'chat.completion',
       created: Math.floor(Date.now() / 1000),
       model: request.config.model,
-      choices: [{
-        index: 0,
-        message: {
-          role: 'assistant',
-          content: `Mock OpenAI ${request.config.model} response for ${request.messages.length} messages`,
+      choices: [
+        {
+          index: 0,
+          message: {
+            role: 'assistant',
+            content: `Mock OpenAI ${request.config.model} response for ${request.messages.length} messages`,
+          },
+          finishReason: 'stop',
         },
-        finishReason: 'stop',
-      }],
+      ],
       usage: {
         promptTokens: this.estimatePromptTokens(request),
         completionTokens: 120, // Mock completion tokens
@@ -552,7 +618,9 @@ export class OpenAIService {
     };
 
     // Simulate API latency
-    await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 250));
+    await new Promise((resolve) =>
+      setTimeout(resolve, 150 + Math.random() * 250),
+    );
 
     return mockResponse;
   }
@@ -562,10 +630,10 @@ export class OpenAIService {
    */
   private async performStreamingOpenAICall(
     request: OpenAIChatRequest,
-    onChunk: (chunk: OpenAIStreamChunk) => void
+    onChunk: (chunk: OpenAIStreamChunk) => void,
   ): Promise<void> {
     // TODO: Implement actual OpenAI streaming SDK integration
-    
+
     // Mock streaming response
     const chunks: OpenAIStreamChunk[] = [
       {
@@ -587,7 +655,9 @@ export class OpenAIService {
         object: 'chat.completion.chunk',
         created: Math.floor(Date.now() / 1000),
         model: request.config.model,
-        choices: [{ index: 0, delta: { content: 'from OpenAI with validation.' } }],
+        choices: [
+          { index: 0, delta: { content: 'from OpenAI with validation.' } },
+        ],
       },
       {
         id: `stream${Date.now()}`,
@@ -599,7 +669,7 @@ export class OpenAIService {
     ];
 
     for (const chunk of chunks) {
-      await new Promise(resolve => setTimeout(resolve, 80)); // Simulate streaming delay
+      await new Promise((resolve) => setTimeout(resolve, 80)); // Simulate streaming delay
       onChunk(chunk);
     }
   }
@@ -607,9 +677,11 @@ export class OpenAIService {
   /**
    * Perform OpenAI function calling (mock implementation)
    */
-  private async performOpenAIFunctionCall(request: OpenAIChatRequest): Promise<OpenAIChatResponse> {
+  private async performOpenAIFunctionCall(
+    request: OpenAIChatRequest,
+  ): Promise<OpenAIChatResponse> {
     // TODO: Implement actual OpenAI function calling SDK integration
-    
+
     const mockFunctionCall: OpenAIFunctionCall = {
       name: request.functions?.[0]?.name ?? 'mock_function',
       arguments: JSON.stringify({ param: 'mock_value' }),
@@ -620,15 +692,17 @@ export class OpenAIService {
       object: 'chat.completion',
       created: Math.floor(Date.now() / 1000),
       model: request.config.model,
-      choices: [{
-        index: 0,
-        message: {
-          role: 'assistant',
-          content: null,
-          functionCall: mockFunctionCall,
+      choices: [
+        {
+          index: 0,
+          message: {
+            role: 'assistant',
+            content: null,
+            functionCall: mockFunctionCall,
+          },
+          finishReason: 'function_call',
         },
-        finishReason: 'function_call',
-      }],
+      ],
       usage: {
         promptTokens: this.estimatePromptTokens(request),
         completionTokens: 80,
@@ -636,7 +710,9 @@ export class OpenAIService {
       },
     };
 
-    await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 200));
+    await new Promise((resolve) =>
+      setTimeout(resolve, 200 + Math.random() * 200),
+    );
     return mockResponse;
   }
 
@@ -652,7 +728,7 @@ export class OpenAIService {
     metadata?: Record<string, unknown>;
   }): Promise<OpenAIAssistant> {
     // TODO: Implement actual OpenAI Assistant API integration
-    
+
     const mockAssistant: OpenAIAssistant = {
       id: `asst${Date.now()}${Math.random().toString(36).substring(7)}`,
       object: 'assistant',
@@ -664,7 +740,9 @@ export class OpenAIService {
       metadata: config.metadata ?? {},
     };
 
-    await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 200));
+    await new Promise((resolve) =>
+      setTimeout(resolve, 300 + Math.random() * 200),
+    );
     return mockAssistant;
   }
 
@@ -672,29 +750,41 @@ export class OpenAIService {
 
   private estimatePromptTokens(request: OpenAIChatRequest): number {
     // Rough token estimation (4 characters per token)
-    const messageContent = request.messages.map(m => m.content ?? '').join(' ');
+    const messageContent = request.messages
+      .map((m) => m.content ?? '')
+      .join(' ');
     const functionsContent = JSON.stringify(request.functions ?? []);
     return Math.ceil((messageContent.length + functionsContent.length) / 4);
   }
 
-  private updatePerformanceMetrics(duration: number, usage: { promptTokens: number; completionTokens: number }): void {
-    this.averageResponseTime = 
-      (this.averageResponseTime * (this.requestCount - 1) + duration) / this.requestCount;
-    
+  private updatePerformanceMetrics(
+    duration: number,
+    usage: { promptTokens: number; completionTokens: number },
+  ): void {
+    this.averageResponseTime =
+      (this.averageResponseTime * (this.requestCount - 1) + duration) /
+      this.requestCount;
+
     this.tokenUsage.prompt += usage.promptTokens;
     this.tokenUsage.completion += usage.completionTokens;
   }
 
   private logPerformanceMetrics(): void {
-    const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 0;
-    
+    const validationRate =
+      this.requestCount > 0
+        ? (this.validationCount / this.requestCount) * 100
+        : 0;
+
     this.logger.log('OpenAI Service Performance Metrics', {
       requestCount: this.requestCount,
       validationRate: `${validationRate.toFixed(2)}%`,
       averageResponseTime: `${this.averageResponseTime.toFixed(2)}ms`,
       totalPromptTokens: this.tokenUsage.prompt,
       totalCompletionTokens: this.tokenUsage.completion,
-      tokenRatio: this.tokenUsage.prompt > 0 ? (this.tokenUsage.completion / this.tokenUsage.prompt).toFixed(2) : '0',
+      tokenRatio:
+        this.tokenUsage.prompt > 0
+          ? (this.tokenUsage.completion / this.tokenUsage.prompt).toFixed(2)
+          : '0',
     });
   }
 
@@ -708,7 +798,10 @@ export class OpenAIService {
     metrics: Record<string, unknown>;
   } {
     const avgResponseTime = this.averageResponseTime;
-    const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
+    const validationRate =
+      this.requestCount > 0
+        ? (this.validationCount / this.requestCount) * 100
+        : 100;
 
     let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
     if (avgResponseTime > 1500 || validationRate < 95) {

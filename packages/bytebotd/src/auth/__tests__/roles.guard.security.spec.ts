@@ -32,17 +32,22 @@ interface AuthenticatedRequest {
   method: string;
   ip: string;
   headers: Record<string, string | string[] | undefined>;
-  connection: { remoteAddress: string 
-
-};
+  connection: { remoteAddress: string };
   socket: { remoteAddress: string };
 }
 
 // Type guard for execution context
-function _isMockExecutionContext(context: unknown, n): context is ExecutionContext {
+function _isMockExecutionContext(
+  context: unknown,
+  n,
+): context is ExecutionContext {
   return (
-    typeof context === 'object' &&context !== null &&'switchToHttp' in context &&typeof (context as { switchToHttp: unknown 
-}).switchToHttp === 'function');}
+    typeof context === 'object' &&
+    context !== null &&
+    'switchToHttp' in context &&
+    typeof (context as { switchToHttp: unknown }).switchToHttp === 'function'
+  );
+}
 
 // Helper function to create properly typed ByteBotdUser
 function _createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
@@ -54,20 +59,20 @@ function _createTypedUser(partial: Partial<ByteBotdUser>): ByteBotdUser {
     role: (partial.role as UserRole) ?? UserRole._VIEWER,
     isActive: (partial.isActive as boolean) ?? true,
     permissions: (partial.permissions as Permission[]) ?? [],
-  
-};
+  };
   return { ...baseUser, ...partial } as ByteBotdUser;
 }
 
 // Helper function to create malicious user for security testing
-function _createMaliciousUser(overrides: Record<string, unknown>): MaliciousTestUser {
+function _createMaliciousUser(
+  overrides: Record<string, unknown>,
+): MaliciousTestUser {
   const baseUser: MaliciousTestUser = {
     id: 'malicious_user',
     email: 'malicious@test.com',
     role: UserRole._VIEWER as UserRole,
     permissions: [] as Permission[],
-  
-};
+  };
   return { ...baseUser, ...overrides } as MaliciousTestUser;
 }
 
@@ -82,7 +87,6 @@ interface MaliciousTestUser extends Partial<ByteBotdUser> {
   constructor?: unknown;
   admin?: boolean;
   roles?: UserRole[];
-
 }
 
 describe('RolesGuard - Advanced Security Tests', () => {
@@ -93,7 +97,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
   const operationId = `roles_security_test${Date.now()}`;
 
   const securityLogger = {
-  info: (message: string, meta?: Record<string, unknown>) =>
+    info: (message: string, meta?: Record<string, unknown>) =>
       console.log(`[RBAC-SECURITY] ${message}`, meta ?? ''),
     warn: (message: string, meta?: Record<string, unknown>) =>
       console.warn(`[RBAC-WARNING] ${message}`, meta ?? ''),
@@ -106,7 +110,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
     user?: ByteBotdUser,
     route = 'test-route',
     method = 'GET',
-    ip = '127.0.0.1'
+    ip = '127.0.0.1',
   ): ExecutionContext => {
     const mockRequest = {
       user: user,
@@ -130,43 +134,43 @@ describe('RolesGuard - Advanced Security Tests', () => {
       getHandler: jest.fn().mockReturnValue({ name: 'testHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'TestController' }),
       getArgs: jest.fn().mockReturnValue([]),
-        getArgByIndex: jest.fn().mockReturnValue({}),
+      getArgByIndex: jest.fn().mockReturnValue({}),
       switchToRpc: jest.fn().mockReturnValue({}),
       switchToWs: jest.fn().mockReturnValue({}),
-      getType: jest.fn().mockReturnValue('http'),} satisfies ExecutionContext;};
+      getType: jest.fn().mockReturnValue('http'),
+    } satisfies ExecutionContext;
+  };
 
   // Create malicious user objects for security testing
   const createMaliciousUsers = () => {
-  return {
-    // User with prototype pollution attempt
-    prototypePollution: {
-      sub: 'user_123',
-      id: 'user_123',
-      email: 'user@test.com',
-      username: 'testuser',
-      role: UserRole._VIEWER,
-      isActive: true,
+    return {
+      // User with prototype pollution attempt
+      prototypePollution: {
+        sub: 'user_123',
+        id: 'user_123',
+        email: 'user@test.com',
+        username: 'testuser',
+        role: UserRole._VIEWER,
+        isActive: true,
         // Prototype pollution attempt (removed __proto__ due to TypeScript strict mode)
         // Constructor manipulation attempt (removed due to TypeScript strict mode)
-      
-} satisfies ByteBotdUser,
+      } satisfies ByteBotdUser,
 
       // User with role confusion
       roleConfusion: {
-  sub: 'user_456',
-      id: 'user_456',
+        sub: 'user_456',
+        id: 'user_456',
         email: 'admin@test.com',
-      username: 'fakeadmin',
+        username: 'fakeadmin',
         role: UserRole._ADMIN as UserRole, // Proper enum value
         isActive: true,
         admin: true, // Additional admin flag
-  roles: [UserRole._ADMIN], // Array of roles
-      
-} satisfies MaliciousTestUser,
+        roles: [UserRole._ADMIN], // Array of roles
+      } satisfies MaliciousTestUser,
 
       // User with XSS in properties
       xssPayload: {
-  sub: '<script>alert("XSS")</script>',
+        sub: '<script>alert("XSS")</script>',
         id: '<script>alert("XSS")</script>',
         email: '<img src=x onerror=alert("XSS")>@test.com',
         username: 'javascript:alert("XSS")',
@@ -174,78 +178,82 @@ describe('RolesGuard - Advanced Security Tests', () => {
         lastName: '\u003cscript\u003ealert("XSS")\u003c/script\u003e',
         role: UserRole._VIEWER,
         isActive: true,
-      
-} satisfies ByteBotdUser,
+      } satisfies ByteBotdUser,
 
       // User with SQL injection in properties
       sqlInjection: {
-  sub: "\"; DROP TABLE users; --",
-        id: "\"; DROP TABLE users; --",
+        sub: '"; DROP TABLE users; --',
+        id: '"; DROP TABLE users; --',
         email: "admin@test.com\"; DELETE FROM sessions WHERE '1'='1",
         username: "admin' OR '1'='1",
         role: UserRole._VIEWER,
         isActive: true,
-      
-} satisfies ByteBotdUser,
+      } satisfies ByteBotdUser,
 
       // Inactive user attempting access
       inactiveUser: {
-  sub: 'inactive_user',
+        sub: 'inactive_user',
         id: 'inactive_user',
         email: 'inactive@test.com',
         username: 'inactive',
         role: UserRole._ADMIN,
         isActive: false, // Inactive user with admin role
-      
-} satisfies ByteBotdUser};
+      } satisfies ByteBotdUser,
+    };
   };
 
   beforeEach(async () => {
-  securityLogger.info(
-      `[${operationId
-}] Setting up RBAC Security test module`,);
-      module = await Test.createTestingModule({
-        providers: [
-          RolesGuard,
-          {
-            provide: Reflector,
-            useValue: {
-              getAllAndOverride: jest.fn(),
-            },
-        }]
-      }).compile();
+    securityLogger.info(
+      `[${operationId}] Setting up RBAC Security test module`,
+    );
+    module = await Test.createTestingModule({
+      providers: [
+        RolesGuard,
+        {
+          provide: Reflector,
+          useValue: {
+            getAllAndOverride: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
 
     guard = module.get<RolesGuard>(RolesGuard);
     reflector = module.get<Reflector>(Reflector);
 
-    securityLogger.info(`[${operationId}] RBAC Security test setup completed`);});
+    securityLogger.info(`[${operationId}] RBAC Security test setup completed`);
+  });
 
-    afterEach(async () => {
-  await module.close();
+  afterEach(async () => {
+    await module.close();
     securityLogger.info(
-      `[${operationId
-}] RBAC Security test cleanup completed`,
+      `[${operationId}] RBAC Security test cleanup completed`,
     );
   });
 
-    describe('Role Escalation Attack Prevention', () => {
-  it('should prevent prototype pollution role escalation', async () => {
-        const testId = `${operationId
-}_prototype_pollution`;
-        securityLogger.info(`[${testId}] Testing prototype pollution role escalation prevention`,
-        );
+  describe('Role Escalation Attack Prevention', () => {
+    it('should prevent prototype pollution role escalation', async () => {
+      const testId = `${operationId}_prototype_pollution`;
+      securityLogger.info(
+        `[${testId}] Testing prototype pollution role escalation prevention`,
+      );
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
         maliciousUsers.prototypePollution,
-        'admin-endpoint','POST','192.168.1.100',);jest
+        'admin-endpoint',
+        'POST',
+        '192.168.1.100',
+      );
+      jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce([UserRole._ADMIN]) // roles
         .mockReturnValueOnce(undefined); // permissions
 
       // Should deny access despite prototype pollution attempt
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException);
+        ForbiddenException,
+      );
 
       securityLogger.warn(
         `[${testId}] Prototype pollution attack blocked - user role: ${maliciousUsers.prototypePollution.role}`,
@@ -254,29 +262,32 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
     it('should prevent role confusion attacks', async () => {
       const testId = `${operationId}_role_confusion`;
-      securityLogger.info(`[${testId}] Testing role confusion attack prevention`);
+      securityLogger.info(
+        `[${testId}] Testing role confusion attack prevention`,
+      );
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
         maliciousUsers.roleConfusion,
         'sensitive-data',
-        'GET'
+        'GET',
       );
       jest
-        .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._ADMIN]) // roles.mockReturnValueOnce(undefined); // permissions
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValueOnce([UserRole._ADMIN]); // roles.mockReturnValueOnce(undefined); // permissions
 
       // Test role validation strictness
       try {
-  await guard.canActivate(context);
+        await guard.canActivate(context);
         // If it passes, verify it's because of proper role validationnot confusion
-        const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+        const request = context
+          .switchToHttp()
+          .getRequest() as AuthenticatedRequest;
         expect(request.user?.role).toBe(UserRole._ADMIN);
-      
-} catch (error) {
-  // Should throw ForbiddenException if role validation is strict
+      } catch (error) {
+        // Should throw ForbiddenException if role validation is strict
         expect(error).toBeInstanceOf(ForbiddenException);
-      
-}
+      }
 
       securityLogger.info(
         `[${testId}] Role confusion attack handled appropriately`,
@@ -284,13 +295,18 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
 
     it('should prevent inactive user role escalation', async () => {
-      const testId = `${operationId}_inactive_escalation`;securityLogger.info(`[${testId}] Testing inactive user role escalation prevention`,
+      const testId = `${operationId}_inactive_escalation`;
+      securityLogger.info(
+        `[${testId}] Testing inactive user role escalation prevention`,
       );
 
       const maliciousUsers = createMaliciousUsers();
       const context = createMockExecutionContext(
         maliciousUsers.inactiveUser as ByteBotdUser,
-        'user-management','DELETE',);jest
+        'user-management',
+        'DELETE',
+      );
+      jest
         .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce([UserRole._ADMIN]) // roles
         .mockReturnValueOnce(undefined); // permissions
@@ -298,10 +314,10 @@ describe('RolesGuard - Advanced Security Tests', () => {
       // Inactive users should not be able to access protected resources
       // regardless of their role
       if (maliciousUsers.inactiveUser.isActive === false) {
-  await expect(guard.canActivate(context)).rejects.toThrow(
-          ForbiddenException);
-      
-}
+        await expect(guard.canActivate(context)).rejects.toThrow(
+          ForbiddenException,
+        );
+      }
 
       securityLogger.warn(
         `[${testId}] Inactive user access denied despite admin role`,
@@ -310,7 +326,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
     it('should prevent concurrent role modification attacks', async () => {
       const testId = `${operationId}_concurrent_role_modification`;
-      securityLogger.info(`[${testId}] Testing concurrent role modification attack prevention`,
+      securityLogger.info(
+        `[${testId}] Testing concurrent role modification attack prevention`,
       );
 
       const user: ByteBotdUser = {
@@ -324,26 +341,27 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const contexts = Array(10)
         .fill(null)
-        .map(() => createMockExecutionContext(user, 'admin-action', 'POST'));jest.spyOn(reflector, 'getAllAndOverride')
+        .map(() => createMockExecutionContext(user, 'admin-action', 'POST'));
+      jest
+        .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValue([UserRole._ADMIN]); // All require admin
 
       // Simulate concurrent requests where user role might be modified
       const promises = contexts.map(async (context, index) => {
-  // Simulate role modification during concurrent requests
+        // Simulate role modification during concurrent requests
         if (index === 5) {
           user.role = UserRole._ADMIN; // Simulate role escalation mid-flight
-        
-}
+        }
 
         try {
-  const _result = await guard.canActivate(context);
+          const _result = await guard.canActivate(context);
           return { success: true, index: index };
         } catch (error) {
-  return {
-  success: false,
+          return {
+            success: false,
             index: index,
-            error: (error as Error).message
-};
+            error: (error as Error).message,
+          };
         }
       });
 
@@ -359,10 +377,11 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
   });
 
-    describe('Permission Bypass Attack Prevention', () => {
-  it('should prevent permission array manipulation', async () => {
+  describe('Permission Bypass Attack Prevention', () => {
+    it('should prevent permission array manipulation', async () => {
       const testId = `${operationId}_permission_manipulation`;
-      securityLogger.info(`[${testId}] Testing permission array manipulation prevention`,
+      securityLogger.info(
+        `[${testId}] Testing permission array manipulation prevention`,
       );
 
       const user: ByteBotdUser = {
@@ -374,32 +393,38 @@ describe('RolesGuard - Advanced Security Tests', () => {
         isActive: true,
       };
 
-      const context = createMockExecutionContext(user, 'system-admin', 'POST');jest.spyOn(reflector, 'getAllAndOverride')
+      const context = createMockExecutionContext(user, 'system-admin', 'POST');
+      jest
+        .spyOn(reflector, 'getAllAndOverride')
         .mockReturnValueOnce(undefined) // roles
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions
 
       // Attempt to manipulate permissions during request
       const _originalPermissions = Object.values(Permission);
-      const maliciousRequest = context.switchToHttp().getRequest() as AuthenticatedRequest;
+      const maliciousRequest = context
+        .switchToHttp()
+        .getRequest() as AuthenticatedRequest;
 
       // Try to inject permissions
-      (maliciousRequest.user as unknown as Record<string, unknown>).permissions = [
-        Permission._SYSTEM_ADMIN,
-      ];
-      (maliciousRequest.user as unknown as Record<string, unknown>)._permissions = [
-        Permission._SYSTEM_ADMIN,
-      ];
+      (
+        maliciousRequest.user as unknown as Record<string, unknown>
+      ).permissions = [Permission._SYSTEM_ADMIN];
+      (
+        maliciousRequest.user as unknown as Record<string, unknown>
+      )._permissions = [Permission._SYSTEM_ADMIN];
 
       // Should still deny access based on role-based permissions
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException);
+        ForbiddenException,
+      );
 
       securityLogger.warn(`[${testId}] Permission manipulation attack blocked`);
     });
 
     it('should prevent permission spoofing through object injection', async () => {
       const testId = `${operationId}_permission_spoofing`;
-      securityLogger.info(`[${testId}] Testing permission spoofing attack prevention`,
+      securityLogger.info(
+        `[${testId}] Testing permission spoofing attack prevention`,
       );
 
       const spoofedUser: unknown = {
@@ -432,7 +457,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException);
+        ForbiddenException,
+      );
 
       securityLogger.warn(
         `[${testId}] Permission spoofing through object injection blocked`,
@@ -440,17 +466,19 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
   });
 
-    describe('Authorization Timing Attack Prevention', () => {
-  it('should maintain consistent response times regardless of role', async () => {
+  describe('Authorization Timing Attack Prevention', () => {
+    it('should maintain consistent response times regardless of role', async () => {
       const testId = `${operationId}_timing_consistency`;
-      securityLogger.info(`[${testId}] Testing authorization timing consistency`);
+      securityLogger.info(
+        `[${testId}] Testing authorization timing consistency`,
+      );
 
       const users = [
         { role: UserRole._ADMIN, expected: true },
         { role: UserRole._OPERATOR, expected: false },
         { role: UserRole._VIEWER, expected: false },
         { role: 'invalid' as UserRole, expected: false },
-        { role: null as unknown as UserRole, expected: false }
+        { role: null as unknown as UserRole, expected: false },
       ];
 
       const timings: number[] = [];
@@ -466,19 +494,18 @@ describe('RolesGuard - Advanced Security Tests', () => {
         };
 
         const context = createMockExecutionContext(user, 'admin-only', 'POST');
-        jest.spyOn(reflector, 'getAllAndOverride')
+        jest
+          .spyOn(reflector, 'getAllAndOverride')
           .mockReturnValueOnce([UserRole._ADMIN])
           .mockReturnValueOnce(undefined);
 
         const startTime = process.hrtime.bigint();
 
         try {
-  await guard.canActivate(context);
-        
-} catch (_error) {
-  // Expected for non-admin users
-        
-}
+          await guard.canActivate(context);
+        } catch (_error) {
+          // Expected for non-admin users
+        }
 
         const endTime = process.hrtime.bigint();
         const duration = Number(endTime - startTime) / 1000000; // Convert to milliseconds
@@ -489,7 +516,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
       const avgTime =
         timings.reduce((sum, time) => sum + time, 0) / timings.length;
       const maxDeviation = Math.max(
-        ...timings.map((time) => Math.abs(time - avgTime)));
+        ...timings.map((time) => Math.abs(time - avgTime)),
+      );
 
       // Should not deviate more than 25ms from average
       expect(maxDeviation).toBeLessThan(25);
@@ -500,7 +528,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
 
     it('should handle rapid authorization checks without performance degradation', async () => {
-      const testId = `${operationId}_rapid_checks`;securityLogger.info(`[${testId}] Testing rapid authorization check performance`,
+      const testId = `${operationId}_rapid_checks`;
+      securityLogger.info(
+        `[${testId}] Testing rapid authorization check performance`,
       );
 
       const user: ByteBotdUser = {
@@ -513,7 +543,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
       };
 
       jest
-        .spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole._ADMIN]);
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValue([UserRole._ADMIN]);
       const startTime = Date.now();
 
       // Perform 1000 rapid authorization checks
@@ -539,10 +570,11 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
   });
 
-    describe('Input Sanitization and Injection Prevention', () => {
-  it('should handle XSS payloads in user properties safely', async () => {
-      const testId = `${operationId
-}_xss_handling`;securityLogger.info(`[${testId}] Testing XSS _payload handling in user properties`,
+  describe('Input Sanitization and Injection Prevention', () => {
+    it('should handle XSS payloads in user properties safely', async () => {
+      const testId = `${operationId}_xss_handling`;
+      securityLogger.info(
+        `[${testId}] Testing XSS _payload handling in user properties`,
       );
 
       const maliciousUsers = createMaliciousUsers();
@@ -561,7 +593,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
       expect(result).toBe(true);
 
       // Verify user properties are handled safely (no script execution)
-      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+      const request = context
+        .switchToHttp()
+        .getRequest() as AuthenticatedRequest;
       expect(request.user?.id).toBeDefined();
       expect(request.user?.email).toBeDefined();
       expect(request.user?.username).toBeDefined();
@@ -572,7 +606,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
 
     it('should prevent SQL injection through user properties', async () => {
-      const testId = `${operationId}_sql_injection_handling`;securityLogger.info(`[${testId}] Testing SQL injection prevention in user properties`,
+      const testId = `${operationId}_sql_injection_handling`;
+      securityLogger.info(
+        `[${testId}] Testing SQL injection prevention in user properties`,
       );
 
       const maliciousUsers = createMaliciousUsers();
@@ -591,7 +627,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
       expect(result).toBe(true);
 
       // Verify SQL injection payloads are safely handled
-      const request = context.switchToHttp().getRequest() as AuthenticatedRequest;
+      const request = context
+        .switchToHttp()
+        .getRequest() as AuthenticatedRequest;
       expect(request.user?.id).toBeDefined();
       expect(request.user?.email).toBeDefined();
       expect(request.user?.username).toBeDefined();
@@ -602,10 +640,12 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
   });
 
-    describe('Concurrent Access Attack Prevention', () => {
-  it('should handle concurrent authorization attacks', async () => {
+  describe('Concurrent Access Attack Prevention', () => {
+    it('should handle concurrent authorization attacks', async () => {
       const testId = `${operationId}_concurrent_attacks`;
-      securityLogger.info(`[${testId}] Testing concurrent authorization attack handling`);
+      securityLogger.info(
+        `[${testId}] Testing concurrent authorization attack handling`,
+      );
       const attackUsers = Array(50)
         .fill(null)
         .map(
@@ -616,8 +656,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
               email: `attacker${index}@malicious.com`,
               username: `attacker${index}`,
               role: UserRole._VIEWER,
-              isActive: true
-      }) as ByteBotdUser,
+              isActive: true,
+            }) as ByteBotdUser,
         );
 
       jest
@@ -638,13 +678,13 @@ describe('RolesGuard - Advanced Security Tests', () => {
           const _result = await guard.canActivate(context);
           return {
             success: true,
-            userId: user.id
+            userId: user.id,
           };
         } catch (error) {
           return {
             success: false,
             userId: user.id,
-            error: (error as Error).message
+            error: (error as Error).message,
           };
         }
       });
@@ -665,7 +705,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
 
     it('should prevent race conditions in role checking', async () => {
-      const testId = `${operationId}_race_conditions`;securityLogger.info(`[${testId}] Testing race condition prevention in role checking`,
+      const testId = `${operationId}_race_conditions`;
+      securityLogger.info(
+        `[${testId}] Testing race condition prevention in role checking`,
       );
 
       const sharedUser: ByteBotdUser = {
@@ -694,7 +736,7 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       // Simulate race condition by modifying user role during concurrent checks
       const promises = contexts.map(async (context, index) => {
-  // Simulate role modification during concurrent access
+        // Simulate role modification during concurrent access
         if (index === 10) {
           setTimeout(() => {
             sharedUser.role = UserRole._ADMIN;
@@ -720,28 +762,32 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
   });
 
-    describe('Security Audit and Logging', () => {
-  it('should log authorization failures with security context', async () => {
-      const testId = `${operationId
-}_audit_logging`;securityLogger.info(`[${testId}] Testing security audit logging`);
+  describe('Security Audit and Logging', () => {
+    it('should log authorization failures with security context', async () => {
+      const testId = `${operationId}_audit_logging`;
+      securityLogger.info(`[${testId}] Testing security audit logging`);
 
       // Mock console to capture security logs
       const originalConsole = { ...console };
       const auditLogs: string[] = [];
 
       console.warn = (...args) => {
-        auditLogs.push(args.join(' '));originalConsole.warn(...args);};
+        auditLogs.push(args.join(' '));
+        originalConsole.warn(...args);
+      };
 
       console.error = (...args) => {
-        auditLogs.push(args.join(' '));originalConsole.error(...args);};
+        auditLogs.push(args.join(' '));
+        originalConsole.error(...args);
+      };
 
       const suspiciousUser: ByteBotdUser = {
-  sub: 'suspicious_user',
-      id: 'suspicious_user',
+        sub: 'suspicious_user',
+        id: 'suspicious_user',
         email: 'attacker@malicious.com',
-      username: 'hacker',
-      role: UserRole._VIEWER,
-      isActive: true,
+        username: 'hacker',
+        role: UserRole._VIEWER,
+        isActive: true,
       };
 
       const context = createMockExecutionContext(
@@ -751,7 +797,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
         '10.0.0.1', // Suspicious IP
       );
       jest
-        .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._ADMIN]).mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValueOnce([UserRole._ADMIN])
+        .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
         ForbiddenException,
@@ -764,7 +812,11 @@ describe('RolesGuard - Advanced Security Tests', () => {
       // Verify security audit logs contain relevant information
       const hasSecurityAudit = auditLogs.some(
         (log) =>
-          log.includes('10.0.0.1') ||log.includes('suspicious') ||log.includes('authorization') ||log.includes('financial-data'));
+          log.includes('10.0.0.1') ||
+          log.includes('suspicious') ||
+          log.includes('authorization') ||
+          log.includes('financial-data'),
+      );
       expect(hasSecurityAudit).toBe(true);
 
       securityLogger.warn(
@@ -773,7 +825,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
 
     it('should track authorization patterns for anomaly detection', async () => {
-      const testId = `${operationId}_anomaly_tracking`;securityLogger.info(`[${testId}] Testing authorization pattern tracking`);
+      const testId = `${operationId}_anomaly_tracking`;
+      securityLogger.info(`[${testId}] Testing authorization pattern tracking`);
 
       const normalUser: ByteBotdUser = {
         sub: 'normal_user',
@@ -785,17 +838,26 @@ describe('RolesGuard - Advanced Security Tests', () => {
       };
 
       // Simulate normal access pattern
-      const normalEndpoints = ['tasks', 'reports', 'dashboard'];const normalPromises = normalEndpoints.map((endpoint) => {
-  const context = createMockExecutionContext(normalUser, endpoint, 'GET');jest.spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._OPERATOR]).mockReturnValueOnce(undefined);
+      const normalEndpoints = ['tasks', 'reports', 'dashboard'];
+      const normalPromises = normalEndpoints.map((endpoint) => {
+        const context = createMockExecutionContext(normalUser, endpoint, 'GET');
+        jest
+          .spyOn(reflector, 'getAllAndOverride')
+          .mockReturnValueOnce([UserRole._OPERATOR])
+          .mockReturnValueOnce(undefined);
         return guard.canActivate(context);
-      
-});
+      });
 
       await Promise.all(normalPromises);
 
       // Simulate suspicious access pattern
       const suspiciousEndpoints = [
-        'admin-panel','user-management','system-config','financial-reports','audit-logs','security-settings'
+        'admin-panel',
+        'user-management',
+        'system-config',
+        'financial-reports',
+        'audit-logs',
+        'security-settings',
       ];
       const suspiciousPromises = suspiciousEndpoints.map((endpoint) => {
         const context = createMockExecutionContext(
@@ -804,7 +866,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
           'POST',
         );
         jest
-          .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._ADMIN]).mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
+          .spyOn(reflector, 'getAllAndOverride')
+          .mockReturnValueOnce([UserRole._ADMIN])
+          .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
         try {
           return guard.canActivate(context);
         } catch (_error: unknown) {
@@ -814,7 +878,8 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
       const suspiciousResults = await Promise.all(suspiciousPromises);
       const blockedAttempts = suspiciousResults.filter(
-        (r) => r === 'blocked').length;
+        (r) => r === 'blocked',
+      ).length;
 
       // All suspicious attempts should be blocked
       expect(blockedAttempts).toBe(6);
@@ -825,10 +890,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
   });
 
-    describe('Memory and Resource Security', () => {
-  it('should prevent memory exhaustion during sustained attacks', async () => {
-      const testId = `${operationId
-}_memory_exhaustion`;
+  describe('Memory and Resource Security', () => {
+    it('should prevent memory exhaustion during sustained attacks', async () => {
+      const testId = `${operationId}_memory_exhaustion`;
       securityLogger.info(`[${testId}] Testing memory exhaustion prevention`);
       const initialMemory = process.memoryUsage();
       // Simulate sustained authorization attacks
@@ -853,12 +917,10 @@ describe('RolesGuard - Advanced Security Tests', () => {
           .mockReturnValueOnce([Permission._SYSTEM_ADMIN]);
 
         try {
-  await guard.canActivate(context);
-        
-} catch {
-  // Expected for attack attempts
-        
-}
+          await guard.canActivate(context);
+        } catch {
+          // Expected for attack attempts
+        }
       }
 
       const finalMemory = process.memoryUsage();
@@ -873,7 +935,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
     });
 
     it('should maintain consistent performance under load', async () => {
-      const testId = `${operationId}_performance_consistency`;securityLogger.info(`[${testId}] Testing performance consistency under load`,
+      const testId = `${operationId}_performance_consistency`;
+      securityLogger.info(
+        `[${testId}] Testing performance consistency under load`,
       );
 
       const loadUser: ByteBotdUser = {

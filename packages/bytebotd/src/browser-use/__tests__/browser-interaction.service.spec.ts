@@ -49,11 +49,15 @@ describe('BrowserInteractionService', () => {
     });
 
     it('should log initialization message on creation', () => {
-      expect(loggerSpy).toHaveBeenCalledWith('BrowserInteractionService initialized');
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'BrowserInteractionService initialized',
+      );
     });
 
     it('should be injectable as singleton', async () => {
-      const anotherService = module.get<BrowserInteractionService>(BrowserInteractionService);
+      const anotherService = module.get<BrowserInteractionService>(
+        BrowserInteractionService,
+      );
       expect(service).toBe(anotherService);
     });
   });
@@ -72,16 +76,20 @@ describe('BrowserInteractionService', () => {
       });
 
       it('should handle complex CSS selectors', async () => {
-        const complexSelector = 'div.container > button[data-testid="submit"]:nth-child(2)';
+        const complexSelector =
+          'div.container > button[data-testid="submit"]:nth-child(2)';
         const result = await service.click(complexSelector);
 
         expect(result.success).toBe(true);
         expect(result.message).toContain(complexSelector);
-        expect(loggerSpy).toHaveBeenCalledWith(`Clicking element: ${complexSelector}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Clicking element: ${complexSelector}`,
+        );
       });
 
       it('should handle XPath selectors', async () => {
-        const xpathSelector = '//button[@class="submit-btn" and contains(text(), "Submit")]';
+        const xpathSelector =
+          '//button[@class="submit-btn" and contains(text(), "Submit")]';
         const result = await service.click(xpathSelector);
 
         expect(result.success).toBe(true);
@@ -89,7 +97,8 @@ describe('BrowserInteractionService', () => {
       });
 
       it('should handle attribute selectors', async () => {
-        const attributeSelector = '[data-testid="user-profile"][aria-expanded="false"]';
+        const attributeSelector =
+          '[data-testid="user-profile"][aria-expanded="false"]';
         const result = await service.click(attributeSelector);
 
         expect(result.success).toBe(true);
@@ -105,7 +114,9 @@ describe('BrowserInteractionService', () => {
         // Service should still process it (current placeholder implementation)
         // but in real implementation would sanitize
         expect(result.success).toBe(true);
-        expect(loggerSpy).toHaveBeenCalledWith(`Clicking element: ${maliciousSelector}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Clicking element: ${maliciousSelector}`,
+        );
       });
 
       it('should handle SQL injection-like selectors', async () => {
@@ -175,7 +186,7 @@ describe('BrowserInteractionService', () => {
 
         const startTime = performance.now();
         const results = await Promise.all(
-          selectors.map(selector => service.click(selector))
+          selectors.map((selector) => service.click(selector)),
         );
         const endTime = performance.now();
 
@@ -202,12 +213,15 @@ describe('BrowserInteractionService', () => {
           success: true,
           message: `Text typed in ${selector} successfully`,
         });
-        expect(loggerSpy).toHaveBeenCalledWith(`Typing text in element: ${selector}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Typing text in element: ${selector}`,
+        );
       });
 
       it('should handle complex text input', async () => {
         const selector = 'input[name="description"]';
-        const complexText = 'This is a complex text with special chars: !@#$%^&*()_+-={}[]|\\:";\'<>?,./';
+        const complexText =
+          'This is a complex text with special chars: !@#$%^&*()_+-={}[]|\\:";\'<>?,./';
         const result = await service.type(selector, complexText);
 
         expect(result.success).toBe(true);
@@ -357,7 +371,7 @@ describe('BrowserInteractionService', () => {
 
         const startTime = performance.now();
         const results = await Promise.all(
-          inputs.map(input => service.type(input.selector, input.text))
+          inputs.map((input) => service.type(input.selector, input.text)),
         );
         const endTime = performance.now();
 
@@ -402,7 +416,7 @@ describe('BrowserInteractionService', () => {
       }
 
       // All operations should succeed
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.success).toBe(true);
       });
     });
@@ -443,11 +457,15 @@ describe('BrowserInteractionService', () => {
         if (op.type === 'click') {
           await service.click(op.selector);
           expectedLogCalls++;
-          expect(loggerSpy).toHaveBeenCalledWith(`Clicking element: ${op.selector}`);
+          expect(loggerSpy).toHaveBeenCalledWith(
+            `Clicking element: ${op.selector}`,
+          );
         } else if (op.type === 'type') {
           await service.type(op.selector, op.text!);
           expectedLogCalls++;
-          expect(loggerSpy).toHaveBeenCalledWith(`Typing text in element: ${op.selector}`);
+          expect(loggerSpy).toHaveBeenCalledWith(
+            `Typing text in element: ${op.selector}`,
+          );
         }
       }
 
@@ -459,7 +477,7 @@ describe('BrowserInteractionService', () => {
       const typeResult = await service.type('#test-input', 'test text');
 
       // Both methods should return consistent structure
-      [clickResult, typeResult].forEach(result => {
+      [clickResult, typeResult].forEach((result) => {
         expect(result).toHaveProperty('success');
         expect(result).toHaveProperty('message');
         expect(typeof result.success).toBe('boolean');
@@ -480,7 +498,8 @@ describe('BrowserInteractionService', () => {
       }
 
       const finalMemoryUsage = process.memoryUsage();
-      const memoryIncrease = finalMemoryUsage.heapUsed - initialMemoryUsage.heapUsed;
+      const memoryIncrease =
+        finalMemoryUsage.heapUsed - initialMemoryUsage.heapUsed;
 
       // Memory increase should be reasonable (less than 5MB for 1000 operations)
       expect(memoryIncrease).toBeLessThan(5 * 1024 * 1024);
@@ -498,7 +517,8 @@ describe('BrowserInteractionService', () => {
       }
 
       // Performance should remain consistent
-      const averageTime = executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
+      const averageTime =
+        executionTimes.reduce((a, b) => a + b, 0) / executionTimes.length;
       const maxTime = Math.max(...executionTimes);
 
       expect(averageTime).toBeLessThan(100); // Average under 100ms for both operations
@@ -538,7 +558,9 @@ describe('BrowserInteractionService', () => {
 
         // Service should process sensitive data without exposing it in logs
         expect(result.success).toBe(true);
-        expect(loggerSpy).toHaveBeenCalledWith(`Typing text in element: ${input.selector}`);
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Typing text in element: ${input.selector}`,
+        );
         // Note: In production, sensitive text should not be logged
       }
     });

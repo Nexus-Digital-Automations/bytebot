@@ -24,20 +24,36 @@
  * @version 2.0.0 - PARLANT MAXIMUM INTEGRATION
  */
 
-import { Controller, Get, Logger, Header, UseGuards } from '@nestjs/common';import { ApiBearerAuth } from '@nestjs/swagger';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {Authenticated,
+import { Controller, Get, Logger, Header, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import {
+  Authenticated,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';import { BytebotMetricsService } from './metrics.service';import {ParlantHealthMetricsValidationService,
+} from '../auth/decorators/roles.decorator';
+import { BytebotMetricsService } from './metrics.service';
+import {
+  ParlantHealthMetricsValidationService,
   MetricsOperationType,
-} from '../parlant/services/parlant-health-metrics-validation.service';/*** Metrics collection controller providing Prometheus endpoints with Parlant validation
+} from '../parlant/services/parlant-health-metrics-validation.service'; /*** Metrics collection controller providing Prometheus endpoints with Parlant validation
  */
-@Controller('metrics')@UseGuards(JwtAuthGuard, RolesGuard)@ApiBearerAuth('bearer')export class MetricsController {private readonly logger = new Logger(MetricsController.name);
+@Controller('metrics')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth('bearer')
+export class MetricsController {
+  private readonly logger = new Logger(MetricsController.name);
 
   constructor(
     private readonly metricsService: BytebotMetricsService,
     private readonly parlantValidationService: ParlantHealthMetricsValidationService,
   ) {
-    this.logger.log('Metrics Controller initialized with Parlant validation');this.logger.log('PARLANT INTEGRATION: Risk-based conversational validation active for all metrics operations');}/**
+    this.logger.log('Metrics Controller initialized with Parlant validation');
+    this.logger.log(
+      'PARLANT INTEGRATION: Risk-based conversational validation active for all metrics operations',
+    );
+  } /**
    * Prometheus metrics endpoint with Parlant validation
    * GET /metrics
    *
@@ -48,40 +64,60 @@ import { Controller, Get, Logger, Header, UseGuards } from '@nestjs/common';impo
   @Authenticated()
   @Header('Content-Type', 'text/plain; charset=utf-8')
   async getMetrics(@CurrentUser() user: ByteBotdUser): Promise<string> {
-    const operationId = `metrics${Date.now()}`;this.logger.debug(`[${operationId}] Metrics collection requested with Parlant validation`, {
-      operationId,
-      userId: user.id,
-      username: user.username,
-      role: user.role,
-      securityEvent: 'metrics_access_requested',});try {
+    const operationId = `metrics${Date.now()}`;
+    this.logger.debug(
+      `[${operationId}] Metrics collection requested with Parlant validation`,
+      {
+        operationId,
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+        securityEvent: 'metrics_access_requested',
+      },
+    );
+    try {
       // PARLANT VALIDATION: Prometheus metrics collection (LOW risk - optimized with caching)
-      const validation = await this.parlantValidationService.validateMetricsOperation(
-        MetricsOperationType.PROMETHEUS_COLLECTION,
+      const validation =
+        await this.parlantValidationService.validateMetricsOperation(
+          MetricsOperationType.PROMETHEUS_COLLECTION,
+          {
+            endpoint: '/metrics',
+            method: 'GET',
+            frequency: 'high-frequency',
+            metricsType: 'prometheus_format',
+            includesSystemMetrics: true,
+            includesApplicationMetrics: true,
+            includesPerformanceMetrics: true,
+          },
+          { userId: user.id, userRole: user.role },
+        );
+
+      this.logger.debug(
+        `[${operationId}] Parlant validation completed for metrics collection`,
         {
-          endpoint: '/metrics',method: 'GET',frequency: 'high-frequency',metricsType: 'prometheus_format',
-          includesSystemMetrics: true,
-          includesApplicationMetrics: true,
-          includesPerformanceMetrics: true,
+          operationId,
+          approved: Boolean(validation.approved),
+          riskLevel: String(validation.riskLevel || 'unknown'),
+          validationDuration: Number(
+            validation.performanceImpact?.validationDuration || 0,
+          ),
+          cacheHit: Boolean(validation.performanceImpact?.cacheHit),
+          optimization: String(
+            validation.performanceImpact?.optimization || 'none',
+          ),
         },
-        { userId: user.id, userRole: user.role },
       );
 
-      this.logger.debug(`[${operationId}] Parlant validation completed for metrics collection`, {
-        operationId,
-        approved: Boolean(validation.approved),
-        riskLevel: String(validation.riskLevel || 'unknown'),
-        validationDuration: Number(validation.performanceImpact?.validationDuration || 0),
-        cacheHit: Boolean(validation.performanceImpact?.cacheHit),
-        optimization: String(validation.performanceImpact?.optimization || 'none'),
-      });
-
       if (!validation.approved) {
-        this.logger.warn(`[${operationId}] Metrics collection rejected by Parlant validation`, {
-          operationId,
-          reason: validation.reason,
-          conversationId: validation.conversationId,
-          userId: user.id,
-        });
+        this.logger.warn(
+          `[${operationId}] Metrics collection rejected by Parlant validation`,
+          {
+            operationId,
+            reason: validation.reason,
+            conversationId: validation.conversationId,
+            userId: user.id,
+          },
+        );
 
         // Track rejection metrics
         this.metricsService.recordApiRequestDuration('GET', '/metrics', 403, 0);
@@ -91,7 +127,9 @@ import { Controller, Get, Logger, Header, UseGuards } from '@nestjs/common';impo
 # TYPE bytebot_metrics_validation_rejected counter
 bytebot_metrics_validation_rejected{reason="${validation.reason ?? 'unknown'}"} 1# HELP bytebot_metrics_conversation_id Conversation ID for validation# TYPE bytebot_metrics_conversation_id info
 bytebot_metrics_conversation_id{conversation_id="${validation.conversationId}"} 1
-`;}const startTime = Date.now();
+`;
+      }
+      const startTime = Date.now();
 
       // Execute metrics collection with Parlant audit trail
       const metricsData = await this.metricsService.getPrometheusMetrics();
@@ -110,17 +148,22 @@ bytebot_metrics_conversation_id{conversation_id="${validation.conversationId}"} 
         },
       );
 
-      this.logger.debug(`[${operationId}] Metrics data size and timing with Parlant validation`, {
-        processingTimeMs: processingTime,
-        validationTimeMs: validation.performanceImpact.validationDuration,
-        totalTimeMs: processingTime + validation.performanceImpact.validationDuration,
-        metricsSize: metricsData.length,
-        cacheHit: validation.performanceImpact.cacheHit,
-      });
+      this.logger.debug(
+        `[${operationId}] Metrics data size and timing with Parlant validation`,
+        {
+          processingTimeMs: processingTime,
+          validationTimeMs: validation.performanceImpact.validationDuration,
+          totalTimeMs:
+            processingTime + validation.performanceImpact.validationDuration,
+          metricsSize: metricsData.length,
+          cacheHit: validation.performanceImpact.cacheHit,
+        },
+      );
 
       // Track metrics endpoint performance with validation overhead
       this.metricsService.recordApiRequestDuration(
-        'GET','/metrics',
+        'GET',
+        '/metrics',
         200,
         processingTime + validation.performanceImpact.validationDuration,
       );
@@ -135,7 +178,6 @@ bytebot_parlant_cache_hits_total{operation="metrics_collection"} ${validation.pe
 `;
 
       return metricsData + parlantMetrics;
-
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';

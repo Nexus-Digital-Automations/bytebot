@@ -32,9 +32,7 @@ import { BrowserUseMonitoringService } from './errors/browser-use-monitoring.ser
  */
 @Global()
 @Module({
-  controllers: [
-    BrowserUseController,
-  ],
+  controllers: [BrowserUseController],
   providers: [
     // Core browser automation services
     BrowserUseService,

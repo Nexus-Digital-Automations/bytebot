@@ -37,12 +37,12 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
-  ConversationalValidationError
+  ConversationalValidationError,
 } from '../parlant/parlant-integration.service';
 import {
   ParlantValidationInterceptor,
   SecurityLevel,
-  ValidationMode
+  ValidationMode,
 } from '@bytebot/shared/src/parlant/parlant-validation.decorator';
 import { ParlantValidationMiddleware } from '@bytebot/shared/src/parlant/parlant-validation.middleware';
 import { ParlantErrorFilter } from '@bytebot/shared/src/parlant/parlant-error-handler';
@@ -94,7 +94,9 @@ class MockParlantIntegrationService {
   private performanceMode: 'FAST' | 'SLOW' | 'VARIABLE' = 'FAST';
   private failureRate = 0; // 0-100, percentage of requests that should fail
 
-  async validateFunctionExecution(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
+  async validateFunctionExecution(
+    request: ParlantValidationRequest,
+  ): Promise<ParlantValidationResponse> {
     this.callHistory.push(request);
 
     // Simulate performance variations
@@ -105,7 +107,7 @@ class MockParlantIntegrationService {
       throw new ConversationalValidationError(
         'test_error',
         'Simulated validation failure for testing',
-        ['Retry the operation', 'Check your permissions']
+        ['Retry the operation', 'Check your permissions'],
       );
     }
 
@@ -120,7 +122,10 @@ class MockParlantIntegrationService {
   }
 
   // Test configuration methods
-  setMockResponse(request: Partial<ParlantValidationRequest>, response: ParlantValidationResponse): void {
+  setMockResponse(
+    request: Partial<ParlantValidationRequest>,
+    response: ParlantValidationResponse,
+  ): void {
     const key = this.generateCacheKey(request as ParlantValidationRequest);
     this.mockResponses.set(key, response);
   }
@@ -157,7 +162,7 @@ class MockParlantIntegrationService {
     }
 
     if (delay > 0) {
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
@@ -165,11 +170,14 @@ class MockParlantIntegrationService {
     return `${request.functionName}_${request.riskLevel}_${request.context.userId}`;
   }
 
-  private generateDefaultResponse(request: ParlantValidationRequest): ParlantValidationResponse {
+  private generateDefaultResponse(
+    request: ParlantValidationRequest,
+  ): ParlantValidationResponse {
     // Default approval logic based on risk level
-    const approved = request.riskLevel === RiskLevel._MINIMAL ||
-                    request.riskLevel === RiskLevel._LOW ||
-                    (request.riskLevel === RiskLevel._MODERATE && Math.random() > 0.3);
+    const approved =
+      request.riskLevel === RiskLevel._MINIMAL ||
+      request.riskLevel === RiskLevel._LOW ||
+      (request.riskLevel === RiskLevel._MODERATE && Math.random() > 0.3);
 
     return {
       approved,
@@ -179,13 +187,17 @@ class MockParlantIntegrationService {
         ? `Test approval for ${request.functionName} with ${request.riskLevel} risk level`
         : `Test denial for ${request.functionName} - requires additional validation`,
       confidence: approved ? 0.95 : 0.45,
-      suggestedAlternatives: approved ? [] : ['Use alternative approach', 'Request explicit permission'],
-      executionContext: approved ? {
-        timeoutMs: 10000,
-        retryAttempts: 3,
-        monitoringLevel: 'DETAILED',
-        safeguards: ['logging', 'monitoring']
-      } : undefined
+      suggestedAlternatives: approved
+        ? []
+        : ['Use alternative approach', 'Request explicit permission'],
+      executionContext: approved
+        ? {
+            timeoutMs: 10000,
+            retryAttempts: 3,
+            monitoringLevel: 'DETAILED',
+            safeguards: ['logging', 'monitoring'],
+          }
+        : undefined,
     };
   }
 }
@@ -212,10 +224,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.CRITICAL,
         riskLevel: RiskLevel._CRITICAL,
         validationMode: ValidationMode.EXPLICIT,
-        shouldBeApproved: false // Critical operations require explicit approval
+        shouldBeApproved: false, // Critical operations require explicit approval
       },
       performanceTarget: 500,
-      description: 'Test critical computer automation with screenshot capture'
+      description: 'Test critical computer automation with screenshot capture',
     },
     {
       name: 'Computer Use - Job Status Query',
@@ -227,10 +239,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.LOW,
         riskLevel: RiskLevel._LOW,
         validationMode: ValidationMode.AUTOMATIC,
-        shouldBeApproved: true
+        shouldBeApproved: true,
       },
       performanceTarget: 200,
-      description: 'Test low-risk job status monitoring'
+      description: 'Test low-risk job status monitoring',
     },
     {
       name: 'Computer Use - Batch Actions',
@@ -239,8 +251,8 @@ describe('PARLANT Integration Testing Suite', () => {
       requestBody: {
         actions: [
           { action: 'screenshot' },
-          { action: 'click', coordinates: { x: 100, y: 200 } }
-        ]
+          { action: 'click', coordinates: { x: 100, y: 200 } },
+        ],
       },
       expectedStatus: 200,
       expectedValidation: {
@@ -248,10 +260,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.CRITICAL,
         riskLevel: RiskLevel._CRITICAL,
         validationMode: ValidationMode.EXPLICIT,
-        shouldBeApproved: false
+        shouldBeApproved: false,
       },
       performanceTarget: 800,
-      description: 'Test batch computer automation operations'
+      description: 'Test batch computer automation operations',
     },
 
     // Authentication API Tests
@@ -261,7 +273,7 @@ describe('PARLANT Integration Testing Suite', () => {
       method: 'POST',
       requestBody: {
         email: 'test@example.com',
-        password: 'testpassword123'
+        password: 'testpassword123',
       },
       expectedStatus: 200,
       expectedValidation: {
@@ -269,10 +281,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.CRITICAL,
         riskLevel: RiskLevel._HIGH,
         validationMode: ValidationMode.EXPLICIT,
-        shouldBeApproved: false
+        shouldBeApproved: false,
       },
       performanceTarget: 1000,
-      description: 'Test user authentication with credential validation'
+      description: 'Test user authentication with credential validation',
     },
     {
       name: 'Authentication - User Registration',
@@ -283,7 +295,7 @@ describe('PARLANT Integration Testing Suite', () => {
         password: 'newpassword123',
         username: 'newuser',
         firstName: 'New',
-        lastName: 'User'
+        lastName: 'User',
       },
       expectedStatus: 201,
       expectedValidation: {
@@ -291,10 +303,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.CRITICAL,
         riskLevel: RiskLevel._HIGH,
         validationMode: ValidationMode.EXPLICIT,
-        shouldBeApproved: false
+        shouldBeApproved: false,
       },
       performanceTarget: 1200,
-      description: 'Test user registration with security validation'
+      description: 'Test user registration with security validation',
     },
     {
       name: 'Authentication - Profile Access',
@@ -306,10 +318,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.LOW,
         riskLevel: RiskLevel._LOW,
         validationMode: ValidationMode.AUTOMATIC,
-        shouldBeApproved: true
+        shouldBeApproved: true,
       },
       performanceTarget: 300,
-      description: 'Test profile access with automatic validation'
+      description: 'Test profile access with automatic validation',
     },
 
     // Database API Tests
@@ -323,10 +335,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.LOW,
         riskLevel: RiskLevel._LOW,
         validationMode: ValidationMode.AUTOMATIC,
-        shouldBeApproved: true
+        shouldBeApproved: true,
       },
       performanceTarget: 400,
-      description: 'Test database read operations with automatic approval'
+      description: 'Test database read operations with automatic approval',
     },
     {
       name: 'Database - Data Modification',
@@ -338,7 +350,7 @@ describe('PARLANT Integration Testing Suite', () => {
         data: { status: 'active' },
         conditions: { id: 'test-user-id' },
         justification: 'Test data modification',
-        requireBackup: true
+        requireBackup: true,
       },
       expectedStatus: 200,
       expectedValidation: {
@@ -346,10 +358,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.CRITICAL,
         riskLevel: RiskLevel._CRITICAL,
         validationMode: ValidationMode.EXPLICIT,
-        shouldBeApproved: false
+        shouldBeApproved: false,
       },
       performanceTarget: 2000,
-      description: 'Test critical database modification operations'
+      description: 'Test critical database modification operations',
     },
     {
       name: 'Database - Schema Change',
@@ -360,7 +372,7 @@ describe('PARLANT Integration Testing Suite', () => {
         ddl: 'ALTER TABLE users ADD COLUMN test_column VARCHAR(255)',
         description: 'Test schema modification',
         reversible: true,
-        rollbackInstructions: 'ALTER TABLE users DROP COLUMN test_column'
+        rollbackInstructions: 'ALTER TABLE users DROP COLUMN test_column',
       },
       expectedStatus: 200,
       expectedValidation: {
@@ -368,10 +380,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.CRITICAL,
         riskLevel: RiskLevel._CRITICAL,
         validationMode: ValidationMode.EXPLICIT,
-        shouldBeApproved: false
+        shouldBeApproved: false,
       },
       performanceTarget: 3000,
-      description: 'Test critical database schema modifications'
+      description: 'Test critical database schema modifications',
     },
 
     // Configuration API Tests
@@ -385,10 +397,10 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.MEDIUM,
         riskLevel: RiskLevel._MODERATE,
         validationMode: ValidationMode.AUTOMATIC,
-        shouldBeApproved: true
+        shouldBeApproved: true,
       },
       performanceTarget: 300,
-      description: 'Test configuration settings retrieval'
+      description: 'Test configuration settings retrieval',
     },
     {
       name: 'Configuration - Security Policy Update',
@@ -399,10 +411,10 @@ describe('PARLANT Integration Testing Suite', () => {
         configuration: {
           authentication: {
             sessionTimeout: 3600,
-            maxLoginAttempts: 5
-          }
+            maxLoginAttempts: 5,
+          },
         },
-        justification: 'Test security policy update'
+        justification: 'Test security policy update',
       },
       expectedStatus: 200,
       expectedValidation: {
@@ -410,11 +422,11 @@ describe('PARLANT Integration Testing Suite', () => {
         securityLevel: SecurityLevel.CRITICAL,
         riskLevel: RiskLevel._CRITICAL,
         validationMode: ValidationMode.EXPLICIT,
-        shouldBeApproved: false
+        shouldBeApproved: false,
       },
       performanceTarget: 2500,
-      description: 'Test critical security configuration changes'
-    }
+      description: 'Test critical security configuration changes',
+    },
   ];
 
   beforeAll(async () => {
@@ -426,12 +438,12 @@ describe('PARLANT Integration Testing Suite', () => {
         ComputerUseController,
         AuthController,
         DatabaseApiController,
-        ConfigurationApiController
+        ConfigurationApiController,
       ],
       providers: [
         {
           provide: ParlantIntegrationService,
-          useValue: mockParlantService
+          useValue: mockParlantService,
         },
         ParlantValidationInterceptor,
         ParlantValidationMiddleware,
@@ -442,32 +454,34 @@ describe('PARLANT Integration Testing Suite', () => {
           useValue: createMock<ConfigService>({
             get: jest.fn((key: string, defaultValue?: any) => {
               const config: Record<string, any> = {
-                'PARLANT_ENABLED': true,
-                'PARLANT_TARGET_VALIDATION_TIME': 500,
-                'JWT_SECRET': 'test-secret-key'
+                PARLANT_ENABLED: true,
+                PARLANT_TARGET_VALIDATION_TIME: 500,
+                JWT_SECRET: 'test-secret-key',
               };
               return config[key] ?? defaultValue;
-            })
-          })
+            }),
+          }),
         },
         {
           provide: JwtService,
           useValue: createMock<JwtService>({
             sign: jest.fn(() => 'test-jwt-token'),
-            verify: jest.fn(() => ({ userId: 'test-user', role: 'ADMIN' }))
-          })
-        }
-      ]
+            verify: jest.fn(() => ({ userId: 'test-user', role: 'ADMIN' })),
+          }),
+        },
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
 
     // Apply global filters and interceptors
     app.useGlobalFilters(new ParlantErrorFilter());
-    app.useGlobalInterceptors(new ParlantValidationInterceptor(
-      app.get('Reflector'),
-      mockParlantService as any
-    ));
+    app.useGlobalInterceptors(
+      new ParlantValidationInterceptor(
+        app.get('Reflector'),
+        mockParlantService as any,
+      ),
+    );
 
     jwtService = moduleFixture.get<JwtService>(JwtService);
     testToken = jwtService.sign({ userId: 'test-user', role: 'ADMIN' });
@@ -493,7 +507,7 @@ describe('PARLANT Integration Testing Suite', () => {
       if (scenario.expectedValidation.shouldBeCalled) {
         const mockRequest: Partial<ParlantValidationRequest> = {
           functionName: `${scenario.endpoint}.${scenario.method}`,
-          riskLevel: scenario.expectedValidation.riskLevel
+          riskLevel: scenario.expectedValidation.riskLevel,
         };
 
         const mockResponse: ParlantValidationResponse = {
@@ -503,7 +517,7 @@ describe('PARLANT Integration Testing Suite', () => {
           reasoning: scenario.expectedValidation.shouldBeApproved
             ? 'Test approval for automated testing'
             : 'Test denial for security validation',
-          confidence: 0.95
+          confidence: 0.95,
         };
 
         mockParlantService.setMockResponse(mockRequest, mockResponse);
@@ -513,7 +527,9 @@ describe('PARLANT Integration Testing Suite', () => {
 
       // Execute request
       const response = await request(app.getHttpServer())
-        [scenario.method.toLowerCase() as 'get' | 'post' | 'put' | 'delete'](scenario.endpoint)
+        [
+          scenario.method.toLowerCase() as 'get' | 'post' | 'put' | 'delete'
+        ](scenario.endpoint)
         .set('Authorization', `Bearer ${testToken}`)
         .send(scenario.requestBody);
 
@@ -534,7 +550,9 @@ describe('PARLANT Integration Testing Suite', () => {
       // Validate performance target
       expect(responseTime).toBeLessThanOrEqual(scenario.performanceTarget);
 
-      console.log(`✓ ${scenario.name}: ${responseTime}ms (target: ${scenario.performanceTarget}ms)`);
+      console.log(
+        `✓ ${scenario.name}: ${responseTime}ms (target: ${scenario.performanceTarget}ms)`,
+      );
     });
   });
 
@@ -546,7 +564,7 @@ describe('PARLANT Integration Testing Suite', () => {
       requestsPerUser: 10,
       rampUpTimeMs: 5000,
       maxResponseTimeMs: 500,
-      minSuccessRate: 95
+      minSuccessRate: 95,
     };
 
     test('Sub-500ms validation performance under load', async () => {
@@ -559,7 +577,9 @@ describe('PARLANT Integration Testing Suite', () => {
       // Create concurrent requests
       for (let user = 0; user < loadTestConfig.concurrentUsers; user++) {
         for (let req = 0; req < loadTestConfig.requestsPerUser; req++) {
-          const delay = (user * loadTestConfig.rampUpTimeMs) / loadTestConfig.concurrentUsers;
+          const delay =
+            (user * loadTestConfig.rampUpTimeMs) /
+            loadTestConfig.concurrentUsers;
 
           const promise = new Promise<void>((resolve) => {
             setTimeout(async () => {
@@ -572,12 +592,12 @@ describe('PARLANT Integration Testing Suite', () => {
                 const responseTime = Date.now() - startTime;
                 results.push({
                   responseTime,
-                  success: response.status === 200
+                  success: response.status === 200,
                 });
               } catch (error) {
                 results.push({
                   responseTime: Date.now() - startTime,
-                  success: false
+                  success: false,
                 });
               }
               resolve();
@@ -592,12 +612,13 @@ describe('PARLANT Integration Testing Suite', () => {
       await Promise.all(promises);
 
       // Analyze results
-      const successCount = results.filter(r => r.success).length;
+      const successCount = results.filter((r) => r.success).length;
       const successRate = (successCount / results.length) * 100;
-      const averageResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
-      const maxResponseTime = Math.max(...results.map(r => r.responseTime));
+      const averageResponseTime =
+        results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
+      const maxResponseTime = Math.max(...results.map((r) => r.responseTime));
       const p95ResponseTime = results
-        .map(r => r.responseTime)
+        .map((r) => r.responseTime)
         .sort((a, b) => a - b)[Math.floor(results.length * 0.95)];
 
       console.log('Load Test Results:', {
@@ -605,12 +626,14 @@ describe('PARLANT Integration Testing Suite', () => {
         successRate: `${successRate.toFixed(2)}%`,
         averageResponseTime: `${averageResponseTime.toFixed(2)}ms`,
         maxResponseTime: `${maxResponseTime}ms`,
-        p95ResponseTime: `${p95ResponseTime}ms`
+        p95ResponseTime: `${p95ResponseTime}ms`,
       });
 
       // Validate performance requirements
       expect(successRate).toBeGreaterThanOrEqual(loadTestConfig.minSuccessRate);
-      expect(p95ResponseTime).toBeLessThanOrEqual(loadTestConfig.maxResponseTimeMs);
+      expect(p95ResponseTime).toBeLessThanOrEqual(
+        loadTestConfig.maxResponseTimeMs,
+      );
     }, 30000);
 
     test('Performance degradation with slow PARLANT service', async () => {
@@ -637,7 +660,7 @@ describe('PARLANT Integration Testing Suite', () => {
       testUnauthorizedAccess: true,
       testInsufficientPermissions: true,
       testRiskLevelEscalation: true,
-      testConversationalBypass: true
+      testConversationalBypass: true,
     };
 
     test('Unauthorized access rejection', async () => {
@@ -660,12 +683,15 @@ describe('PARLANT Integration Testing Suite', () => {
         validationTimestamp: new Date(),
         reasoning: 'High-risk operation requires additional authorization',
         confidence: 0.95,
-        suggestedAlternatives: ['Use lower-risk alternative', 'Request explicit approval']
+        suggestedAlternatives: [
+          'Use lower-risk alternative',
+          'Request explicit approval',
+        ],
       };
 
       mockParlantService.setMockResponse(
         { riskLevel: RiskLevel._CRITICAL } as ParlantValidationRequest,
-        mockResponse
+        mockResponse,
       );
 
       const response = await request(app.getHttpServer())
@@ -674,7 +700,7 @@ describe('PARLANT Integration Testing Suite', () => {
         .send({
           operation: 'DROP_TABLE',
           ddl: 'DROP TABLE test_table',
-          description: 'Test dangerous operation'
+          description: 'Test dangerous operation',
         });
 
       expect(response.status).toBe(HttpStatus.FORBIDDEN);
@@ -694,7 +720,7 @@ describe('PARLANT Integration Testing Suite', () => {
           table: 'users',
           operation: 'DELETE',
           justification: 'PARLANT_BYPASS_ATTEMPT',
-          conditions: { id: 'test' }
+          conditions: { id: 'test' },
         });
 
       // Should still trigger validation regardless of bypass attempt
@@ -726,12 +752,12 @@ describe('PARLANT Integration Testing Suite', () => {
         validationTimestamp: new Date(),
         reasoning: 'Operation denied for testing error response structure',
         confidence: 0.85,
-        suggestedAlternatives: ['Alternative action 1', 'Alternative action 2']
+        suggestedAlternatives: ['Alternative action 1', 'Alternative action 2'],
       };
 
       mockParlantService.setMockResponse(
         { riskLevel: RiskLevel._HIGH } as ParlantValidationRequest,
-        mockResponse
+        mockResponse,
       );
 
       const response = await request(app.getHttpServer())
@@ -746,22 +772,22 @@ describe('PARLANT Integration Testing Suite', () => {
         error: 'Conversational Validation Failed',
         details: expect.objectContaining({
           conversationId: 'conv_error_test',
-          reasoning: 'Operation denied for testing error response structure'
+          reasoning: 'Operation denied for testing error response structure',
         }),
         guidance: expect.objectContaining({
           explanation: expect.any(String),
           immediateActions: expect.any(Array),
           alternatives: expect.any(Array),
-          preventionTips: expect.any(Array)
+          preventionTips: expect.any(Array),
         }),
         recovery: expect.objectContaining({
           autoRetryAvailable: expect.any(Boolean),
-          recommendedStrategy: expect.any(String)
+          recommendedStrategy: expect.any(String),
         }),
         metadata: expect.objectContaining({
           correlationId: expect.any(String),
-          timestamp: expect.any(String)
-        })
+          timestamp: expect.any(String),
+        }),
       });
     });
   });
@@ -788,8 +814,8 @@ describe('PARLANT Integration Testing Suite', () => {
       }
 
       // Should see service unavailable responses after circuit breaker opens
-      const serviceUnavailableCount = responses.filter(r =>
-        r.status === HttpStatus.SERVICE_UNAVAILABLE
+      const serviceUnavailableCount = responses.filter(
+        (r) => r.status === HttpStatus.SERVICE_UNAVAILABLE,
       ).length;
 
       expect(serviceUnavailableCount).toBeGreaterThan(0);
@@ -800,7 +826,7 @@ describe('PARLANT Integration Testing Suite', () => {
       mockParlantService.setFailureRate(0);
 
       // Wait for circuit breaker to reset (simulate with delay)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const response = await request(app.getHttpServer())
         .get('/auth/profile')
@@ -834,7 +860,7 @@ describe('PARLANT Integration Testing Suite', () => {
       const recentCalls = callHistory.slice(-2);
 
       // Validate audit trail structure
-      recentCalls.forEach(call => {
+      recentCalls.forEach((call) => {
         expect(call).toHaveProperty('operationId');
         expect(call).toHaveProperty('functionName');
         expect(call).toHaveProperty('riskLevel');
@@ -853,7 +879,7 @@ describe('PARLANT Integration Testing Suite', () => {
           table: 'test_table',
           operation: 'UPDATE',
           data: { status: 'active' },
-          justification: 'Test compliance validation'
+          justification: 'Test compliance validation',
         });
 
       const callHistory = mockParlantService.getCallHistory();
@@ -866,8 +892,8 @@ describe('PARLANT Integration Testing Suite', () => {
         metadata: expect.objectContaining({
           operationId: expect.any(String),
           businessCategory: expect.any(String),
-          timestamp: expect.any(String)
-        })
+          timestamp: expect.any(String),
+        }),
       });
     });
   });
@@ -882,7 +908,7 @@ describe('PARLANT Integration Testing Suite', () => {
         {
           endpoint: '/config',
           method: 'GET' as const,
-          expectedStatus: 200
+          expectedStatus: 200,
         },
         // Step 2: Modify configuration (should be denied)
         {
@@ -893,16 +919,16 @@ describe('PARLANT Integration Testing Suite', () => {
             value: 'test-value',
             category: 'SYSTEM',
             sensitivity: 'INTERNAL',
-            justification: 'Test configuration change'
+            justification: 'Test configuration change',
           },
-          expectedStatus: 403 // Should be denied by PARLANT
+          expectedStatus: 403, // Should be denied by PARLANT
         },
         // Step 3: Query database
         {
           endpoint: '/database/query?query=SELECT 1',
           method: 'GET' as const,
-          expectedStatus: 200
-        }
+          expectedStatus: 200,
+        },
       ];
 
       for (const step of workflowSteps) {
@@ -932,15 +958,15 @@ describe('PARLANT Integration Testing Suite', () => {
       const responses = await Promise.all(promises);
 
       // All requests should succeed
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
       });
 
       // Should have separate validation calls for each user
       const callHistory = mockParlantService.getCallHistory();
-      const userIds = callHistory.map(call => call.context.userId);
+      const userIds = callHistory.map((call) => call.context.userId);
 
-      users.forEach(userId => {
+      users.forEach((userId) => {
         expect(userIds).toContain(userId);
       });
     });
@@ -968,7 +994,13 @@ describe('PARLANT Integration Testing Suite', () => {
           const startTime = Date.now();
           try {
             const response = await request(app.getHttpServer())
-              [scenario.method.toLowerCase() as 'get' | 'post' | 'put' | 'delete'](scenario.endpoint)
+              [
+                scenario.method.toLowerCase() as
+                  | 'get'
+                  | 'post'
+                  | 'put'
+                  | 'delete'
+              ](scenario.endpoint)
               .set('Authorization', `Bearer ${testToken}`)
               .send(scenario.requestBody);
 
@@ -986,25 +1018,30 @@ describe('PARLANT Integration Testing Suite', () => {
         benchmarkResults.push({
           endpoint: scenario.endpoint,
           method: scenario.method,
-          averageTime: results.reduce((sum, time) => sum + time, 0) / results.length,
+          averageTime:
+            results.reduce((sum, time) => sum + time, 0) / results.length,
           maxTime: Math.max(...results),
           minTime: Math.min(...results),
-          successRate: (successCount / iterations) * 100
+          successRate: (successCount / iterations) * 100,
         });
       }
 
       // Log benchmark results
       console.log('\n=== Performance Benchmark Results ===');
-      benchmarkResults.forEach(result => {
-        console.log(`${result.method} ${result.endpoint}: avg=${result.averageTime.toFixed(2)}ms, max=${result.maxTime}ms, success=${result.successRate}%`);
+      benchmarkResults.forEach((result) => {
+        console.log(
+          `${result.method} ${result.endpoint}: avg=${result.averageTime.toFixed(2)}ms, max=${result.maxTime}ms, success=${result.successRate}%`,
+        );
       });
 
       // Validate that critical endpoints meet performance targets
-      const criticalEndpoints = benchmarkResults.filter(r =>
-        r.endpoint.includes('/auth/') || r.endpoint.includes('/computer-use/')
+      const criticalEndpoints = benchmarkResults.filter(
+        (r) =>
+          r.endpoint.includes('/auth/') ||
+          r.endpoint.includes('/computer-use/'),
       );
 
-      criticalEndpoints.forEach(result => {
+      criticalEndpoints.forEach((result) => {
         expect(result.averageTime).toBeLessThanOrEqual(1000); // 1 second average
         expect(result.successRate).toBeGreaterThanOrEqual(90); // 90% success rate
       });
@@ -1025,7 +1062,7 @@ function generateTestData(type: 'user' | 'config' | 'database'): any {
         username: `testuser${Date.now()}`,
         firstName: 'Test',
         lastName: 'User',
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
     case 'config':
       return {
@@ -1033,14 +1070,14 @@ function generateTestData(type: 'user' | 'config' | 'database'): any {
         value: 'test_value',
         category: 'SYSTEM',
         sensitivity: 'INTERNAL',
-        justification: 'Test configuration for integration testing'
+        justification: 'Test configuration for integration testing',
       };
     case 'database':
       return {
         table: 'test_table',
         operation: 'INSERT',
         data: { name: `test_record_${Date.now()}`, status: 'active' },
-        justification: 'Test database operation for integration testing'
+        justification: 'Test database operation for integration testing',
       };
     default:
       return {};
@@ -1050,14 +1087,20 @@ function generateTestData(type: 'user' | 'config' | 'database'): any {
 /**
  * Validate response structure matches expected format
  */
-function validateResponseStructure(response: any, expectedStructure: any): boolean {
+function validateResponseStructure(
+  response: any,
+  expectedStructure: any,
+): boolean {
   // Implement recursive structure validation
   for (const key in expectedStructure) {
     if (!(key in response)) {
       return false;
     }
 
-    if (typeof expectedStructure[key] === 'object' && expectedStructure[key] !== null) {
+    if (
+      typeof expectedStructure[key] === 'object' &&
+      expectedStructure[key] !== null
+    ) {
       if (!validateResponseStructure(response[key], expectedStructure[key])) {
         return false;
       }
@@ -1087,6 +1130,6 @@ function calculatePerformanceStats(responseTimes: number[]): {
     p95: sorted[Math.floor(len * 0.95)],
     p99: sorted[Math.floor(len * 0.99)],
     min: Math.min(...responseTimes),
-    max: Math.max(...responseTimes)
+    max: Math.max(...responseTimes),
   };
 }

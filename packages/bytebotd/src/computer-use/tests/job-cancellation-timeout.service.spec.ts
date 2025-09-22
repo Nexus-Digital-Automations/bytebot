@@ -63,9 +63,13 @@ describe('JobCancellationTimeoutService', () => {
       ],
     }).compile();
 
-    service = module.get<JobCancellationTimeoutService>(JobCancellationTimeoutService);
+    service = module.get<JobCancellationTimeoutService>(
+      JobCancellationTimeoutService,
+    );
     asyncJobService = module.get<AsyncJobService>(AsyncJobService);
-    enhancedAsyncJobService = module.get<EnhancedAsyncJobService>(EnhancedAsyncJobService);
+    enhancedAsyncJobService = module.get<EnhancedAsyncJobService>(
+      EnhancedAsyncJobService,
+    );
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
 
     // Reset mocks
@@ -87,8 +91,14 @@ describe('JobCancellationTimeoutService', () => {
     });
 
     it('should set up event listeners', () => {
-      expect(mockEventEmitter.on).toHaveBeenCalledWith('job.completed', expect.any(Function));
-      expect(mockEventEmitter.on).toHaveBeenCalledWith('job.failed', expect.any(Function));
+      expect(mockEventEmitter.on).toHaveBeenCalledWith(
+        'job.completed',
+        expect.any(Function),
+      );
+      expect(mockEventEmitter.on).toHaveBeenCalledWith(
+        'job.failed',
+        expect.any(Function),
+      );
     });
   });
 
@@ -121,7 +131,10 @@ describe('JobCancellationTimeoutService', () => {
         expect(result.jobId).toBe(testJobId);
         expect(result.reason).toBe('Test cancellation');
         expect(mockAsyncJobService.cancelJob).toHaveBeenCalledWith(testJobId);
-        expect(mockEventEmitter.emit).toHaveBeenCalledWith('job.cancellation.completed', expect.any(Object));
+        expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+          'job.cancellation.completed',
+          expect.any(Object),
+        );
       });
 
       it('should handle graceful cancellation with cleanup', async () => {
@@ -203,7 +216,9 @@ describe('JobCancellationTimeoutService', () => {
         const abortController = new AbortController();
         const abortSpy = jest.spyOn(abortController, 'abort');
 
-        service.registerActiveJob(testJobId, abortController, [cleanupCallback]);
+        service.registerActiveJob(testJobId, abortController, [
+          cleanupCallback,
+        ]);
 
         const request: JobCancellationRequest = {
           jobId: testJobId,
@@ -222,7 +237,9 @@ describe('JobCancellationTimeoutService', () => {
 
       it('should handle enhanced service cancellation failure', async () => {
         mockAsyncJobService.cancelJob.mockReturnValue(true);
-        mockEnhancedAsyncJobService.cancelJobsByCriteria.mockRejectedValue(new Error('Enhanced service error'));
+        mockEnhancedAsyncJobService.cancelJobsByCriteria.mockRejectedValue(
+          new Error('Enhanced service error'),
+        );
 
         const request: JobCancellationRequest = {
           jobId: testJobId,
@@ -253,7 +270,8 @@ describe('JobCancellationTimeoutService', () => {
           callCount++;
           return {
             jobId: testJobId,
-            status: callCount <= 20 ? JobStatus.IN_PROGRESS : JobStatus.CANCELLED, // Still running during wait period
+            status:
+              callCount <= 20 ? JobStatus.IN_PROGRESS : JobStatus.CANCELLED, // Still running during wait period
             progress: 50,
             submittedAt: new Date().toISOString(),
           };
@@ -280,7 +298,8 @@ describe('JobCancellationTimeoutService', () => {
           callCount++;
           return {
             jobId: testJobId,
-            status: callCount <= 2 ? JobStatus.IN_PROGRESS : JobStatus.COMPLETED,
+            status:
+              callCount <= 2 ? JobStatus.IN_PROGRESS : JobStatus.COMPLETED,
             progress: callCount <= 2 ? 50 : 100,
             submittedAt: new Date().toISOString(),
           };
@@ -314,7 +333,9 @@ describe('JobCancellationTimeoutService', () => {
         const result = await service.cancelJob(request);
 
         expect(result.success).toBe(false);
-        expect(result.cleanup.errors).toContain(expect.stringContaining('Job not found'));
+        expect(result.cleanup.errors).toContain(
+          expect.stringContaining('Job not found'),
+        );
       });
 
       it('should handle already completed job', async () => {
@@ -334,7 +355,9 @@ describe('JobCancellationTimeoutService', () => {
         const result = await service.cancelJob(request);
 
         expect(result.success).toBe(false);
-        expect(result.cleanup.errors).toContain(expect.stringContaining('Cannot cancel job in completed state'));
+        expect(result.cleanup.errors).toContain(
+          expect.stringContaining('Cannot cancel job in completed state'),
+        );
       });
 
       it('should handle already cancelled job', async () => {
@@ -360,7 +383,9 @@ describe('JobCancellationTimeoutService', () => {
       it('should handle cleanup callback failures', async () => {
         mockAsyncJobService.cancelJob.mockReturnValue(true);
 
-        const failingCallback = jest.fn().mockRejectedValue(new Error('Cleanup failed'));
+        const failingCallback = jest
+          .fn()
+          .mockRejectedValue(new Error('Cleanup failed'));
         service.registerActiveJob(testJobId, undefined, [failingCallback]);
 
         const request: JobCancellationRequest = {
@@ -372,7 +397,9 @@ describe('JobCancellationTimeoutService', () => {
         const result = await service.cancelJob(request);
 
         expect(result.success).toBe(true);
-        expect(result.cleanup.errors).toContain(expect.stringContaining('Cleanup failed'));
+        expect(result.cleanup.errors).toContain(
+          expect.stringContaining('Cleanup failed'),
+        );
         expect(failingCallback).toHaveBeenCalled();
       });
     });
@@ -504,7 +531,9 @@ describe('JobCancellationTimeoutService', () => {
         ],
       };
 
-      await expect(service.configureJobTimeout(config)).resolves.toBeUndefined();
+      await expect(
+        service.configureJobTimeout(config),
+      ).resolves.toBeUndefined();
     });
 
     it('should set up timeout monitoring for active job', async () => {
@@ -525,7 +554,7 @@ describe('JobCancellationTimeoutService', () => {
 
       // Verify timeout is configured (implementation detail)
       const activeJobs = service.getActiveJobs();
-      const job = activeJobs.find(j => j.jobId === testJobId);
+      const job = activeJobs.find((j) => j.jobId === testJobId);
       expect(job).toBeDefined();
       expect(job?.hasTimeout).toBe(true);
     });
@@ -561,14 +590,14 @@ describe('JobCancellationTimeoutService', () => {
     it('should handle multiple active jobs', () => {
       const jobIds = ['job1', 'job2', 'job3'];
 
-      jobIds.forEach(jobId => {
+      jobIds.forEach((jobId) => {
         service.registerActiveJob(jobId);
       });
 
       const activeJobs = service.getActiveJobs();
       expect(activeJobs).toHaveLength(3);
 
-      const trackedJobIds = activeJobs.map(job => job.jobId);
+      const trackedJobIds = activeJobs.map((job) => job.jobId);
       expect(trackedJobIds).toEqual(expect.arrayContaining(jobIds));
     });
   });
@@ -597,10 +626,13 @@ describe('JobCancellationTimeoutService', () => {
       const result = await service.emergencyShutdown('Critical error');
 
       // Verify that forced cancellation was used
-      expect(result.cancelled.every(c =>
-        c.strategy === CancellationStrategy.FORCED ||
-        c.actualStrategy === CancellationStrategy.FORCED
-      )).toBe(true);
+      expect(
+        result.cancelled.every(
+          (c) =>
+            c.strategy === CancellationStrategy.FORCED ||
+            c.actualStrategy === CancellationStrategy.FORCED,
+        ),
+      ).toBe(true);
     });
   });
 
@@ -664,7 +696,7 @@ describe('JobCancellationTimeoutService', () => {
           strategy: CancellationStrategy.GRACEFUL,
           reason: 'Event test',
           success: true,
-        })
+        }),
       );
     });
 
@@ -675,8 +707,9 @@ describe('JobCancellationTimeoutService', () => {
       expect(activeJobs).toHaveLength(1);
 
       // Simulate job completion event
-      const completionHandler = mockEventEmitter.on.mock.calls
-        .find(call => call[0] === 'job.completed')?.[1];
+      const completionHandler = mockEventEmitter.on.mock.calls.find(
+        (call) => call[0] === 'job.completed',
+      )?.[1];
 
       if (completionHandler) {
         completionHandler({ jobId: testJobId });
@@ -706,11 +739,13 @@ describe('JobCancellationTimeoutService', () => {
       };
 
       // Submit multiple cancellation requests rapidly
-      const promises = Array.from({ length: 5 }, () => service.cancelJob(request));
+      const promises = Array.from({ length: 5 }, () =>
+        service.cancelJob(request),
+      );
       const results = await Promise.all(promises);
 
       // All should succeed or handle the already-cancelled state
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.jobId).toBe(testJobId);
         expect(typeof result.success).toBe('boolean');
       });
@@ -719,7 +754,7 @@ describe('JobCancellationTimeoutService', () => {
     it('should handle large bulk cancellation requests', async () => {
       // Register many active jobs
       const jobIds = Array.from({ length: 100 }, (_, i) => `bulk_job_${i}`);
-      jobIds.forEach(jobId => service.registerActiveJob(jobId));
+      jobIds.forEach((jobId) => service.registerActiveJob(jobId));
 
       mockAsyncJobService.cancelJob.mockReturnValue(true);
 
@@ -742,7 +777,8 @@ describe('JobCancellationTimeoutService', () => {
       const invalidJobIds = ['', null, undefined, 'invalid_job'];
 
       for (const jobId of invalidJobIds) {
-        if (jobId === '' || jobId) { // Skip null/undefined for TypeScript
+        if (jobId === '' || jobId) {
+          // Skip null/undefined for TypeScript
           const request: JobCancellationRequest = {
             jobId: jobId as string,
             strategy: CancellationStrategy.GRACEFUL,

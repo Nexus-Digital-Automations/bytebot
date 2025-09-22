@@ -154,8 +154,12 @@ describe('BrowserUseController', () => {
     });
 
     it('should log initialization messages', () => {
-      expect(loggerSpy).toHaveBeenCalledWith('Browser-Use Controller initialized with local-only architecture');
-      expect(loggerSpy).toHaveBeenCalledWith('BYTEBOT INTEGRATION: Browser automation API endpoints active');
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'Browser-Use Controller initialized with local-only architecture',
+      );
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'BYTEBOT INTEGRATION: Browser automation API endpoints active',
+      );
     });
 
     it('should inject all required services', () => {
@@ -203,7 +207,9 @@ describe('BrowserUseController', () => {
         const result = await controller.executeScript(executeDto, mockUser);
 
         expect(result.success).toBe(true);
-        expect(browserSessionService.createSession).toHaveBeenCalledWith({ options: {} });
+        expect(browserSessionService.createSession).toHaveBeenCalledWith({
+          options: {},
+        });
         expect(browserUseService.executeScript).toHaveBeenCalledWith(
           executeDto.script,
           newSessionId,
@@ -234,14 +240,18 @@ describe('BrowserUseController', () => {
 
         expect(result.timing.startTime).toBeGreaterThanOrEqual(startTime);
         expect(result.timing.endTime).toBeLessThanOrEqual(endTime);
-        expect(result.timing.duration).toBe(result.timing.endTime - result.timing.startTime);
+        expect(result.timing.duration).toBe(
+          result.timing.endTime - result.timing.startTime,
+        );
       });
     });
 
     describe('Error Handling', () => {
       it('should handle service execution errors gracefully', async () => {
         const errorMessage = 'Script execution failed';
-        browserUseService.executeScript.mockRejectedValue(new Error(errorMessage));
+        browserUseService.executeScript.mockRejectedValue(
+          new Error(errorMessage),
+        );
 
         const result = await controller.executeScript(mockExecuteDto, mockUser);
 
@@ -263,7 +273,9 @@ describe('BrowserUseController', () => {
 
       it('should handle session creation errors', async () => {
         const executeDto = { ...mockExecuteDto, sessionId: undefined };
-        browserSessionService.createSession.mockRejectedValue(new Error('Session creation failed'));
+        browserSessionService.createSession.mockRejectedValue(
+          new Error('Session creation failed'),
+        );
 
         const result = await controller.executeScript(executeDto, mockUser);
 
@@ -277,7 +289,9 @@ describe('BrowserUseController', () => {
         const longScript = 'console.log("test");'.repeat(100);
         const executeDto = { ...mockExecuteDto, script: longScript };
 
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
 
         await controller.executeScript(executeDto, mockUser);
 
@@ -291,7 +305,9 @@ describe('BrowserUseController', () => {
       });
 
       it('should include user context in all log entries', async () => {
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
 
         await controller.executeScript(mockExecuteDto, mockUser);
 
@@ -307,7 +323,9 @@ describe('BrowserUseController', () => {
         const maliciousScript = '<script>alert("xss")</script>';
         const executeDto = { ...mockExecuteDto, script: maliciousScript };
 
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
 
         const result = await controller.executeScript(executeDto, mockUser);
 
@@ -323,7 +341,9 @@ describe('BrowserUseController', () => {
 
     describe('Performance Requirements', () => {
       it('should complete endpoint processing within reasonable time', async () => {
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
 
         const startTime = performance.now();
         await controller.executeScript(mockExecuteDto, mockUser);
@@ -334,15 +354,17 @@ describe('BrowserUseController', () => {
       });
 
       it('should handle concurrent requests efficiently', async () => {
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
 
-        const requests = Array(5).fill(null).map(() =>
-          controller.executeScript(mockExecuteDto, mockUser)
-        );
+        const requests = Array(5)
+          .fill(null)
+          .map(() => controller.executeScript(mockExecuteDto, mockUser));
 
         const results = await Promise.all(requests);
 
-        results.forEach(result => {
+        results.forEach((result) => {
           expect(result.success).toBe(true);
         });
 
@@ -426,7 +448,9 @@ describe('BrowserUseController', () => {
       });
 
       it('should handle timeout errors', async () => {
-        browserUseService.navigate.mockRejectedValue(new Error('Navigation timeout'));
+        browserUseService.navigate.mockRejectedValue(
+          new Error('Navigation timeout'),
+        );
 
         const result = await controller.navigate(mockNavigateDto, mockUser);
 
@@ -472,7 +496,9 @@ describe('BrowserUseController', () => {
 
         for (const url of maliciousUrls) {
           const navigateDto = { ...mockNavigateDto, url };
-          browserUseService.navigate.mockRejectedValue(new Error('Blocked malicious URL'));
+          browserUseService.navigate.mockRejectedValue(
+            new Error('Blocked malicious URL'),
+          );
 
           const result = await controller.navigate(navigateDto, mockUser);
 
@@ -564,7 +590,9 @@ describe('BrowserUseController', () => {
       });
 
       it('should handle element not found errors', async () => {
-        browserUseService.wait.mockRejectedValue(new Error('Element not found'));
+        browserUseService.wait.mockRejectedValue(
+          new Error('Element not found'),
+        );
 
         const result = await controller.wait(mockWaitDto, mockUser);
 
@@ -605,13 +633,17 @@ describe('BrowserUseController', () => {
         };
 
         browserUseService.getSystemHealth.mockResolvedValue(mockSystemHealth);
-        browserSessionService.getSessionStatus.mockResolvedValue(mockSessionStatus);
+        browserSessionService.getSessionStatus.mockResolvedValue(
+          mockSessionStatus,
+        );
 
         const result = await controller.getStatus(mockStatusDto, mockUser);
 
         expect(result.healthy).toBe(true);
         expect(result.session).toBe(mockSessionStatus);
-        expect(browserSessionService.getSessionStatus).toHaveBeenCalledWith(mockStatusDto.sessionId);
+        expect(browserSessionService.getSessionStatus).toHaveBeenCalledWith(
+          mockStatusDto.sessionId,
+        );
       });
 
       it('should get all sessions when no specific session requested', async () => {
@@ -639,10 +671,13 @@ describe('BrowserUseController', () => {
     describe('Error Handling', () => {
       it('should throw HttpException on service errors', async () => {
         const errorMessage = 'System health check failed';
-        browserUseService.getSystemHealth.mockRejectedValue(new Error(errorMessage));
+        browserUseService.getSystemHealth.mockRejectedValue(
+          new Error(errorMessage),
+        );
 
-        await expect(controller.getStatus(mockStatusDto, mockUser))
-          .rejects.toThrow(HttpException);
+        await expect(
+          controller.getStatus(mockStatusDto, mockUser),
+        ).rejects.toThrow(HttpException);
 
         try {
           await controller.getStatus(mockStatusDto, mockUser);
@@ -674,7 +709,8 @@ describe('BrowserUseController', () => {
       it('should capture screenshot successfully', async () => {
         const mockResult = {
           filePath: '/screenshots/test-123.png',
-          base64Data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
+          base64Data:
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==',
           metadata: {
             width: 1920,
             height: 1080,
@@ -685,7 +721,10 @@ describe('BrowserUseController', () => {
 
         browserUseService.captureScreenshot.mockResolvedValue(mockResult);
 
-        const result = await controller.captureScreenshot(mockScreenshotDto, mockUser);
+        const result = await controller.captureScreenshot(
+          mockScreenshotDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(true);
         expect(result.filePath).toBe(mockResult.filePath);
@@ -714,7 +753,10 @@ describe('BrowserUseController', () => {
 
         browserUseService.captureScreenshot.mockResolvedValue(mockResult);
 
-        const result = await controller.captureScreenshot(fullPageDto, mockUser);
+        const result = await controller.captureScreenshot(
+          fullPageDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(true);
         expect(result.metadata?.height).toBe(3000);
@@ -744,9 +786,14 @@ describe('BrowserUseController', () => {
     describe('Error Handling', () => {
       it('should handle screenshot capture failures', async () => {
         const errorMessage = 'Element not found for screenshot';
-        browserUseService.captureScreenshot.mockRejectedValue(new Error(errorMessage));
+        browserUseService.captureScreenshot.mockRejectedValue(
+          new Error(errorMessage),
+        );
 
-        const result = await controller.captureScreenshot(mockScreenshotDto, mockUser);
+        const result = await controller.captureScreenshot(
+          mockScreenshotDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(false);
         expect(result.error).toBe(errorMessage);
@@ -754,9 +801,14 @@ describe('BrowserUseController', () => {
       });
 
       it('should handle storage errors', async () => {
-        browserUseService.captureScreenshot.mockRejectedValue(new Error('Disk full'));
+        browserUseService.captureScreenshot.mockRejectedValue(
+          new Error('Disk full'),
+        );
 
-        const result = await controller.captureScreenshot(mockScreenshotDto, mockUser);
+        const result = await controller.captureScreenshot(
+          mockScreenshotDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(false);
         expect(result.error).toBe('Disk full');
@@ -777,9 +829,14 @@ describe('BrowserUseController', () => {
           screenshot: 'base64screenshot',
         };
 
-        browserInteractionService.performInteraction.mockResolvedValue(mockResult);
+        browserInteractionService.performInteraction.mockResolvedValue(
+          mockResult,
+        );
 
-        const result = await controller.performInteraction(mockInteractionDto, mockUser);
+        const result = await controller.performInteraction(
+          mockInteractionDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(true);
         expect(result.interactionType).toBe(mockInteractionDto.type);
@@ -787,7 +844,9 @@ describe('BrowserUseController', () => {
         expect(result.elementInfo).toBe(mockResult.elementInfo);
         expect(result.timing).toBeDefined();
 
-        expect(browserInteractionService.performInteraction).toHaveBeenCalledWith(
+        expect(
+          browserInteractionService.performInteraction,
+        ).toHaveBeenCalledWith(
           mockInteractionDto.type,
           mockInteractionDto.selector,
           mockInteractionDto.sessionId,
@@ -813,7 +872,9 @@ describe('BrowserUseController', () => {
           elementInfo: { tagName: 'INPUT', type: 'email' },
         };
 
-        browserInteractionService.performInteraction.mockResolvedValue(mockResult);
+        browserInteractionService.performInteraction.mockResolvedValue(
+          mockResult,
+        );
 
         const result = await controller.performInteraction(typeDto, mockUser);
 
@@ -833,7 +894,9 @@ describe('BrowserUseController', () => {
           elementInfo: { tagName: 'DIV', className: 'dropdown-trigger' },
         };
 
-        browserInteractionService.performInteraction.mockResolvedValue(mockResult);
+        browserInteractionService.performInteraction.mockResolvedValue(
+          mockResult,
+        );
 
         const result = await controller.performInteraction(hoverDto, mockUser);
 
@@ -853,9 +916,14 @@ describe('BrowserUseController', () => {
           elementInfo: { tagName: 'DIV' },
         };
 
-        browserInteractionService.performInteraction.mockResolvedValue(mockResult);
+        browserInteractionService.performInteraction.mockResolvedValue(
+          mockResult,
+        );
 
-        const result = await controller.performInteraction(dragDropDto, mockUser);
+        const result = await controller.performInteraction(
+          dragDropDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(true);
         expect(result.interactionType).toBe('drag');
@@ -865,9 +933,14 @@ describe('BrowserUseController', () => {
     describe('Error Handling', () => {
       it('should handle element not found errors', async () => {
         const errorMessage = 'Element not found: #non-existent-button';
-        browserInteractionService.performInteraction.mockRejectedValue(new Error(errorMessage));
+        browserInteractionService.performInteraction.mockRejectedValue(
+          new Error(errorMessage),
+        );
 
-        const result = await controller.performInteraction(mockInteractionDto, mockUser);
+        const result = await controller.performInteraction(
+          mockInteractionDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(false);
         expect(result.error).toBe(errorMessage);
@@ -875,9 +948,14 @@ describe('BrowserUseController', () => {
       });
 
       it('should handle interaction timeout errors', async () => {
-        browserInteractionService.performInteraction.mockRejectedValue(new Error('Interaction timeout'));
+        browserInteractionService.performInteraction.mockRejectedValue(
+          new Error('Interaction timeout'),
+        );
 
-        const result = await controller.performInteraction(mockInteractionDto, mockUser);
+        const result = await controller.performInteraction(
+          mockInteractionDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(false);
         expect(result.error).toBe('Interaction timeout');
@@ -889,9 +967,14 @@ describe('BrowserUseController', () => {
           selector: '!!!invalid-selector!!',
         };
 
-        browserInteractionService.performInteraction.mockRejectedValue(new Error('Invalid selector'));
+        browserInteractionService.performInteraction.mockRejectedValue(
+          new Error('Invalid selector'),
+        );
 
-        const result = await controller.performInteraction(invalidDto, mockUser);
+        const result = await controller.performInteraction(
+          invalidDto,
+          mockUser,
+        );
 
         expect(result.success).toBe(false);
         expect(result.error).toBe('Invalid selector');
@@ -902,7 +985,9 @@ describe('BrowserUseController', () => {
   describe('Controller-wide Security and Performance', () => {
     describe('Logging and Audit Trail', () => {
       it('should log all operations with operation IDs', async () => {
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
 
         await controller.executeScript(mockExecuteDto, mockUser);
 
@@ -913,7 +998,9 @@ describe('BrowserUseController', () => {
       });
 
       it('should include timing information in logs', async () => {
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
 
         await controller.executeScript(mockExecuteDto, mockUser);
 
@@ -927,7 +1014,9 @@ describe('BrowserUseController', () => {
 
       it('should log errors with full context', async () => {
         const errorSpy = jest.spyOn(Logger.prototype, 'error');
-        browserUseService.executeScript.mockRejectedValue(new Error('Test error'));
+        browserUseService.executeScript.mockRejectedValue(
+          new Error('Test error'),
+        );
 
         await controller.executeScript(mockExecuteDto, mockUser);
 
@@ -944,12 +1033,27 @@ describe('BrowserUseController', () => {
     describe('Performance Requirements', () => {
       it('should handle high concurrency across all endpoints', async () => {
         // Mock all services to return quickly
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
-        browserUseService.navigate.mockResolvedValue({ finalUrl: 'https://example.com', statusCode: 200 });
-        browserUseService.wait.mockResolvedValue({ data: {}, actualWaitTime: 100 });
-        browserUseService.getSystemHealth.mockResolvedValue({ browserServiceRunning: true, activeSessions: 0 });
-        browserUseService.captureScreenshot.mockResolvedValue({ filePath: '/test.png' });
-        browserInteractionService.performInteraction.mockResolvedValue({ data: {} });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
+        browserUseService.navigate.mockResolvedValue({
+          finalUrl: 'https://example.com',
+          statusCode: 200,
+        });
+        browserUseService.wait.mockResolvedValue({
+          data: {},
+          actualWaitTime: 100,
+        });
+        browserUseService.getSystemHealth.mockResolvedValue({
+          browserServiceRunning: true,
+          activeSessions: 0,
+        });
+        browserUseService.captureScreenshot.mockResolvedValue({
+          filePath: '/test.png',
+        });
+        browserInteractionService.performInteraction.mockResolvedValue({
+          data: {},
+        });
 
         // Create concurrent requests to different endpoints
         const requests = [
@@ -966,7 +1070,7 @@ describe('BrowserUseController', () => {
         const endTime = performance.now();
 
         // All requests should complete successfully
-        results.forEach(result => {
+        results.forEach((result) => {
           expect(result.success || result.healthy).toBe(true);
         });
 
@@ -975,17 +1079,19 @@ describe('BrowserUseController', () => {
       });
 
       it('should maintain response time under load', async () => {
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
 
-        const requests = Array(20).fill(null).map(() =>
-          controller.executeScript(mockExecuteDto, mockUser)
-        );
+        const requests = Array(20)
+          .fill(null)
+          .map(() => controller.executeScript(mockExecuteDto, mockUser));
 
         const startTime = performance.now();
         const results = await Promise.all(requests);
         const endTime = performance.now();
 
-        results.forEach(result => {
+        results.forEach((result) => {
           expect(result.success).toBe(true);
         });
 
@@ -1000,8 +1106,13 @@ describe('BrowserUseController', () => {
         const initialMemory = process.memoryUsage();
 
         // Mock all services
-        browserUseService.executeScript.mockResolvedValue({ output: 'success' });
-        browserUseService.navigate.mockResolvedValue({ finalUrl: 'https://example.com', statusCode: 200 });
+        browserUseService.executeScript.mockResolvedValue({
+          output: 'success',
+        });
+        browserUseService.navigate.mockResolvedValue({
+          finalUrl: 'https://example.com',
+          statusCode: 200,
+        });
 
         // Execute many operations
         for (let i = 0; i < 100; i++) {

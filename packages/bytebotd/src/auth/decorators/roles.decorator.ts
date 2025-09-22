@@ -18,7 +18,9 @@ import {
   SetMetadata,
   createParamDecorator,
   ExecutionContext,
-} from '@nestjs/common';import { UserRole, Permission } from '@bytebot/shared';import { AuthenticatedRequest, ByteBotdUser } from '../guards/jwt-auth.guard';
+} from '@nestjs/common';
+import { UserRole, Permission } from '@bytebot/shared';
+import { AuthenticatedRequest, ByteBotdUser } from '../guards/jwt-auth.guard';
 
 /**
  * Roles decorator - Specify required roles for route access
@@ -55,7 +57,10 @@ export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
  * ```
  */
 export const Permissions = (...permissions: Permission[]) =>
-  SetMetadata('permissions', permissions);/*** Public decorator - Mark routes as publicly accessible (skip authentication)
+  SetMetadata(
+    'permissions',
+    permissions,
+  ); /*** Public decorator - Mark routes as publicly accessible (skip authentication)
  * Use this decorator for routes that don't require authentication
  *
  * @returns MethodDecorator - Decorator function
@@ -84,7 +89,7 @@ export const Public = () => SetMetadata('_isPublic', true);
  * @Post('/user-profile')* getProfile(@CurrentUser('id') userId: string) {
  *   return { userId };
  * }
- * ```*/export const CurrentUser = createParamDecorator(
+ * ```*/ export const CurrentUser = createParamDecorator(
   (data: keyof ByteBotdUser | undefined, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user;
@@ -113,7 +118,7 @@ export const Public = () => SetMetadata('_isPublic', true);
  * shutdownSystem() {
  *   return this.systemService.shutdown();
  * }
- * ```*/export const RequireRole = (role: UserRole) => Roles(role);
+ * ```*/ export const RequireRole = (role: UserRole) => Roles(role);
 
 /**
  * RequirePermission decorator - Simplified permission requirement decorator
@@ -129,7 +134,7 @@ export const Public = () => SetMetadata('_isPublic', true);
  * takeScreenshot() {
  *   return this.computerUseService.takeScreenshot();
  * }
- * ```*/export const RequirePermission = (permission: Permission) =>
+ * ```*/ export const RequirePermission = (permission: Permission) =>
   Permissions(permission);
 
 /**
@@ -145,7 +150,7 @@ export const Public = () => SetMetadata('_isPublic', true);
  * getSystemDiagnostics() {
  *   return this.systemService.getDiagnostics();
  * }
- * ```*/export const AdminOnly = () => RequireRole(UserRole._ADMIN);
+ * ```*/ export const AdminOnly = () => RequireRole(UserRole._ADMIN);
 
 /**
  * OperatorOrAdmin decorator - Restrict access to operators and admins
@@ -160,7 +165,8 @@ export const Public = () => SetMetadata('_isPublic', true);
  * executeComputerAction() {
  *   return this.computerUseService.executeAction();
  * }
- * ```*/export const OperatorOrAdmin = () => Roles(UserRole._OPERATOR, UserRole._ADMIN);
+ * ```*/ export const OperatorOrAdmin = () =>
+  Roles(UserRole._OPERATOR, UserRole._ADMIN);
 
 /**
  * ComputerControlRequired decorator - Require computer control permission
@@ -175,7 +181,7 @@ export const Public = () => SetMetadata('_isPublic', true);
  * clickMouse() {
  *   return this.computerUseService.click();
  * }
- * ```*/export const ComputerControlRequired = () =>
+ * ```*/ export const ComputerControlRequired = () =>
   RequirePermission(Permission._COMPUTER_CONTROL);
 
 /**
@@ -191,7 +197,7 @@ export const Public = () => SetMetadata('_isPublic', true);
  * viewScreenshot() {
  *   return this.computerUseService.getScreenshot();
  * }
- * ```*/export const ComputerViewRequired = () =>
+ * ```*/ export const ComputerViewRequired = () =>
   RequirePermission(Permission._COMPUTER_VIEW);
 
 /**

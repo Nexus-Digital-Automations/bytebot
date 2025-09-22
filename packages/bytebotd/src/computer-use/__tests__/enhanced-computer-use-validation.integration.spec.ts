@@ -21,25 +21,30 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
-import { EnhancedComputerControlValidationService,
+import {
+  EnhancedComputerControlValidationService,
   ComputerControlValidationContext,
   MouseOperationRisk,
-  KeyboardInputRisk
+  KeyboardInputRisk,
 } from '../enhanced-computer-control-validation.service';
-import { EnhancedScreenCaptureValidationService,
+import {
+  EnhancedScreenCaptureValidationService,
   ScreenCaptureValidationContext,
-  ContentPrivacyAssessment
+  ContentPrivacyAssessment,
 } from '../enhanced-screen-capture-validation.service';
-import { EnhancedFileSystemValidationService,
+import {
+  EnhancedFileSystemValidationService,
   FileSystemValidationContext,
-  FileOperationRisk
+  FileOperationRisk,
 } from '../enhanced-file-system-validation.service';
-import { EnhancedApplicationControlValidationService,
+import {
+  EnhancedApplicationControlValidationService,
   ApplicationControlValidationContext,
-  ApplicationRisk
+  ApplicationRisk,
 } from '../enhanced-application-control-validation.service';
-import { ParlantIntegrationService,
-  RiskLevel
+import {
+  ParlantIntegrationService,
+  RiskLevel,
 } from '../../parlant/parlant-integration.service';
 import {
   MoveMouseAction,
@@ -93,19 +98,23 @@ describe('Enhanced Computer-Use Validation Integration', () => {
       ],
     }).compile();
 
-    computerControlService = module.get<EnhancedComputerControlValidationService>(
-      EnhancedComputerControlValidationService
-    );
+    computerControlService =
+      module.get<EnhancedComputerControlValidationService>(
+        EnhancedComputerControlValidationService,
+      );
     screenCaptureService = module.get<EnhancedScreenCaptureValidationService>(
-      EnhancedScreenCaptureValidationService
+      EnhancedScreenCaptureValidationService,
     );
     fileSystemService = module.get<EnhancedFileSystemValidationService>(
-      EnhancedFileSystemValidationService
+      EnhancedFileSystemValidationService,
     );
-    applicationControlService = module.get<EnhancedApplicationControlValidationService>(
-      EnhancedApplicationControlValidationService
-    );
-    parlantService = module.get(ParlantIntegrationService) as jest.Mocked<ParlantIntegrationService>;
+    applicationControlService =
+      module.get<EnhancedApplicationControlValidationService>(
+        EnhancedApplicationControlValidationService,
+      );
+    parlantService = module.get(
+      ParlantIntegrationService,
+    ) as jest.Mocked<ParlantIntegrationService>;
 
     // Setup test contexts
     setupTestContexts();
@@ -242,7 +251,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         const result = await computerControlService.validateMouseMovement(
           mouseAction,
-          computerControlContext
+          computerControlContext,
         );
 
         const duration = Date.now() - startTime;
@@ -266,7 +275,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         const result = await computerControlService.validateMouseMovement(
           mouseAction,
-          computerControlContext
+          computerControlContext,
         );
 
         expect(result).toBe(true);
@@ -274,7 +283,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
           expect.objectContaining({
             functionName: 'ComputerControl.moveMouse',
             riskLevel: expect.any(String),
-          })
+          }),
         );
       });
 
@@ -288,7 +297,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const startTime1 = Date.now();
         const result1 = await computerControlService.validateMouseMovement(
           mouseAction,
-          computerControlContext
+          computerControlContext,
         );
         const duration1 = Date.now() - startTime1;
 
@@ -296,7 +305,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const startTime2 = Date.now();
         const result2 = await computerControlService.validateMouseMovement(
           mouseAction,
-          computerControlContext
+          computerControlContext,
         );
         const duration2 = Date.now() - startTime2;
 
@@ -326,7 +335,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const startTime = Date.now();
         const result = await computerControlService.validateMouseClick(
           clickAction,
-          computerControlContext
+          computerControlContext,
         );
         const duration = Date.now() - startTime;
 
@@ -336,7 +345,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
           expect.objectContaining({
             functionName: 'ComputerControl.clickMouse',
             actionDescription: expect.stringContaining('left click'),
-          })
+          }),
         );
       });
 
@@ -357,7 +366,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         const result = await computerControlService.validateMouseClick(
           clickAction,
-          computerControlContext
+          computerControlContext,
         );
 
         expect(result).toBe(false);
@@ -374,7 +383,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const startTime = Date.now();
         const result = await computerControlService.validateKeyboardInput(
           typeAction,
-          computerControlContext
+          computerControlContext,
         );
         const duration = Date.now() - startTime;
 
@@ -398,7 +407,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         const result = await computerControlService.validateKeyboardInput(
           typeAction,
-          computerControlContext
+          computerControlContext,
         );
 
         expect(result).toBe(true);
@@ -408,7 +417,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
             functionParams: expect.objectContaining({
               content: expect.stringContaining('[CONTENT MASKED]'),
             }),
-          })
+          }),
         );
       });
 
@@ -428,14 +437,14 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         const result = await computerControlService.validateKeyboardInput(
           keysAction,
-          computerControlContext
+          computerControlContext,
         );
 
         expect(result).toBe(true);
         expect(parlantService.validateFunctionExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             riskLevel: RiskLevel._HIGH,
-          })
+          }),
         );
       });
     });
@@ -453,7 +462,8 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         };
 
         const startTime = Date.now();
-        const result = await screenCaptureService.validateScreenshotCapture(publicContext);
+        const result =
+          await screenCaptureService.validateScreenshotCapture(publicContext);
         const duration = Date.now() - startTime;
 
         expect(result).toBe(true);
@@ -475,7 +485,8 @@ describe('Enhanced Computer-Use Validation Integration', () => {
           windowTitle: 'Personal Email - Inbox',
         };
 
-        const result = await screenCaptureService.validateScreenshotCapture(personalContext);
+        const result =
+          await screenCaptureService.validateScreenshotCapture(personalContext);
 
         expect(result).toBe(true);
         expect(parlantService.validateFunctionExecution).toHaveBeenCalledWith(
@@ -484,7 +495,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
             functionParams: expect.objectContaining({
               privacyLevel: 'PERSONAL',
             }),
-          })
+          }),
         );
       });
 
@@ -495,7 +506,8 @@ describe('Enhanced Computer-Use Validation Integration', () => {
           windowTitle: '1Password - Vault',
         };
 
-        const result = await screenCaptureService.validateScreenshotCapture(privateContext);
+        const result =
+          await screenCaptureService.validateScreenshotCapture(privateContext);
 
         expect(result).toBe(false);
       });
@@ -508,12 +520,14 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         // First assessment
         const startTime1 = Date.now();
-        const result1 = await screenCaptureService.validateScreenshotCapture(context1);
+        const result1 =
+          await screenCaptureService.validateScreenshotCapture(context1);
         const duration1 = Date.now() - startTime1;
 
         // Second assessment (should be faster due to caching)
         const startTime2 = Date.now();
-        const result2 = await screenCaptureService.validateScreenshotCapture(context1);
+        const result2 =
+          await screenCaptureService.validateScreenshotCapture(context1);
         const duration2 = Date.now() - startTime2;
 
         expect(result1).toBe(true);
@@ -534,14 +548,14 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         const result = await screenCaptureService.validateScreenAnalysis(
           'OCR',
-          screenCaptureContext
+          screenCaptureContext,
         );
 
         expect(result).toBe(true);
         expect(parlantService.validateFunctionExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             riskLevel: RiskLevel._HIGH,
-          })
+          }),
         );
       });
 
@@ -557,7 +571,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const startTime = Date.now();
         const result = await screenCaptureService.validateScreenAnalysis(
           'ACCESSIBILITY_SCAN',
-          accessibilityContext
+          accessibilityContext,
         );
         const duration = Date.now() - startTime;
 
@@ -575,7 +589,10 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const filePath = '/Users/test-user/Documents/report.txt';
 
         const startTime = Date.now();
-        const result = await fileSystemService.validateFileRead(filePath, fileSystemContext);
+        const result = await fileSystemService.validateFileRead(
+          filePath,
+          fileSystemContext,
+        );
         const duration = Date.now() - startTime;
 
         expect(result).toBe(true);
@@ -585,7 +602,10 @@ describe('Enhanced Computer-Use Validation Integration', () => {
       it('should block restricted path access', async () => {
         const filePath = '/etc/passwd';
 
-        const result = await fileSystemService.validateFileRead(filePath, fileSystemContext);
+        const result = await fileSystemService.validateFileRead(
+          filePath,
+          fileSystemContext,
+        );
 
         expect(result).toBe(false);
       });
@@ -609,13 +629,16 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         const filePath = '/var/log/system.log';
 
-        const result = await fileSystemService.validateFileRead(filePath, systemFileContext);
+        const result = await fileSystemService.validateFileRead(
+          filePath,
+          systemFileContext,
+        );
 
         expect(result).toBe(true);
         expect(parlantService.validateFunctionExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             functionName: 'FileSystem.readFile',
-          })
+          }),
         );
       });
     });
@@ -636,7 +659,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const result = await fileSystemService.validateFileWrite(
           filePath,
           content,
-          fileSystemContext
+          fileSystemContext,
         );
 
         expect(result).toBe(true);
@@ -646,7 +669,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
             functionParams: expect.objectContaining({
               backupCreated: expect.any(Boolean),
             }),
-          })
+          }),
         );
       });
 
@@ -657,7 +680,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const result = await fileSystemService.validateFileWrite(
           filePath,
           maliciousContent,
-          fileSystemContext
+          fileSystemContext,
         );
 
         expect(result).toBe(false);
@@ -678,7 +701,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         const result = await fileSystemService.validateFileWrite(
           filePath,
           sensitiveContent,
-          fileSystemContext
+          fileSystemContext,
         );
 
         expect(result).toBe(true);
@@ -688,7 +711,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
             functionParams: expect.objectContaining({
               sensitiveData: true,
             }),
-          })
+          }),
         );
       });
     });
@@ -705,14 +728,17 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
         const filePath = '/Users/test-user/Documents/old-file.txt';
 
-        const result = await fileSystemService.validateFileDelete(filePath, fileSystemContext);
+        const result = await fileSystemService.validateFileDelete(
+          filePath,
+          fileSystemContext,
+        );
 
         expect(result).toBe(true);
         expect(parlantService.validateFunctionExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             functionName: 'FileSystem.deleteFile',
             riskLevel: RiskLevel._HIGH,
-          })
+          }),
         );
       });
     });
@@ -724,12 +750,13 @@ describe('Enhanced Computer-Use Validation Integration', () => {
     describe('Application Launch Validation', () => {
       it('should approve safe application launches within 200ms', async () => {
         const startTime = Date.now();
-        const result = await applicationControlService.validateApplicationLaunch(
-          'calculator',
-          '/Applications/Calculator.app',
-          [],
-          applicationControlContext
-        );
+        const result =
+          await applicationControlService.validateApplicationLaunch(
+            'calculator',
+            '/Applications/Calculator.app',
+            [],
+            applicationControlContext,
+          );
         const duration = Date.now() - startTime;
 
         expect(result).toBe(true);
@@ -745,29 +772,31 @@ describe('Enhanced Computer-Use Validation Integration', () => {
           confidence: 0.8,
         });
 
-        const result = await applicationControlService.validateApplicationLaunch(
-          'terminal',
-          '/Applications/Utilities/Terminal.app',
-          [],
-          applicationControlContext
-        );
+        const result =
+          await applicationControlService.validateApplicationLaunch(
+            'terminal',
+            '/Applications/Utilities/Terminal.app',
+            [],
+            applicationControlContext,
+          );
 
         expect(result).toBe(true);
         expect(parlantService.validateFunctionExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             functionName: 'ApplicationControl.launchApplication',
             riskLevel: RiskLevel._HIGH,
-          })
+          }),
         );
       });
 
       it('should block dangerous applications', async () => {
-        const result = await applicationControlService.validateApplicationLaunch(
-          'malware.exe',
-          '/tmp/malware.exe',
-          [],
-          applicationControlContext
-        );
+        const result =
+          await applicationControlService.validateApplicationLaunch(
+            'malware.exe',
+            '/tmp/malware.exe',
+            [],
+            applicationControlContext,
+          );
 
         expect(result).toBe(false);
       });
@@ -781,12 +810,13 @@ describe('Enhanced Computer-Use Validation Integration', () => {
           },
         };
 
-        const result = await applicationControlService.validateApplicationLaunch(
-          'photoshop',
-          '/Applications/Adobe Photoshop/Photoshop.app',
-          [],
-          highResourceContext
-        );
+        const result =
+          await applicationControlService.validateApplicationLaunch(
+            'photoshop',
+            '/Applications/Adobe Photoshop/Photoshop.app',
+            [],
+            highResourceContext,
+          );
 
         expect(result).toBe(false);
       });
@@ -794,12 +824,13 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
     describe('Application Termination Validation', () => {
       it('should allow user application termination', async () => {
-        const result = await applicationControlService.validateApplicationTermination(
-          12345,
-          'calculator',
-          false,
-          applicationControlContext
-        );
+        const result =
+          await applicationControlService.validateApplicationTermination(
+            12345,
+            'calculator',
+            false,
+            applicationControlContext,
+          );
 
         expect(result).toBe(true);
       });
@@ -809,16 +840,18 @@ describe('Enhanced Computer-Use Validation Integration', () => {
           approved: false,
           conversationId: 'conv-123',
           validationTimestamp: new Date(),
-          reasoning: 'Critical system process termination denied for system stability',
+          reasoning:
+            'Critical system process termination denied for system stability',
           confidence: 0.95,
         });
 
-        const result = await applicationControlService.validateApplicationTermination(
-          1,
-          'kernel',
-          true,
-          applicationControlContext
-        );
+        const result =
+          await applicationControlService.validateApplicationTermination(
+            1,
+            'kernel',
+            true,
+            applicationControlContext,
+          );
 
         expect(result).toBe(false);
       });
@@ -830,21 +863,25 @@ describe('Enhanced Computer-Use Validation Integration', () => {
   describe('Performance Requirements', () => {
     it('should meet sub-500ms validation targets for all operations', async () => {
       const operations = [
-        () => computerControlService.validateMouseMovement(
-          { action: 'move_mouse', coordinates: { x: 500, y: 300 } },
-          computerControlContext
-        ),
-        () => screenCaptureService.validateScreenshotCapture(screenCaptureContext),
-        () => fileSystemService.validateFileRead(
-          '/Users/test-user/Documents/test.txt',
-          fileSystemContext
-        ),
-        () => applicationControlService.validateApplicationLaunch(
-          'calculator',
-          '/Applications/Calculator.app',
-          [],
-          applicationControlContext
-        ),
+        () =>
+          computerControlService.validateMouseMovement(
+            { action: 'move_mouse', coordinates: { x: 500, y: 300 } },
+            computerControlContext,
+          ),
+        () =>
+          screenCaptureService.validateScreenshotCapture(screenCaptureContext),
+        () =>
+          fileSystemService.validateFileRead(
+            '/Users/test-user/Documents/test.txt',
+            fileSystemContext,
+          ),
+        () =>
+          applicationControlService.validateApplicationLaunch(
+            'calculator',
+            '/Applications/Calculator.app',
+            [],
+            applicationControlContext,
+          ),
       ];
 
       const results = await Promise.all(
@@ -853,7 +890,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
           const result = await operation();
           const duration = Date.now() - startTime;
           return { result, duration };
-        })
+        }),
       );
 
       results.forEach(({ result, duration }) => {
@@ -870,7 +907,10 @@ describe('Enhanced Computer-Use Validation Integration', () => {
 
       // Perform multiple operations to populate cache
       for (let i = 0; i < 10; i++) {
-        await computerControlService.validateMouseMovement(mouseAction, computerControlContext);
+        await computerControlService.validateMouseMovement(
+          mouseAction,
+          computerControlContext,
+        );
       }
 
       const metrics = computerControlService.getPerformanceMetrics();
@@ -893,36 +933,44 @@ describe('Enhanced Computer-Use Validation Integration', () => {
       // Simulate a complex operation involving multiple services
       const results = await Promise.all([
         computerControlService.validateMouseClick(
-          { action: 'click_mouse', coordinates: { x: 800, y: 400 }, button: 'left' },
-          computerControlContext
+          {
+            action: 'click_mouse',
+            coordinates: { x: 800, y: 400 },
+            button: 'left',
+          },
+          computerControlContext,
         ),
         screenCaptureService.validateScreenshotCapture(screenCaptureContext),
         fileSystemService.validateFileRead(
           '/Users/test-user/Documents/data.txt',
-          fileSystemContext
+          fileSystemContext,
         ),
       ]);
 
-      expect(results.every(result => result === true)).toBe(true);
+      expect(results.every((result) => result === true)).toBe(true);
     });
 
     it('should maintain consistent security levels across all services', async () => {
       const securityTestCases = [
-        () => computerControlService.validateMouseMovement(
-          { action: 'move_mouse', coordinates: { x: 10, y: 10 } }, // System area
-          computerControlContext
-        ),
-        () => screenCaptureService.validateScreenshotCapture({
-          ...screenCaptureContext,
-          activeApplication: 'banking-app',
-        }),
-        () => fileSystemService.validateFileRead('/etc/passwd', fileSystemContext),
-        () => applicationControlService.validateApplicationLaunch(
-          'admin-tool',
-          '/usr/bin/admin-tool',
-          ['--privileged'],
-          applicationControlContext
-        ),
+        () =>
+          computerControlService.validateMouseMovement(
+            { action: 'move_mouse', coordinates: { x: 10, y: 10 } }, // System area
+            computerControlContext,
+          ),
+        () =>
+          screenCaptureService.validateScreenshotCapture({
+            ...screenCaptureContext,
+            activeApplication: 'banking-app',
+          }),
+        () =>
+          fileSystemService.validateFileRead('/etc/passwd', fileSystemContext),
+        () =>
+          applicationControlService.validateApplicationLaunch(
+            'admin-tool',
+            '/usr/bin/admin-tool',
+            ['--privileged'],
+            applicationControlContext,
+          ),
       ];
 
       // All these operations should require parlant validation or be blocked
@@ -946,14 +994,18 @@ describe('Enhanced Computer-Use Validation Integration', () => {
   describe('Error Handling', () => {
     it('should handle parlant service failures gracefully', async () => {
       parlantService.validateFunctionExecution.mockRejectedValue(
-        new Error('Parlant service unavailable')
+        new Error('Parlant service unavailable'),
       );
 
       await expect(
         computerControlService.validateMouseClick(
-          { action: 'click_mouse', coordinates: { x: 800, y: 400 }, button: 'left' },
-          computerControlContext
-        )
+          {
+            action: 'click_mouse',
+            coordinates: { x: 800, y: 400 },
+            button: 'left',
+          },
+          computerControlContext,
+        ),
       ).rejects.toThrow('Parlant service unavailable');
     });
 
@@ -961,8 +1013,8 @@ describe('Enhanced Computer-Use Validation Integration', () => {
       await expect(
         fileSystemService.validateFileRead(
           '../../../etc/passwd', // Path traversal attempt
-          fileSystemContext
-        )
+          fileSystemContext,
+        ),
       ).resolves.toBe(false);
     });
 
@@ -979,7 +1031,7 @@ describe('Enhanced Computer-Use Validation Integration', () => {
         'heavy-application',
         '/Applications/Heavy.app',
         [],
-        resourceConstrainedContext
+        resourceConstrainedContext,
       );
 
       expect(result).toBe(false);

@@ -42,7 +42,7 @@ import {
   ParlantIntegrationService,
   ParlantConversationContext,
   ParlantValidationRequest,
-  RiskLevel
+  RiskLevel,
 } from '../../src/parlant/parlant-integration.service';
 
 /**
@@ -51,11 +51,20 @@ import {
 interface SecurityTestScenario {
   name: string;
   description: string;
-  securityLevel: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' | 'CLASSIFIED';
+  securityLevel:
+    | 'PUBLIC'
+    | 'INTERNAL'
+    | 'CONFIDENTIAL'
+    | 'RESTRICTED'
+    | 'CLASSIFIED';
   userRole: string;
   expectedAccess: boolean;
   shouldAudit: boolean;
-  threatType?: 'PRIVILEGE_ESCALATION' | 'SESSION_HIJACKING' | 'AUTHENTICATION_BYPASS' | 'DATA_EXFILTRATION';
+  threatType?:
+    | 'PRIVILEGE_ESCALATION'
+    | 'SESSION_HIJACKING'
+    | 'AUTHENTICATION_BYPASS'
+    | 'DATA_EXFILTRATION';
 }
 
 /**
@@ -100,7 +109,7 @@ class SecurityTestUtils {
         securityLevel: 'PUBLIC',
         userRole: 'guest',
         expectedAccess: true,
-        shouldAudit: false
+        shouldAudit: false,
       },
       {
         name: 'Internal Access - Employee',
@@ -108,7 +117,7 @@ class SecurityTestUtils {
         securityLevel: 'INTERNAL',
         userRole: 'employee',
         expectedAccess: true,
-        shouldAudit: true
+        shouldAudit: true,
       },
       {
         name: 'Confidential Access - Manager',
@@ -116,7 +125,7 @@ class SecurityTestUtils {
         securityLevel: 'CONFIDENTIAL',
         userRole: 'manager',
         expectedAccess: true,
-        shouldAudit: true
+        shouldAudit: true,
       },
       {
         name: 'Restricted Access - Administrator',
@@ -124,7 +133,7 @@ class SecurityTestUtils {
         securityLevel: 'RESTRICTED',
         userRole: 'administrator',
         expectedAccess: true,
-        shouldAudit: true
+        shouldAudit: true,
       },
       {
         name: 'Classified Access - Security Officer',
@@ -132,7 +141,7 @@ class SecurityTestUtils {
         securityLevel: 'CLASSIFIED',
         userRole: 'security_officer',
         expectedAccess: true,
-        shouldAudit: true
+        shouldAudit: true,
       },
       // Unauthorized access scenarios
       {
@@ -142,7 +151,7 @@ class SecurityTestUtils {
         userRole: 'employee',
         expectedAccess: false,
         shouldAudit: true,
-        threatType: 'PRIVILEGE_ESCALATION'
+        threatType: 'PRIVILEGE_ESCALATION',
       },
       {
         name: 'Unauthorized Restricted Access',
@@ -151,7 +160,7 @@ class SecurityTestUtils {
         userRole: 'manager',
         expectedAccess: false,
         shouldAudit: true,
-        threatType: 'PRIVILEGE_ESCALATION'
+        threatType: 'PRIVILEGE_ESCALATION',
       },
       {
         name: 'Unauthorized Classified Access',
@@ -160,7 +169,7 @@ class SecurityTestUtils {
         userRole: 'administrator',
         expectedAccess: false,
         shouldAudit: true,
-        threatType: 'PRIVILEGE_ESCALATION'
+        threatType: 'PRIVILEGE_ESCALATION',
       },
       // Threat scenarios
       {
@@ -170,7 +179,7 @@ class SecurityTestUtils {
         userRole: 'hijacked_session',
         expectedAccess: false,
         shouldAudit: true,
-        threatType: 'SESSION_HIJACKING'
+        threatType: 'SESSION_HIJACKING',
       },
       {
         name: 'Authentication Bypass Attempt',
@@ -179,8 +188,8 @@ class SecurityTestUtils {
         userRole: 'unauthenticated',
         expectedAccess: false,
         shouldAudit: true,
-        threatType: 'AUTHENTICATION_BYPASS'
-      }
+        threatType: 'AUTHENTICATION_BYPASS',
+      },
     ];
   }
 
@@ -192,38 +201,58 @@ class SecurityTestUtils {
       {
         algorithm: 'RS256',
         keyType: 'rsa',
-        payload: { sub: 'user123', role: 'employee', exp: Math.floor(Date.now() / 1000) + 3600 },
+        payload: {
+          sub: 'user123',
+          role: 'employee',
+          exp: Math.floor(Date.now() / 1000) + 3600,
+        },
         shouldValidate: true,
-        description: 'Valid RSA256 JWT'
+        description: 'Valid RSA256 JWT',
       },
       {
         algorithm: 'ES256',
         keyType: 'ec',
-        payload: { sub: 'user456', role: 'manager', exp: Math.floor(Date.now() / 1000) + 3600 },
+        payload: {
+          sub: 'user456',
+          role: 'manager',
+          exp: Math.floor(Date.now() / 1000) + 3600,
+        },
         shouldValidate: true,
-        description: 'Valid ECDSA256 JWT'
+        description: 'Valid ECDSA256 JWT',
       },
       {
         algorithm: 'HS256',
         keyType: 'hmac',
-        payload: { sub: 'user789', role: 'administrator', exp: Math.floor(Date.now() / 1000) + 3600 },
+        payload: {
+          sub: 'user789',
+          role: 'administrator',
+          exp: Math.floor(Date.now() / 1000) + 3600,
+        },
         shouldValidate: true,
-        description: 'Valid HMAC256 JWT'
+        description: 'Valid HMAC256 JWT',
       },
       {
         algorithm: 'RS256',
         keyType: 'rsa',
-        payload: { sub: 'user123', role: 'employee', exp: Math.floor(Date.now() / 1000) - 3600 },
+        payload: {
+          sub: 'user123',
+          role: 'employee',
+          exp: Math.floor(Date.now() / 1000) - 3600,
+        },
         shouldValidate: false,
-        description: 'Expired RSA256 JWT'
+        description: 'Expired RSA256 JWT',
       },
       {
         algorithm: 'HS256',
         keyType: 'hmac',
-        payload: { sub: 'malicious', role: 'admin', iat: Math.floor(Date.now() / 1000) + 3600 },
+        payload: {
+          sub: 'malicious',
+          role: 'admin',
+          iat: Math.floor(Date.now() / 1000) + 3600,
+        },
         shouldValidate: false,
-        description: 'JWT with future issued time'
-      }
+        description: 'JWT with future issued time',
+      },
     ];
   }
 
@@ -233,7 +262,7 @@ class SecurityTestUtils {
   static createSecurityContext(
     userId: string,
     role: string,
-    securityLevel: string
+    securityLevel: string,
   ): ParlantConversationContext {
     return {
       userId,
@@ -246,8 +275,8 @@ class SecurityTestUtils {
         securityClearance: securityLevel,
         authenticationMethod: 'JWT',
         sessionStartTime: new Date().toISOString(),
-        lastActivity: new Date().toISOString()
-      }
+        lastActivity: new Date().toISOString(),
+      },
     };
   }
 
@@ -257,7 +286,7 @@ class SecurityTestUtils {
   static validateAuditEvent(
     event: SecurityAuditEvent,
     expectedResult: 'ALLOWED' | 'DENIED' | 'FLAGGED',
-    threatType?: string
+    threatType?: string,
   ): { isValid: boolean; violations: string[] } {
     const violations: string[] = [];
 
@@ -277,17 +306,24 @@ class SecurityTestUtils {
       violations.push('Missing or invalid sessionId');
     }
 
-    if (threatType && (!event.details.threatType || event.details.threatType !== threatType)) {
-      violations.push(`Expected threat type ${threatType}, got ${event.details.threatType}`);
+    if (
+      threatType &&
+      (!event.details.threatType || event.details.threatType !== threatType)
+    ) {
+      violations.push(
+        `Expected threat type ${threatType}, got ${event.details.threatType}`,
+      );
     }
 
     if (event.result === 'DENIED' && event.riskScore < 0.7) {
-      violations.push(`Risk score ${event.riskScore} too low for denied access`);
+      violations.push(
+        `Risk score ${event.riskScore} too low for denied access`,
+      );
     }
 
     return {
       isValid: violations.length === 0,
-      violations
+      violations,
     };
   }
 }
@@ -305,8 +341,8 @@ describe('Parlant Security Validation', () => {
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          envFilePath: '.env.test'
-        })
+          envFilePath: '.env.test',
+        }),
       ],
       providers: [
         AigentParlantSecurityBridgeService,
@@ -320,14 +356,18 @@ describe('Parlant Security Validation', () => {
           useValue: new Redis({
             host: 'localhost',
             port: 6379,
-            db: 15 // Use test database
-          })
-        }
-      ]
+            db: 15, // Use test database
+          }),
+        },
+      ],
     }).compile();
 
-    securityBridge = module.get<AigentParlantSecurityBridgeService>(AigentParlantSecurityBridgeService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
+    securityBridge = module.get<AigentParlantSecurityBridgeService>(
+      AigentParlantSecurityBridgeService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
     jwtService = module.get<JwtService>(JwtService);
     rolesGuard = module.get<RolesGuard>(RolesGuard);
     jwtAuthGuard = module.get<JwtAuthGuard>(JwtAuthGuard);
@@ -348,7 +388,7 @@ describe('Parlant Security Validation', () => {
         sub: 'test-user-001',
         role: 'employee',
         securityClearance: 'INTERNAL',
-        exp: Math.floor(Date.now() / 1000) + 3600
+        exp: Math.floor(Date.now() / 1000) + 3600,
       };
 
       const jwtToken = jwtService.sign(testPayload);
@@ -358,8 +398,8 @@ describe('Parlant Security Validation', () => {
         jwtToken,
         {
           conversationId: 'security-test-001',
-          clientInfo: { userAgent: 'test-browser', ipAddress: '127.0.0.1' }
-        }
+          clientInfo: { userAgent: 'test-browser', ipAddress: '127.0.0.1' },
+        },
       );
       const bridgeLatency = Date.now() - startTime;
 
@@ -377,15 +417,15 @@ describe('Parlant Security Validation', () => {
         sub: 'test-user-002',
         role: 'manager',
         securityClearance: 'CONFIDENTIAL',
-        exp: Math.floor(Date.now() / 1000) - 3600 // Expired 1 hour ago
+        exp: Math.floor(Date.now() / 1000) - 3600, // Expired 1 hour ago
       };
 
       const expiredToken = jwtService.sign(expiredPayload);
 
       await expect(
         securityBridge.createParlantSessionFromJWT(expiredToken, {
-          conversationId: 'security-test-002'
-        })
+          conversationId: 'security-test-002',
+        }),
       ).rejects.toThrow(/expired|invalid/i);
     });
 
@@ -394,7 +434,7 @@ describe('Parlant Security Validation', () => {
         sub: 'test-user-003',
         role: 'administrator',
         securityClearance: 'RESTRICTED',
-        exp: Math.floor(Date.now() / 1000) + 3600
+        exp: Math.floor(Date.now() / 1000) + 3600,
       };
 
       const validToken = jwtService.sign(validPayload);
@@ -404,8 +444,8 @@ describe('Parlant Security Validation', () => {
 
       await expect(
         securityBridge.createParlantSessionFromJWT(tamperedToken, {
-          conversationId: 'security-test-003'
-        })
+          conversationId: 'security-test-003',
+        }),
       ).rejects.toThrow(/signature|invalid/i);
     });
 
@@ -416,14 +456,21 @@ describe('Parlant Security Validation', () => {
         if (config.shouldValidate) {
           // For valid tokens, session creation should succeed
           try {
-            const token = jwtService.sign(config.payload, { algorithm: config.algorithm });
-            const session = await securityBridge.createParlantSessionFromJWT(token, {
-              conversationId: `multi-algo-${config.algorithm}`
+            const token = jwtService.sign(config.payload, {
+              algorithm: config.algorithm,
             });
+            const session = await securityBridge.createParlantSessionFromJWT(
+              token,
+              {
+                conversationId: `multi-algo-${config.algorithm}`,
+              },
+            );
 
             expect(session).toBeDefined();
             expect(session.userId).toBe(config.payload.sub);
-            logger.log(`✓ ${config.description} - Session created successfully`);
+            logger.log(
+              `✓ ${config.description} - Session created successfully`,
+            );
           } catch (error) {
             logger.error(`✗ ${config.description} - Failed: ${error}`);
             // Some algorithms might not be supported in test environment
@@ -431,11 +478,13 @@ describe('Parlant Security Validation', () => {
         } else {
           // For invalid tokens, session creation should fail
           try {
-            const token = jwtService.sign(config.payload, { algorithm: config.algorithm });
+            const token = jwtService.sign(config.payload, {
+              algorithm: config.algorithm,
+            });
             await expect(
               securityBridge.createParlantSessionFromJWT(token, {
-                conversationId: `invalid-${config.algorithm}`
-              })
+                conversationId: `invalid-${config.algorithm}`,
+              }),
             ).rejects.toThrow();
             logger.log(`✓ ${config.description} - Correctly rejected`);
           } catch (error) {
@@ -456,30 +505,38 @@ describe('Parlant Security Validation', () => {
         const context = SecurityTestUtils.createSecurityContext(
           `user-${scenario.name.replace(/\s+/g, '-').toLowerCase()}`,
           scenario.userRole,
-          scenario.securityLevel
+          scenario.securityLevel,
         );
 
         const testRequest: ParlantValidationRequest = {
           functionName: `access_${scenario.securityLevel.toLowerCase()}_data`,
           functionParams: { dataLevel: scenario.securityLevel },
           actionDescription: `Attempting to access ${scenario.securityLevel} level data`,
-          riskLevel: scenario.securityLevel === 'CLASSIFIED' ? RiskLevel.CRITICAL :
-                    scenario.securityLevel === 'RESTRICTED' ? RiskLevel.HIGH :
-                    RiskLevel.MEDIUM,
+          riskLevel:
+            scenario.securityLevel === 'CLASSIFIED'
+              ? RiskLevel.CRITICAL
+              : scenario.securityLevel === 'RESTRICTED'
+                ? RiskLevel.HIGH
+                : RiskLevel.MEDIUM,
           operationId: `rbac-test-${Date.now()}`,
-          context
+          context,
         };
 
         try {
-          const response = await parlantService.validateFunctionExecution(testRequest);
+          const response =
+            await parlantService.validateFunctionExecution(testRequest);
 
           if (scenario.expectedAccess) {
             expect(response.approved).toBe(true);
             logger.log(`✓ ${scenario.name} - Access granted as expected`);
           } else {
             expect(response.approved).toBe(false);
-            expect(response.reasoning).toMatch(/unauthorized|access denied|insufficient privileges/i);
-            logger.log(`✓ ${scenario.name} - Access denied as expected: ${response.reasoning}`);
+            expect(response.reasoning).toMatch(
+              /unauthorized|access denied|insufficient privileges/i,
+            );
+            logger.log(
+              `✓ ${scenario.name} - Access denied as expected: ${response.reasoning}`,
+            );
           }
 
           // Verify audit requirements
@@ -487,10 +544,11 @@ describe('Parlant Security Validation', () => {
             expect(response.validationTimestamp).toBeInstanceOf(Date);
             expect(response.conversationId).toBeDefined();
           }
-
         } catch (error) {
           if (!scenario.expectedAccess) {
-            logger.log(`✓ ${scenario.name} - Correctly threw security exception`);
+            logger.log(
+              `✓ ${scenario.name} - Correctly threw security exception`,
+            );
           } else {
             throw error;
           }
@@ -509,9 +567,9 @@ describe('Parlant Security Validation', () => {
             functionParams: {
               userId: 'employee-001',
               injectRole: 'administrator', // Malicious parameter
-              escalatePrivileges: true
-            }
-          }
+              escalatePrivileges: true,
+            },
+          },
         },
         {
           name: 'Security Level Manipulation',
@@ -521,9 +579,9 @@ describe('Parlant Security Validation', () => {
             functionName: 'access_classified_data',
             functionParams: {
               overrideSecurityLevel: 'CLASSIFIED',
-              bypassValidation: true
-            }
-          }
+              bypassValidation: true,
+            },
+          },
         },
         {
           name: 'Session Context Tampering',
@@ -533,17 +591,17 @@ describe('Parlant Security Validation', () => {
             functionName: 'admin_operation',
             functionParams: {
               forceAdminContext: true,
-              mockUserRole: 'security_officer'
-            }
-          }
-        }
+              mockUserRole: 'security_officer',
+            },
+          },
+        },
       ];
 
       for (const scenario of privilegeEscalationScenarios) {
         const context = SecurityTestUtils.createSecurityContext(
           `escalation-test-${Date.now()}`,
           scenario.userRole,
-          scenario.securityLevel
+          scenario.securityLevel,
         );
 
         const request: ParlantValidationRequest = {
@@ -551,18 +609,21 @@ describe('Parlant Security Validation', () => {
           actionDescription: `Privilege escalation attempt: ${scenario.name}`,
           riskLevel: RiskLevel.CRITICAL,
           operationId: `escalation-${Date.now()}`,
-          context
+          context,
         };
 
-        const response = await parlantService.validateFunctionExecution(request);
+        const response =
+          await parlantService.validateFunctionExecution(request);
 
         // Privilege escalation should be detected and blocked
         expect(response.approved).toBe(false);
         expect(response.reasoning).toMatch(
-          /privilege|escalation|unauthorized|security|suspicious/i
+          /privilege|escalation|unauthorized|security|suspicious/i,
         );
 
-        logger.log(`✓ ${scenario.name} - Privilege escalation detected and blocked`);
+        logger.log(
+          `✓ ${scenario.name} - Privilege escalation detected and blocked`,
+        );
       }
     });
 
@@ -576,30 +637,38 @@ describe('Parlant Security Validation', () => {
         sub: testUser,
         role: testRole,
         securityClearance: testSecurityLevel,
-        exp: Math.floor(Date.now() / 1000) + 3600
+        exp: Math.floor(Date.now() / 1000) + 3600,
       };
 
       const jwtToken = jwtService.sign(jwtPayload);
-      const initialSession = await securityBridge.createParlantSessionFromJWT(jwtToken, {
-        conversationId: 'sync-test-001'
-      });
+      const initialSession = await securityBridge.createParlantSessionFromJWT(
+        jwtToken,
+        {
+          conversationId: 'sync-test-001',
+        },
+      );
 
       // Verify session exists in cache/storage
-      const retrievedSession = await securityBridge.getParlantSessionByUserId(testUser);
+      const retrievedSession =
+        await securityBridge.getParlantSessionByUserId(testUser);
       expect(retrievedSession).toBeDefined();
       expect(retrievedSession?.userId).toBe(testUser);
       expect(retrievedSession?.securityLevel).toBe(testSecurityLevel);
 
       // Create concurrent session (should update existing)
-      const updatedSession = await securityBridge.createParlantSessionFromJWT(jwtToken, {
-        conversationId: 'sync-test-002'
-      });
+      const updatedSession = await securityBridge.createParlantSessionFromJWT(
+        jwtToken,
+        {
+          conversationId: 'sync-test-002',
+        },
+      );
 
       expect(updatedSession.userId).toBe(testUser);
       expect(updatedSession.sessionId).toBeDefined();
 
       // Verify session integrity
-      const finalSession = await securityBridge.getParlantSessionByUserId(testUser);
+      const finalSession =
+        await securityBridge.getParlantSessionByUserId(testUser);
       expect(finalSession?.userId).toBe(testUser);
       expect(finalSession?.securityLevel).toBe(testSecurityLevel);
     });
@@ -617,19 +686,22 @@ describe('Parlant Security Validation', () => {
         sub: legitimateUser,
         role: legitimateRole,
         securityClearance: 'INTERNAL',
-        exp: Math.floor(Date.now() / 1000) + 3600
+        exp: Math.floor(Date.now() / 1000) + 3600,
       };
 
       const legitToken = jwtService.sign(legitPayload);
-      const legitSession = await securityBridge.createParlantSessionFromJWT(legitToken, {
-        conversationId: 'hijack-test-legit'
-      });
+      const legitSession = await securityBridge.createParlantSessionFromJWT(
+        legitToken,
+        {
+          conversationId: 'hijack-test-legit',
+        },
+      );
 
       // Simulate hijacking attempt with same user ID but different session characteristics
       const hijackAttemptContext = SecurityTestUtils.createSecurityContext(
         legitimateUser,
         'administrator', // Different role - suspicious
-        'CLASSIFIED' // Different security level - suspicious
+        'CLASSIFIED', // Different security level - suspicious
       );
 
       // Override metadata to simulate hijacked session
@@ -638,7 +710,11 @@ describe('Parlant Security Validation', () => {
         originalSessionId: legitSession.sessionId,
         ipAddress: '192.168.1.100', // Different IP
         userAgent: 'Suspicious-Browser/1.0',
-        sessionAnomalies: ['IP_CHANGE', 'ROLE_ESCALATION', 'SECURITY_LEVEL_CHANGE']
+        sessionAnomalies: [
+          'IP_CHANGE',
+          'ROLE_ESCALATION',
+          'SECURITY_LEVEL_CHANGE',
+        ],
       };
 
       const hijackRequest: ParlantValidationRequest = {
@@ -647,14 +723,17 @@ describe('Parlant Security Validation', () => {
         actionDescription: 'Suspicious high-privilege access attempt',
         riskLevel: RiskLevel.CRITICAL,
         operationId: 'hijack-attempt-001',
-        context: hijackAttemptContext
+        context: hijackAttemptContext,
       };
 
-      const response = await parlantService.validateFunctionExecution(hijackRequest);
+      const response =
+        await parlantService.validateFunctionExecution(hijackRequest);
 
       // Session hijacking should be detected
       expect(response.approved).toBe(false);
-      expect(response.reasoning).toMatch(/hijack|suspicious|anomaly|unauthorized/i);
+      expect(response.reasoning).toMatch(
+        /hijack|suspicious|anomaly|unauthorized/i,
+      );
 
       logger.log('✓ Session hijacking attempt detected and blocked');
     });
@@ -663,13 +742,21 @@ describe('Parlant Security Validation', () => {
       const bypassAttempts = [
         {
           name: 'Null JWT Token',
-          context: SecurityTestUtils.createSecurityContext('bypass-user-1', 'guest', 'PUBLIC'),
-          expectedBlock: true
+          context: SecurityTestUtils.createSecurityContext(
+            'bypass-user-1',
+            'guest',
+            'PUBLIC',
+          ),
+          expectedBlock: true,
         },
         {
           name: 'Malformed JWT Token',
-          context: SecurityTestUtils.createSecurityContext('bypass-user-2', 'admin', 'CLASSIFIED'),
-          expectedBlock: true
+          context: SecurityTestUtils.createSecurityContext(
+            'bypass-user-2',
+            'admin',
+            'CLASSIFIED',
+          ),
+          expectedBlock: true,
         },
         {
           name: 'Missing Security Context',
@@ -681,11 +768,11 @@ describe('Parlant Security Validation', () => {
             conversationHistory: [],
             metadata: {
               bypassAuthentication: true,
-              skipValidation: true
-            }
+              skipValidation: true,
+            },
           } as ParlantConversationContext,
-          expectedBlock: true
-        }
+          expectedBlock: true,
+        },
       ];
 
       for (const attempt of bypassAttempts) {
@@ -695,15 +782,20 @@ describe('Parlant Security Validation', () => {
           actionDescription: `Authentication bypass attempt: ${attempt.name}`,
           riskLevel: RiskLevel.CRITICAL,
           operationId: `bypass-${Date.now()}`,
-          context: attempt.context
+          context: attempt.context,
         };
 
-        const response = await parlantService.validateFunctionExecution(bypassRequest);
+        const response =
+          await parlantService.validateFunctionExecution(bypassRequest);
 
         if (attempt.expectedBlock) {
           expect(response.approved).toBe(false);
-          expect(response.reasoning).toMatch(/authentication|bypass|unauthorized|invalid/i);
-          logger.log(`✓ ${attempt.name} - Authentication bypass detected and blocked`);
+          expect(response.reasoning).toMatch(
+            /authentication|bypass|unauthorized|invalid/i,
+          );
+          logger.log(
+            `✓ ${attempt.name} - Authentication bypass detected and blocked`,
+          );
         }
       }
     });
@@ -723,19 +815,31 @@ describe('Parlant Security Validation', () => {
       const securityOperations = [
         {
           name: 'Legitimate Access',
-          context: SecurityTestUtils.createSecurityContext('audit-user-1', 'manager', 'CONFIDENTIAL'),
-          expectedResult: 'ALLOWED' as const
+          context: SecurityTestUtils.createSecurityContext(
+            'audit-user-1',
+            'manager',
+            'CONFIDENTIAL',
+          ),
+          expectedResult: 'ALLOWED' as const,
         },
         {
           name: 'Unauthorized Access',
-          context: SecurityTestUtils.createSecurityContext('audit-user-2', 'employee', 'CLASSIFIED'),
-          expectedResult: 'DENIED' as const
+          context: SecurityTestUtils.createSecurityContext(
+            'audit-user-2',
+            'employee',
+            'CLASSIFIED',
+          ),
+          expectedResult: 'DENIED' as const,
         },
         {
           name: 'Suspicious Activity',
-          context: SecurityTestUtils.createSecurityContext('audit-user-3', 'guest', 'RESTRICTED'),
-          expectedResult: 'FLAGGED' as const
-        }
+          context: SecurityTestUtils.createSecurityContext(
+            'audit-user-3',
+            'guest',
+            'RESTRICTED',
+          ),
+          expectedResult: 'FLAGGED' as const,
+        },
       ];
 
       for (const operation of securityOperations) {
@@ -745,7 +849,7 @@ describe('Parlant Security Validation', () => {
           actionDescription: `Security audit test: ${operation.name}`,
           riskLevel: RiskLevel.HIGH,
           operationId: `audit-${Date.now()}`,
-          context: operation.context
+          context: operation.context,
         };
 
         await parlantService.validateFunctionExecution(auditRequest);
@@ -758,7 +862,10 @@ describe('Parlant Security Validation', () => {
       expect(auditTestEvents.length).toBeGreaterThan(0);
 
       for (const event of auditTestEvents) {
-        const validation = SecurityTestUtils.validateAuditEvent(event, event.result);
+        const validation = SecurityTestUtils.validateAuditEvent(
+          event,
+          event.result,
+        );
         expect(validation.isValid).toBe(true);
 
         if (validation.violations.length > 0) {
@@ -766,7 +873,9 @@ describe('Parlant Security Validation', () => {
         }
       }
 
-      logger.log(`✓ Security audit logging validated - ${auditTestEvents.length} events processed`);
+      logger.log(
+        `✓ Security audit logging validated - ${auditTestEvents.length} events processed`,
+      );
     });
   });
 
@@ -783,14 +892,14 @@ describe('Parlant Security Validation', () => {
             sub: `perf-user-${i}`,
             role: i % 2 === 0 ? 'employee' : 'manager',
             securityClearance: i % 3 === 0 ? 'INTERNAL' : 'CONFIDENTIAL',
-            exp: Math.floor(Date.now() / 1000) + 3600
+            exp: Math.floor(Date.now() / 1000) + 3600,
           };
 
           const token = jwtService.sign(payload);
           const startTime = Date.now();
 
           await securityBridge.createParlantSessionFromJWT(token, {
-            conversationId: `perf-test-${i}`
+            conversationId: `perf-test-${i}`,
           });
 
           return Date.now() - startTime;
@@ -800,9 +909,14 @@ describe('Parlant Security Validation', () => {
       }
 
       const responseTimes = await Promise.all(performancePromises);
-      const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+      const avgResponseTime =
+        responseTimes.reduce((sum, time) => sum + time, 0) /
+        responseTimes.length;
       const maxResponseTime = Math.max(...responseTimes);
-      const p95ResponseTime = responseTimes.sort((a, b) => a - b)[Math.floor(responseTimes.length * 0.95)] || 0;
+      const p95ResponseTime =
+        responseTimes.sort((a, b) => a - b)[
+          Math.floor(responseTimes.length * 0.95)
+        ] || 0;
 
       logger.log(`Security Bridge Performance Results:
         Average: ${avgResponseTime.toFixed(1)}ms
@@ -816,7 +930,11 @@ describe('Parlant Security Validation', () => {
     }, 30000);
 
     it('should handle Redis session clustering correctly', async () => {
-      const clusterTestUsers = ['cluster-user-1', 'cluster-user-2', 'cluster-user-3'];
+      const clusterTestUsers = [
+        'cluster-user-1',
+        'cluster-user-2',
+        'cluster-user-3',
+      ];
       const sessions: any[] = [];
 
       // Create sessions across cluster
@@ -825,20 +943,24 @@ describe('Parlant Security Validation', () => {
           sub: userId,
           role: 'employee',
           securityClearance: 'INTERNAL',
-          exp: Math.floor(Date.now() / 1000) + 3600
+          exp: Math.floor(Date.now() / 1000) + 3600,
         };
 
         const token = jwtService.sign(payload);
-        const session = await securityBridge.createParlantSessionFromJWT(token, {
-          conversationId: `cluster-${userId}`
-        });
+        const session = await securityBridge.createParlantSessionFromJWT(
+          token,
+          {
+            conversationId: `cluster-${userId}`,
+          },
+        );
 
         sessions.push(session);
       }
 
       // Verify session retrieval from cluster
       for (const userId of clusterTestUsers) {
-        const retrievedSession = await securityBridge.getParlantSessionByUserId(userId);
+        const retrievedSession =
+          await securityBridge.getParlantSessionByUserId(userId);
         expect(retrievedSession).toBeDefined();
         expect(retrievedSession?.userId).toBe(userId);
       }
@@ -846,7 +968,8 @@ describe('Parlant Security Validation', () => {
       // Test session cleanup
       for (const userId of clusterTestUsers) {
         await securityBridge.invalidateParlantSession(userId);
-        const clearedSession = await securityBridge.getParlantSessionByUserId(userId);
+        const clearedSession =
+          await securityBridge.getParlantSessionByUserId(userId);
         expect(clearedSession).toBeNull();
       }
 

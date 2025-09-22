@@ -46,7 +46,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
-  RiskLevel
+  RiskLevel,
 } from '../../src/parlant/parlant-integration.service';
 
 import { ParlantWebSocketBridgeService } from '../../src/common/websocket/parlant-websocket-bridge.service';
@@ -71,7 +71,14 @@ interface E2EWorkflowScenario {
  */
 interface WorkflowStep {
   name: string;
-  action: 'AUTHENTICATE' | 'CREATE_SESSION' | 'ESTABLISH_WEBSOCKET' | 'SEND_MESSAGE' | 'VALIDATE_FUNCTION' | 'DATABASE_OPERATION' | 'CLEANUP';
+  action:
+    | 'AUTHENTICATE'
+    | 'CREATE_SESSION'
+    | 'ESTABLISH_WEBSOCKET'
+    | 'SEND_MESSAGE'
+    | 'VALIDATE_FUNCTION'
+    | 'DATABASE_OPERATION'
+    | 'CLEANUP';
   input: Record<string, unknown>;
   expectedOutput: Record<string, unknown>;
   maxDuration: number;
@@ -114,7 +121,8 @@ class E2ETestUtils {
     return [
       {
         name: 'Complete Authentication Workflow',
-        description: 'Full authentication → session → conversation → validation flow',
+        description:
+          'Full authentication → session → conversation → validation flow',
         criticalPath: true,
         errorRecoveryTest: false,
         expectedDuration: 1500,
@@ -124,7 +132,7 @@ class E2ETestUtils {
             action: 'AUTHENTICATE',
             input: { username: 'test-user', role: 'employee' },
             expectedOutput: { authenticated: true, token: 'string' },
-            maxDuration: 200
+            maxDuration: 200,
           },
           {
             name: 'create_parlant_session',
@@ -132,43 +140,43 @@ class E2ETestUtils {
             input: { token: '{{authenticate_user.token}}' },
             expectedOutput: { sessionId: 'string', userId: 'test-user' },
             maxDuration: 100,
-            dependsOn: ['authenticate_user']
+            dependsOn: ['authenticate_user'],
           },
           {
             name: 'establish_websocket',
             action: 'ESTABLISH_WEBSOCKET',
             input: { sessionId: '{{create_parlant_session.sessionId}}' },
             expectedOutput: { connected: true, connectionId: 'string' },
-            maxDuration: 500
+            maxDuration: 500,
           },
           {
             name: 'send_conversation_message',
             action: 'SEND_MESSAGE',
             input: {
               message: 'I need to access user data',
-              type: 'conversation_start'
+              type: 'conversation_start',
             },
             expectedOutput: { messageId: 'string', acknowledged: true },
-            maxDuration: 100
+            maxDuration: 100,
           },
           {
             name: 'validate_function_call',
             action: 'VALIDATE_FUNCTION',
             input: {
               functionName: 'get_user_data',
-              parameters: { userId: 'test-user' }
+              parameters: { userId: 'test-user' },
             },
             expectedOutput: { approved: true, confidence: 'number' },
-            maxDuration: 800
+            maxDuration: 800,
           },
           {
             name: 'cleanup_session',
             action: 'CLEANUP',
             input: { sessionId: '{{create_parlant_session.sessionId}}' },
             expectedOutput: { cleaned: true },
-            maxDuration: 100
-          }
-        ]
+            maxDuration: 100,
+          },
+        ],
       },
       {
         name: 'Real-time WebSocket Communication',
@@ -182,10 +190,10 @@ class E2ETestUtils {
             action: 'ESTABLISH_WEBSOCKET',
             input: {
               userId: 'websocket-test-user',
-              conversationId: 'ws-conversation-001'
+              conversationId: 'ws-conversation-001',
             },
             expectedOutput: { connected: true, connectionId: 'string' },
-            maxDuration: 500
+            maxDuration: 500,
           },
           {
             name: 'send_streaming_messages',
@@ -193,30 +201,33 @@ class E2ETestUtils {
             input: {
               messageCount: 10,
               messageInterval: 100,
-              messageType: 'stream'
+              messageType: 'stream',
             },
             expectedOutput: { messagesDelivered: 10, avgLatency: 'number' },
-            maxDuration: 1200
+            maxDuration: 1200,
           },
           {
             name: 'validate_message_order',
             action: 'VALIDATE_FUNCTION',
             input: { validateSequence: true },
             expectedOutput: { sequenceValid: true, duplicates: 0 },
-            maxDuration: 200
+            maxDuration: 200,
           },
           {
             name: 'close_websocket_connection',
             action: 'CLEANUP',
-            input: { connectionId: '{{establish_websocket_connection.connectionId}}' },
+            input: {
+              connectionId: '{{establish_websocket_connection.connectionId}}',
+            },
             expectedOutput: { closed: true },
-            maxDuration: 100
-          }
-        ]
+            maxDuration: 100,
+          },
+        ],
       },
       {
         name: 'Database Transaction Workflow',
-        description: 'Complete database integration with transaction validation',
+        description:
+          'Complete database integration with transaction validation',
         criticalPath: true,
         errorRecoveryTest: false,
         expectedDuration: 1000,
@@ -226,7 +237,7 @@ class E2ETestUtils {
             action: 'DATABASE_OPERATION',
             input: { operation: 'begin_transaction' },
             expectedOutput: { transactionId: 'string', status: 'active' },
-            maxDuration: 100
+            maxDuration: 100,
           },
           {
             name: 'store_conversation_data',
@@ -234,29 +245,29 @@ class E2ETestUtils {
             input: {
               operation: 'insert',
               table: 'parlant_conversations',
-              data: { userId: 'db-test-user', content: 'test conversation' }
+              data: { userId: 'db-test-user', content: 'test conversation' },
             },
             expectedOutput: { inserted: true, recordId: 'string' },
-            maxDuration: 200
+            maxDuration: 200,
           },
           {
             name: 'validate_data_integrity',
             action: 'VALIDATE_FUNCTION',
             input: { recordId: '{{store_conversation_data.recordId}}' },
             expectedOutput: { valid: true, consistent: true },
-            maxDuration: 300
+            maxDuration: 300,
           },
           {
             name: 'commit_transaction',
             action: 'DATABASE_OPERATION',
             input: {
               operation: 'commit',
-              transactionId: '{{start_database_transaction.transactionId}}'
+              transactionId: '{{start_database_transaction.transactionId}}',
             },
             expectedOutput: { committed: true },
-            maxDuration: 150
-          }
-        ]
+            maxDuration: 150,
+          },
+        ],
       },
       {
         name: 'Error Recovery Workflow',
@@ -270,7 +281,7 @@ class E2ETestUtils {
             action: 'AUTHENTICATE',
             input: { username: 'invalid-user', password: 'wrong-password' },
             expectedOutput: { authenticated: false, error: 'string' },
-            maxDuration: 200
+            maxDuration: 200,
           },
           {
             name: 'retry_authentication',
@@ -278,24 +289,24 @@ class E2ETestUtils {
             input: { username: 'valid-user', password: 'correct-password' },
             expectedOutput: { authenticated: true, token: 'string' },
             maxDuration: 200,
-            retryCount: 3
+            retryCount: 3,
           },
           {
             name: 'simulate_websocket_disconnection',
             action: 'ESTABLISH_WEBSOCKET',
             input: { forceDisconnect: true },
             expectedOutput: { reconnected: true, connectionId: 'string' },
-            maxDuration: 1000
+            maxDuration: 1000,
           },
           {
             name: 'validate_recovery_state',
             action: 'VALIDATE_FUNCTION',
             input: { checkRecoveryState: true },
             expectedOutput: { recovered: true, stateConsistent: true },
-            maxDuration: 500
-          }
-        ]
-      }
+            maxDuration: 500,
+          },
+        ],
+      },
     ];
   }
 
@@ -309,8 +320,13 @@ class E2ETestUtils {
       parlantService: ParlantIntegrationService;
       websocketBridge: ParlantWebSocketBridgeService;
       securityBridge: AigentParlantSecurityBridgeService;
-    }
-  ): Promise<{ success: boolean; output: Record<string, unknown>; duration: number; error?: string }> {
+    },
+  ): Promise<{
+    success: boolean;
+    output: Record<string, unknown>;
+    duration: number;
+    error?: string;
+  }> {
     const startTime = Date.now();
 
     try {
@@ -318,25 +334,51 @@ class E2ETestUtils {
 
       switch (step.action) {
         case 'AUTHENTICATE':
-          output = await E2ETestUtils.executeAuthentication(step.input, services.securityBridge);
+          output = await E2ETestUtils.executeAuthentication(
+            step.input,
+            services.securityBridge,
+          );
           break;
         case 'CREATE_SESSION':
-          output = await E2ETestUtils.executeSessionCreation(step.input, context, services.securityBridge);
+          output = await E2ETestUtils.executeSessionCreation(
+            step.input,
+            context,
+            services.securityBridge,
+          );
           break;
         case 'ESTABLISH_WEBSOCKET':
-          output = await E2ETestUtils.executeWebSocketConnection(step.input, context, services.websocketBridge);
+          output = await E2ETestUtils.executeWebSocketConnection(
+            step.input,
+            context,
+            services.websocketBridge,
+          );
           break;
         case 'SEND_MESSAGE':
-          output = await E2ETestUtils.executeMessageSending(step.input, context, services.websocketBridge);
+          output = await E2ETestUtils.executeMessageSending(
+            step.input,
+            context,
+            services.websocketBridge,
+          );
           break;
         case 'VALIDATE_FUNCTION':
-          output = await E2ETestUtils.executeFunctionValidation(step.input, context, services.parlantService);
+          output = await E2ETestUtils.executeFunctionValidation(
+            step.input,
+            context,
+            services.parlantService,
+          );
           break;
         case 'DATABASE_OPERATION':
-          output = await E2ETestUtils.executeDatabaseOperation(step.input, context);
+          output = await E2ETestUtils.executeDatabaseOperation(
+            step.input,
+            context,
+          );
           break;
         case 'CLEANUP':
-          output = await E2ETestUtils.executeCleanup(step.input, context, services);
+          output = await E2ETestUtils.executeCleanup(
+            step.input,
+            context,
+            services,
+          );
           break;
         default:
           throw new Error(`Unknown action: ${step.action}`);
@@ -348,15 +390,17 @@ class E2ETestUtils {
         success: duration <= step.maxDuration,
         output,
         duration,
-        error: duration > step.maxDuration ? `Step exceeded max duration ${step.maxDuration}ms` : undefined
+        error:
+          duration > step.maxDuration
+            ? `Step exceeded max duration ${step.maxDuration}ms`
+            : undefined,
       };
-
     } catch (error) {
       return {
         success: false,
         output: {},
         duration: Date.now() - startTime,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -366,10 +410,13 @@ class E2ETestUtils {
    */
   private static async executeAuthentication(
     input: Record<string, unknown>,
-    securityBridge: AigentParlantSecurityBridgeService
+    securityBridge: AigentParlantSecurityBridgeService,
   ): Promise<Record<string, unknown>> {
     // Simulate authentication process
-    if (input.username === 'invalid-user' || input.password === 'wrong-password') {
+    if (
+      input.username === 'invalid-user' ||
+      input.password === 'wrong-password'
+    ) {
       return { authenticated: false, error: 'Invalid credentials' };
     }
 
@@ -384,9 +431,12 @@ class E2ETestUtils {
   private static async executeSessionCreation(
     input: Record<string, unknown>,
     context: Record<string, unknown>,
-    securityBridge: AigentParlantSecurityBridgeService
+    securityBridge: AigentParlantSecurityBridgeService,
   ): Promise<Record<string, unknown>> {
-    const token = E2ETestUtils.resolveContextVariable(input.token as string, context);
+    const token = E2ETestUtils.resolveContextVariable(
+      input.token as string,
+      context,
+    );
 
     // Mock session creation
     const sessionId = `session-${Date.now()}`;
@@ -401,14 +451,14 @@ class E2ETestUtils {
   private static async executeWebSocketConnection(
     input: Record<string, unknown>,
     context: Record<string, unknown>,
-    websocketBridge: ParlantWebSocketBridgeService
+    websocketBridge: ParlantWebSocketBridgeService,
   ): Promise<Record<string, unknown>> {
     // Simulate WebSocket connection establishment
     const connectionId = `ws-conn-${Date.now()}`;
 
     if (input.forceDisconnect) {
       // Simulate disconnection and reconnection
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       return { reconnected: true, connectionId: `reconnected-${connectionId}` };
     }
 
@@ -421,7 +471,7 @@ class E2ETestUtils {
   private static async executeMessageSending(
     input: Record<string, unknown>,
     context: Record<string, unknown>,
-    websocketBridge: ParlantWebSocketBridgeService
+    websocketBridge: ParlantWebSocketBridgeService,
   ): Promise<Record<string, unknown>> {
     if (typeof input.messageCount === 'number' && input.messageCount > 1) {
       // Streaming messages
@@ -435,21 +485,22 @@ class E2ETestUtils {
         const msgStartTime = Date.now();
 
         // Simulate message sending
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
 
         latencies.push(Date.now() - msgStartTime);
 
         if (i < messageCount - 1) {
-          await new Promise(resolve => setTimeout(resolve, interval));
+          await new Promise((resolve) => setTimeout(resolve, interval));
         }
       }
 
-      const avgLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+      const avgLatency =
+        latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
 
       return {
         messagesDelivered: messageCount,
         avgLatency,
-        totalDuration: Date.now() - startTime
+        totalDuration: Date.now() - startTime,
       };
     } else {
       // Single message
@@ -464,7 +515,7 @@ class E2ETestUtils {
   private static async executeFunctionValidation(
     input: Record<string, unknown>,
     context: Record<string, unknown>,
-    parlantService: ParlantIntegrationService
+    parlantService: ParlantIntegrationService,
   ): Promise<Record<string, unknown>> {
     if (input.validateSequence) {
       return { sequenceValid: true, duplicates: 0 };
@@ -491,11 +542,12 @@ class E2ETestUtils {
         agentRole: 'assistant',
         securityLevel: 'LOW',
         conversationHistory: [],
-        metadata: { e2eTest: true }
-      }
+        metadata: { e2eTest: true },
+      },
     };
 
-    const response = await parlantService.validateFunctionExecution(mockRequest);
+    const response =
+      await parlantService.validateFunctionExecution(mockRequest);
     return { approved: response.approved, confidence: response.confidence };
   }
 
@@ -504,7 +556,7 @@ class E2ETestUtils {
    */
   private static async executeDatabaseOperation(
     input: Record<string, unknown>,
-    context: Record<string, unknown>
+    context: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
     const operation = input.operation as string;
 
@@ -535,7 +587,7 @@ class E2ETestUtils {
       parlantService: ParlantIntegrationService;
       websocketBridge: ParlantWebSocketBridgeService;
       securityBridge: AigentParlantSecurityBridgeService;
-    }
+    },
   ): Promise<Record<string, unknown>> {
     // Simulate cleanup operations
     if (input.sessionId) {
@@ -552,8 +604,15 @@ class E2ETestUtils {
   /**
    * Resolve context variables in inputs
    */
-  private static resolveContextVariable(value: string, context: Record<string, unknown>): unknown {
-    if (typeof value === 'string' && value.startsWith('{{') && value.endsWith('}}')) {
+  private static resolveContextVariable(
+    value: string,
+    context: Record<string, unknown>,
+  ): unknown {
+    if (
+      typeof value === 'string' &&
+      value.startsWith('{{') &&
+      value.endsWith('}}')
+    ) {
       const path = value.slice(2, -2);
       const keys = path.split('.');
       let result: unknown = context;
@@ -575,17 +634,22 @@ class E2ETestUtils {
   /**
    * Calculate workflow performance score
    */
-  static calculatePerformanceScore(metrics: WorkflowMetrics, expectedDuration: number): number {
+  static calculatePerformanceScore(
+    metrics: WorkflowMetrics,
+    expectedDuration: number,
+  ): number {
     let score = 100;
 
     // Duration penalty
     if (metrics.totalDuration > expectedDuration) {
-      const overrun = (metrics.totalDuration - expectedDuration) / expectedDuration;
+      const overrun =
+        (metrics.totalDuration - expectedDuration) / expectedDuration;
       score -= Math.min(50, overrun * 100);
     }
 
     // Success rate bonus/penalty
-    const successRate = metrics.successfulSteps / (metrics.successfulSteps + metrics.failedSteps);
+    const successRate =
+      metrics.successfulSteps / (metrics.successfulSteps + metrics.failedSteps);
     score *= successRate;
 
     // Error recovery bonus
@@ -608,24 +672,32 @@ describe('Parlant End-to-End Workflow Testing', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot()
-      ],
+      imports: [ConfigModule.forRoot()],
       providers: [
         ParlantIntegrationService,
         ParlantWebSocketBridgeService,
         ParlantWebSocketIntegrationService,
         AigentParlantSecurityBridgeService,
         ParlantPerformanceOrchestratorService,
-        Logger
-      ]
+        Logger,
+      ],
     }).compile();
 
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
-    websocketBridge = module.get<ParlantWebSocketBridgeService>(ParlantWebSocketBridgeService);
-    websocketIntegration = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
-    securityBridge = module.get<AigentParlantSecurityBridgeService>(AigentParlantSecurityBridgeService);
-    orchestrator = module.get<ParlantPerformanceOrchestratorService>(ParlantPerformanceOrchestratorService);
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
+    websocketBridge = module.get<ParlantWebSocketBridgeService>(
+      ParlantWebSocketBridgeService,
+    );
+    websocketIntegration = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
+    securityBridge = module.get<AigentParlantSecurityBridgeService>(
+      AigentParlantSecurityBridgeService,
+    );
+    orchestrator = module.get<ParlantPerformanceOrchestratorService>(
+      ParlantPerformanceOrchestratorService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
@@ -640,7 +712,9 @@ describe('Parlant End-to-End Workflow Testing', () => {
   describe('Complete Workflow Integration', () => {
     it('should execute complete authentication workflow successfully', async () => {
       const scenarios = E2ETestUtils.generateWorkflowScenarios();
-      const authWorkflow = scenarios.find(s => s.name === 'Complete Authentication Workflow');
+      const authWorkflow = scenarios.find(
+        (s) => s.name === 'Complete Authentication Workflow',
+      );
 
       if (!authWorkflow) {
         throw new Error('Authentication workflow scenario not found');
@@ -659,7 +733,11 @@ describe('Parlant End-to-End Workflow Testing', () => {
       for (const step of authWorkflow.steps) {
         logger.log(`Executing step: ${step.name}`);
 
-        const result = await E2ETestUtils.executeWorkflowStep(step, context, services);
+        const result = await E2ETestUtils.executeWorkflowStep(
+          step,
+          context,
+          services,
+        );
 
         if (result.success) {
           successfulSteps++;
@@ -681,14 +759,21 @@ describe('Parlant End-to-End Workflow Testing', () => {
         scenarioName: authWorkflow.name,
         totalDuration,
         stepDurations: Object.fromEntries(
-          authWorkflow.steps.map(step => [step.name, 0])
+          authWorkflow.steps.map((step) => [step.name, 0]),
         ),
         successfulSteps,
         failedSteps,
         performanceScore: E2ETestUtils.calculatePerformanceScore(
-          { scenarioName: authWorkflow.name, totalDuration, stepDurations: {}, successfulSteps, failedSteps, performanceScore: 0 },
-          authWorkflow.expectedDuration
-        )
+          {
+            scenarioName: authWorkflow.name,
+            totalDuration,
+            stepDurations: {},
+            successfulSteps,
+            failedSteps,
+            performanceScore: 0,
+          },
+          authWorkflow.expectedDuration,
+        ),
       };
 
       logger.log(`Authentication Workflow Results:
@@ -705,7 +790,9 @@ describe('Parlant End-to-End Workflow Testing', () => {
 
     it('should handle real-time WebSocket communication workflow', async () => {
       const scenarios = E2ETestUtils.generateWorkflowScenarios();
-      const wsWorkflow = scenarios.find(s => s.name === 'Real-time WebSocket Communication');
+      const wsWorkflow = scenarios.find(
+        (s) => s.name === 'Real-time WebSocket Communication',
+      );
 
       if (!wsWorkflow) {
         throw new Error('WebSocket workflow scenario not found');
@@ -722,14 +809,21 @@ describe('Parlant End-to-End Workflow Testing', () => {
       let totalMessageLatency = 0;
 
       for (const step of wsWorkflow.steps) {
-        const result = await E2ETestUtils.executeWorkflowStep(step, context, services);
+        const result = await E2ETestUtils.executeWorkflowStep(
+          step,
+          context,
+          services,
+        );
 
         if (result.success) {
           successfulSteps++;
           context[step.name] = result.output;
 
           // Track message latency for streaming test
-          if (step.name === 'send_streaming_messages' && result.output.avgLatency) {
+          if (
+            step.name === 'send_streaming_messages' &&
+            result.output.avgLatency
+          ) {
             totalMessageLatency = result.output.avgLatency as number;
           }
         } else {
@@ -753,7 +847,9 @@ describe('Parlant End-to-End Workflow Testing', () => {
 
     it('should complete database transaction workflow with integrity', async () => {
       const scenarios = E2ETestUtils.generateWorkflowScenarios();
-      const dbWorkflow = scenarios.find(s => s.name === 'Database Transaction Workflow');
+      const dbWorkflow = scenarios.find(
+        (s) => s.name === 'Database Transaction Workflow',
+      );
 
       if (!dbWorkflow) {
         throw new Error('Database workflow scenario not found');
@@ -770,7 +866,11 @@ describe('Parlant End-to-End Workflow Testing', () => {
       let dataIntegrityConfirmed = false;
 
       for (const step of dbWorkflow.steps) {
-        const result = await E2ETestUtils.executeWorkflowStep(step, context, services);
+        const result = await E2ETestUtils.executeWorkflowStep(
+          step,
+          context,
+          services,
+        );
 
         expect(result.success).toBe(true);
         context[step.name] = result.output;
@@ -812,7 +912,9 @@ describe('Parlant End-to-End Workflow Testing', () => {
   describe('Error Handling and Recovery Workflows', () => {
     it('should recover gracefully from authentication failures', async () => {
       const scenarios = E2ETestUtils.generateWorkflowScenarios();
-      const errorWorkflow = scenarios.find(s => s.name === 'Error Recovery Workflow');
+      const errorWorkflow = scenarios.find(
+        (s) => s.name === 'Error Recovery Workflow',
+      );
 
       if (!errorWorkflow) {
         throw new Error('Error recovery workflow scenario not found');
@@ -830,7 +932,11 @@ describe('Parlant End-to-End Workflow Testing', () => {
       let recoveryStateValid = false;
 
       for (const step of errorWorkflow.steps) {
-        const result = await E2ETestUtils.executeWorkflowStep(step, context, services);
+        const result = await E2ETestUtils.executeWorkflowStep(
+          step,
+          context,
+          services,
+        );
 
         context[step.name] = result.output;
 
@@ -890,13 +996,35 @@ describe('Parlant End-to-End Workflow Testing', () => {
 
           // Simulate a simplified workflow
           const steps = [
-            { name: 'auth', action: 'AUTHENTICATE' as const, input: { username: `user-${i}` }, expectedOutput: {}, maxDuration: 200 },
-            { name: 'session', action: 'CREATE_SESSION' as const, input: {}, expectedOutput: {}, maxDuration: 100 },
-            { name: 'validate', action: 'VALIDATE_FUNCTION' as const, input: {}, expectedOutput: {}, maxDuration: 300 }
+            {
+              name: 'auth',
+              action: 'AUTHENTICATE' as const,
+              input: { username: `user-${i}` },
+              expectedOutput: {},
+              maxDuration: 200,
+            },
+            {
+              name: 'session',
+              action: 'CREATE_SESSION' as const,
+              input: {},
+              expectedOutput: {},
+              maxDuration: 100,
+            },
+            {
+              name: 'validate',
+              action: 'VALIDATE_FUNCTION' as const,
+              input: {},
+              expectedOutput: {},
+              maxDuration: 300,
+            },
           ];
 
           for (const step of steps) {
-            const result = await E2ETestUtils.executeWorkflowStep(step, context, services);
+            const result = await E2ETestUtils.executeWorkflowStep(
+              step,
+              context,
+              services,
+            );
             if (result.success) {
               successfulSteps++;
             }
@@ -912,9 +1040,16 @@ describe('Parlant End-to-End Workflow Testing', () => {
             successfulSteps,
             failedSteps: steps.length - successfulSteps,
             performanceScore: E2ETestUtils.calculatePerformanceScore(
-              { scenarioName: '', totalDuration, stepDurations: {}, successfulSteps, failedSteps: steps.length - successfulSteps, performanceScore: 0 },
-              1000
-            )
+              {
+                scenarioName: '',
+                totalDuration,
+                stepDurations: {},
+                successfulSteps,
+                failedSteps: steps.length - successfulSteps,
+                performanceScore: 0,
+              },
+              1000,
+            ),
           };
         })();
 
@@ -923,9 +1058,12 @@ describe('Parlant End-to-End Workflow Testing', () => {
 
       const results = await Promise.all(workflowPromises);
 
-      const avgDuration = results.reduce((sum, r) => sum + r.totalDuration, 0) / results.length;
-      const avgScore = results.reduce((sum, r) => sum + r.performanceScore, 0) / results.length;
-      const allSuccessful = results.every(r => r.failedSteps === 0);
+      const avgDuration =
+        results.reduce((sum, r) => sum + r.totalDuration, 0) / results.length;
+      const avgScore =
+        results.reduce((sum, r) => sum + r.performanceScore, 0) /
+        results.length;
+      const allSuccessful = results.every((r) => r.failedSteps === 0);
 
       logger.log(`Concurrent Workflow Results:
         Workflows: ${concurrentWorkflows}
@@ -946,7 +1084,7 @@ describe('Parlant End-to-End Workflow Testing', () => {
       const productionScenarios = [
         { name: 'Morning Rush', users: 20, duration: 10000, pattern: 'burst' },
         { name: 'Steady State', users: 10, duration: 15000, pattern: 'steady' },
-        { name: 'Evening Peak', users: 30, duration: 8000, pattern: 'gradual' }
+        { name: 'Evening Peak', users: 30, duration: 8000, pattern: 'gradual' },
       ];
 
       for (const scenario of productionScenarios) {
@@ -958,40 +1096,68 @@ describe('Parlant End-to-End Workflow Testing', () => {
         for (let userId = 0; userId < scenario.users; userId++) {
           const userWorkflow = (async () => {
             const context: Record<string, unknown> = { userId };
-            const services = { parlantService, websocketBridge, securityBridge };
+            const services = {
+              parlantService,
+              websocketBridge,
+              securityBridge,
+            };
 
             // Simulate user behavior pattern
             if (scenario.pattern === 'burst') {
               // All users start immediately
             } else if (scenario.pattern === 'gradual') {
               // Stagger user entry
-              await new Promise(resolve => setTimeout(resolve, userId * 100));
+              await new Promise((resolve) => setTimeout(resolve, userId * 100));
             } else {
               // Steady pattern with random delays
-              await new Promise(resolve => setTimeout(resolve, Math.random() * 1000));
+              await new Promise((resolve) =>
+                setTimeout(resolve, Math.random() * 1000),
+              );
             }
 
             // Execute simplified user workflow
             try {
               const authResult = await E2ETestUtils.executeWorkflowStep(
-                { name: 'auth', action: 'AUTHENTICATE', input: { username: `prod-user-${userId}` }, expectedOutput: {}, maxDuration: 500 },
+                {
+                  name: 'auth',
+                  action: 'AUTHENTICATE',
+                  input: { username: `prod-user-${userId}` },
+                  expectedOutput: {},
+                  maxDuration: 500,
+                },
                 context,
-                services
+                services,
               );
 
               const sessionResult = await E2ETestUtils.executeWorkflowStep(
-                { name: 'session', action: 'CREATE_SESSION', input: {}, expectedOutput: {}, maxDuration: 300 },
+                {
+                  name: 'session',
+                  action: 'CREATE_SESSION',
+                  input: {},
+                  expectedOutput: {},
+                  maxDuration: 300,
+                },
                 context,
-                services
+                services,
               );
 
               const validateResult = await E2ETestUtils.executeWorkflowStep(
-                { name: 'validate', action: 'VALIDATE_FUNCTION', input: { functionName: 'production_function' }, expectedOutput: {}, maxDuration: 800 },
+                {
+                  name: 'validate',
+                  action: 'VALIDATE_FUNCTION',
+                  input: { functionName: 'production_function' },
+                  expectedOutput: {},
+                  maxDuration: 800,
+                },
                 context,
-                services
+                services,
               );
 
-              return authResult.success && sessionResult.success && validateResult.success;
+              return (
+                authResult.success &&
+                sessionResult.success &&
+                validateResult.success
+              );
             } catch (error) {
               logger.error(`User ${userId} workflow failed:`, error);
               return false;
@@ -1003,7 +1169,7 @@ describe('Parlant End-to-End Workflow Testing', () => {
 
         const results = await Promise.all(userPromises);
         const totalDuration = Date.now() - startTime;
-        const successRate = results.filter(r => r).length / results.length;
+        const successRate = results.filter((r) => r).length / results.length;
 
         logger.log(`${scenario.name} Results:
           Duration: ${totalDuration}ms

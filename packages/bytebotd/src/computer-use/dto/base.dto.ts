@@ -1,8 +1,19 @@
-import { IsNumber, Min, Max } from 'class-validator';/*** Data Transfer Object for screen coordinates with enhanced security validation
+import {
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator'; /*** Data Transfer Object for screen coordinates with enhanced security validation
  * Properties are initialized by NestJS validation pipeline with advanced coordinate validation
  */
 export class CoordinatesDto {
-  @IsNumber({}, { message: 'X coordinate must be a valid number' })@Min(0, { message: 'X coordinate cannot be negative' })@Max(65535, { message: 'X coordinate exceeds maximum allowed value' })x: number = 0;@IsNumber({}, { message: 'Y coordinate must be a valid number' })@Min(0, { message: 'Y coordinate cannot be negative' })@Max(65535, { message: 'Y coordinate exceeds maximum allowed value' })y: number = 0;/**
+  @IsNumber({}, { message: 'X coordinate must be a valid number' })
+  @Min(0, { message: 'X coordinate cannot be negative' })
+  @Max(65535, { message: 'X coordinate exceeds maximum allowed value' })
+  x: number = 0;
+  @IsNumber({}, { message: 'Y coordinate must be a valid number' })
+  @Min(0, { message: 'Y coordinate cannot be negative' })
+  @Max(65535, { message: 'Y coordinate exceeds maximum allowed value' })
+  y: number = 0; /**
    * Validate the entire coordinate object for security issues
    * Individual property validators above provide comprehensive validation
    */
@@ -19,13 +30,15 @@ export class CoordinatesDto {
 export enum ButtonType {
   LEFT = 'left',
   RIGHT = 'right',
-  MIDDLE = 'middle',}/**
+  MIDDLE = 'middle',
+} /**
  * Key/Mouse press types with security validation
  * Restricts to safe press action values
  */
 export enum PressType {
   UP = 'up',
-  DOWN = 'down',}/**
+  DOWN = 'down',
+} /**
  * Scroll direction types with security validation
  * Restricts to safe directional values
  */
@@ -33,7 +46,8 @@ export enum ScrollDirection {
   UP = 'up',
   DOWN = 'down',
   LEFT = 'left',
-  RIGHT = 'right',}/**
+  RIGHT = 'right',
+} /**
  * Allowed application names with security validation
  * Whitelist of approved applications for computer-use operations
  * Prevents arbitrary application launching for security

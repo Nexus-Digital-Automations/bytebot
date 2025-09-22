@@ -112,7 +112,10 @@ export interface ConcurrentValidationTestResults {
  */
 export interface ParlantServiceMock {
   processValidation(request: ValidationTestCase): Promise<ValidationTestResult>;
-  getServiceHealth(): { status: 'healthy' | 'degraded' | 'unhealthy'; responseTime: number };
+  getServiceHealth(): {
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    responseTime: number;
+  };
   simulateLoad(concurrency: number): Promise<void>;
   reset(): void;
 }
@@ -134,10 +137,11 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
 
   constructor(
     private config: ParlantValidationTestConfig,
-    parlantServiceMock?: ParlantServiceMock
+    parlantServiceMock?: ParlantServiceMock,
   ) {
     super();
-    this.parlantServiceMock = parlantServiceMock || this.createDefaultServiceMock();
+    this.parlantServiceMock =
+      parlantServiceMock || this.createDefaultServiceMock();
   }
 
   /**
@@ -171,7 +175,6 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
       });
 
       return results;
-
     } catch (error) {
       this.emit('testError', {
         timestamp: Date.now(),
@@ -192,7 +195,12 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
       const testId = `validation_test_${Date.now()}_${i}`;
 
       const complexity = this.getValidationComplexity(i);
-      const testCase = await this.createValidationTestCase(testId, sessionId, complexity, i);
+      const testCase = await this.createValidationTestCase(
+        testId,
+        sessionId,
+        complexity,
+        i,
+      );
 
       testCases.push(testCase);
     }
@@ -209,7 +217,9 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Get validation complexity for test case
    */
-  private getValidationComplexity(index: number): 'simple' | 'moderate' | 'complex' {
+  private getValidationComplexity(
+    index: number,
+  ): 'simple' | 'moderate' | 'complex' {
     switch (this.config.validationComplexity) {
       case 'simple':
         return 'simple';
@@ -220,7 +230,11 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
       case 'mixed':
         // Distribute complexity evenly
         const remainder = index % 3;
-        return remainder === 0 ? 'simple' : remainder === 1 ? 'moderate' : 'complex';
+        return remainder === 0
+          ? 'simple'
+          : remainder === 1
+            ? 'moderate'
+            : 'complex';
       default:
         return 'moderate';
     }
@@ -233,15 +247,21 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
     testId: string,
     sessionId: string,
     complexity: 'simple' | 'moderate' | 'complex',
-    index: number
+    index: number,
   ): Promise<ValidationTestCase> {
     const action = this.createValidationAction(complexity, index);
     const context = this.createValidationContext(sessionId, index);
-    const conversationHistory = this.createConversationHistory(sessionId, complexity);
+    const conversationHistory = this.createConversationHistory(
+      sessionId,
+      complexity,
+    );
 
     // Determine expected result based on action complexity and risk
     const expectedResult = this.determineExpectedResult(action, complexity);
-    const expectedConfidence = this.calculateExpectedConfidence(action, complexity);
+    const expectedConfidence = this.calculateExpectedConfidence(
+      action,
+      complexity,
+    );
 
     return {
       testId,
@@ -259,14 +279,18 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Create validation action based on complexity
    */
-  private createValidationAction(complexity: 'simple' | 'moderate' | 'complex', index: number): ValidationAction {
+  private createValidationAction(
+    complexity: 'simple' | 'moderate' | 'complex',
+    index: number,
+  ): ValidationAction {
     const actionTypes = {
       simple: ['read_file', 'list_directory', 'get_status'],
       moderate: ['write_file', 'create_directory', 'send_email'],
       complex: ['delete_database', 'modify_permissions', 'execute_script'],
     };
 
-    const actionType = actionTypes[complexity][index % actionTypes[complexity].length];
+    const actionType =
+      actionTypes[complexity][index % actionTypes[complexity].length];
 
     return {
       actionType,
@@ -275,9 +299,25 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
       parameters: this.generateActionParameters(actionType, complexity),
       reversible: complexity === 'simple',
       impact: {
-        scope: complexity === 'simple' ? 'local' : complexity === 'moderate' ? 'limited' : 'external',
-        severity: complexity === 'simple' ? 'low' : complexity === 'moderate' ? 'medium' : 'high',
-        confidence: 0.8 + (complexity === 'simple' ? 0.15 : complexity === 'moderate' ? 0.1 : 0.0),
+        scope:
+          complexity === 'simple'
+            ? 'local'
+            : complexity === 'moderate'
+              ? 'limited'
+              : 'external',
+        severity:
+          complexity === 'simple'
+            ? 'low'
+            : complexity === 'moderate'
+              ? 'medium'
+              : 'high',
+        confidence:
+          0.8 +
+          (complexity === 'simple'
+            ? 0.15
+            : complexity === 'moderate'
+              ? 0.1
+              : 0.0),
       },
     };
   }
@@ -285,7 +325,10 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Generate action parameters based on type and complexity
    */
-  private generateActionParameters(actionType: string, complexity: string): Record<string, unknown> {
+  private generateActionParameters(
+    actionType: string,
+    complexity: string,
+  ): Record<string, unknown> {
     const baseParams = {
       testMode: true,
       complexity,
@@ -294,15 +337,38 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
 
     switch (actionType) {
       case 'read_file':
-        return { ...baseParams, filePath: '/test/documents/sample.txt', encoding: 'utf8' };
+        return {
+          ...baseParams,
+          filePath: '/test/documents/sample.txt',
+          encoding: 'utf8',
+        };
       case 'write_file':
-        return { ...baseParams, filePath: '/test/output/result.txt', content: 'Test content', append: false };
+        return {
+          ...baseParams,
+          filePath: '/test/output/result.txt',
+          content: 'Test content',
+          append: false,
+        };
       case 'delete_database':
-        return { ...baseParams, database: 'test_db', confirmDeletion: true, backupFirst: true };
+        return {
+          ...baseParams,
+          database: 'test_db',
+          confirmDeletion: true,
+          backupFirst: true,
+        };
       case 'send_email':
-        return { ...baseParams, recipient: 'test@example.com', subject: 'Test Email', body: 'Test content' };
+        return {
+          ...baseParams,
+          recipient: 'test@example.com',
+          subject: 'Test Email',
+          body: 'Test content',
+        };
       case 'execute_script':
-        return { ...baseParams, scriptPath: '/test/scripts/validation.sh', arguments: ['--test', '--safe'] };
+        return {
+          ...baseParams,
+          scriptPath: '/test/scripts/validation.sh',
+          arguments: ['--test', '--safe'],
+        };
       default:
         return baseParams;
     }
@@ -311,7 +377,10 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Create validation context
    */
-  private createValidationContext(sessionId: string, index: number): ValidationContext {
+  private createValidationContext(
+    sessionId: string,
+    index: number,
+  ): ValidationContext {
     return {
       userId: `test_user_${index % 10}`, // Distribute across 10 users
       requestId: `request_${sessionId}_${Date.now()}`,
@@ -330,9 +399,14 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Create conversation history for context
    */
-  private createConversationHistory(sessionId: string, complexity: string): ConversationalMessage[] {
-    const historyDepth = Math.min(this.config.conversationContextDepth,
-      complexity === 'simple' ? 3 : complexity === 'moderate' ? 7 : 12);
+  private createConversationHistory(
+    sessionId: string,
+    complexity: string,
+  ): ConversationalMessage[] {
+    const historyDepth = Math.min(
+      this.config.conversationContextDepth,
+      complexity === 'simple' ? 3 : complexity === 'moderate' ? 7 : 12,
+    );
 
     const history: ConversationalMessage[] = [];
 
@@ -346,7 +420,7 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
         payload: {
           messageType: 'conversation_context',
           content: `Historical context message ${i + 1} for ${complexity} validation`,
-          contextRelevance: 0.8 - (i * 0.1),
+          contextRelevance: 0.8 - i * 0.1,
         },
         metadata: {
           priority: 'low',
@@ -365,7 +439,7 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
    */
   private determineExpectedResult(
     action: ValidationAction,
-    complexity: string
+    complexity: string,
   ): 'approved' | 'rejected' | 'conditional' {
     // Simple heuristic for test expectations
     if (complexity === 'simple' && action.reversible) {
@@ -386,7 +460,10 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Calculate expected confidence level
    */
-  private calculateExpectedConfidence(action: ValidationAction, complexity: string): number {
+  private calculateExpectedConfidence(
+    action: ValidationAction,
+    complexity: string,
+  ): number {
     let baseConfidence = action.impact.confidence;
 
     // Adjust based on complexity
@@ -405,7 +482,9 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Execute concurrent validations
    */
-  private async executeConcurrentValidations(testCases: ValidationTestCase[]): Promise<void> {
+  private async executeConcurrentValidations(
+    testCases: ValidationTestCase[],
+  ): Promise<void> {
     this.emit('validationStarted', {
       timestamp: Date.now(),
       totalValidations: testCases.length,
@@ -430,7 +509,9 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
       });
 
       // Execute batch concurrently
-      const batchPromises = batch.map(testCase => this.executeValidationTest(testCase));
+      const batchPromises = batch.map((testCase) =>
+        this.executeValidationTest(testCase),
+      );
       await Promise.allSettled(batchPromises);
 
       this.emit('batchCompleted', {
@@ -441,7 +522,7 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
 
       // Small delay between batches to prevent overwhelming
       if (batchIndex < batches.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
 
@@ -454,7 +535,9 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Execute individual validation test
    */
-  private async executeValidationTest(testCase: ValidationTestCase): Promise<ValidationTestResult> {
+  private async executeValidationTest(
+    testCase: ValidationTestCase,
+  ): Promise<ValidationTestResult> {
     this.activeValidations.set(testCase.testId, testCase);
 
     const startTime = performance.now();
@@ -466,14 +549,17 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
 
       // Calculate performance metrics
       result.responseTime = performance.now() - startTime;
-      result.performanceCompliant = result.responseTime <= this.config.expectedResponseTime;
+      result.performanceCompliant =
+        result.responseTime <= this.config.expectedResponseTime;
 
       // Check accuracy
       result.accuracy = this.validateAccuracy(testCase, result);
 
       // Check conversation context preservation
-      result.conversationContextPreserved = this.validateConversationContext(testCase, result);
-
+      result.conversationContextPreserved = this.validateConversationContext(
+        testCase,
+        result,
+      );
     } catch (error) {
       result = {
         testId: testCase.testId,
@@ -506,8 +592,15 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Validate accuracy of validation result
    */
-  private validateAccuracy(testCase: ValidationTestCase, result: ValidationTestResult): boolean {
-    if (!result.actualResult || result.actualResult === 'error' || result.actualResult === 'timeout') {
+  private validateAccuracy(
+    testCase: ValidationTestCase,
+    result: ValidationTestResult,
+  ): boolean {
+    if (
+      !result.actualResult ||
+      result.actualResult === 'error' ||
+      result.actualResult === 'timeout'
+    ) {
       return false;
     }
 
@@ -515,8 +608,9 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
     const resultMatches = result.actualResult === testCase.expectedResult;
 
     // Check if confidence is within acceptable range
-    const confidenceAcceptable = result.actualConfidence ?
-      Math.abs(result.actualConfidence - testCase.expectedConfidence) <= 0.2 : false;
+    const confidenceAcceptable = result.actualConfidence
+      ? Math.abs(result.actualConfidence - testCase.expectedConfidence) <= 0.2
+      : false;
 
     return resultMatches && confidenceAcceptable;
   }
@@ -524,15 +618,24 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Validate conversation context preservation
    */
-  private validateConversationContext(testCase: ValidationTestCase, result: ValidationTestResult): boolean {
+  private validateConversationContext(
+    testCase: ValidationTestCase,
+    result: ValidationTestResult,
+  ): boolean {
     // Check if validation response references conversation context appropriately
     if (result.validationDetails.conversationalResponse) {
       const response = result.validationDetails.conversationalResponse;
 
       // Simple heuristic: response should be contextually appropriate
-      const contextualKeywords = ['conversation', 'discussed', 'mentioned', 'context'];
-      const hasContextualReferences = contextualKeywords.some(keyword =>
-        response.toLowerCase().includes(keyword));
+      const contextualKeywords = [
+        'conversation',
+        'discussed',
+        'mentioned',
+        'context',
+      ];
+      const hasContextualReferences = contextualKeywords.some((keyword) =>
+        response.toLowerCase().includes(keyword),
+      );
 
       return hasContextualReferences || testCase.complexity === 'simple';
     }
@@ -548,43 +651,68 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
 
     // Calculate basic metrics
     const totalValidations = this.validationResults.length;
-    const successfulValidations = this.validationResults.filter(r =>
-      r.actualResult && ['approved', 'rejected', 'conditional'].includes(r.actualResult)).length;
-    const failedValidations = this.validationResults.filter(r => r.actualResult === 'error').length;
-    const timedOutValidations = this.validationResults.filter(r => r.actualResult === 'timeout').length;
+    const successfulValidations = this.validationResults.filter(
+      (r) =>
+        r.actualResult &&
+        ['approved', 'rejected', 'conditional'].includes(r.actualResult),
+    ).length;
+    const failedValidations = this.validationResults.filter(
+      (r) => r.actualResult === 'error',
+    ).length;
+    const timedOutValidations = this.validationResults.filter(
+      (r) => r.actualResult === 'timeout',
+    ).length;
 
     // Calculate accuracy score
-    const accurateResults = this.validationResults.filter(r => r.accuracy).length;
-    const accuracyScore = totalValidations > 0 ? accurateResults / totalValidations : 0;
+    const accurateResults = this.validationResults.filter(
+      (r) => r.accuracy,
+    ).length;
+    const accuracyScore =
+      totalValidations > 0 ? accurateResults / totalValidations : 0;
 
     // Calculate performance score
-    const performantResults = this.validationResults.filter(r => r.performanceCompliant).length;
-    const performanceScore = totalValidations > 0 ? performantResults / totalValidations : 0;
+    const performantResults = this.validationResults.filter(
+      (r) => r.performanceCompliant,
+    ).length;
+    const performanceScore =
+      totalValidations > 0 ? performantResults / totalValidations : 0;
 
     // Calculate resilience score (ability to handle load without errors)
-    const resilienceScore = totalValidations > 0 ? successfulValidations / totalValidations : 0;
+    const resilienceScore =
+      totalValidations > 0 ? successfulValidations / totalValidations : 0;
 
     // Calculate response time metrics
     const responseTimes = this.validationResults
-      .filter(r => r.responseTime)
-      .map(r => r.responseTime!)
+      .filter((r) => r.responseTime)
+      .map((r) => r.responseTime!)
       .sort((a, b) => a - b);
 
-    const averageResponseTime = responseTimes.length > 0 ?
-      responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length : 0;
+    const averageResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) /
+          responseTimes.length
+        : 0;
 
-    const p95ResponseTime = responseTimes.length > 0 ?
-      responseTimes[Math.floor(responseTimes.length * 0.95)] : 0;
+    const p95ResponseTime =
+      responseTimes.length > 0
+        ? responseTimes[Math.floor(responseTimes.length * 0.95)]
+        : 0;
 
-    const p99ResponseTime = responseTimes.length > 0 ?
-      responseTimes[Math.floor(responseTimes.length * 0.99)] : 0;
+    const p99ResponseTime =
+      responseTimes.length > 0
+        ? responseTimes[Math.floor(responseTimes.length * 0.99)]
+        : 0;
 
     // Calculate throughput
-    const throughput = testDuration > 0 ? (successfulValidations / testDuration) * 1000 : 0;
+    const throughput =
+      testDuration > 0 ? (successfulValidations / testDuration) * 1000 : 0;
 
     // Calculate concurrency efficiency
-    const theoreticalMaxThroughput = this.config.maxConcurrentValidations / (this.config.expectedResponseTime / 1000);
-    const concurrencyEfficiency = theoreticalMaxThroughput > 0 ? throughput / theoreticalMaxThroughput : 0;
+    const theoreticalMaxThroughput =
+      this.config.maxConcurrentValidations /
+      (this.config.expectedResponseTime / 1000);
+    const concurrencyEfficiency =
+      theoreticalMaxThroughput > 0 ? throughput / theoreticalMaxThroughput : 0;
 
     // Identify performance bottlenecks
     const performanceBottlenecks = this.identifyPerformanceBottlenecks();
@@ -628,11 +756,13 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
 
     // Analyze response time distribution
     const responseTimes = this.validationResults
-      .filter(r => r.responseTime)
-      .map(r => r.responseTime!);
+      .filter((r) => r.responseTime)
+      .map((r) => r.responseTime!);
 
     if (responseTimes.length > 0) {
-      const averageTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+      const averageTime =
+        responseTimes.reduce((sum, time) => sum + time, 0) /
+        responseTimes.length;
       const maxTime = Math.max(...responseTimes);
 
       if (averageTime > this.config.expectedResponseTime * 1.5) {
@@ -644,7 +774,11 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
       }
 
       // Check for response time variance
-      const variance = responseTimes.reduce((sum, time) => sum + Math.pow(time - averageTime, 2), 0) / responseTimes.length;
+      const variance =
+        responseTimes.reduce(
+          (sum, time) => sum + Math.pow(time - averageTime, 2),
+          0,
+        ) / responseTimes.length;
       const standardDeviation = Math.sqrt(variance);
 
       if (standardDeviation > averageTime * 0.5) {
@@ -653,13 +787,19 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
     }
 
     // Analyze failure patterns
-    const errorRate = this.validationResults.filter(r => r.actualResult === 'error').length / this.validationResults.length;
-    if (errorRate > 0.05) { // 5% error rate threshold
+    const errorRate =
+      this.validationResults.filter((r) => r.actualResult === 'error').length /
+      this.validationResults.length;
+    if (errorRate > 0.05) {
+      // 5% error rate threshold
       bottlenecks.push('high_error_rate');
     }
 
-    const timeoutRate = this.validationResults.filter(r => r.actualResult === 'timeout').length / this.validationResults.length;
-    if (timeoutRate > 0.02) { // 2% timeout rate threshold
+    const timeoutRate =
+      this.validationResults.filter((r) => r.actualResult === 'timeout')
+        .length / this.validationResults.length;
+    if (timeoutRate > 0.02) {
+      // 2% timeout rate threshold
       bottlenecks.push('high_timeout_rate');
     }
 
@@ -681,32 +821,52 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
 
     // Accuracy recommendations
     if (metrics.accuracyScore < this.config.validationAccuracyThreshold) {
-      recommendations.push('Improve validation accuracy through better training data and model tuning');
-      recommendations.push('Review validation logic for edge cases and complex scenarios');
+      recommendations.push(
+        'Improve validation accuracy through better training data and model tuning',
+      );
+      recommendations.push(
+        'Review validation logic for edge cases and complex scenarios',
+      );
     }
 
     // Performance recommendations
     if (metrics.performanceScore < 0.8) {
-      recommendations.push('Optimize validation processing pipeline for better response times');
-      recommendations.push('Consider implementing validation result caching for similar requests');
+      recommendations.push(
+        'Optimize validation processing pipeline for better response times',
+      );
+      recommendations.push(
+        'Consider implementing validation result caching for similar requests',
+      );
     }
 
     // Resilience recommendations
     if (metrics.resilienceScore < 0.9) {
-      recommendations.push('Implement better error handling and recovery mechanisms');
-      recommendations.push('Add circuit breaker patterns for external service dependencies');
+      recommendations.push(
+        'Implement better error handling and recovery mechanisms',
+      );
+      recommendations.push(
+        'Add circuit breaker patterns for external service dependencies',
+      );
     }
 
     // Concurrency recommendations
     if (metrics.concurrencyEfficiency < 0.7) {
-      recommendations.push('Optimize concurrent request handling and resource allocation');
-      recommendations.push('Consider implementing request queuing and load balancing');
+      recommendations.push(
+        'Optimize concurrent request handling and resource allocation',
+      );
+      recommendations.push(
+        'Consider implementing request queuing and load balancing',
+      );
     }
 
     // Throughput recommendations
     if (metrics.throughput < this.config.maxConcurrentValidations * 0.8) {
-      recommendations.push('Scale validation processing capacity to handle higher throughput');
-      recommendations.push('Implement parallel processing for independent validation tasks');
+      recommendations.push(
+        'Scale validation processing capacity to handle higher throughput',
+      );
+      recommendations.push(
+        'Implement parallel processing for independent validation tasks',
+      );
     }
 
     return recommendations;
@@ -715,10 +875,16 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
   /**
    * Get complexity distribution of test cases
    */
-  private getComplexityDistribution(testCases: ValidationTestCase[]): Record<string, number> {
-    const distribution: Record<string, number> = { simple: 0, moderate: 0, complex: 0 };
+  private getComplexityDistribution(
+    testCases: ValidationTestCase[],
+  ): Record<string, number> {
+    const distribution: Record<string, number> = {
+      simple: 0,
+      moderate: 0,
+      complex: 0,
+    };
 
-    testCases.forEach(testCase => {
+    testCases.forEach((testCase) => {
       distribution[testCase.complexity]++;
     });
 
@@ -730,15 +896,17 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
    */
   private createDefaultServiceMock(): ParlantServiceMock {
     return {
-      async processValidation(request: ValidationTestCase): Promise<ValidationTestResult> {
+      async processValidation(
+        request: ValidationTestCase,
+      ): Promise<ValidationTestResult> {
         // Simulate processing time based on complexity
         const processingTime = {
-          simple: 200 + Math.random() * 300,    // 200-500ms
-          moderate: 500 + Math.random() * 700,  // 500-1200ms
+          simple: 200 + Math.random() * 300, // 200-500ms
+          moderate: 500 + Math.random() * 700, // 500-1200ms
           complex: 1000 + Math.random() * 1500, // 1000-2500ms
         }[request.complexity];
 
-        await new Promise(resolve => setTimeout(resolve, processingTime));
+        await new Promise((resolve) => setTimeout(resolve, processingTime));
 
         // Simulate validation logic
         const result: ValidationTestResult = {
@@ -747,16 +915,23 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
           requestTimestamp: Date.now() - processingTime,
           responseTimestamp: Date.now(),
           actualResult: request.expectedResult,
-          actualConfidence: request.expectedConfidence + (Math.random() - 0.5) * 0.1,
+          actualConfidence:
+            request.expectedConfidence + (Math.random() - 0.5) * 0.1,
           accuracy: true, // Will be calculated by tester
           performanceCompliant: true, // Will be calculated by tester
           conversationContextPreserved: true, // Will be calculated by tester
           validationDetails: {
             reasoning: `Validation completed for ${request.action.actionType} with ${request.complexity} complexity`,
             conversationalResponse: `Based on our conversation, I ${request.expectedResult === 'approved' ? 'approve' : 'recommend caution for'} this ${request.action.actionType} action.`,
-            conditions: request.expectedResult === 'conditional' ? [
-              { condition: 'user_confirmation', description: 'Requires explicit user confirmation' }
-            ] : undefined,
+            conditions:
+              request.expectedResult === 'conditional'
+                ? [
+                    {
+                      condition: 'user_confirmation',
+                      description: 'Requires explicit user confirmation',
+                    },
+                  ]
+                : undefined,
           },
         };
 
@@ -776,7 +951,10 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
         return result;
       },
 
-      getServiceHealth(): { status: 'healthy' | 'degraded' | 'unhealthy'; responseTime: number } {
+      getServiceHealth(): {
+        status: 'healthy' | 'degraded' | 'unhealthy';
+        responseTime: number;
+      } {
         return {
           status: 'healthy',
           responseTime: 50 + Math.random() * 100,
@@ -785,12 +963,12 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
 
       async simulateLoad(concurrency: number): Promise<void> {
         // Simulate load on the service
-        await new Promise(resolve => setTimeout(resolve, concurrency * 10));
+        await new Promise((resolve) => setTimeout(resolve, concurrency * 10));
       },
 
       reset(): void {
         // Reset service state
-      }
+      },
     };
   }
 
@@ -808,10 +986,13 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
     const completed = this.validationResults.length;
     const activeValidations = this.activeValidations.size;
     const progress = totalValidations > 0 ? completed / totalValidations : 0;
-    const duration = this.testStartTime > 0 ? performance.now() - this.testStartTime : 0;
+    const duration =
+      this.testStartTime > 0 ? performance.now() - this.testStartTime : 0;
 
     return {
-      active: activeValidations > 0 || (this.testStartTime > 0 && this.testEndTime === 0),
+      active:
+        activeValidations > 0 ||
+        (this.testStartTime > 0 && this.testEndTime === 0),
       progress,
       completed,
       active_validations: activeValidations,
@@ -830,21 +1011,34 @@ export class ParlantConcurrentValidationTester extends EventEmitter {
     recentResults: ValidationTestResult[];
   } {
     const recentResults = this.validationResults.slice(-20); // Last 20 results
-    const accurateResults = recentResults.filter(r => r.accuracy).length;
-    const accuracy = recentResults.length > 0 ? accurateResults / recentResults.length : 0;
+    const accurateResults = recentResults.filter((r) => r.accuracy).length;
+    const accuracy =
+      recentResults.length > 0 ? accurateResults / recentResults.length : 0;
 
-    const responseTimes = recentResults.filter(r => r.responseTime).map(r => r.responseTime!);
-    const averageResponseTime = responseTimes.length > 0 ?
-      responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length : 0;
+    const responseTimes = recentResults
+      .filter((r) => r.responseTime)
+      .map((r) => r.responseTime!);
+    const averageResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) /
+          responseTimes.length
+        : 0;
 
     const currentTime = performance.now();
     const recentTimeWindow = 10000; // 10 seconds
-    const recentValidations = this.validationResults.filter(r =>
-      r.responseTimestamp && (currentTime - (r.responseTimestamp - this.testStartTime)) <= recentTimeWindow);
+    const recentValidations = this.validationResults.filter(
+      (r) =>
+        r.responseTimestamp &&
+        currentTime - (r.responseTimestamp - this.testStartTime) <=
+          recentTimeWindow,
+    );
     const throughput = recentValidations.length / (recentTimeWindow / 1000);
 
-    const errorResults = recentResults.filter(r => r.actualResult === 'error').length;
-    const errorRate = recentResults.length > 0 ? errorResults / recentResults.length : 0;
+    const errorResults = recentResults.filter(
+      (r) => r.actualResult === 'error',
+    ).length;
+    const errorRate =
+      recentResults.length > 0 ? errorResults / recentResults.length : 0;
 
     return {
       accuracy,

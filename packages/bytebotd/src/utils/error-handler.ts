@@ -22,9 +22,11 @@ import {
   isSystemError,
   isValidationError,
   isHttpError,
-} from '../types/error-types';import {ErrorFactory,
+} from '../types/error-types';
+import {
+  ErrorFactory,
   BaseCustomError as _BaseCustomError,
-} from '../errors/custom-errors';/*** Result type for operations that may fail
+} from '../errors/custom-errors'; /*** Result type for operations that may fail
  */
 export type Result<T, E = ApplicationError> =
   | {
@@ -95,7 +97,7 @@ export const defaultLogger: ErrorLogger = {
     console.error(`[ERROR] ${message}`, context ?? ''),
   fatal: (message: string, context?: Record<string, unknown>): void =>
     console.error(`[FATAL] ${message}`, context ?? ''),
-};/**
+}; /**
  * Global error handler configuration
  */
 export interface ErrorHandlerConfig {

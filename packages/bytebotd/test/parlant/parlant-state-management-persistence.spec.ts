@@ -49,7 +49,7 @@ import {
   ConversationalMessage,
   ConversationalMessageType,
   ConversationalSession,
-  SessionStatus
+  SessionStatus,
 } from '../../src/common/websocket/conversational-websocket-bridge.service';
 
 import { ParlantIntegrationService } from '../../src/parlant/parlant-integration.service';
@@ -186,7 +186,6 @@ interface StateOperation {
  * State management test utilities
  */
 class StateManagementTestUtils {
-
   /**
    * Generate state test scenarios
    */
@@ -204,34 +203,37 @@ class StateManagementTestUtils {
             syncPreferences: {
               immediateSync: true,
               conflictHandling: 'auto',
-              backgroundSync: true
-            }
-          }
+              backgroundSync: true,
+            },
+          },
         ],
         operations: [
           {
             deviceId: 'desktop-001',
             operationType: 'message',
-            data: { content: 'Hello, I need help with user data', type: 'user_message' },
-            expectedLatency: 25
+            data: {
+              content: 'Hello, I need help with user data',
+              type: 'user_message',
+            },
+            expectedLatency: 25,
           },
           {
             deviceId: 'desktop-001',
             operationType: 'validation',
             data: { functionName: 'getUserData', approved: true },
-            expectedLatency: 50
+            expectedLatency: 50,
           },
           {
             deviceId: 'desktop-001',
             operationType: 'preference',
             data: { theme: 'dark', notifications: true },
-            expectedLatency: 15
-          }
+            expectedLatency: 15,
+          },
         ],
         expectedFinalState: {
           messageHistory: { length: 2 } as any,
           validationHistory: { length: 1 } as any,
-          synchronizationStatus: 'synced'
+          synchronizationStatus: 'synced',
         },
         performanceTargets: {
           syncLatency: 25,
@@ -245,8 +247,8 @@ class StateManagementTestUtils {
           resolutionTime: 0,
           memoryUsage: 10 * 1024 * 1024,
           compressionRatio: 0.7,
-          networkOverhead: 0.1
-        }
+          networkOverhead: 0.1,
+        },
       },
       {
         name: 'Multi-Device State Synchronization',
@@ -260,8 +262,8 @@ class StateManagementTestUtils {
             syncPreferences: {
               immediateSync: true,
               conflictHandling: 'auto',
-              backgroundSync: true
-            }
+              backgroundSync: true,
+            },
           },
           {
             deviceId: 'mobile-001',
@@ -271,41 +273,44 @@ class StateManagementTestUtils {
             syncPreferences: {
               immediateSync: false,
               conflictHandling: 'manual',
-              backgroundSync: true
-            }
-          }
+              backgroundSync: true,
+            },
+          },
         ],
         operations: [
           {
             deviceId: 'desktop-002',
             operationType: 'message',
-            data: { content: 'Starting conversation on desktop', type: 'user_message' },
-            expectedLatency: 30
+            data: {
+              content: 'Starting conversation on desktop',
+              type: 'user_message',
+            },
+            expectedLatency: 30,
           },
           {
             deviceId: 'mobile-001',
             operationType: 'sync',
             data: { syncType: 'initial' },
             expectedLatency: 200,
-            dependsOn: ['desktop-002:message']
+            dependsOn: ['desktop-002:message'],
           },
           {
             deviceId: 'mobile-001',
             operationType: 'message',
             data: { content: 'Continuing on mobile', type: 'user_message' },
-            expectedLatency: 40
+            expectedLatency: 40,
           },
           {
             deviceId: 'desktop-002',
             operationType: 'sync',
             data: { syncType: 'incremental' },
             expectedLatency: 150,
-            dependsOn: ['mobile-001:message']
-          }
+            dependsOn: ['mobile-001:message'],
+          },
         ],
         expectedFinalState: {
           messageHistory: { length: 2 } as any,
-          synchronizationStatus: 'synced'
+          synchronizationStatus: 'synced',
         },
         performanceTargets: {
           syncLatency: 200,
@@ -319,12 +324,13 @@ class StateManagementTestUtils {
           resolutionTime: 0,
           memoryUsage: 20 * 1024 * 1024,
           compressionRatio: 0.8,
-          networkOverhead: 0.2
-        }
+          networkOverhead: 0.2,
+        },
       },
       {
         name: 'State Conflict Resolution',
-        description: 'Handling state conflicts between concurrent device updates',
+        description:
+          'Handling state conflicts between concurrent device updates',
         devices: [
           {
             deviceId: 'device-a',
@@ -334,8 +340,8 @@ class StateManagementTestUtils {
             syncPreferences: {
               immediateSync: true,
               conflictHandling: 'auto',
-              backgroundSync: true
-            }
+              backgroundSync: true,
+            },
           },
           {
             deviceId: 'device-b',
@@ -345,33 +351,37 @@ class StateManagementTestUtils {
             syncPreferences: {
               immediateSync: true,
               conflictHandling: 'auto',
-              backgroundSync: true
-            }
-          }
+              backgroundSync: true,
+            },
+          },
         ],
         operations: [
           {
             deviceId: 'device-a',
             operationType: 'preference',
             data: { theme: 'dark', language: 'en' },
-            expectedLatency: 25
+            expectedLatency: 25,
           },
           {
             deviceId: 'device-b',
             operationType: 'preference',
             data: { theme: 'light', timezone: 'UTC' },
-            expectedLatency: 25
+            expectedLatency: 25,
           },
           {
             deviceId: 'device-a',
             operationType: 'sync',
             data: { syncType: 'conflict-resolution' },
-            expectedLatency: 300
-          }
+            expectedLatency: 300,
+          },
         ],
         expectedFinalState: {
-          userPreferences: { theme: 'light', language: 'en', timezone: 'UTC' } as any,
-          synchronizationStatus: 'synced'
+          userPreferences: {
+            theme: 'light',
+            language: 'en',
+            timezone: 'UTC',
+          } as any,
+          synchronizationStatus: 'synced',
         },
         performanceTargets: {
           syncLatency: 300,
@@ -385,9 +395,9 @@ class StateManagementTestUtils {
           resolutionTime: 300,
           memoryUsage: 15 * 1024 * 1024,
           compressionRatio: 0.75,
-          networkOverhead: 0.15
-        }
-      }
+          networkOverhead: 0.15,
+        },
+      },
     ];
   }
 
@@ -396,7 +406,7 @@ class StateManagementTestUtils {
    */
   static async executeStateTestScenario(
     scenario: StateTestScenario,
-    conversationalBridge: ConversationalWebSocketBridgeService
+    conversationalBridge: ConversationalWebSocketBridgeService,
   ): Promise<{
     success: boolean;
     finalState: ConversationState;
@@ -411,7 +421,8 @@ class StateManagementTestUtils {
     try {
       // Initialize devices and connections
       for (const device of scenario.devices) {
-        const client = await StateManagementTestUtils.createDeviceClient(device);
+        const client =
+          await StateManagementTestUtils.createDeviceClient(device);
         deviceClients.set(device.deviceId, client);
 
         // Initialize device state
@@ -425,7 +436,7 @@ class StateManagementTestUtils {
           contextData: {},
           lastUpdated: new Date(),
           version: 1,
-          synchronizationStatus: 'synced'
+          synchronizationStatus: 'synced',
         };
 
         deviceStates.set(device.deviceId, initialState);
@@ -455,7 +466,7 @@ class StateManagementTestUtils {
           operation,
           client,
           currentState,
-          conversationalBridge
+          conversationalBridge,
         );
 
         const operationLatency = performance.now() - operationStartTime;
@@ -463,36 +474,41 @@ class StateManagementTestUtils {
         // Store operation result
         operationResults[`${operation.deviceId}:${operation.operationType}`] = {
           ...result,
-          latency: operationLatency
+          latency: operationLatency,
         };
 
         // Update device state
         const updatedState = StateManagementTestUtils.applyOperationToState(
           currentState,
           operation,
-          result
+          result,
         );
         deviceStates.set(operation.deviceId, updatedState);
       }
 
       // Perform final synchronization
       const finalSyncStartTime = performance.now();
-      await StateManagementTestUtils.performFinalSynchronization(deviceClients, deviceStates);
+      await StateManagementTestUtils.performFinalSynchronization(
+        deviceClients,
+        deviceStates,
+      );
       const finalSyncTime = performance.now() - finalSyncStartTime;
 
       // Validate final state consistency
-      const stateConsistency = StateManagementTestUtils.validateStateConsistency(deviceStates);
+      const stateConsistency =
+        StateManagementTestUtils.validateStateConsistency(deviceStates);
 
       // Calculate overall metrics
       const overallMetrics = StateManagementTestUtils.calculateOverallMetrics(
         operationResults,
         finalSyncTime,
         stateConsistency,
-        scenario.performanceTargets
+        scenario.performanceTargets,
       );
 
       // Get primary device's final state
-      const primaryDevice = scenario.devices.find(d => d.priority === 1) || scenario.devices[0];
+      const primaryDevice =
+        scenario.devices.find((d) => d.priority === 1) || scenario.devices[0];
       const finalState = deviceStates.get(primaryDevice.deviceId)!;
 
       return {
@@ -500,20 +516,21 @@ class StateManagementTestUtils {
           finalState,
           scenario.expectedFinalState,
           overallMetrics,
-          scenario.performanceTargets
+          scenario.performanceTargets,
         ),
         finalState,
         metrics: overallMetrics,
-        deviceStates
+        deviceStates,
       };
-
     } catch (error) {
       return {
         success: false,
-        finalState: deviceStates.values().next().value || StateManagementTestUtils.createEmptyState(),
+        finalState:
+          deviceStates.values().next().value ||
+          StateManagementTestUtils.createEmptyState(),
         metrics: StateManagementTestUtils.createEmptyMetrics(),
         deviceStates,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     } finally {
       // Close all device connections
@@ -532,23 +549,43 @@ class StateManagementTestUtils {
     operation: StateOperation,
     client: WebSocket,
     currentState: ConversationState,
-    conversationalBridge: ConversationalWebSocketBridgeService
+    conversationalBridge: ConversationalWebSocketBridgeService,
   ): Promise<Record<string, unknown>> {
     switch (operation.operationType) {
       case 'message':
-        return await StateManagementTestUtils.executeMessageOperation(operation, client, currentState);
+        return await StateManagementTestUtils.executeMessageOperation(
+          operation,
+          client,
+          currentState,
+        );
 
       case 'validation':
-        return await StateManagementTestUtils.executeValidationOperation(operation, client, currentState);
+        return await StateManagementTestUtils.executeValidationOperation(
+          operation,
+          client,
+          currentState,
+        );
 
       case 'preference':
-        return await StateManagementTestUtils.executePreferenceOperation(operation, client, currentState);
+        return await StateManagementTestUtils.executePreferenceOperation(
+          operation,
+          client,
+          currentState,
+        );
 
       case 'context':
-        return await StateManagementTestUtils.executeContextOperation(operation, client, currentState);
+        return await StateManagementTestUtils.executeContextOperation(
+          operation,
+          client,
+          currentState,
+        );
 
       case 'sync':
-        return await StateManagementTestUtils.executeSyncOperation(operation, client, currentState);
+        return await StateManagementTestUtils.executeSyncOperation(
+          operation,
+          client,
+          currentState,
+        );
 
       default:
         throw new Error(`Unknown operation type: ${operation.operationType}`);
@@ -561,7 +598,7 @@ class StateManagementTestUtils {
   private static async executeMessageOperation(
     operation: StateOperation,
     client: WebSocket,
-    currentState: ConversationState
+    currentState: ConversationState,
   ): Promise<Record<string, unknown>> {
     const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
@@ -577,8 +614,8 @@ class StateManagementTestUtils {
         priority: 'normal',
         requiresAck: true,
         compression: false,
-        routingHints: ['state-management']
-      }
+        routingHints: ['state-management'],
+      },
     };
 
     await StateManagementTestUtils.sendMessage(client, message);
@@ -588,7 +625,7 @@ class StateManagementTestUtils {
       content: operation.data,
       timestamp: new Date(),
       sequenceNumber: currentState.messageHistory.length + 1,
-      acknowledged: true
+      acknowledged: true,
     };
   }
 
@@ -598,7 +635,7 @@ class StateManagementTestUtils {
   private static async executeValidationOperation(
     operation: StateOperation,
     client: WebSocket,
-    currentState: ConversationState
+    currentState: ConversationState,
   ): Promise<Record<string, unknown>> {
     const validationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
@@ -611,14 +648,14 @@ class StateManagementTestUtils {
       sequence: currentState.validationHistory.length + 1,
       payload: {
         validationId,
-        ...operation.data
+        ...operation.data,
       },
       metadata: {
         priority: 'high',
         requiresAck: true,
         compression: false,
-        routingHints: ['validation']
-      }
+        routingHints: ['validation'],
+      },
     };
 
     await StateManagementTestUtils.sendMessage(client, validationMessage);
@@ -630,7 +667,7 @@ class StateManagementTestUtils {
       result: operation.data.approved ? 'approved' : 'pending',
       timestamp: new Date(),
       duration: 100,
-      userConfirmation: operation.data.userConfirmation
+      userConfirmation: operation.data.userConfirmation,
     };
   }
 
@@ -640,7 +677,7 @@ class StateManagementTestUtils {
   private static async executePreferenceOperation(
     operation: StateOperation,
     client: WebSocket,
-    currentState: ConversationState
+    currentState: ConversationState,
   ): Promise<Record<string, unknown>> {
     const preferenceMessage: ConversationalMessage = {
       type: ConversationalMessageType.SESSION_START, // Using generic message type
@@ -650,14 +687,14 @@ class StateManagementTestUtils {
       sequence: 1,
       payload: {
         operationType: 'preference_update',
-        preferences: operation.data
+        preferences: operation.data,
       },
       metadata: {
         priority: 'low',
         requiresAck: false,
         compression: false,
-        routingHints: ['preferences']
-      }
+        routingHints: ['preferences'],
+      },
     };
 
     await StateManagementTestUtils.sendMessage(client, preferenceMessage);
@@ -665,7 +702,7 @@ class StateManagementTestUtils {
     return {
       preferences: operation.data,
       updated: true,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -675,12 +712,12 @@ class StateManagementTestUtils {
   private static async executeContextOperation(
     operation: StateOperation,
     client: WebSocket,
-    currentState: ConversationState
+    currentState: ConversationState,
   ): Promise<Record<string, unknown>> {
     return {
       contextData: operation.data,
       updated: true,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -690,7 +727,7 @@ class StateManagementTestUtils {
   private static async executeSyncOperation(
     operation: StateOperation,
     client: WebSocket,
-    currentState: ConversationState
+    currentState: ConversationState,
   ): Promise<Record<string, unknown>> {
     const syncMessage: ConversationalMessage = {
       type: ConversationalMessageType.SESSION_START, // Using generic message type
@@ -701,26 +738,26 @@ class StateManagementTestUtils {
       payload: {
         operationType: 'state_sync',
         syncType: operation.data.syncType,
-        currentState: currentState
+        currentState: currentState,
       },
       metadata: {
         priority: 'high',
         requiresAck: true,
         compression: true,
-        routingHints: ['synchronization']
-      }
+        routingHints: ['synchronization'],
+      },
     };
 
     await StateManagementTestUtils.sendMessage(client, syncMessage);
 
     // Simulate sync delay
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     return {
       syncType: operation.data.syncType,
       synced: true,
       timestamp: new Date(),
-      conflicts: operation.data.syncType === 'conflict-resolution' ? 1 : 0
+      conflicts: operation.data.syncType === 'conflict-resolution' ? 1 : 0,
     };
   }
 
@@ -730,7 +767,7 @@ class StateManagementTestUtils {
   private static applyOperationToState(
     currentState: ConversationState,
     operation: StateOperation,
-    result: Record<string, unknown>
+    result: Record<string, unknown>,
   ): ConversationState {
     const updatedState = { ...currentState };
     updatedState.version++;
@@ -744,7 +781,7 @@ class StateManagementTestUtils {
           content: result.content as Record<string, unknown>,
           timestamp: result.timestamp as Date,
           sequenceNumber: result.sequenceNumber as number,
-          acknowledged: result.acknowledged as boolean
+          acknowledged: result.acknowledged as boolean,
         });
         break;
 
@@ -756,26 +793,26 @@ class StateManagementTestUtils {
           result: result.result as 'approved' | 'rejected' | 'pending',
           timestamp: result.timestamp as Date,
           duration: result.duration as number,
-          userConfirmation: result.userConfirmation as boolean
+          userConfirmation: result.userConfirmation as boolean,
         });
         break;
 
       case 'preference':
         updatedState.userPreferences = {
           ...updatedState.userPreferences,
-          ...(result.preferences as Record<string, unknown>)
+          ...(result.preferences as Record<string, unknown>),
         };
         break;
 
       case 'context':
         updatedState.contextData = {
           ...updatedState.contextData,
-          ...(result.contextData as Record<string, unknown>)
+          ...(result.contextData as Record<string, unknown>),
         };
         break;
 
       case 'sync':
-        if (result.conflicts as number > 0) {
+        if ((result.conflicts as number) > 0) {
           updatedState.synchronizationStatus = 'conflict';
         } else {
           updatedState.synchronizationStatus = 'synced';
@@ -791,11 +828,11 @@ class StateManagementTestUtils {
    */
   private static async performFinalSynchronization(
     deviceClients: Map<string, WebSocket>,
-    deviceStates: Map<string, ConversationState>
+    deviceStates: Map<string, ConversationState>,
   ): Promise<void> {
     // In a real implementation, this would perform cross-device state synchronization
     // For testing, we simulate the process with a delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Mark all states as synchronized
     for (const [deviceId, state] of deviceStates.entries()) {
@@ -808,7 +845,7 @@ class StateManagementTestUtils {
    * Validate state consistency across devices
    */
   private static validateStateConsistency(
-    deviceStates: Map<string, ConversationState>
+    deviceStates: Map<string, ConversationState>,
   ): boolean {
     if (deviceStates.size <= 1) return true;
 
@@ -817,17 +854,17 @@ class StateManagementTestUtils {
 
     // Check conversation ID consistency
     const conversationIdConsistent = states.every(
-      state => state.conversationId === referenceState.conversationId
+      (state) => state.conversationId === referenceState.conversationId,
     );
 
     // Check user ID consistency
     const userIdConsistent = states.every(
-      state => state.userId === referenceState.userId
+      (state) => state.userId === referenceState.userId,
     );
 
     // Check synchronization status
     const syncStatusConsistent = states.every(
-      state => state.synchronizationStatus === 'synced'
+      (state) => state.synchronizationStatus === 'synced',
     );
 
     return conversationIdConsistent && userIdConsistent && syncStatusConsistent;
@@ -840,14 +877,19 @@ class StateManagementTestUtils {
     operationResults: Record<string, any>,
     finalSyncTime: number,
     stateConsistency: boolean,
-    performanceTargets: StateManagementMetrics
+    performanceTargets: StateManagementMetrics,
   ): StateManagementMetrics {
-    const latencies = Object.values(operationResults).map(r => r.latency || 0);
-    const syncLatency = latencies.length > 0
-      ? latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length
-      : 0;
+    const latencies = Object.values(operationResults).map(
+      (r) => r.latency || 0,
+    );
+    const syncLatency =
+      latencies.length > 0
+        ? latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length
+        : 0;
 
-    const conflictOperations = Object.values(operationResults).filter(r => r.conflicts > 0);
+    const conflictOperations = Object.values(operationResults).filter(
+      (r) => r.conflicts > 0,
+    );
 
     return {
       syncLatency,
@@ -857,11 +899,14 @@ class StateManagementTestUtils {
       recoveryTime: finalSyncTime,
       dataIntegrity: stateConsistency,
       consistencyRate: stateConsistency ? 1.0 : 0.95,
-      conflictCount: conflictOperations.reduce((sum, op) => sum + (op.conflicts || 0), 0),
+      conflictCount: conflictOperations.reduce(
+        (sum, op) => sum + (op.conflicts || 0),
+        0,
+      ),
       resolutionTime: conflictOperations.length > 0 ? finalSyncTime : 0,
       memoryUsage: process.memoryUsage().heapUsed,
       compressionRatio: 0.75, // Estimated
-      networkOverhead: 0.1 // Estimated
+      networkOverhead: 0.1, // Estimated
     };
   }
 
@@ -872,10 +917,13 @@ class StateManagementTestUtils {
     finalState: ConversationState,
     expectedFinalState: Partial<ConversationState>,
     metrics: StateManagementMetrics,
-    targets: StateManagementMetrics
+    targets: StateManagementMetrics,
   ): boolean {
     // Check state expectations
-    const stateValid = StateManagementTestUtils.validateExpectedState(finalState, expectedFinalState);
+    const stateValid = StateManagementTestUtils.validateExpectedState(
+      finalState,
+      expectedFinalState,
+    );
 
     // Check performance targets
     const performanceValid =
@@ -891,14 +939,21 @@ class StateManagementTestUtils {
    */
   private static validateExpectedState(
     actualState: ConversationState,
-    expectedState: Partial<ConversationState>
+    expectedState: Partial<ConversationState>,
   ): boolean {
     for (const [key, expectedValue] of Object.entries(expectedState)) {
       const actualValue = (actualState as any)[key];
 
-      if (typeof expectedValue === 'object' && expectedValue !== null && 'length' in expectedValue) {
+      if (
+        typeof expectedValue === 'object' &&
+        expectedValue !== null &&
+        'length' in expectedValue
+      ) {
         // Check array length
-        if (!Array.isArray(actualValue) || actualValue.length !== expectedValue.length) {
+        if (
+          !Array.isArray(actualValue) ||
+          actualValue.length !== expectedValue.length
+        ) {
           return false;
         }
       } else if (actualValue !== expectedValue) {
@@ -912,7 +967,10 @@ class StateManagementTestUtils {
   /**
    * Send WebSocket message
    */
-  private static async sendMessage(client: WebSocket, message: ConversationalMessage): Promise<void> {
+  private static async sendMessage(
+    client: WebSocket,
+    message: ConversationalMessage,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (client.readyState !== WebSocket.OPEN) {
         reject(new Error('WebSocket not open'));
@@ -934,15 +992,15 @@ class StateManagementTestUtils {
    */
   private static async createDeviceClient(
     device: MultiDeviceConfig,
-    port: number = 8081
+    port: number = 8081,
   ): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
       const client = new WebSocket(`ws://localhost:${port}`, {
         headers: {
           'Device-ID': device.deviceId,
           'Device-Type': device.deviceType,
-          'User-Agent': `${device.deviceType}-client`
-        }
+          'User-Agent': `${device.deviceType}-client`,
+        },
       });
 
       client.on('open', () => resolve(client));
@@ -971,7 +1029,7 @@ class StateManagementTestUtils {
       contextData: {},
       lastUpdated: new Date(),
       version: 0,
-      synchronizationStatus: 'error'
+      synchronizationStatus: 'error',
     };
   }
 
@@ -991,7 +1049,7 @@ class StateManagementTestUtils {
       resolutionTime: 0,
       memoryUsage: 0,
       compressionRatio: 1.0,
-      networkOverhead: 0
+      networkOverhead: 0,
     };
   }
 
@@ -1008,7 +1066,7 @@ class StateManagementTestUtils {
       backupEnabled: true,
       maxStateSize: 1024 * 1024, // 1MB
       compressionEnabled: true,
-      deltaSync: true
+      deltaSync: true,
     };
   }
 }
@@ -1030,26 +1088,30 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
           load: [
             () => ({
               CONVERSATIONAL_WEBSOCKET_PORT: 8081,
-              NODE_ENV: 'test'
-            })
-          ]
-        })
+              NODE_ENV: 'test',
+            }),
+          ],
+        }),
       ],
       providers: [
         ConversationalWebSocketBridgeService,
         ParlantIntegrationService,
-        Logger
-      ]
+        Logger,
+      ],
     }).compile();
 
-    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
+    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
 
     // Allow time for WebSocket server to start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   afterAll(async () => {
@@ -1061,7 +1123,9 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
   describe('Single Device State Management', () => {
     it('should manage conversation state on single device', async () => {
       const scenarios = StateManagementTestUtils.generateStateTestScenarios();
-      const singleDeviceScenario = scenarios.find(s => s.name === 'Single Device State Management');
+      const singleDeviceScenario = scenarios.find(
+        (s) => s.name === 'Single Device State Management',
+      );
 
       if (!singleDeviceScenario) {
         throw new Error('Single device scenario not found');
@@ -1071,7 +1135,7 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
 
       const result = await StateManagementTestUtils.executeStateTestScenario(
         singleDeviceScenario,
-        conversationalBridge
+        conversationalBridge,
       );
 
       logger.log(`Single Device State Management Results:
@@ -1087,7 +1151,9 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
       expect(result.success).toBe(true);
       expect(result.finalState.synchronizationStatus).toBe('synced');
       expect(result.finalState.messageHistory.length).toBeGreaterThan(0);
-      expect(result.metrics.syncLatency).toBeLessThan(singleDeviceScenario.performanceTargets.syncLatency);
+      expect(result.metrics.syncLatency).toBeLessThan(
+        singleDeviceScenario.performanceTargets.syncLatency,
+      );
       expect(result.metrics.dataIntegrity).toBe(true);
       expect(result.metrics.consistencyRate).toBe(1.0);
     }, 25000);
@@ -1098,7 +1164,9 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
   describe('Multi-Device State Synchronization', () => {
     it('should synchronize state across desktop and mobile devices', async () => {
       const scenarios = StateManagementTestUtils.generateStateTestScenarios();
-      const multiDeviceScenario = scenarios.find(s => s.name === 'Multi-Device State Synchronization');
+      const multiDeviceScenario = scenarios.find(
+        (s) => s.name === 'Multi-Device State Synchronization',
+      );
 
       if (!multiDeviceScenario) {
         throw new Error('Multi-device scenario not found');
@@ -1108,12 +1176,12 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
 
       const result = await StateManagementTestUtils.executeStateTestScenario(
         multiDeviceScenario,
-        conversationalBridge
+        conversationalBridge,
       );
 
       const deviceCount = result.deviceStates.size;
       const allDevicesSynced = Array.from(result.deviceStates.values()).every(
-        state => state.synchronizationStatus === 'synced'
+        (state) => state.synchronizationStatus === 'synced',
       );
 
       logger.log(`Multi-Device State Synchronization Results:
@@ -1128,7 +1196,9 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
       expect(result.success).toBe(true);
       expect(deviceCount).toBe(multiDeviceScenario.devices.length);
       expect(allDevicesSynced).toBe(true);
-      expect(result.metrics.syncLatency).toBeLessThan(multiDeviceScenario.performanceTargets.syncLatency);
+      expect(result.metrics.syncLatency).toBeLessThan(
+        multiDeviceScenario.performanceTargets.syncLatency,
+      );
       expect(result.metrics.consistencyRate).toBeGreaterThan(0.95);
     }, 35000);
   });
@@ -1138,7 +1208,9 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
   describe('State Conflict Resolution', () => {
     it('should resolve conflicts between concurrent device updates', async () => {
       const scenarios = StateManagementTestUtils.generateStateTestScenarios();
-      const conflictScenario = scenarios.find(s => s.name === 'State Conflict Resolution');
+      const conflictScenario = scenarios.find(
+        (s) => s.name === 'State Conflict Resolution',
+      );
 
       if (!conflictScenario) {
         throw new Error('Conflict resolution scenario not found');
@@ -1148,10 +1220,12 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
 
       const result = await StateManagementTestUtils.executeStateTestScenario(
         conflictScenario,
-        conversationalBridge
+        conversationalBridge,
       );
 
-      const conflictsResolved = result.metrics.conflictCount > 0 && result.finalState.synchronizationStatus === 'synced';
+      const conflictsResolved =
+        result.metrics.conflictCount > 0 &&
+        result.finalState.synchronizationStatus === 'synced';
       const finalPreferences = result.finalState.userPreferences;
 
       logger.log(`State Conflict Resolution Results:
@@ -1165,7 +1239,9 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
       expect(result.success).toBe(true);
       expect(result.metrics.conflictCount).toBeGreaterThan(0);
       expect(conflictsResolved).toBe(true);
-      expect(result.metrics.resolutionTime).toBeLessThan(conflictScenario.performanceTargets.resolutionTime);
+      expect(result.metrics.resolutionTime).toBeLessThan(
+        conflictScenario.performanceTargets.resolutionTime,
+      );
       expect(result.metrics.dataIntegrity).toBe(true);
 
       // Validate merged preferences contain elements from both devices
@@ -1189,8 +1265,8 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
         syncPreferences: {
           immediateSync: true,
           conflictHandling: 'auto',
-          backgroundSync: true
-        }
+          backgroundSync: true,
+        },
       });
 
       const initialState: ConversationState = {
@@ -1204,8 +1280,8 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
             content: { text: 'Initial message' },
             timestamp: new Date(),
             sequenceNumber: 1,
-            acknowledged: true
-          }
+            acknowledged: true,
+          },
         ],
         validationHistory: [
           {
@@ -1215,14 +1291,14 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
             result: 'approved',
             timestamp: new Date(),
             duration: 100,
-            userConfirmation: true
-          }
+            userConfirmation: true,
+          },
         ],
         userPreferences: { theme: 'dark', language: 'en' },
         contextData: { testContext: 'value' },
         lastUpdated: new Date(),
         version: 5,
-        synchronizationStatus: 'synced'
+        synchronizationStatus: 'synced',
       };
 
       let persistenceSuccess = false;
@@ -1239,14 +1315,14 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
           sequence: 1,
           payload: {
             operationType: 'state_persistence',
-            state: initialState
+            state: initialState,
           },
           metadata: {
             priority: 'high',
             requiresAck: true,
             compression: true,
-            routingHints: ['persistence']
-          }
+            routingHints: ['persistence'],
+          },
         };
 
         await StateManagementTestUtils.sendMessage(client, persistenceMessage);
@@ -1254,7 +1330,7 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
 
         // Simulate connection loss
         client.terminate();
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Reconnect and attempt recovery
         client = await StateManagementTestUtils.createDeviceClient({
@@ -1265,8 +1341,8 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
           syncPreferences: {
             immediateSync: true,
             conflictHandling: 'auto',
-            backgroundSync: true
-          }
+            backgroundSync: true,
+          },
         });
 
         // Send state recovery request
@@ -1279,14 +1355,14 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
           payload: {
             operationType: 'state_recovery',
             sessionId: initialState.sessionId,
-            conversationId: initialState.conversationId
+            conversationId: initialState.conversationId,
           },
           metadata: {
             priority: 'high',
             requiresAck: true,
             compression: false,
-            routingHints: ['recovery']
-          }
+            routingHints: ['recovery'],
+          },
         };
 
         await StateManagementTestUtils.sendMessage(client, recoveryMessage);
@@ -1306,7 +1382,6 @@ describe('PARLANT Conversation State Management and Persistence Testing Suite', 
         expect(persistenceSuccess).toBe(true);
         expect(recoverySuccess).toBe(true);
         expect(dataIntegrityPreserved).toBe(true);
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();

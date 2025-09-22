@@ -19,20 +19,24 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ThrottlerException } from '@nestjs/throttler';/*** Security-focused error classification
+import { ThrottlerException } from '@nestjs/throttler'; /*** Security-focused error classification
  */
 enum SecurityErrorType {
-  VALIDATION_ERROR = 'validation_error',AUTHENTICATION_ERROR = 'authentication_error',AUTHORIZATION_ERROR = 'authorization_error',RATE_LIMIT_ERROR = 'rate_limit_error',SECURITY_VIOLATION = 'security_violation',SYSTEM_ERROR = 'system_error',INPUT_ERROR = 'input_error',}/**
+  VALIDATION_ERROR = 'validation_error',
+  AUTHENTICATION_ERROR = 'authentication_error',
+  AUTHORIZATION_ERROR = 'authorization_error',
+  RATE_LIMIT_ERROR = 'rate_limit_error',
+  SECURITY_VIOLATION = 'security_violation',
+  SYSTEM_ERROR = 'system_error',
+  INPUT_ERROR = 'input_error',
+} /**
  * Error details structure for development responses
  */
 interface ErrorDetails {
   name: string;
   cause: string | null;
-
-
 }
 
 /**
@@ -48,8 +52,6 @@ interface SecureErrorResponse {
   // Only include in development
   details?: ErrorDetails;
   stack?: string;
-
-
 }
 
 /**
@@ -63,12 +65,9 @@ interface _SecurityErrorMetrics {
   endpoint: string;
   timestamp: Date;
   riskScore: number;
-
-
 }
 
 @Catch()
-
 export class SecurityExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(SecurityExceptionFilter.name);
 
@@ -86,15 +85,15 @@ export class SecurityExceptionFilter implements ExceptionFilter {
    * Handle all exceptions with security-focused processing
    */
   catch(exception: unknown, host: ArgumentsHost) {
-  const ctx = host.switchToHttp();
+    const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
     // Generate request ID for tracking (use existing or create new)
     const requestId =
-      (request.headers['x-correlation-id'] as string) ||(request.headers['x-request-id'] as string) ||
-      `error-${Date.now()
-}-${Math.random().toString(36).substr(2, 9)}`;
+      (request.headers['x-correlation-id'] as string) ||
+      (request.headers['x-request-id'] as string) ||
+      `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Classify and analyze the exception
     const errorAnalysis = this.analyzeException(exception, request);
@@ -115,12 +114,13 @@ export class SecurityExceptionFilter implements ExceptionFilter {
 
     // Check for security attack patterns
     if (errorAnalysis.riskScore >= 7) {
-  this.handleHighRiskError(request, errorAnalysis, requestId);
-    
-}
+      this.handleHighRiskError(request, errorAnalysis, requestId);
+    }
 
     // Set security headers
-    response.setHeader('X-Request-ID', requestId);response.setHeader('X-Content-Type-Options', 'nosniff');response.setHeader('X-Frame-Options', 'DENY');// Send secure responseresponse.status(secureResponse.statusCode).json(secureResponse);
+    response.setHeader('X-Request-ID', requestId);
+    response.setHeader('X-Content-Type-Options', 'nosniff');
+    response.setHeader('X-Frame-Options', 'DENY'); // Send secure responseresponse.status(secureResponse.statusCode).json(secureResponse);
   }
 
   /**
@@ -130,14 +130,13 @@ export class SecurityExceptionFilter implements ExceptionFilter {
     exception: unknown,
     request: Request,
   ): {
-  errorType: SecurityErrorType;
+    errorType: SecurityErrorType;
     statusCode: number;
     riskScore: number;
     threatIndicators: string[];
     isSecurityRelated: boolean;
-  
-} {
-  let errorType = SecurityErrorType.SYSTEM_ERROR;
+  } {
+    let errorType = SecurityErrorType.SYSTEM_ERROR;
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let riskScore = 1;
     const threatIndicators: string[] = [];
@@ -148,7 +147,6 @@ export class SecurityExceptionFilter implements ExceptionFilter {
 
       // Classify by HTTP status code
       switch (statusCode) {
-
         case HttpStatus.BAD_REQUEST:
           errorType = SecurityErrorType.INPUT_ERROR;
           riskScore = 2;
@@ -156,58 +154,65 @@ export class SecurityExceptionFilter implements ExceptionFilter {
         case HttpStatus.UNAUTHORIZED:
           errorType = SecurityErrorType.AUTHENTICATION_ERROR;
           riskScore = 4;
-          threatIndicators.push('auth_failure');break;
-      case HttpStatus.FORBIDDEN:
+          threatIndicators.push('auth_failure');
+          break;
+        case HttpStatus.FORBIDDEN:
           errorType = SecurityErrorType.AUTHORIZATION_ERROR;
           riskScore = 5;
-          threatIndicators.push('access_denied');break;
-      case HttpStatus.TOO_MANY_REQUESTS:
+          threatIndicators.push('access_denied');
+          break;
+        case HttpStatus.TOO_MANY_REQUESTS:
           errorType = SecurityErrorType.RATE_LIMIT_ERROR;
           riskScore = 3;
-          threatIndicators.push('rate_limit_exceeded');break;
-  default:
-        if (statusCode >= HttpStatus.BAD_REQUEST && statusCode < HttpStatus.INTERNAL_SERVER_ERROR) {
+          threatIndicators.push('rate_limit_exceeded');
+          break;
+        default:
+          if (
+            statusCode >= HttpStatus.BAD_REQUEST &&
+            statusCode < HttpStatus.INTERNAL_SERVER_ERROR
+          ) {
             riskScore = 3;
-        break;
-          
-
-    }
+            break;
+          }
       }
 
       // Check for specific exception types
       if (exception instanceof ThrottlerException) {
-  errorType = SecurityErrorType.RATE_LIMIT_ERROR;
+        errorType = SecurityErrorType.RATE_LIMIT_ERROR;
         riskScore = 4;
         threatIndicators.push('throttle_violation');
-}// Analyze error message for security patterns
+      } // Analyze error message for security patterns
       const message = exception.message?.toLowerCase() ?? '';
-if (message.includes('validation') ?? message.includes('sanitization')) {
-  errorType = SecurityErrorType.VALIDATION_ERROR;riskScore += 1;
-      
-}
+      if (message.includes('validation') ?? message.includes('sanitization')) {
+        errorType = SecurityErrorType.VALIDATION_ERROR;
+        riskScore += 1;
+      }
 
-  if(
-        message.includes('xss') ||message.includes('injection') ||message.includes('malicious')) {
-  errorType = SecurityErrorType.SECURITY_VIOLATION;
+      if (
+        message.includes('xss') ||
+        message.includes('injection') ||
+        message.includes('malicious')
+      ) {
+        errorType = SecurityErrorType.SECURITY_VIOLATION;
         riskScore += 4;
         threatIndicators.push('attack_detected');
-}}
+      }
+    }
 
     // Increase risk score for repeated errors from same client
     const clientIdentifier = this.getClientIdentifier(request);
     const existingPattern = this.errorPatterns.get(clientIdentifier);
     if (existingPattern && existingPattern.count > 5) {
-  riskScore += 2;
+      riskScore += 2;
       threatIndicators.push('repeated_errors');
-}
-return {
-  errorType,
+    }
+    return {
+      errorType,
       statusCode,
       riskScore: Math.min(10, riskScore), // Cap at 10
       threatIndicators,
       isSecurityRelated: riskScore >= 4 || threatIndicators.length > 0,
-    
-};
+    };
   }
 
   /**
@@ -218,35 +223,32 @@ return {
     request: Request,
     requestId: string,
     errorAnalysis: {
-  errorType: SecurityErrorType;
+      errorType: SecurityErrorType;
       statusCode: number;
       riskScore: number;
       threatIndicators: string[];
       isSecurityRelated: boolean;
-    
-},
+    },
   ): SecureErrorResponse {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+    const isDevelopment = process.env.NODE_ENV === 'development';
 
-// Base secure response
+    // Base secure response
     const response: SecureErrorResponse = {
-  statusCode: errorAnalysis.statusCode,
+      statusCode: errorAnalysis.statusCode,
       error: this.getSecureErrorName(errorAnalysis.statusCode),
       message: this.getSecureErrorMessage(exception, errorAnalysis),
       timestamp: new Date().toISOString(),
       path: request.path,
       requestId,
-    
-};
+    };
 
     // Only include detailed information in development
     if (isDevelopment) {
-  response.details = this.sanitizeErrorDetails(exception) ?? undefined;
+      response.details = this.sanitizeErrorDetails(exception) ?? undefined;
 
       if (exception instanceof Error && exception.stack) {
         response.stack = exception.stack;
-      
-}
+      }
     }
 
     return response;
@@ -256,44 +258,56 @@ return {
    * Get secure error name based on status code
    */
   private getSecureErrorName(statusCode: number): string {
-  const errorNames: Record<number, string> = {
-  400: 'Bad Request',401: 'Unauthorized',403: 'Forbidden',404: 'Not Found',405: 'Method Not Allowed',409: 'Conflict',422: 'Unprocessable Entity',429: 'Too Many Requests',500: 'Internal Server Error',502: 'Bad Gateway',503: 'Service Unavailable',504: 'Gateway Timeout',
-
-};
-return errorNames[statusCode] ?? 'Unknown Error';}/**
+    const errorNames: Record<number, string> = {
+      400: 'Bad Request',
+      401: 'Unauthorized',
+      403: 'Forbidden',
+      404: 'Not Found',
+      405: 'Method Not Allowed',
+      409: 'Conflict',
+      422: 'Unprocessable Entity',
+      429: 'Too Many Requests',
+      500: 'Internal Server Error',
+      502: 'Bad Gateway',
+      503: 'Service Unavailable',
+      504: 'Gateway Timeout',
+    };
+    return errorNames[statusCode] ?? 'Unknown Error';
+  } /**
    * Get secure error message that doesn't leak sensitive information
    */
   private getSecureErrorMessage(
     exception: unknown,
     errorAnalysis: {
-  errorType: SecurityErrorType;
+      errorType: SecurityErrorType;
       statusCode: number;
       riskScore: number;
       threatIndicators: string[];
       isSecurityRelated: boolean;
-    
-},
+    },
   ): string {
-  // For security violations, use generic message
+    // For security violations, use generic message
     if (errorAnalysis.errorType === SecurityErrorType.SECURITY_VIOLATION) {
       return 'Request blocked due to security policy violation';
-}// For rate limiting
+    } // For rate limiting
     if (errorAnalysis.errorType === SecurityErrorType.RATE_LIMIT_ERROR) {
-      return 'Too many requests. Please try again later';}// For validation errors, provide safe message
+      return 'Too many requests. Please try again later';
+    } // For validation errors, provide safe message
     if (errorAnalysis.errorType === SecurityErrorType.VALIDATION_ERROR) {
-      return 'Invalid input provided. Please check your request';}// For HTTP exceptions, use the message but sanitize it
+      return 'Invalid input provided. Please check your request';
+    } // For HTTP exceptions, use the message but sanitize it
     if (exception instanceof HttpException) {
-  const message = exception.message;
+      const message = exception.message;
       return this.sanitizeErrorMessage(message);
-    
-}
+    }
 
     // Generic message for other errors
-    return 'An error occurred while processing your request';}/**
+    return 'An error occurred while processing your request';
+  } /**
    * Sanitize error message to prevent information disclosure
    */
   private sanitizeErrorMessage(message: string): string {
-  // Remove sensitive patterns
+    // Remove sensitive patterns
     const sanitizedMessage = message
       // Remove file paths
       .replace(/\/[a-zA-Z0-9/_-]+/g, '[PATH_REMOVED]')
@@ -306,31 +320,28 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
       // Remove sensitive environment variables
       .replace(
         /NODE_ENV|API_KEY|SECRET|PASSWORD|TOKEN/gi,
-        '[SENSITIVE_REMOVED]'
+        '[SENSITIVE_REMOVED]',
       );
 
     return sanitizedMessage.substring(0, 200); // Limit message length
-  
-}
+  }
 
   /**
    * Sanitize error details for development responses
    */
   private sanitizeErrorDetails(exception: unknown): ErrorDetails | null {
-  if (!(exception instanceof Error)) {
+    if (!(exception instanceof Error)) {
       return null;
-    
-}
+    }
 
     // Type guard for exception cause property
     const cause = this.getErrorCause(exception);
 
     return {
-  name: exception.name,
+      name: exception.name,
       cause,
       // Don't include the full stack trace in JSON response
-    
-};
+    };
   }
 
   /**
@@ -354,7 +365,11 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
           return '[object Object]';
         }
 
-        if (typeof cause === 'number' || typeof cause === 'boolean' || typeof cause === 'bigint') {
+        if (
+          typeof cause === 'number' ||
+          typeof cause === 'boolean' ||
+          typeof cause === 'bigint'
+        ) {
           return String(cause);
         }
         // For other types, ensure it's a string or convertible
@@ -476,9 +491,10 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
       endpoint: request.path,
       riskScore: errorAnalysis.riskScore,
       threatIndicators: errorAnalysis.threatIndicators,
-      recommendation: 'Consider implementing additional security measures for this client',
+      recommendation:
+        'Consider implementing additional security measures for this client',
       timestamp: new Date().toISOString(),
-});
+    });
 
     // In a production environment, you might:
     // - Send alert to security team
@@ -507,12 +523,14 @@ return errorNames[statusCode] ?? 'Unknown Error';}/**
       request.socket.remoteAddress ??
       'unknown'
     );
-}
+  }
 
   /**
    * Sanitize headers to remove sensitive information
    */
-  private sanitizeHeaders(headers: Record<string, unknown>): Record<string, unknown> {
+  private sanitizeHeaders(
+    headers: Record<string, unknown>,
+  ): Record<string, unknown> {
     const sanitized = { ...headers };
 
     const sensitiveHeaders = [

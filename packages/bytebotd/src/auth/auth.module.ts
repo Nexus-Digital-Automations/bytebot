@@ -36,27 +36,46 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
   // Multi-algorithm support configuration
   algorithms: ['HS256', 'RS256', 'ES256', 'EdDSA'] as Algorithm[],
   // Primary secret for HS256 (backward compatibility)
-  secret: configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production'),
+  secret: configService.get<string>(
+    'JWT_SECRET_HS256',
+    'bytebot-default-secret-change-in-production',
+  ),
   // Enhanced signing options
   signOptions: {
     expiresIn: configService.get<string>('JWT_EXPIRES_IN', '1h'),
-    algorithm: configService.get<string>('JWT_DEFAULT_ALGORITHM', 'HS256') as Algorithm,
+    algorithm: configService.get<string>(
+      'JWT_DEFAULT_ALGORITHM',
+      'HS256',
+    ) as Algorithm,
     issuer: configService.get<string>('JWT_ISSUER', 'aigent-bytebot-system'),
-    audience: configService.get<string>('JWT_AUDIENCE', 'bytebotd-enterprise-control'),
+    audience: configService.get<string>(
+      'JWT_AUDIENCE',
+      'bytebotd-enterprise-control',
+    ),
     keyid: configService.get<string>('JWT_KEY_ID'),
   },
   // Enhanced verification options
   verifyOptions: {
     algorithms: ['HS256', 'RS256', 'ES256', 'EdDSA'] as Algorithm[],
     issuer: configService.get<string>('JWT_ISSUER', 'aigent-bytebot-system'),
-    audience: configService.get<string>('JWT_AUDIENCE', 'bytebotd-enterprise-control'),
+    audience: configService.get<string>(
+      'JWT_AUDIENCE',
+      'bytebotd-enterprise-control',
+    ),
     clockTolerance: 300, // 5 minutes
     maxAge: configService.get<string>('JWT_MAX_AGE', '24h'),
   },
   // Enterprise security options
-  secretOrKeyProvider: (_requestType: unknown, _tokenOrPayload: string | object | Buffer, _options?: unknown) => {
+  secretOrKeyProvider: (
+    _requestType: unknown,
+    _tokenOrPayload: string | object | Buffer,
+    _options?: unknown,
+  ) => {
     // Dynamic key resolution handled by EnhancedJwtStrategy
-    return configService.get<string>('JWT_SECRET_HS256', 'bytebot-default-secret-change-in-production');
+    return configService.get<string>(
+      'JWT_SECRET_HS256',
+      'bytebot-default-secret-change-in-production',
+    );
   },
 });
 
@@ -139,7 +158,9 @@ export const enhancedJwtConfigFactory = (configService: ConfigService) => ({
 export class AuthModule {
   constructor() {
     console.log('Enhanced AIgent-Parlant Authentication Module initialized');
-    console.log('Enterprise JWT authentication with conversational security bridge active');
+    console.log(
+      'Enterprise JWT authentication with conversational security bridge active',
+    );
     console.log('Multi-algorithm support: HS256, RS256, ES256, EdDSA');
     console.log('5-tier security classification system enabled');
     console.log('Redis session clustering and emergency overrides available');

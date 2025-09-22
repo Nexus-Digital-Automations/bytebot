@@ -192,25 +192,91 @@ import { Test, TestingModule } from '@nestjs/testing';import { CacheKeyGenerator
       const result = generator.generateApiKey('GET', '/api/data', queryParams);expect(result).toMatch(/^api:api:get:api_data:[a-f0-9]{12}$/);});
   });
 
-  describe('Database Key Generation', () => {it('should generate database keys with table and operation', () => {const result = generator.generateDbKey('users', 'SELECT');expect(result).toBe('database:db:users:select');});it('should include parameters hash when provided', () => {const params = { id: 123, status: 'active' };const result = generator.generateDbKey('users', 'SELECT', params);expect(result).toMatch(/^database:db:users:select:[a-f0-9]{12}$/);});
+  describe('Database Key Generation', () => {
+    it('should generate database keys with table and operation', () => {
+      const result = generator.generateDbKey('users', 'SELECT');
+      expect(result).toBe('database:db:users:select');
+    });
 
-    it('should handle empty parameters', () => {const result = generator.generateDbKey('users', 'COUNT', {});expect(result).toBe('database:db:users:count');});});
+    it('should include parameters hash when provided', () => {
+      const params = { id: 123, status: 'active' };
+      const result = generator.generateDbKey('users', 'SELECT', params);
+      expect(result).toMatch(/^database:db:users:select:[a-f0-9]{12}$/);
+    });
 
-  describe('Task Key Generation', () => {it('should generate task keys with ID and operation', () => {const result = generator.generateTaskKey('task123', 'status');expect(result).toBe('tasks:task:task123:status');});it('should include additional parameters', () => {const params = { userId: 'user456', priority: 'high' };const result = generator.generateTaskKey('task123', 'execute', params);expect(result).toMatch(/^tasks:task:task123:execute:[a-f0-9]{12}$/);});
+    it('should handle empty parameters', () => {
+      const result = generator.generateDbKey('users', 'COUNT', {});
+      expect(result).toBe('database:db:users:count');
+    });
   });
 
-  describe('Invalidation Pattern Generation', () => {it('should generate basic invalidation patterns', () => {const result = generator.generateInvalidationPattern('cache');expect(result).toBe('cache:*');});it('should generate specific invalidation patterns', () => {const result = generator.generateInvalidationPattern('cache', 'user');expect(result).toBe('cache:user*');});it('should handle empty patterns', () => {const result = generator.generateInvalidationPattern('namespace', '');expect(result).toBe('namespace:*');});});
+  describe('Task Key Generation', () => {
+    it('should generate task keys with ID and operation', () => {
+      const result = generator.generateTaskKey('task123', 'status');
+      expect(result).toBe('tasks:task:task123:status');
+    });
 
-  describe('Key Validation', () => {it('should validate normal keys', () => {expect(() => {generator.generate('valid-key');}).not.toThrow();});
+    it('should include additional parameters', () => {
+      const params = { userId: 'user456', priority: 'high' };
+      const result = generator.generateTaskKey('task123', 'execute', params);
+      expect(result).toMatch(/^tasks:task:task123:execute:[a-f0-9]{12}$/);
+    });
+  });
 
-    it('should reject empty keys', () => {expect(() => {generator.generate('');}).toThrow('Generated key is empty');});it('should reject extremely long keys', () => {const extremelyLongKey = 'a'.repeat(1000);expect(() => {generator.generate(extremelyLongKey, undefined, { 
+  describe('Invalidation Pattern Generation', () => {
+    it('should generate basic invalidation patterns', () => {
+      const result = generator.generateInvalidationPattern('cache');
+      expect(result).toBe('cache:*');
+    });
+
+    it('should generate specific invalidation patterns', () => {
+      const result = generator.generateInvalidationPattern('cache', 'user');
+      expect(result).toBe('cache:user*');
+    });
+
+    it('should handle empty patterns', () => {
+      const result = generator.generateInvalidationPattern('namespace', '');
+      expect(result).toBe('namespace:*');
+    });
+  });
+
+  describe('Key Validation', () => {
+    it('should validate normal keys', () => {
+      expect(() => {
+        generator.generate('valid-key');
+      }).not.toThrow();
+    });
+
+    it('should reject empty keys', () => {
+      expect(() => {
+        generator.generate('');
+      }).toThrow('Generated key is empty');
+    });
+
+    it('should reject extremely long keys', () => {
+      const extremelyLongKey = 'a'.repeat(1000);
+      expect(() => {
+        generator.generate(extremelyLongKey, undefined, {
           hashLongKeys: false,
-          maxLength: 999 
+          maxLength: 999
         });
-      }).toThrow('Generated key exceeds maximum length');});it('should reject keys with whitespace', () => {// This test verifies the validation catches issues that sanitization missedconst keyWithTabs = 'key\tWith
-Whitespace';// Mock the sanitization to let whitespace through for testingconst _originalGenerate = generator.generate;
-      jest.spyOn(generator as unknown as { sanitizeKey: jest.Mock }, 'sanitizeKey').mockReturnValue(keyWithTabs);expect(() => {generator.generate(keyWithTabs);
-      }).toThrow('Generated key contains whitespace characters');// Restore original method(generator as unknown as { sanitizeKey: jest.Mock }).sanitizeKey.mockRestore();
+      }).toThrow('Generated key exceeds maximum length');
+    });
+
+    it('should reject keys with whitespace', () => {
+      // This test verifies the validation catches issues that sanitization missed
+      const keyWithTabs = 'key\tWithWhitespace';
+
+      // Mock the sanitization to let whitespace through for testing
+      const _originalGenerate = generator.generate;
+      jest.spyOn(generator as unknown as { sanitizeKey: jest.Mock }, 'sanitizeKey').mockReturnValue(keyWithTabs);
+
+      expect(() => {
+        generator.generate(keyWithTabs);
+      }).toThrow('Generated key contains whitespace characters');
+
+      // Restore original method
+      (generator as unknown as { sanitizeKey: jest.Mock }).sanitizeKey.mockRestore();
     });
   });
 

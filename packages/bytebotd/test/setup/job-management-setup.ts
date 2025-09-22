@@ -84,21 +84,21 @@ export const DEFAULT_TEST_CONFIG: TestConfiguration = {
     password: process.env.REDIS_PASSWORD,
   },
   timeouts: {
-    unit: 30000,      // 30 seconds
-    integration: 120000,  // 2 minutes
-    performance: 300000,  // 5 minutes
-    chaos: 300000,        // 5 minutes
-    security: 120000,     // 2 minutes
+    unit: 30000, // 30 seconds
+    integration: 120000, // 2 minutes
+    performance: 300000, // 5 minutes
+    chaos: 300000, // 5 minutes
+    security: 120000, // 2 minutes
   },
   thresholds: {
     performance: {
-      jobSubmissionRate: 1000,  // jobs per second
-      executionLatency: 500,    // milliseconds
+      jobSubmissionRate: 1000, // jobs per second
+      executionLatency: 500, // milliseconds
       queueOperationLatency: 10, // milliseconds
     },
     security: {
-      encryptionEntropy: 4.0,   // minimum entropy
-      maxFailureRate: 0.05,     // 5% maximum failure rate
+      encryptionEntropy: 4.0, // minimum entropy
+      maxFailureRate: 0.05, // 5% maximum failure rate
     },
   },
 };
@@ -119,7 +119,9 @@ export class TestUtils {
   /**
    * Generate test computer actions
    */
-  generateTestAction(type: 'simple' | 'complex' | 'malicious' = 'simple'): ComputerAction {
+  generateTestAction(
+    type: 'simple' | 'complex' | 'malicious' = 'simple',
+  ): ComputerAction {
     switch (type) {
       case 'simple':
         return {
@@ -184,10 +186,12 @@ export class TestUtils {
       try {
         const status = await service.getJobStatus(jobId);
 
-        if (status.status === JobStatus.COMPLETED ||
-            status.status === JobStatus.FAILED ||
-            status.status === JobStatus.CANCELLED ||
-            status.status === JobStatus.TIMEOUT) {
+        if (
+          status.status === JobStatus.COMPLETED ||
+          status.status === JobStatus.FAILED ||
+          status.status === JobStatus.CANCELLED ||
+          status.status === JobStatus.TIMEOUT
+        ) {
           return status;
         }
 
@@ -210,7 +214,10 @@ export class TestUtils {
     actionType: 'simple' | 'complex' | 'malicious' = 'simple',
   ): Promise<string[]> {
     const promises = Array.from({ length: count }, () =>
-      service.createJob(this.generateTestAction(actionType), this.generateJobOptions())
+      service.createJob(
+        this.generateTestAction(actionType),
+        this.generateJobOptions(),
+      ),
     );
 
     return Promise.all(promises);
@@ -220,7 +227,7 @@ export class TestUtils {
    * Sleep utility
    */
   async sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -249,7 +256,9 @@ export class TestUtils {
   /**
    * Measure execution time
    */
-  async measureExecutionTime<T>(operation: () => Promise<T>): Promise<{ result: T; time: number }> {
+  async measureExecutionTime<T>(
+    operation: () => Promise<T>,
+  ): Promise<{ result: T; time: number }> {
     const startTime = performance.now();
     const result = await operation();
     const endTime = performance.now();
@@ -276,11 +285,13 @@ export class TestUtils {
     const len = sorted.length;
 
     const mean = sorted.reduce((sum, val) => sum + val, 0) / len;
-    const median = len % 2 === 0
-      ? (sorted[len / 2 - 1] + sorted[len / 2]) / 2
-      : sorted[Math.floor(len / 2)];
+    const median =
+      len % 2 === 0
+        ? (sorted[len / 2 - 1] + sorted[len / 2]) / 2
+        : sorted[Math.floor(len / 2)];
 
-    const variance = sorted.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / len;
+    const variance =
+      sorted.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / len;
     const stdDev = Math.sqrt(variance);
 
     return {
@@ -307,7 +318,8 @@ export class TestUtils {
 
     // Calculate entropy
     const entropy = this.calculateEntropy(encryptedData);
-    const hasHighEntropy = entropy > DEFAULT_TEST_CONFIG.thresholds.security.encryptionEntropy;
+    const hasHighEntropy =
+      entropy > DEFAULT_TEST_CONFIG.thresholds.security.encryptionEntropy;
 
     return {
       hasProperFormat,
@@ -412,7 +424,7 @@ Memory Usage: ${(metrics.memoryUsage / 1024 / 1024).toFixed(2)} MB
     failed: number;
   }): string {
     const total = results.passed + results.failed;
-    const passRate = total > 0 ? (results.passed / total * 100) : 0;
+    const passRate = total > 0 ? (results.passed / total) * 100 : 0;
 
     return `
 Security Test Report

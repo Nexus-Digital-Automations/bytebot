@@ -34,20 +34,20 @@ import { EnhancedAsyncJobService } from '../enhanced-async-job.service';
  * Cancellation strategy enumeration
  */
 export enum CancellationStrategy {
-  GRACEFUL = 'graceful',           // Allow current operations to complete
-  IMMEDIATE = 'immediate',         // Stop as soon as possible
-  FORCED = 'forced',              // Terminate forcefully if needed
-  ESCALATED = 'escalated',        // Try graceful, then escalate to forced
+  GRACEFUL = 'graceful', // Allow current operations to complete
+  IMMEDIATE = 'immediate', // Stop as soon as possible
+  FORCED = 'forced', // Terminate forcefully if needed
+  ESCALATED = 'escalated', // Try graceful, then escalate to forced
 }
 
 /**
  * Timeout escalation level
  */
 export enum TimeoutEscalation {
-  WARNING = 'warning',            // Send warning notification
-  GRACEFUL_CANCEL = 'graceful_cancel',  // Attempt graceful cancellation
-  FORCE_CANCEL = 'force_cancel',  // Force cancellation
-  EMERGENCY_STOP = 'emergency_stop',    // Emergency system stop
+  WARNING = 'warning', // Send warning notification
+  GRACEFUL_CANCEL = 'graceful_cancel', // Attempt graceful cancellation
+  FORCE_CANCEL = 'force_cancel', // Force cancellation
+  EMERGENCY_STOP = 'emergency_stop', // Emergency system stop
 }
 
 /**
@@ -73,7 +73,7 @@ export interface BulkCancellationRequest {
     priority?: JobPriority[];
     olderThan?: Date;
     longerThan?: number; // milliseconds
-    pattern?: string;    // regex pattern for job metadata
+    pattern?: string; // regex pattern for job metadata
   };
   strategy: CancellationStrategy;
   reason: string;
@@ -87,8 +87,8 @@ export interface BulkCancellationRequest {
  */
 export interface TimeoutConfiguration {
   jobId: string;
-  softTimeoutMs: number;    // First warning
-  hardTimeoutMs: number;    // Cancellation timeout
+  softTimeoutMs: number; // First warning
+  hardTimeoutMs: number; // Cancellation timeout
   escalationSteps: {
     delayMs: number;
     action: TimeoutEscalation;
@@ -167,7 +167,9 @@ export class JobCancellationTimeoutService {
   /**
    * Cancel a single job with specified strategy
    */
-  async cancelJob(request: JobCancellationRequest): Promise<CancellationResult> {
+  async cancelJob(
+    request: JobCancellationRequest,
+  ): Promise<CancellationResult> {
     const startTime = Date.now();
     const tracker = this.activeJobs.get(request.jobId);
 
@@ -177,8 +179,8 @@ export class JobCancellationTimeoutService {
         jobId: request.jobId,
         strategy: request.strategy,
         reason: request.reason,
-        hasTracker: !!tracker
-      }
+        hasTracker: !!tracker,
+      },
     );
 
     const result: CancellationResult = {
@@ -202,7 +204,9 @@ export class JobCancellationTimeoutService {
       try {
         jobStatus = this.asyncJobService.getJobStatus(request.jobId);
       } catch (error) {
-        this.logger.warn(`Job ${request.jobId} not found in base service, checking enhanced service`);
+        this.logger.warn(
+          `Job ${request.jobId} not found in base service, checking enhanced service`,
+        );
         // Job might be in enhanced service only
         jobStatus = {
           jobId: request.jobId,
@@ -213,7 +217,10 @@ export class JobCancellationTimeoutService {
       }
 
       // Check if job can be cancelled
-      if (jobStatus.status === JobStatus.COMPLETED || jobStatus.status === JobStatus.FAILED) {
+      if (
+        jobStatus.status === JobStatus.COMPLETED ||
+        jobStatus.status === JobStatus.FAILED
+      ) {
         throw new Error(`Cannot cancel job in ${jobStatus.status} state`);
       }
 
@@ -228,7 +235,7 @@ export class JobCancellationTimeoutService {
       result.actualStrategy = await this.executeCancellationStrategy(
         request,
         tracker,
-        result
+        result,
       );
 
       // Perform cleanup if requested
@@ -256,14 +263,17 @@ export class JobCancellationTimeoutService {
         strategy: result.actualStrategy,
         duration: result.duration,
       });
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to cancel job ${request.jobId}: ${errorMessage}`, {
-        jobId: request.jobId,
-        strategy: request.strategy,
-        error: errorMessage,
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Failed to cancel job ${request.jobId}: ${errorMessage}`,
+        {
+          jobId: request.jobId,
+          strategy: request.strategy,
+          error: errorMessage,
+        },
+      );
       result.cleanup.errors.push(errorMessage);
     }
 
@@ -275,7 +285,9 @@ export class JobCancellationTimeoutService {
   /**
    * Cancel multiple jobs based on criteria
    */
-  async cancelJobsBulk(request: BulkCancellationRequest): Promise<BulkCancellationResult> {
+  async cancelJobsBulk(
+    request: BulkCancellationRequest,
+  ): Promise<BulkCancellationResult> {
     const requestId = `bulk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -314,7 +326,7 @@ export class JobCancellationTimeoutService {
       if (result.dryRun) {
         this.logger.log(`Dry run: would cancel ${result.attempted} jobs`, {
           requestId,
-          matchedJobs: matchingJobs.map(j => j.jobId),
+          matchedJobs: matchingJobs.map((j) => j.jobId),
         });
         result.duration = Date.now() - startTime;
         return result;
@@ -343,7 +355,9 @@ export class JobCancellationTimeoutService {
               result.failed++;
               result.failures.push({
                 jobId: job.jobId,
-                error: cancellationResult.cleanup.errors.join(', ') || 'Unknown error',
+                error:
+                  cancellationResult.cleanup.errors.join(', ') ||
+                  'Unknown error',
               });
             }
           } catch (error) {
@@ -364,7 +378,6 @@ export class JobCancellationTimeoutService {
         successful: result.successful,
         failed: result.failed,
       });
-
     } catch (error) {
       this.logger.error(`Bulk cancellation ${requestId} failed: ${error}`, {
         requestId,
@@ -399,7 +412,7 @@ export class JobCancellationTimeoutService {
   registerActiveJob(
     jobId: string,
     abortController?: AbortController,
-    cleanupCallbacks: (() => Promise<void>)[] = []
+    cleanupCallbacks: (() => Promise<void>)[] = [],
   ): void {
     const tracker: ActiveJobTracker = {
       jobId,
@@ -431,7 +444,7 @@ export class JobCancellationTimeoutService {
     const tracker = this.activeJobs.get(jobId);
     if (tracker) {
       // Clear any pending timeout escalations
-      tracker.escalationTimeouts.forEach(timeout => clearTimeout(timeout));
+      tracker.escalationTimeouts.forEach((timeout) => clearTimeout(timeout));
       this.activeJobs.delete(jobId);
 
       this.logger.debug(`Unregistered active job ${jobId}`, { jobId });
@@ -449,7 +462,7 @@ export class JobCancellationTimeoutService {
    * Get all active jobs being tracked
    */
   getActiveJobs(): { jobId: string; startedAt: Date; hasTimeout: boolean }[] {
-    return Array.from(this.activeJobs.values()).map(tracker => ({
+    return Array.from(this.activeJobs.values()).map((tracker) => ({
       jobId: tracker.jobId,
       startedAt: tracker.startedAt,
       hasTimeout: !!tracker.timeoutConfig,
@@ -478,7 +491,7 @@ export class JobCancellationTimeoutService {
   private async executeCancellationStrategy(
     request: JobCancellationRequest,
     tracker: ActiveJobTracker | undefined,
-    result: CancellationResult
+    result: CancellationResult,
   ): Promise<CancellationStrategy> {
     switch (request.strategy) {
       case CancellationStrategy.GRACEFUL:
@@ -504,13 +517,15 @@ export class JobCancellationTimeoutService {
   private async executeGracefulCancellation(
     request: JobCancellationRequest,
     tracker: ActiveJobTracker | undefined,
-    result: CancellationResult
+    result: CancellationResult,
   ): Promise<CancellationStrategy> {
     // Try base service cancellation first
     const baseSuccess = this.asyncJobService.cancelJob(request.jobId);
 
     if (baseSuccess) {
-      this.logger.log(`Gracefully cancelled job ${request.jobId} via base service`);
+      this.logger.log(
+        `Gracefully cancelled job ${request.jobId} via base service`,
+      );
       return CancellationStrategy.GRACEFUL;
     }
 
@@ -533,7 +548,7 @@ export class JobCancellationTimeoutService {
   private async executeImmediateCancellation(
     request: JobCancellationRequest,
     tracker: ActiveJobTracker | undefined,
-    result: CancellationResult
+    result: CancellationResult,
   ): Promise<CancellationStrategy> {
     // Cancel via base service
     this.asyncJobService.cancelJob(request.jobId);
@@ -552,7 +567,7 @@ export class JobCancellationTimeoutService {
   private async executeForcedCancellation(
     request: JobCancellationRequest,
     tracker: ActiveJobTracker | undefined,
-    result: CancellationResult
+    result: CancellationResult,
   ): Promise<CancellationStrategy> {
     // Cancel via both services
     this.asyncJobService.cancelJob(request.jobId);
@@ -591,11 +606,15 @@ export class JobCancellationTimeoutService {
   private async executeEscalatedCancellation(
     request: JobCancellationRequest,
     tracker: ActiveJobTracker | undefined,
-    result: CancellationResult
+    result: CancellationResult,
   ): Promise<CancellationStrategy> {
     // Try graceful first
     try {
-      const gracefulResult = await this.executeGracefulCancellation(request, tracker, result);
+      const gracefulResult = await this.executeGracefulCancellation(
+        request,
+        tracker,
+        result,
+      );
 
       // Wait a short period to see if it works
       const completed = await this.waitForJobCompletion(request.jobId, 2000);
@@ -607,7 +626,9 @@ export class JobCancellationTimeoutService {
     }
 
     // Escalate to forced
-    this.logger.log(`Escalating to forced cancellation for job ${request.jobId}`);
+    this.logger.log(
+      `Escalating to forced cancellation for job ${request.jobId}`,
+    );
     return this.executeForcedCancellation(request, tracker, result);
   }
 
@@ -617,7 +638,7 @@ export class JobCancellationTimeoutService {
   private async performJobCleanup(
     jobId: string,
     tracker: ActiveJobTracker | undefined,
-    result: CancellationResult
+    result: CancellationResult,
   ): Promise<void> {
     this.logger.debug(`Performing cleanup for job ${jobId}`);
 
@@ -647,7 +668,7 @@ export class JobCancellationTimeoutService {
    */
   private async notifyDependentJobs(
     jobId: string,
-    result: CancellationResult
+    result: CancellationResult,
   ): Promise<void> {
     try {
       // This would need integration with dependency management system
@@ -668,16 +689,18 @@ export class JobCancellationTimeoutService {
    */
   private async waitForJobCompletion(
     jobId: string,
-    timeoutMs: number
+    timeoutMs: number,
   ): Promise<boolean> {
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeoutMs) {
       try {
         const status = this.asyncJobService.getJobStatus(jobId);
-        if (status.status === JobStatus.COMPLETED ||
-            status.status === JobStatus.FAILED ||
-            status.status === JobStatus.CANCELLED) {
+        if (
+          status.status === JobStatus.COMPLETED ||
+          status.status === JobStatus.FAILED ||
+          status.status === JobStatus.CANCELLED
+        ) {
           return true;
         }
       } catch (error) {
@@ -685,7 +708,7 @@ export class JobCancellationTimeoutService {
         return true;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     return false;
@@ -695,14 +718,14 @@ export class JobCancellationTimeoutService {
    * Find jobs matching criteria
    */
   private async findJobsByCriteria(
-    criteria: BulkCancellationRequest['criteria']
+    criteria: BulkCancellationRequest['criteria'],
   ): Promise<{ jobId: string; status: JobStatus }[]> {
     // This would integrate with job search functionality
     // For now, return active jobs as placeholder
     const activeJobs = this.getActiveJobs();
 
     return activeJobs
-      .filter(job => {
+      .filter((job) => {
         if (criteria.olderThan && job.startedAt > criteria.olderThan) {
           return false;
         }
@@ -714,7 +737,7 @@ export class JobCancellationTimeoutService {
         }
         return true;
       })
-      .map(job => ({
+      .map((job) => ({
         jobId: job.jobId,
         status: JobStatus.IN_PROGRESS, // Placeholder
       }));
@@ -728,13 +751,17 @@ export class JobCancellationTimeoutService {
     if (!tracker) return;
 
     // Clear existing timeouts
-    tracker.escalationTimeouts.forEach(timeout => clearTimeout(timeout));
+    tracker.escalationTimeouts.forEach((timeout) => clearTimeout(timeout));
     tracker.escalationTimeouts = [];
 
     // Set up escalation timeouts
     for (const step of config.escalationSteps) {
       const timeout = setTimeout(async () => {
-        await this.handleTimeoutEscalation(config.jobId, step.action, step.metadata);
+        await this.handleTimeoutEscalation(
+          config.jobId,
+          step.action,
+          step.metadata,
+        );
       }, step.delayMs);
 
       tracker.escalationTimeouts.push(timeout);
@@ -747,7 +774,7 @@ export class JobCancellationTimeoutService {
   private async handleTimeoutEscalation(
     jobId: string,
     action: TimeoutEscalation,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<void> {
     this.logger.warn(`Timeout escalation for job ${jobId}: ${action}`, {
       jobId,
@@ -794,16 +821,23 @@ export class JobCancellationTimeoutService {
       for (const [jobId, tracker] of this.activeJobs.entries()) {
         const duration = now - tracker.startedAt.getTime();
 
-        if (tracker.timeoutConfig && duration > tracker.timeoutConfig.hardTimeoutMs) {
-          this.logger.warn(`Job ${jobId} exceeded hard timeout, force cancelling`);
+        if (
+          tracker.timeoutConfig &&
+          duration > tracker.timeoutConfig.hardTimeoutMs
+        ) {
+          this.logger.warn(
+            `Job ${jobId} exceeded hard timeout, force cancelling`,
+          );
 
           this.cancelJob({
             jobId,
             strategy: CancellationStrategy.FORCED,
             reason: 'Hard timeout exceeded',
             cleanup: true,
-          }).catch(error => {
-            this.logger.error(`Failed to cancel timed out job ${jobId}: ${error}`);
+          }).catch((error) => {
+            this.logger.error(
+              `Failed to cancel timed out job ${jobId}: ${error}`,
+            );
           });
         }
       }
@@ -840,7 +874,7 @@ export class JobCancellationTimeoutService {
    */
   @Cron(CronExpression.EVERY_HOUR)
   private cleanupCancellationHistory(): void {
-    const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // 24 hours ago
+    const cutoffTime = Date.now() - 24 * 60 * 60 * 1000; // 24 hours ago
     let cleaned = 0;
 
     for (const [jobId, result] of this.cancellationHistory.entries()) {

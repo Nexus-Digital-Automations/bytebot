@@ -12,7 +12,8 @@
  * Jest Mock Function with proper typing
  * Extends basic function type with Jest mock methods
  */
-export type MockFunction<T extends (...args: unknown[]) => unknown> = jest.MockedFunction<T>;
+export type MockFunction<T extends (...args: unknown[]) => unknown> =
+  jest.MockedFunction<T>;
 
 /**
  * Jest Mock Object with proper typing
@@ -22,8 +23,8 @@ export type MockObject<T> = {
   [K in keyof T]: T[K] extends (...args: unknown[]) => unknown
     ? MockFunction<T[K]>
     : T[K] extends object
-    ? MockObject<T[K]>
-    : T[K];
+      ? MockObject<T[K]>
+      : T[K];
 };
 
 /**
@@ -33,7 +34,9 @@ export type MockObject<T> = {
 
 // Mouse component mock interface
 export interface MockMouseInterface {
-  move: MockFunction<(path: unknown, movementType?: unknown) => Promise<unknown>>;
+  move: MockFunction<
+    (path: unknown, movementType?: unknown) => Promise<unknown>
+  >;
   setPosition: MockFunction<(coordinates: unknown) => Promise<unknown>>;
   getPosition: MockFunction<() => Promise<{ x: number; y: number }>>;
   leftClick: MockFunction<() => Promise<unknown>>;
@@ -54,8 +57,12 @@ export interface MockMouseInterface {
 export interface MockScreenInterface {
   capture: MockFunction<(region?: unknown) => Promise<unknown>>;
   find: MockFunction<(needle: unknown, options?: unknown) => Promise<unknown>>;
-  waitFor: MockFunction<(needle: unknown, timeout?: number, region?: unknown) => Promise<unknown>>;
-  highlight: MockFunction<(region: unknown, duration?: number, color?: string) => Promise<void>>;
+  waitFor: MockFunction<
+    (needle: unknown, timeout?: number, region?: unknown) => Promise<unknown>
+  >;
+  highlight: MockFunction<
+    (region: unknown, duration?: number, color?: string) => Promise<void>
+  >;
   config: {
     resourceDirectory: string;
     confidence: number;
@@ -65,8 +72,12 @@ export interface MockScreenInterface {
 // Keyboard component mock interface
 export interface MockKeyboardInterface {
   type: MockFunction<(text: string) => Promise<unknown>>;
-  pressKey: MockFunction<(key: unknown, ...modifiers: unknown[]) => Promise<unknown>>;
-  releaseKey: MockFunction<(key: unknown, ...modifiers: unknown[]) => Promise<unknown>>;
+  pressKey: MockFunction<
+    (key: unknown, ...modifiers: unknown[]) => Promise<unknown>
+  >;
+  releaseKey: MockFunction<
+    (key: unknown, ...modifiers: unknown[]) => Promise<unknown>
+  >;
   config: {
     autoDelayMs: number;
   };
@@ -80,7 +91,9 @@ export interface MockNutInterface {
   Key: Record<string, string>;
   Button: Record<string, number>;
   Point: MockFunction<(x: number, y: number) => { x: number; y: number }>;
-  Region: MockFunction<(x: number, y: number, width: number, height: number) => unknown>;
+  Region: MockFunction<
+    (x: number, y: number, width: number, height: number) => unknown
+  >;
   Image: MockFunction<() => unknown>;
   sleep: MockFunction<(ms: number) => Promise<void>>;
   straightTo: MockFunction<(target: unknown) => unknown>;
@@ -104,7 +117,9 @@ export interface MockComputerUseServiceInterface {
 // NUT Service mock interface
 export interface MockNutServiceInterface {
   moveMouse: MockFunction<(coordinates: unknown) => Promise<unknown>>;
-  clickMouse: MockFunction<(coordinates: unknown, button?: unknown) => Promise<unknown>>;
+  clickMouse: MockFunction<
+    (coordinates: unknown, button?: unknown) => Promise<unknown>
+  >;
   captureScreen: MockFunction<(region?: unknown) => Promise<unknown>>;
   typeText: MockFunction<(text: string) => Promise<unknown>>;
   pressKey: MockFunction<(key: unknown) => Promise<unknown>>;
@@ -129,7 +144,9 @@ export interface ServiceResponse {
 /**
  * Creates a properly typed Jest mock function
  */
-export function createMockFunction<T extends (...args: unknown[]) => unknown>(): MockFunction<T> {
+export function createMockFunction<
+  T extends (...args: unknown[]) => unknown,
+>(): MockFunction<T> {
   return jest.fn() as unknown as MockFunction<T>;
 }
 
@@ -151,7 +168,9 @@ export function createNutMock(): MockNutInterface {
       waitFor: createMockFunction(),
       highlight: createMockFunction(),
       config: {
-        resourceDirectory: '/tmp/nut-resources',confidence: 0.99,},
+        resourceDirectory: '/tmp/nut-resources',
+        confidence: 0.99,
+      },
     },
     mouse: {
       move: createMockFunction(),
@@ -179,7 +198,22 @@ export function createNutMock(): MockNutInterface {
       },
     },
     Key: {
-      Escape: 'Escape',Enter: 'Return',Space: 'space',Tab: 'Tab',Shift: 'shift',Control: 'ctrl',Alt: 'alt',Meta: 'cmd',F1: 'F1',F12: 'F12',Up: 'up',Down: 'down',Left: 'left',Right: 'right',},Button: {
+      Escape: 'Escape',
+      Enter: 'Return',
+      Space: 'space',
+      Tab: 'Tab',
+      Shift: 'shift',
+      Control: 'ctrl',
+      Alt: 'alt',
+      Meta: 'cmd',
+      F1: 'F1',
+      F12: 'F12',
+      Up: 'up',
+      Down: 'down',
+      Left: 'left',
+      Right: 'right',
+    },
+    Button: {
       LEFT: 0,
       MIDDLE: 1,
       RIGHT: 2,
@@ -191,7 +225,10 @@ export function createNutMock(): MockNutInterface {
     straightTo: createMockFunction(),
     linear: createMockFunction(),
     PROVIDER: {
-      CV: 'opencv',TEMPLATE_MATCHING: 'template',},};
+      CV: 'opencv',
+      TEMPLATE_MATCHING: 'template',
+    },
+  };
 }
 
 /**
@@ -235,7 +272,9 @@ export interface MockTestingInterface {
  * Type-safe client assertion utility
  * Ensures proper typing after undefined checks in tests
  */
-export function assertClientDefined<T>(client: T | undefined): asserts client is T {
+export function assertClientDefined<T>(
+  client: T | undefined,
+): asserts client is T {
   if (!client) {
     throw new Error('Client is undefined');
   }

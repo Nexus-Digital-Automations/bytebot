@@ -10,23 +10,39 @@ import {
   UseInterceptors,
   Get,
   Query,
-} from '@nestjs/common';import {ApiOperation,
+} from '@nestjs/common';
+import {
+  ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiTags,
   ApiQuery,
-} from '@nestjs/swagger';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import {ForVersion,
+} from '@nestjs/swagger';
+import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
+import {
+  ForVersion,
   SUPPORTED_API_VERSIONS,
-} from '../common/versioning/api-version.decorator';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {OperatorOrAdmin,
+} from '../common/versioning/api-version.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import {
+  OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';import { DataExtractionService } from './data-extraction.service';import {DataExtractionDto,
+} from '../auth/decorators/roles.decorator';
+import { DataExtractionService } from './data-extraction.service';
+import {
+  DataExtractionDto,
   MultiSelectorExtractionDto,
   DataExtractionType,
-  ExtractionOutputFormat
-} from './dto/data-extraction.dto';import {DataExtractionResponseDto,
-  MultiExtractionResponseDto
-} from './dto/extraction-response.dto';/*** Data Extraction Controller
+  ExtractionOutputFormat,
+} from './dto/data-extraction.dto';
+import {
+  DataExtractionResponseDto,
+  MultiExtractionResponseDto,
+} from './dto/extraction-response.dto'; /*** Data Extraction Controller
  *
  * Provides enterprise-grade APIs for automated web data extraction including:
  * - Table data extraction with header detection
@@ -45,9 +61,14 @@ import {
  * - Comprehensive audit logging
  * - Safe data serialization and output
  */
-@ApiTags('Data Extraction API')@Controller('data-extraction')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
+@ApiTags('Data Extraction API')
+@Controller('data-extraction')
+@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+@UsePipes(SecuritySanitizationPipes.HIGH_SECURITY)
 @UseInterceptors(LoggingInterceptor)
-@ApiBearerAuth('bearer')export class DataExtractionController {private readonly logger = new Logger(DataExtractionController.name);
+@ApiBearerAuth('bearer')
+export class DataExtractionController {
+  private readonly logger = new Logger(DataExtractionController.name);
 
   constructor(private readonly dataExtractionService: DataExtractionService) {}
 
@@ -62,22 +83,41 @@ import {
    * @param user - Authenticated user context
    * @returns Promise<DataExtractionResponseDto> - Extracted data and metadata
    */
-  @Post('extract')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('extract')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Extract data from web page',description: 'Extract various types of data from web pages including tables, lists, text, links, images, and custom patterns. Supports multiple output formats and advanced configuration.',operationId: 'extractData',})@ApiResponse({
+    summary: 'Extract data from web page',
+    description:
+      'Extract various types of data from web pages including tables, lists, text, links, images, and custom patterns. Supports multiple output formats and advanced configuration.',
+    operationId: 'extractData',
+  })
+  @ApiResponse({
     status: 200,
-    description: 'Data extraction completed successfully',type: DataExtractionResponseDto,})
+    description: 'Data extraction completed successfully',
+    type: DataExtractionResponseDto,
+  })
   @ApiResponse({
     status: 400,
-    description: 'Invalid extraction parameters or unsupported extraction type',})@ApiResponse({
+    description: 'Invalid extraction parameters or unsupported extraction type',
+  })
+  @ApiResponse({
     status: 401,
-    description: 'Authentication required',})@ApiResponse({
+    description: 'Authentication required',
+  })
+  @ApiResponse({
     status: 403,
-    description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ApiResponse({
+    description: 'Insufficient permissions - OPERATOR or ADMIN role required',
+  })
+  @ApiResponse({
     status: 404,
-    description: 'Target elements not found on page',})@ApiResponse({
+    description: 'Target elements not found on page',
+  })
+  @ApiResponse({
     status: 408,
-    description: 'Extraction timeout exceeded',})@ApiResponse({
+    description: 'Extraction timeout exceeded',
+  })
+  @ApiResponse({
     status: 429,
     description: 'Rate limit exceeded',
   })
@@ -85,9 +125,13 @@ import {
     @Body() params: DataExtractionDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<DataExtractionResponseDto> {
-    const operationId = `extract_${params.extractionType}_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `extract_${params.extractionType}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+    try {
       this.logger.log(
-        `[${operationId}] Data extraction request: ${params.extractionType}`,{operationId,
+        `[${operationId}] Data extraction request: ${params.extractionType}`,
+        {
+          operationId,
           extractionType: params.extractionType,
           selector: params.selector,
           url: params.url,
@@ -102,7 +146,9 @@ import {
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Data extraction completed successfully (${processingTime}ms)`,{operationId,
+        `[${operationId}] Data extraction completed successfully (${processingTime}ms)`,
+        {
+          operationId,
           extractionType: params.extractionType,
           itemCount: result.itemCount,
           processingTime,
@@ -124,21 +170,31 @@ import {
           operationId,
           extractionType: params.extractionType,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',
+          userId: user.id,
+          username: user.username,
         },
       );
 
       // Map specific errors to appropriate HTTP status codes
-      if (errorMessage.includes('not found') || errorMessage.includes('elements not found')) {
+      if (
+        errorMessage.includes('not found') ||
+        errorMessage.includes('elements not found')
+      ) {
         throw new HttpException(
           `Target elements not found: ${errorMessage}`,
           HttpStatus.NOT_FOUND,
         );
       }
 
-      if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+      if (
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('Timeout')
+      ) {
         throw new HttpException(
-          `Extraction timeout: ${errorMessage}`,HttpStatus.REQUEST_TIMEOUT,);
+          `Extraction timeout: ${errorMessage}`,
+          HttpStatus.REQUEST_TIMEOUT,
+        );
       }
 
       throw new HttpException(
@@ -159,16 +215,29 @@ import {
    * @param user - Authenticated user context
    * @returns Promise<MultiExtractionResponseDto> - Aggregated extraction results
    */
-  @Post('extract-multiple')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('extract-multiple')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Extract multiple data sets',description: 'Perform multiple data extraction operations on a single page or across multiple pages. Supports parallel execution and result aggregation.',operationId: 'extractMultipleData',})@ApiResponse({
+    summary: 'Extract multiple data sets',
+    description:
+      'Perform multiple data extraction operations on a single page or across multiple pages. Supports parallel execution and result aggregation.',
+    operationId: 'extractMultipleData',
+  })
+  @ApiResponse({
     status: 200,
-    description: 'Multi-extraction completed successfully',type: MultiExtractionResponseDto,})
+    description: 'Multi-extraction completed successfully',
+    type: MultiExtractionResponseDto,
+  })
   @ApiResponse({
     status: 400,
-    description: 'Invalid multi-extraction parameters',})@ApiResponse({
+    description: 'Invalid multi-extraction parameters',
+  })
+  @ApiResponse({
     status: 401,
-    description: 'Authentication required',})@ApiResponse({
+    description: 'Authentication required',
+  })
+  @ApiResponse({
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
@@ -176,16 +245,15 @@ import {
     @Body() params: MultiSelectorExtractionDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<MultiExtractionResponseDto> {
-    const operationId = `multi_extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Multi-extraction request`,
-      {
-        operationId,
-        extractionCount: params.extractions.length,
-        parallel: params.parallel,
-        url: params.url,
-        userId: user.id,
-        username: user.username,
-      },
-    );
+    const operationId = `multi_extract_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    this.logger.log(`[${operationId}] Multi-extraction request`, {
+      operationId,
+      extractionCount: params.extractions.length,
+      parallel: params.parallel,
+      url: params.url,
+      userId: user.id,
+      username: user.username,
+    });
 
     const result = await this.dataExtractionService.extractMultiple(params);
     return result;
@@ -204,23 +272,36 @@ import {
    * @param user - Authenticated user context
    * @returns Promise<DataExtractionResponseDto> - Extracted table data
    */
-  @Post('extract-tables')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('extract-tables')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Extract table data',description: 'Extract table data with advanced configuration options including header detection, column filtering, and row limiting.',operationId: 'extractTables',})@ApiResponse({
+    summary: 'Extract table data',
+    description:
+      'Extract table data with advanced configuration options including header detection, column filtering, and row limiting.',
+    operationId: 'extractTables',
+  })
+  @ApiResponse({
     status: 200,
-    description: 'Table extraction completed successfully',type: DataExtractionResponseDto,})
+    description: 'Table extraction completed successfully',
+    type: DataExtractionResponseDto,
+  })
   async extractTables(
-    @Body('selector') selector?: string,@Body('includeHeaders') includeHeaders: boolean = true,@Body('maxRows') maxRows?: number,@Body('outputFormat') outputFormat: ExtractionOutputFormat = ExtractionOutputFormat.JSON,@CurrentUser() user: ByteBotdUser,): Promise<DataExtractionResponseDto> {
+    @Body('selector') selector?: string,
+    @Body('includeHeaders') includeHeaders: boolean = true,
+    @Body('maxRows') maxRows?: number,
+    @Body('outputFormat')
+    outputFormat: ExtractionOutputFormat = ExtractionOutputFormat.JSON,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<DataExtractionResponseDto> {
     const params: DataExtractionDto = {
       extractionType: DataExtractionType.TABLE,
-      selector: selector || 'table',tableConfig: {includeHeaders,
-        maxRows,
-        skipEmptyRows: true
-      },
+      selector: selector || 'table',
+      tableConfig: { includeHeaders, maxRows, skipEmptyRows: true },
       config: {
         outputFormat,
-        includeMetadata: true
-      }
+        includeMetadata: true,
+      },
     };
 
     return this.extractData(params, user);
@@ -239,23 +320,39 @@ import {
    * @param user - Authenticated user context
    * @returns Promise<DataExtractionResponseDto> - Extracted text content
    */
-  @Post('extract-text')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('extract-text')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Extract text content',description: 'Extract text content with pattern matching, formatting preservation, and length filtering options.',operationId: 'extractText',})@ApiResponse({
+    summary: 'Extract text content',
+    description:
+      'Extract text content with pattern matching, formatting preservation, and length filtering options.',
+    operationId: 'extractText',
+  })
+  @ApiResponse({
     status: 200,
-    description: 'Text extraction completed successfully',type: DataExtractionResponseDto,})
+    description: 'Text extraction completed successfully',
+    type: DataExtractionResponseDto,
+  })
   async extractText(
-    @Body('selector') selector?: string,@Body('patterns') patterns?: string[],@Body('preserveFormatting') preserveFormatting: boolean = false,@Body('minLength') minLength: number = 1,@CurrentUser() user: ByteBotdUser,): Promise<DataExtractionResponseDto> {
+    @Body('selector') selector?: string,
+    @Body('patterns') patterns?: string[],
+    @Body('preserveFormatting') preserveFormatting: boolean = false,
+    @Body('minLength') minLength: number = 1,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<DataExtractionResponseDto> {
     const params: DataExtractionDto = {
       extractionType: DataExtractionType.TEXT,
-      selector: selector || 'body',textConfig: {patterns,
+      selector: selector || 'body',
+      textConfig: {
+        patterns,
         preserveFormatting,
         minLength,
-        visibleOnly: true
+        visibleOnly: true,
       },
       config: {
-        includeMetadata: true
-      }
+        includeMetadata: true,
+      },
     };
 
     return this.extractData(params, user);
@@ -274,21 +371,39 @@ import {
    * @param user - Authenticated user context
    * @returns Promise<DataExtractionResponseDto> - Extracted link data
    */
-  @Post('extract-links')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('extract-links')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Extract links',description: 'Extract links with filtering options for internal/external links, attribute extraction, and URL pattern matching.',operationId: 'extractLinks',})@ApiResponse({
+    summary: 'Extract links',
+    description:
+      'Extract links with filtering options for internal/external links, attribute extraction, and URL pattern matching.',
+    operationId: 'extractLinks',
+  })
+  @ApiResponse({
     status: 200,
-    description: 'Link extraction completed successfully',type: DataExtractionResponseDto,})
+    description: 'Link extraction completed successfully',
+    type: DataExtractionResponseDto,
+  })
   async extractLinks(
-    @Body('selector') selector?: string,@Body('internalOnly') internalOnly: boolean = false,@Body('includeAttributes') includeAttributes?: string[],@Body('urlFilter') urlFilter?: string,@CurrentUser() user: ByteBotdUser,): Promise<DataExtractionResponseDto> {
+    @Body('selector') selector?: string,
+    @Body('internalOnly') internalOnly: boolean = false,
+    @Body('includeAttributes') includeAttributes?: string[],
+    @Body('urlFilter') urlFilter?: string,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<DataExtractionResponseDto> {
     const params: DataExtractionDto = {
       extractionType: DataExtractionType.LINKS,
-      selector: selector || 'a[href]',linkConfig: {internalOnly,
-        includeAttributes: includeAttributes || ['title', 'target', 'rel'],includeLinkText: true,urlFilter
+      selector: selector || 'a[href]',
+      linkConfig: {
+        internalOnly,
+        includeAttributes: includeAttributes || ['title', 'target', 'rel'],
+        includeLinkText: true,
+        urlFilter,
       },
       config: {
-        includeMetadata: true
-      }
+        includeMetadata: true,
+      },
     };
 
     return this.extractData(params, user);
@@ -307,20 +422,41 @@ import {
    * @param user - Authenticated user context
    * @returns Promise<DataExtractionResponseDto> - Extracted image data
    */
-  @Post('extract-images')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('extract-images')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Extract images',description: 'Extract image data with dimension filtering, attribute extraction, and optional base64 data inclusion.',operationId: 'extractImages',})@ApiResponse({
+    summary: 'Extract images',
+    description:
+      'Extract image data with dimension filtering, attribute extraction, and optional base64 data inclusion.',
+    operationId: 'extractImages',
+  })
+  @ApiResponse({
     status: 200,
-    description: 'Image extraction completed successfully',type: DataExtractionResponseDto,})
+    description: 'Image extraction completed successfully',
+    type: DataExtractionResponseDto,
+  })
   async extractImages(
-    @Body('selector') selector?: string,@Body('includeImageData') includeImageData: boolean = false,@Body('minWidth') minWidth?: number,@Body('minHeight') minHeight?: number,@CurrentUser() user: ByteBotdUser,): Promise<DataExtractionResponseDto> {
+    @Body('selector') selector?: string,
+    @Body('includeImageData') includeImageData: boolean = false,
+    @Body('minWidth') minWidth?: number,
+    @Body('minHeight') minHeight?: number,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<DataExtractionResponseDto> {
     const params: DataExtractionDto = {
       extractionType: DataExtractionType.IMAGES,
-      selector: selector || 'img',imageConfig: {includeImageData,
-        includeAttributes: ['alt', 'title', 'width', 'height', 'loading'],minDimensions: minWidth && minHeight ? { width: minWidth, height: minHeight } : undefined},
+      selector: selector || 'img',
+      imageConfig: {
+        includeImageData,
+        includeAttributes: ['alt', 'title', 'width', 'height', 'loading'],
+        minDimensions:
+          minWidth && minHeight
+            ? { width: minWidth, height: minHeight }
+            : undefined,
+      },
       config: {
-        includeMetadata: true
-      }
+        includeMetadata: true,
+      },
     };
 
     return this.extractData(params, user);
@@ -339,13 +475,27 @@ import {
    * @param user - Authenticated user context
    * @returns Promise<DataExtractionResponseDto> - Extracted custom data
    */
-  @Post('extract-custom')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Post('extract-custom')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Extract custom pattern data',description: 'Extract data using custom CSS selectors with configurable attribute and content extraction options.',operationId: 'extractCustomPattern',})@ApiResponse({
+    summary: 'Extract custom pattern data',
+    description:
+      'Extract data using custom CSS selectors with configurable attribute and content extraction options.',
+    operationId: 'extractCustomPattern',
+  })
+  @ApiResponse({
     status: 200,
-    description: 'Custom pattern extraction completed successfully',type: DataExtractionResponseDto,})
+    description: 'Custom pattern extraction completed successfully',
+    type: DataExtractionResponseDto,
+  })
   async extractCustomPattern(
-    @Body('selector') selector: string,@Body('attributes') attributes?: string[],@Body('includeText') includeText: boolean = true,@Body('includeHtml') includeHtml: boolean = false,@CurrentUser() user: ByteBotdUser,): Promise<DataExtractionResponseDto> {
+    @Body('selector') selector: string,
+    @Body('attributes') attributes?: string[],
+    @Body('includeText') includeText: boolean = true,
+    @Body('includeHtml') includeHtml: boolean = false,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<DataExtractionResponseDto> {
     const params: DataExtractionDto = {
       extractionType: DataExtractionType.CUSTOM_PATTERN,
       selector,
@@ -354,11 +504,11 @@ import {
         attributes,
         includeText,
         includeHtml,
-        includeChildren: false
+        includeChildren: false,
       },
       config: {
-        includeMetadata: true
-      }
+        includeMetadata: true,
+      },
     };
 
     return this.extractData(params, user);
@@ -372,14 +522,34 @@ import {
    *
    * @returns Supported extraction types and output formats
    */
-  @Get('formats')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @Get('formats')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get supported extraction formats',description: 'Returns supported data extraction types and output formats for building dynamic extraction interfaces.',operationId: 'getExtractionFormats',})@ApiResponse({
+    summary: 'Get supported extraction formats',
+    description:
+      'Returns supported data extraction types and output formats for building dynamic extraction interfaces.',
+    operationId: 'getExtractionFormats',
+  })
+  @ApiResponse({
     status: 200,
-    description: 'Extraction formats retrieved successfully',schema: {type: 'object',properties: {extractionTypes: {
-          type: 'array',items: { type: 'string', enum: Object.values(DataExtractionType) }},outputFormats: {
-          type: 'array',items: { type: 'string', enum: Object.values(ExtractionOutputFormat) }}}
-    }
+    description: 'Extraction formats retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        extractionTypes: {
+          type: 'array',
+          items: { type: 'string', enum: Object.values(DataExtractionType) },
+        },
+        outputFormats: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: Object.values(ExtractionOutputFormat),
+          },
+        },
+      },
+    },
   })
   async getExtractionFormats(): Promise<{
     extractionTypes: DataExtractionType[];
@@ -387,15 +557,19 @@ import {
   }> {
     return {
       extractionTypes: Object.values(DataExtractionType),
-      outputFormats: Object.values(ExtractionOutputFormat)
+      outputFormats: Object.values(ExtractionOutputFormat),
     };
   }
 
   // Helper methods for error handling
 
   private getErrorMessage(error: unknown): string {
-    if (error && typeof error === 'object' && 'message' in error) {return (error as { message: string }).message;}
-    return typeof error === 'string' ? error : 'Unknown error';}private getErrorStack(error: unknown): string | undefined {
+    if (error && typeof error === 'object' && 'message' in error) {
+      return (error as { message: string }).message;
+    }
+    return typeof error === 'string' ? error : 'Unknown error';
+  }
+  private getErrorStack(error: unknown): string | undefined {
     if (error && typeof error === 'object' && 'stack' in error) {
       return (error as { stack?: string }).stack;
     }

@@ -21,14 +21,8 @@ import { ErrorAnalyticsController } from './error-analytics.controller';
  */
 @Global()
 @Module({
-  providers: [
-    AutomationErrorHandlerService,
-    ErrorRecoveryInterceptor,
-  ],
+  providers: [AutomationErrorHandlerService, ErrorRecoveryInterceptor],
   controllers: [ErrorAnalyticsController],
-  exports: [
-    AutomationErrorHandlerService,
-    ErrorRecoveryInterceptor,
-  ],
+  exports: [AutomationErrorHandlerService, ErrorRecoveryInterceptor],
 })
 export class ErrorHandlingModule {}

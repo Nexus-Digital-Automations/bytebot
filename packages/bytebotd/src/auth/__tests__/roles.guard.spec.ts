@@ -46,7 +46,7 @@ class MockRolesGuard {
 
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
       'permissions',
-      [context.getHandler(), context.getClass()]
+      [context.getHandler(), context.getClass()],
     );
 
     // If no role or permission requirements, allow access
@@ -66,7 +66,7 @@ class MockRolesGuard {
       const hasRole = this.hasRequiredRole(user, requiredRoles);
       if (!hasRole) {
         throw new ForbiddenException(
-          `Access denied. Required roles: ${requiredRoles.join(', ')}`
+          `Access denied. Required roles: ${requiredRoles.join(', ')}`,
         );
       }
     }
@@ -75,11 +75,11 @@ class MockRolesGuard {
     if (requiredPermissions && requiredPermissions.length > 0) {
       const hasPermission = this.hasRequiredPermissions(
         user,
-        requiredPermissions
+        requiredPermissions,
       );
       if (!hasPermission) {
         throw new ForbiddenException(
-          `Access denied. Required permissions: ${requiredPermissions.join(', ')}`
+          `Access denied. Required permissions: ${requiredPermissions.join(', ')}`,
         );
       }
     }
@@ -191,7 +191,7 @@ describe('RolesGuard', () => {
       switchToHttp: jest.fn().mockReturnValue({
         getRequest: jest.fn().mockReturnValue(mockRequest),
         getResponse: jest.fn().mockReturnValue({}),
-        getNext: jest.fn().mockReturnValue({})
+        getNext: jest.fn().mockReturnValue({}),
       }),
       getHandler: jest.fn(),
       getClass: jest.fn(),
@@ -207,7 +207,7 @@ describe('RolesGuard', () => {
   const createMockUser = (
     role: UserRole,
     permissions?: Permission[],
-    overrides?: Partial<AuthenticatedUser>
+    overrides?: Partial<AuthenticatedUser>,
   ): AuthenticatedUser => ({
     id: `user${Date.now()}`,
     email: `${role}@bytebot.ai`,
@@ -285,7 +285,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        new ForbiddenException('Access denied. Required roles: admin')
+        new ForbiddenException('Access denied. Required roles: admin'),
       );
 
       console.log(`[${testId}] Viewer access denial test completed`);
@@ -314,7 +314,9 @@ describe('RolesGuard', () => {
   describe('Role Hierarchy and Inheritance', () => {
     it('should allow admin access to operator routes (role hierarchy)', async () => {
       const testId = `${operationId}_admin_operator_hierarchy`;
-      console.log(`[${testId}] Testing admin access to operator routes via hierarchy`);
+      console.log(
+        `[${testId}] Testing admin access to operator routes via hierarchy`,
+      );
       const adminUser = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(adminUser);
 
@@ -333,7 +335,9 @@ describe('RolesGuard', () => {
 
     it('should allow admin access to viewer routes (role hierarchy)', async () => {
       const testId = `${operationId}_admin_viewer_hierarchy`;
-      console.log(`[${testId}] Testing admin access to viewer routes via hierarchy`);
+      console.log(
+        `[${testId}] Testing admin access to viewer routes via hierarchy`,
+      );
       const adminUser = createMockUser(UserRole._ADMIN);
       const context = createMockExecutionContext(adminUser);
 
@@ -352,7 +356,9 @@ describe('RolesGuard', () => {
 
     it('should allow operator access to viewer routes (role hierarchy)', async () => {
       const testId = `${operationId}_operator_viewer_hierarchy`;
-      console.log(`[${testId}] Testing operator access to viewer routes via hierarchy`);
+      console.log(
+        `[${testId}] Testing operator access to viewer routes via hierarchy`,
+      );
       const operatorUser = createMockUser(UserRole._OPERATOR);
       const context = createMockExecutionContext(operatorUser);
 
@@ -381,7 +387,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException
+        ForbiddenException,
       );
 
       console.log(`[${testId}] Operator admin denial test completed`);
@@ -439,7 +445,7 @@ describe('RolesGuard', () => {
       await expect(guard.canActivate(context)).rejects.toThrow(
         new ForbiddenException(
           'Access denied. Required permissions: system_admin',
-        )
+        ),
       );
 
       console.log(`[${testId}] Missing permission denial test completed`);
@@ -482,7 +488,7 @@ describe('RolesGuard', () => {
         ]); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException
+        ForbiddenException,
       );
 
       console.log(`[${testId}] Partial permission denial test completed`);
@@ -541,7 +547,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions - should fail
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException
+        ForbiddenException,
       );
 
       console.log(`[${testId}] Role OK, permission fail test completed`);
@@ -559,7 +565,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([Permission._SYSTEM_ADMIN]); // permissions - should pass
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException
+        ForbiddenException,
       );
 
       console.log(`[${testId}] Permission OK, role fail test completed`);
@@ -578,7 +584,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        new ForbiddenException('User authentication required')
+        new ForbiddenException('User authentication required'),
       );
 
       console.log(`[${testId}] Unauthenticated access denial test completed`);
@@ -598,7 +604,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException
+        ForbiddenException,
       );
 
       console.log(`[${testId}] Invalid role handling test completed`);
@@ -618,7 +624,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException
+        ForbiddenException,
       );
 
       console.log(`[${testId}] Null role handling test completed`);
@@ -639,7 +645,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce([Permission._TASK_READ]); // permissions
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException
+        ForbiddenException,
       );
 
       console.log(`[${testId}] Null permissions handling test completed`);
@@ -777,7 +783,7 @@ describe('RolesGuard', () => {
 
       // All results should match expectations
       const allCorrect = results.every(
-        (result) => result.success === result.expected
+        (result) => result.success === result.expected,
       );
       expect(allCorrect).toBe(true);
 
@@ -837,7 +843,7 @@ describe('RolesGuard', () => {
         .mockReturnValueOnce(undefined);
 
       await expect(guard.canActivate(context)).rejects.toThrow(
-        ForbiddenException
+        ForbiddenException,
       );
 
       console.log(`[${testId}] Malformed user object test completed`);
@@ -864,7 +870,7 @@ describe('RolesGuard', () => {
         // Type guard for Error-like objects with message property
         if (error && typeof error === 'object' && 'message' in error) {
           expect((error as { message: string }).message).toContain(
-            'admin, operator'
+            'admin, operator',
           );
         } else {
           throw new Error('Expected error with message property');

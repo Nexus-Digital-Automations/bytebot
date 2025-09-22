@@ -101,7 +101,9 @@ export interface TestUploadFile {
 export interface CreateTaskRequest {
   title: string;
   description?: string;
-  priority?: 'low' | 'medium' | 'high';type?: string;metadata?: Record<string, unknown>;
+  priority?: 'low' | 'medium' | 'high';
+  type?: string;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -192,7 +194,9 @@ export interface MockControllerConstructor {
  * Health check response interface
  */
 export interface HealthCheckResponse {
-  status: 'healthy' | 'unhealthy' | 'degraded';timestamp: string;uptime: number;
+  status: 'healthy' | 'unhealthy' | 'degraded';
+  timestamp: string;
+  uptime: number;
   version?: string;
   dependencies?: Record<string, unknown>;
 }
@@ -233,7 +237,14 @@ export interface SecurityEvent {
  * Security event types enumeration
  */
 export enum SecurityEventType {
-  LOGIN_ATTEMPT = 'LOGIN_ATTEMPT',LOGIN_SUCCESS = 'LOGIN_SUCCESS',LOGIN_FAILURE = 'LOGIN_FAILURE',UNAUTHORIZED_ACCESS = 'UNAUTHORIZED_ACCESS',TOKEN_REFRESH = 'TOKEN_REFRESH',SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',}/**
+  LOGIN_ATTEMPT = 'LOGIN_ATTEMPT',
+  LOGIN_SUCCESS = 'LOGIN_SUCCESS',
+  LOGIN_FAILURE = 'LOGIN_FAILURE',
+  UNAUTHORIZED_ACCESS = 'UNAUTHORIZED_ACCESS',
+  TOKEN_REFRESH = 'TOKEN_REFRESH',
+  SUSPICIOUS_ACTIVITY = 'SUSPICIOUS_ACTIVITY',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+} /**
  * File upload response interface
  */
 export interface FileUploadResponse {
@@ -306,7 +317,8 @@ export interface RateLimitTestConfig {
   maxRequests: number;
   windowMs: number;
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';}/**
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+} /**
  * Security test configuration
  */
 export interface SecurityTestConfig {
@@ -406,7 +418,9 @@ export interface TestModuleSetup {
  * HTTP test case interface
  */
 export interface HttpTestCase {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS';url: string;headers?: Record<string, string>;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS';
+  url: string;
+  headers?: Record<string, string>;
   body?: unknown;
   expectedStatus: number | number[];
   expectedHeaders?: Record<string, string>;
@@ -420,7 +434,9 @@ export interface HttpTestCase {
 export interface ConcurrentRequestConfig {
   count: number;
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';authToken?: string;payload?: unknown;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  authToken?: string;
+  payload?: unknown;
   expectedStatuses: number[];
 }
 
@@ -433,7 +449,13 @@ export interface ConcurrentRequestConfig {
  */
 export interface AttackSimulationConfig {
   type:
-    | 'XSS'| 'SQL_INJECTION'| 'HEADER_INJECTION'| 'REQUEST_SMUGGLING'| 'DIRECTORY_TRAVERSAL';payloads: string[];targetEndpoint: string;
+    | 'XSS'
+    | 'SQL_INJECTION'
+    | 'HEADER_INJECTION'
+    | 'REQUEST_SMUGGLING'
+    | 'DIRECTORY_TRAVERSAL';
+  payloads: string[];
+  targetEndpoint: string;
   expectedBehavior: 'BLOCK' | 'SANITIZE' | 'LOG_AND_CONTINUE';
 }
 

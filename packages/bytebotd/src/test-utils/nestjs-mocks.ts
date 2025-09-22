@@ -1,7 +1,3 @@
- 
- 
- 
- 
 // @ts-nocheck
 
 /**
@@ -20,7 +16,9 @@
 
 // TypeScript safety note: This file contains testing utilities that intentionally use flexible typing for mock compatibility
 
-import { TestingModule, Test } from '@nestjs/testing';import { INestApplication } from '@nestjs/common';import { ModuleMetadata } from '@nestjs/common/interfaces';/*** Type definitions for mock utilities
+import { TestingModule, Test } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { ModuleMetadata } from '@nestjs/common/interfaces'; /*** Type definitions for mock utilities
  */
 type DecoratorTarget = {
   controllerPath?: string;
@@ -88,7 +86,10 @@ export const mockDecorators = {
       propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
-      if (descriptor.value && typeof descriptor.value === 'object') {(descriptor.value as Record<string, unknown>).httpMethod = 'GET';(descriptor.value as Record<string, unknown>).path = path;}
+      if (descriptor.value && typeof descriptor.value === 'object') {
+        (descriptor.value as Record<string, unknown>).httpMethod = 'GET';
+        (descriptor.value as Record<string, unknown>).path = path;
+      }
       return descriptor;
     },
 
@@ -99,7 +100,10 @@ export const mockDecorators = {
       propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
-      if (descriptor.value && typeof descriptor.value === 'object') {(descriptor.value as Record<string, unknown>).httpMethod = 'POST';(descriptor.value as Record<string, unknown>).path = path;}
+      if (descriptor.value && typeof descriptor.value === 'object') {
+        (descriptor.value as Record<string, unknown>).httpMethod = 'POST';
+        (descriptor.value as Record<string, unknown>).path = path;
+      }
       return descriptor;
     },
 
@@ -110,7 +114,10 @@ export const mockDecorators = {
       propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
-      if (descriptor.value && typeof descriptor.value === 'object') {(descriptor.value as Record<string, unknown>).httpMethod = 'PUT';(descriptor.value as Record<string, unknown>).path = path;}
+      if (descriptor.value && typeof descriptor.value === 'object') {
+        (descriptor.value as Record<string, unknown>).httpMethod = 'PUT';
+        (descriptor.value as Record<string, unknown>).path = path;
+      }
       return descriptor;
     },
 
@@ -121,7 +128,10 @@ export const mockDecorators = {
       propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
-      if (descriptor.value && typeof descriptor.value === 'object') {(descriptor.value as Record<string, unknown>).httpMethod = 'DELETE';(descriptor.value as Record<string, unknown>).path = path;}
+      if (descriptor.value && typeof descriptor.value === 'object') {
+        (descriptor.value as Record<string, unknown>).httpMethod = 'DELETE';
+        (descriptor.value as Record<string, unknown>).path = path;
+      }
       return descriptor;
     },
 
@@ -176,7 +186,9 @@ export const mockDecorators = {
       propertyKey: string,
       descriptor: PropertyDescriptor,
     ): PropertyDescriptor => {
-      if (descriptor.value && typeof descriptor.value === 'object') {(descriptor.value as Record<string, unknown>).messagePattern = message;}
+      if (descriptor.value && typeof descriptor.value === 'object') {
+        (descriptor.value as Record<string, unknown>).messagePattern = message;
+      }
       return descriptor;
     },
 
@@ -215,7 +227,9 @@ export class MockTestingModuleBuilder {
   /**
    * Add providers to the testing module
    */
-  addProvider(provider: NonNullable<ModuleMetadata['providers']>[0]): this {this.moduleMetadata.providers = this.moduleMetadata.providers ?? [];this.moduleMetadata.providers.push(provider);
+  addProvider(provider: NonNullable<ModuleMetadata['providers']>[0]): this {
+    this.moduleMetadata.providers = this.moduleMetadata.providers ?? [];
+    this.moduleMetadata.providers.push(provider);
     return this;
   }
 
@@ -246,7 +260,9 @@ export class MockTestingModuleBuilder {
    * Add controllers to the testing module
    */
   addController(
-    controller: NonNullable<ModuleMetadata['controllers']>[0],): this {this.moduleMetadata.controllers = this.moduleMetadata.controllers ?? [];
+    controller: NonNullable<ModuleMetadata['controllers']>[0],
+  ): this {
+    this.moduleMetadata.controllers = this.moduleMetadata.controllers ?? [];
     this.moduleMetadata.controllers.push(controller);
     return this;
   }
@@ -280,8 +296,7 @@ export class MockTestingModuleBuilder {
           },
         }),
       }),
-      compile: () =>
-        Test.createTestingModule(this.moduleMetadata).compile(),
+      compile: () => Test.createTestingModule(this.moduleMetadata).compile(),
     };
   }
 }
@@ -359,13 +374,17 @@ export const createMockWebSocketServer = () => ({
   local: jest.fn().mockReturnThis(),
   close: jest.fn(),
   engine: {
-    generateId: jest.fn(() => 'mock-socket-id'),},});
+    generateId: jest.fn(() => 'mock-socket-id'),
+  },
+});
 
 /**
  * Mock WebSocket client
  */
 export const createMockWebSocketClient = () => ({
-  id: 'mock-client-id',emit: jest.fn(),on: jest.fn(),
+  id: 'mock-client-id',
+  emit: jest.fn(),
+  on: jest.fn(),
   join: jest.fn(),
   leave: jest.fn(),
   disconnect: jest.fn(),
@@ -373,7 +392,9 @@ export const createMockWebSocketClient = () => ({
     auth: {},
     headers: {},
     query: {},
-    address: '127.0.0.1',},data: {},
+    address: '127.0.0.1',
+  },
+  data: {},
 });
 
 /**
@@ -381,7 +402,10 @@ export const createMockWebSocketClient = () => ({
  */
 export const createMockHttpContext = () => ({
   req: {
-    method: 'GET',url: '/test',headers: {},body: {},
+    method: 'GET',
+    url: '/test',
+    headers: {},
+    body: {},
     query: {},
     params: {},
     user: null,
@@ -400,7 +424,9 @@ export const createMockHttpContext = () => ({
  * Mock execution context for guards and interceptors
  */
 export const createMockExecutionContext = (
-  contextType: 'http' | 'ws' | 'rpc' = 'http',) => ({getType: jest.fn().mockReturnValue(contextType),
+  contextType: 'http' | 'ws' | 'rpc' = 'http',
+) => ({
+  getType: jest.fn().mockReturnValue(contextType),
   getClass: jest.fn(),
   getHandler: jest.fn(),
   getArgs: jest.fn(),
@@ -467,7 +493,9 @@ export const createMockApplication = (): jest.Mocked<INestApplication> =>
     flushLogs: jest.fn(),
     enableShutdownHooks: jest.fn(),
     getHttpAdapter: jest.fn(),
-    getUrl: jest.fn().mockResolvedValue('http://localhost:3000'),enableCors: jest.fn(),enableVersioning: jest.fn(),
+    getUrl: jest.fn().mockResolvedValue('http://localhost:3000'),
+    enableCors: jest.fn(),
+    enableVersioning: jest.fn(),
     setGlobalPrefix: jest.fn(),
     getHttpServer: jest.fn(),
     resolve: jest.fn(),

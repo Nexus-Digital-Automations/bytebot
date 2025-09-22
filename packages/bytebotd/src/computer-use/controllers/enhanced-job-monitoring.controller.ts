@@ -203,7 +203,8 @@ export class EnhancedJobMonitoringController {
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
   @ParlantValidated({
-    intent: 'Retrieve comprehensive job status with advanced metrics and real-time tracking',
+    intent:
+      'Retrieve comprehensive job status with advanced metrics and real-time tracking',
     securityLevel: SecurityLevel.MEDIUM,
     validationMode: ValidationMode.AUTOMATIC,
     businessCategory: 'ENHANCED_JOB_MONITORING',
@@ -235,12 +236,13 @@ export class EnhancedJobMonitoringController {
         },
       );
 
-      const enhancedStatus = await this.jobMonitoringService.getEnhancedJobStatus(
-        jobId,
-        includePerformanceMetrics,
-        includeResourceUtilization,
-        includeExecutionSteps,
-      );
+      const enhancedStatus =
+        await this.jobMonitoringService.getEnhancedJobStatus(
+          jobId,
+          includePerformanceMetrics,
+          includeResourceUtilization,
+          includeExecutionSteps,
+        );
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
@@ -329,7 +331,8 @@ export class EnhancedJobMonitoringController {
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
   @ParlantValidated({
-    intent: 'Retrieve enhanced status for multiple jobs with bulk processing efficiency',
+    intent:
+      'Retrieve enhanced status for multiple jobs with bulk processing efficiency',
     securityLevel: SecurityLevel.MEDIUM,
     validationMode: ValidationMode.CONVERSATIONAL,
     businessCategory: 'BULK_JOB_MONITORING',
@@ -358,7 +361,8 @@ export class EnhancedJobMonitoringController {
         },
       );
 
-      const bulkResponse = await this.jobMonitoringService.getBulkEnhancedJobStatus(request);
+      const bulkResponse =
+        await this.jobMonitoringService.getBulkEnhancedJobStatus(request);
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
@@ -434,7 +438,11 @@ export class EnhancedJobMonitoringController {
             cpuUsage: { type: 'number', example: 45.2 },
             memoryUsage: { type: 'number', example: 2147483648 },
             memoryTotal: { type: 'number', example: 8589934592 },
-            loadAverage: { type: 'array', items: { type: 'number' }, example: [1.2, 1.5, 1.3] },
+            loadAverage: {
+              type: 'array',
+              items: { type: 'number' },
+              example: [1.2, 1.5, 1.3],
+            },
             uptime: { type: 'number', example: 3600000 },
             activeJobs: { type: 'number', example: 5 },
             queueLength: { type: 'number', example: 12 },
@@ -457,7 +465,8 @@ export class EnhancedJobMonitoringController {
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
   @ParlantValidated({
-    intent: 'Retrieve comprehensive system health metrics and performance indicators',
+    intent:
+      'Retrieve comprehensive system health metrics and performance indicators',
     securityLevel: SecurityLevel.MEDIUM,
     validationMode: ValidationMode.AUTOMATIC,
     businessCategory: 'SYSTEM_HEALTH_MONITORING',
@@ -472,14 +481,11 @@ export class EnhancedJobMonitoringController {
     const startTime = Date.now();
 
     try {
-      this.logger.log(
-        `[${operationId}] System health request`,
-        {
-          operationId,
-          userId: user.id,
-          username: user.username,
-        },
-      );
+      this.logger.log(`[${operationId}] System health request`, {
+        operationId,
+        userId: user.id,
+        username: user.username,
+      });
 
       const healthMetrics = this.jobMonitoringService.getSystemHealthMetrics();
 
@@ -492,7 +498,8 @@ export class EnhancedJobMonitoringController {
         alerts.push(`High CPU usage: ${healthMetrics.cpuUsage.toFixed(1)}%`);
       }
 
-      const memoryUsagePercent = (healthMetrics.memoryUsage / healthMetrics.memoryTotal) * 100;
+      const memoryUsagePercent =
+        (healthMetrics.memoryUsage / healthMetrics.memoryTotal) * 100;
       if (memoryUsagePercent > 85) {
         status = 'degraded';
         alerts.push(`High memory usage: ${memoryUsagePercent.toFixed(1)}%`);
@@ -500,7 +507,9 @@ export class EnhancedJobMonitoringController {
 
       if (healthMetrics.queueLength > 20) {
         status = 'degraded';
-        alerts.push(`Long job queue: ${healthMetrics.queueLength} jobs waiting`);
+        alerts.push(
+          `Long job queue: ${healthMetrics.queueLength} jobs waiting`,
+        );
       }
 
       if (!healthMetrics.systemResourcesAvailable) {
@@ -603,7 +612,10 @@ export class EnhancedJobMonitoringController {
         },
         historicalBasis: { type: 'number', example: 30000 },
         resourceAvailability: { type: 'number', example: 0.75 },
-        estimatedCompletionAt: { type: 'string', example: '2023-12-19T10:31:40.000Z' },
+        estimatedCompletionAt: {
+          type: 'string',
+          example: '2023-12-19T10:31:40.000Z',
+        },
         timestamp: { type: 'string', example: '2023-12-19T10:31:15.789Z' },
       },
     },
@@ -637,18 +649,17 @@ export class EnhancedJobMonitoringController {
     const startTime = Date.now();
 
     try {
-      this.logger.log(
-        `[${operationId}] Job prediction request for: ${jobId}`,
-        {
-          operationId,
-          jobId,
-          userId: user.id,
-          username: user.username,
-        },
-      );
+      this.logger.log(`[${operationId}] Job prediction request for: ${jobId}`, {
+        operationId,
+        jobId,
+        userId: user.id,
+        username: user.username,
+      });
 
       const prediction = this.jobMonitoringService.predictJobCompletion(jobId);
-      const estimatedCompletionAt = new Date(Date.now() + prediction.estimatedCompletionTimeMs);
+      const estimatedCompletionAt = new Date(
+        Date.now() + prediction.estimatedCompletionTimeMs,
+      );
 
       const response: JobPredictionResponse = {
         jobId,
@@ -752,7 +763,8 @@ export class EnhancedJobMonitoringController {
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',
   })
   @ParlantValidated({
-    intent: 'Trigger immediate comprehensive system health check and diagnostics',
+    intent:
+      'Trigger immediate comprehensive system health check and diagnostics',
     securityLevel: SecurityLevel.MEDIUM,
     validationMode: ValidationMode.EXPLICIT,
     businessCategory: 'SYSTEM_DIAGNOSTICS',
@@ -767,14 +779,11 @@ export class EnhancedJobMonitoringController {
     const startTime = Date.now();
 
     try {
-      this.logger.log(
-        `[${operationId}] Manual health check triggered`,
-        {
-          operationId,
-          userId: user.id,
-          username: user.username,
-        },
-      );
+      this.logger.log(`[${operationId}] Manual health check triggered`, {
+        operationId,
+        userId: user.id,
+        username: user.username,
+      });
 
       // Trigger the health check
       await this.jobMonitoringService.performHealthCheck();

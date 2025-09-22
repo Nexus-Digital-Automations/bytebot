@@ -35,8 +35,8 @@ import {
   isScreenshotResponse,
   isCursorPositionResponse,
   isFileReadResponse,
-  isFileWriteResponse
-} from './types';/*** Computer Use Tools Service
+  isFileWriteResponse,
+} from './types'; /*** Computer Use Tools Service
  *
  * Provides MCP-compatible tool implementations for computer automation operations.
  * All methods include comprehensive logging, error handling, and parameter validation
@@ -67,7 +67,8 @@ export class ComputerUseTools {
    */
   private generateOperationId(): string {
     this.operationCounter = (this.operationCounter + 1) % 10000;
-    return `mcp_op${Date.now()}${this.operationCounter.toString().padStart(4, '0')}`;}
+    return `mcp_op${Date.now()}${this.operationCounter.toString().padStart(4, '0')}`;
+  }
 
   /**
    * Logs operation start with comprehensive context
@@ -159,7 +160,9 @@ export class ComputerUseTools {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logOperationStart(operationId, 'computer_move_mouse', { coordinates });try {// Execute mouse move operation through computer use service
+    this.logOperationStart(operationId, 'computer_move_mouse', { coordinates });
+    try {
+      // Execute mouse move operation through computer use service
       await this.computerUseService.action({
         action: 'move_mouse',
         coordinates,
@@ -175,7 +178,8 @@ export class ComputerUseTools {
 
       return { content: [{ type: 'text', text: 'mouse moved' }] };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       this.logOperationError(
         operationId,
         'computer_move_mouse',
@@ -209,7 +213,11 @@ export class ComputerUseTools {
    * Validation: Ensures path has valid coordinates and key names
    */
   @Tool({
-    name: 'computer_trace_mouse',description:'Moves the mouse cursor along a specified path of coordinates.',parameters: McpSchemas.mouseTrace,})
+    name: 'computer_trace_mouse',
+    description:
+      'Moves the mouse cursor along a specified path of coordinates.',
+    parameters: McpSchemas.mouseTrace,
+  })
   async traceMouse({
     path,
     holdKeys,
@@ -220,7 +228,9 @@ export class ComputerUseTools {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
-    this.logOperationStart(operationId, 'computer_trace_mouse', {pathLength: path.length,holdKeys,
+    this.logOperationStart(operationId, 'computer_trace_mouse', {
+      pathLength: path.length,
+      holdKeys,
       startPoint: path[0],
       endPoint: path[path.length - 1],
     });
@@ -233,7 +243,7 @@ export class ComputerUseTools {
         holdKeys,
       });
 
-      const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ""}`;
+      const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ''}`;
       this.logOperationSuccess(
         operationId,
         'computer_trace_mouse',
@@ -245,7 +255,8 @@ export class ComputerUseTools {
         content: [{ type: 'text', text: 'mouse traced' }],
       };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       this.logOperationError(
         operationId,
         'computer_trace_mouse',
@@ -265,7 +276,11 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_click_mouse',description:'Performs a mouse click at the specified coordinates or current position.',parameters: McpSchemas.mouseClickAdvanced,})
+    name: 'computer_click_mouse',
+    description:
+      'Performs a mouse click at the specified coordinates or current position.',
+    parameters: McpSchemas.mouseClickAdvanced,
+  })
   async clickMouse({
     coordinates,
     button,
@@ -273,11 +288,15 @@ export class ComputerUseTools {
     clickCount,
   }: {
     coordinates?: { x: number; y: number };
-    button: 'left' | 'right' | 'middle';holdKeys?: string[];clickCount: number;
+    button: 'left' | 'right' | 'middle';
+    holdKeys?: string[];
+    clickCount: number;
   }) {
     try {
       await this.computerUseService.action({
-        action: 'click_mouse',coordinates,button,
+        action: 'click_mouse',
+        coordinates,
+        button,
         holdKeys,
         clickCount,
       });
@@ -285,7 +304,8 @@ export class ComputerUseTools {
         content: [{ type: 'text', text: 'mouse clicked' }],
       };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -298,23 +318,33 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_press_mouse',description:'Presses or releases a specified mouse button at the given coordinates or current position.',parameters: McpSchemas.mousePress,})
+    name: 'computer_press_mouse',
+    description:
+      'Presses or releases a specified mouse button at the given coordinates or current position.',
+    parameters: McpSchemas.mousePress,
+  })
   async pressMouse({
     coordinates,
     button,
     press,
   }: {
     coordinates?: { x: number; y: number };
-    button: 'left' | 'right' | 'middle';press: 'down' | 'up';}) {try {
+    button: 'left' | 'right' | 'middle';
+    press: 'down' | 'up';
+  }) {
+    try {
       await this.computerUseService.action({
-        action: 'press_mouse',coordinates,button,
+        action: 'press_mouse',
+        coordinates,
+        button,
         press,
       });
       return {
         content: [{ type: 'text', text: 'mouse pressed' }],
       };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -327,24 +357,33 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_drag_mouse',description:'Drags the mouse from a starting point along a path while holding a specified button.',parameters: McpSchemas.mouseDragPath,})
+    name: 'computer_drag_mouse',
+    description:
+      'Drags the mouse from a starting point along a path while holding a specified button.',
+    parameters: McpSchemas.mouseDragPath,
+  })
   async dragMouse({
     path,
     button,
     holdKeys,
   }: {
     path: { x: number; y: number }[];
-    button: 'left' | 'right' | 'middle';holdKeys?: string[];}) {
+    button: 'left' | 'right' | 'middle';
+    holdKeys?: string[];
+  }) {
     try {
       await this.computerUseService.action({
-        action: 'drag_mouse',path,button,
+        action: 'drag_mouse',
+        path,
+        button,
         holdKeys,
       });
       return {
         content: [{ type: 'text', text: 'mouse dragged' }],
       };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -357,7 +396,10 @@ export class ComputerUseTools {
   }
 
   @Tool({
-    name: 'computer_scroll',description: 'Scrolls the mouse wheel up, down, left, or right.',parameters: McpSchemas.scrollAdvanced,})
+    name: 'computer_scroll',
+    description: 'Scrolls the mouse wheel up, down, left, or right.',
+    parameters: McpSchemas.scrollAdvanced,
+  })
   async scroll({
     coordinates,
     direction,
@@ -365,17 +407,22 @@ export class ComputerUseTools {
     holdKeys,
   }: {
     coordinates?: { x: number; y: number };
-    direction: 'up' | 'down' | 'left' | 'right';scrollCount: number;holdKeys?: string[];
+    direction: 'up' | 'down' | 'left' | 'right';
+    scrollCount: number;
+    holdKeys?: string[];
   }) {
     try {
       await this.computerUseService.action({
-        action: 'scroll',coordinates,direction,
+        action: 'scroll',
+        coordinates,
+        direction,
         scrollCount,
         holdKeys,
       });
       return { content: [{ type: 'text', text: 'scrolled' }] };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -417,11 +464,14 @@ V, W, X, Y, Z`,
   async typeKeys({ keys, delay }: { keys: string[]; delay?: number }) {
     try {
       await this.computerUseService.action({
-        action: 'type_keys',keys,delay,
+        action: 'type_keys',
+        keys,
+        delay,
       });
       return { content: [{ type: 'text', text: 'keys typed' }] };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -461,12 +511,17 @@ V, W, X, Y, Z
       `,
     parameters: McpSchemas.pressKeysAdvanced,
   })
-  async pressKeys({ keys, press }: { keys: string[]; press: 'down' | 'up' }) {try {await this.computerUseService.action({
-        action: 'press_keys',keys,press,
+  async pressKeys({ keys, press }: { keys: string[]; press: 'down' | 'up' }) {
+    try {
+      await this.computerUseService.action({
+        action: 'press_keys',
+        keys,
+        press,
       });
       return { content: [{ type: 'text', text: 'keys pressed' }] };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -479,15 +534,22 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_type_text',description:'Types a string of text character by character. Use this tool for strings less than 25 characters, or passwords/sensitive form fields.',parameters: McpSchemas.typeTextAdvanced,})
+    name: 'computer_type_text',
+    description:
+      'Types a string of text character by character. Use this tool for strings less than 25 characters, or passwords/sensitive form fields.',
+    parameters: McpSchemas.typeTextAdvanced,
+  })
   async typeText({ text, delay }: { text: string; delay?: number }) {
     try {
       await this.computerUseService.action({
-        action: 'type_text',text,delay,
+        action: 'type_text',
+        text,
+        delay,
       });
       return { content: [{ type: 'text', text: 'text typed' }] };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -500,13 +562,18 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_paste_text',description:'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',parameters: McpSchemas.pasteText,})
+    name: 'computer_paste_text',
+    description:
+      'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',
+    parameters: McpSchemas.pasteText,
+  })
   async pasteText({ text }: { text: string }) {
     try {
       await this.computerUseService.action({ action: 'paste_text', text });
       return { content: [{ type: 'text', text: 'text pasted' }] };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -519,13 +586,17 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_wait',description: 'Pauses execution for a specified duration.',parameters: McpSchemas.wait,})
+    name: 'computer_wait',
+    description: 'Pauses execution for a specified duration.',
+    parameters: McpSchemas.wait,
+  })
   async wait({ duration }: { duration: number }) {
     try {
       await this.computerUseService.action({ action: 'wait', duration });
       return { content: [{ type: 'text', text: 'waiting done' }] };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -538,19 +609,32 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_application',description:'Opens or switches to the specified application and maximizes it.',parameters: McpSchemas.application,})
+    name: 'computer_application',
+    description:
+      'Opens or switches to the specified application and maximizes it.',
+    parameters: McpSchemas.application,
+  })
   async application({
     application,
   }: {
     application:
-      | 'firefox'| '1password'| 'thunderbird'| 'vscode'| 'terminal'| 'desktop'| 'directory';}) {try {
+      | 'firefox'
+      | '1password'
+      | 'thunderbird'
+      | 'vscode'
+      | 'terminal'
+      | 'desktop'
+      | 'directory';
+  }) {
+    try {
       await this.computerUseService.action({
         action: 'application',
         application,
       });
       return { content: [{ type: 'text', text: 'application opened' }] };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -581,7 +665,10 @@ V, W, X, Y, Z
    * Quality: Optimized compression balances file size and visual fidelity
    */
   @Tool({
-    name: 'computer_screenshot',description: 'Captures a screenshot of the current screen.',})async screenshot() {
+    name: 'computer_screenshot',
+    description: 'Captures a screenshot of the current screen.',
+  })
+  async screenshot() {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
     const screenshotStartTime = Date.now();
@@ -641,7 +728,8 @@ V, W, X, Y, Z
         ],
       };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       this.logOperationError(
         operationId,
         'computer_screenshot',
@@ -683,7 +771,8 @@ V, W, X, Y, Z
         ],
       };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -697,7 +786,8 @@ V, W, X, Y, Z
 
   @Tool({
     name: 'computer_write_file',
-    description:'Writes a file to the specified path with base64 encoded data.',
+    description:
+      'Writes a file to the specified path with base64 encoded data.',
     parameters: McpSchemas.writeFile,
   })
   async writeFile({ path, data }: { path: string; data: string }) {
@@ -730,7 +820,8 @@ V, W, X, Y, Z
         ],
       };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
@@ -744,7 +835,8 @@ V, W, X, Y, Z
 
   @Tool({
     name: 'computer_read_file',
-    description:'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',
+    description:
+      'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',
     parameters: McpSchemas.readFile,
   })
   async readFile({ path }: { path: string }) {
@@ -795,7 +887,8 @@ V, W, X, Y, Z
         ],
       };
     } catch (error: unknown) {
-      const errorObj = error instanceof Error ? error : new Error(String(error));
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {

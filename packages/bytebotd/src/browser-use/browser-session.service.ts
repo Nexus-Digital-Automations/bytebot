@@ -3,7 +3,12 @@
  * Service Layer Implementation for Browser-Use API Endpoints
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { spawn, ChildProcess } from 'child_process';
@@ -28,7 +33,10 @@ import {
 } from './dto/browser-automation.dto';
 
 @Injectable()
-export class BrowserSessionService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class BrowserSessionService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(BrowserSessionService.name);
   private sessions: Map<string, IBrowserSession> = new Map();
   private sessionProcesses: Map<string, ChildProcess> = new Map();
@@ -50,12 +58,20 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
     // Initialize configuration
     this.maxSessions = parseInt(process.env.MAX_BROWSER_SESSIONS || '10');
     this.sessionTimeout = parseInt(process.env.SESSION_TIMEOUT || '1800000'); // 30 minutes
-    this.healthCheckInterval_ms = parseInt(process.env.HEALTH_CHECK_INTERVAL || '30000'); // 30 seconds
-    this.cleanupInterval_ms = parseInt(process.env.CLEANUP_INTERVAL || '300000'); // 5 minutes
+    this.healthCheckInterval_ms = parseInt(
+      process.env.HEALTH_CHECK_INTERVAL || '30000',
+    ); // 30 seconds
+    this.cleanupInterval_ms = parseInt(
+      process.env.CLEANUP_INTERVAL || '300000',
+    ); // 5 minutes
     this.pythonPath = process.env.PYTHON_PATH || 'python3';
-    this.browserUsePath = process.env.BROWSER_USE_PATH || '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
+    this.browserUsePath =
+      process.env.BROWSER_USE_PATH ||
+      '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
 
-    this.logger.log('BrowserSessionService initialized with comprehensive lifecycle management');
+    this.logger.log(
+      'BrowserSessionService initialized with comprehensive lifecycle management',
+    );
   }
 
   async onModuleInit() {
@@ -65,7 +81,9 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
   }
 
   async onModuleDestroy() {
-    this.logger.log('BrowserSessionService module destroying - cleaning up all sessions');
+    this.logger.log(
+      'BrowserSessionService module destroying - cleaning up all sessions',
+    );
     await this.destroyAllSessions();
     this.stopHealthCheck();
     this.stopCleanupScheduler();
@@ -74,7 +92,9 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
   /**
    * Create a new browser session with comprehensive configuration
    */
-  async createSession(sessionDto: CreateBrowserSessionDto): Promise<BrowserSessionResponseDto> {
+  async createSession(
+    sessionDto: CreateBrowserSessionDto,
+  ): Promise<BrowserSessionResponseDto> {
     try {
       // Check session limits
       if (this.sessions.size >= this.maxSessions) {
@@ -131,7 +151,10 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
       this.sessions.set(sessionId, session);
       this.sessionMetrics.set(sessionId, metrics);
 
-      this.logger.log(`Creating browser session ${sessionId} with config:`, config);
+      this.logger.log(
+        `Creating browser session ${sessionId} with config:`,
+        config,
+      );
 
       // Initialize browser session through Python
       try {
@@ -151,15 +174,16 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
             createdAt: session.createdAt,
           },
         };
-
       } catch (error) {
         session.status = 'error';
         this.sessions.set(sessionId, session);
 
-        this.logger.error(`Failed to initialize browser session ${sessionId}`, error);
+        this.logger.error(
+          `Failed to initialize browser session ${sessionId}`,
+          error,
+        );
         throw error;
       }
-
     } catch (error) {
       this.logger.error('Failed to create browser session', error);
       throw error;
@@ -169,7 +193,9 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
   /**
    * Get session information
    */
-  async getSession(sessionId: string): Promise<ServiceResponseDto<IBrowserSession>> {
+  async getSession(
+    sessionId: string,
+  ): Promise<ServiceResponseDto<IBrowserSession>> {
     const session = this.sessions.get(sessionId);
 
     if (!session) {
@@ -177,7 +203,7 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
         success: false,
         error: this.createBrowserError(
           new Error(`Session ${sessionId} not found`),
-          { context: { sessionId } }
+          { context: { sessionId } },
         ),
       };
     }
@@ -198,18 +224,24 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
   /**
    * Get all sessions with optional filtering
    */
-  async getSessions(query: GetSessionsQueryDto): Promise<ServiceResponseDto<IBrowserSession[]>> {
+  async getSessions(
+    query: GetSessionsQueryDto,
+  ): Promise<ServiceResponseDto<IBrowserSession[]>> {
     const { status, limit = 10, offset = 0 } = query;
 
     let filteredSessions = Array.from(this.sessions.values());
 
     // Apply status filter
     if (status) {
-      filteredSessions = filteredSessions.filter(session => session.status === status);
+      filteredSessions = filteredSessions.filter(
+        (session) => session.status === status,
+      );
     }
 
     // Sort by creation date (newest first)
-    filteredSessions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    filteredSessions.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
 
     // Apply pagination
     const paginatedSessions = filteredSessions.slice(offset, offset + limit);
@@ -255,9 +287,14 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
         try {
           process.kill('SIGTERM');
           this.sessionProcesses.delete(sessionId);
-          this.logger.log(`Terminated browser process for session ${sessionId}`);
+          this.logger.log(
+            `Terminated browser process for session ${sessionId}`,
+          );
         } catch (error) {
-          this.logger.error(`Failed to terminate process for session ${sessionId}`, error);
+          this.logger.error(
+            `Failed to terminate process for session ${sessionId}`,
+            error,
+          );
         }
       }
 
@@ -276,7 +313,6 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
           destroyedAt: new Date(),
         },
       };
-
     } catch (error) {
       this.logger.error(`Failed to destroy session ${sessionId}`, error);
 
@@ -293,7 +329,9 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
   /**
    * Get session health status
    */
-  async getSessionHealth(sessionId: string): Promise<ServiceResponseDto<IBrowserHealth>> {
+  async getSessionHealth(
+    sessionId: string,
+  ): Promise<ServiceResponseDto<IBrowserHealth>> {
     const session = this.sessions.get(sessionId);
 
     if (!session) {
@@ -301,7 +339,7 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
         success: false,
         error: this.createBrowserError(
           new Error(`Session ${sessionId} not found`),
-          { context: { sessionId } }
+          { context: { sessionId } },
         ),
       };
     }
@@ -331,16 +369,12 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
       this.logger.error(`Failed to get health for session ${sessionId}`, error);
 
       return {
         success: false,
-        error: this.createBrowserError(
-          error,
-          { context: { sessionId } }
-        ),
+        error: this.createBrowserError(error, { context: { sessionId } }),
       };
     }
   }
@@ -348,7 +382,9 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
   /**
    * Get session statistics
    */
-  async getSessionStatistics(sessionId: string): Promise<ServiceResponseDto<ISessionStatistics>> {
+  async getSessionStatistics(
+    sessionId: string,
+  ): Promise<ServiceResponseDto<ISessionStatistics>> {
     const session = this.sessions.get(sessionId);
     const metrics = this.sessionMetrics.get(sessionId);
 
@@ -357,7 +393,7 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
         success: false,
         error: this.createBrowserError(
           new Error(`Session ${sessionId} not found`),
-          { context: { sessionId } }
+          { context: { sessionId } },
         ),
       };
     }
@@ -395,14 +431,20 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
   /**
    * Record task completion for session statistics
    */
-  recordTaskCompletion(sessionId: string, duration: number, success: boolean): void {
+  recordTaskCompletion(
+    sessionId: string,
+    duration: number,
+    success: boolean,
+  ): void {
     const metrics = this.sessionMetrics.get(sessionId);
     if (metrics) {
       if (success) {
         metrics.tasksCompleted++;
         // Update average duration
         metrics.averageTaskDuration =
-          (metrics.averageTaskDuration * (metrics.tasksCompleted - 1) + duration) / metrics.tasksCompleted;
+          (metrics.averageTaskDuration * (metrics.tasksCompleted - 1) +
+            duration) /
+          metrics.tasksCompleted;
       } else {
         metrics.tasksFailedCount++;
       }
@@ -486,7 +528,9 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
   /**
    * Initialize browser session through Python browser-use framework
    */
-  private async initializeBrowserSession(session: IBrowserSession): Promise<void> {
+  private async initializeBrowserSession(
+    session: IBrowserSession,
+  ): Promise<void> {
     const pythonScript = this.generateSessionInitScript(session);
 
     const result = await this.executePythonCommand({
@@ -500,7 +544,9 @@ export class BrowserSessionService extends EventEmitter implements OnModuleInit,
       throw new Error(`Failed to initialize browser session: ${result.stderr}`);
     }
 
-    this.logger.log(`Browser session ${session.sessionId} initialized successfully`);
+    this.logger.log(
+      `Browser session ${session.sessionId} initialized successfully`,
+    );
   }
 
   /**
@@ -693,13 +739,18 @@ if __name__ == "__main__":
               this.emit('sessionUnhealthy', session);
             }
           } catch (error) {
-            this.logger.error(`Health check failed for session ${sessionId}`, error);
+            this.logger.error(
+              `Health check failed for session ${sessionId}`,
+              error,
+            );
           }
         }
       }
     }, this.healthCheckInterval_ms);
 
-    this.logger.log(`Health check scheduler started (interval: ${this.healthCheckInterval_ms}ms)`);
+    this.logger.log(
+      `Health check scheduler started (interval: ${this.healthCheckInterval_ms}ms)`,
+    );
   }
 
   /**
@@ -735,11 +786,15 @@ if __name__ == "__main__":
       }
 
       if (sessionsToCleanup.length > 0) {
-        this.logger.log(`Cleaned up ${sessionsToCleanup.length} inactive sessions`);
+        this.logger.log(
+          `Cleaned up ${sessionsToCleanup.length} inactive sessions`,
+        );
       }
     }, this.cleanupInterval_ms);
 
-    this.logger.log(`Cleanup scheduler started (interval: ${this.cleanupInterval_ms}ms, timeout: ${this.sessionTimeout}ms)`);
+    this.logger.log(
+      `Cleanup scheduler started (interval: ${this.cleanupInterval_ms}ms, timeout: ${this.sessionTimeout}ms)`,
+    );
   }
 
   /**
@@ -763,7 +818,10 @@ if __name__ == "__main__":
       try {
         await this.destroySession(sessionId);
       } catch (error) {
-        this.logger.error(`Failed to destroy session ${sessionId} during cleanup`, error);
+        this.logger.error(
+          `Failed to destroy session ${sessionId} during cleanup`,
+          error,
+        );
       }
     }
 
@@ -775,7 +833,10 @@ if __name__ == "__main__":
    */
   private createBrowserError(
     error: any,
-    options: { context?: any; severity?: 'info' | 'warning' | 'error' | 'critical' } = {}
+    options: {
+      context?: any;
+      severity?: 'info' | 'warning' | 'error' | 'critical';
+    } = {},
   ): IBrowserError {
     return {
       code: error.code || 'SESSION_ERROR',
@@ -791,7 +852,9 @@ if __name__ == "__main__":
    * Get service status information
    */
   getServiceStatus(): ServiceResponseDto<any> {
-    const activeSessions = Array.from(this.sessions.values()).filter(s => s.status === 'active').length;
+    const activeSessions = Array.from(this.sessions.values()).filter(
+      (s) => s.status === 'active',
+    ).length;
     const totalSessions = this.sessions.size;
 
     return {

@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsObject, IsArray, IsBoolean, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsObject,
+  IsArray,
+  IsBoolean,
+  IsNumber,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
@@ -61,7 +68,11 @@ export class BrowserExecuteResponseDto {
 
   @ApiPropertyOptional({
     description: 'Execution timing information',
-    example: { startTime: 1695123456789, endTime: 1695123459123, duration: 2334 },
+    example: {
+      startTime: 1695123456789,
+      endTime: 1695123459123,
+      duration: 2334,
+    },
   })
   timing?: {
     startTime: number;

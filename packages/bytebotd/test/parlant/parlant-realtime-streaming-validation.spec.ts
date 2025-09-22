@@ -41,7 +41,7 @@ import {
   ConversationalMessageType,
   ProgressUpdateMessage,
   ValidationStreamingOptions,
-  SessionStatus
+  SessionStatus,
 } from '../../src/common/websocket/conversational-websocket-bridge.service';
 
 import { ParlantIntegrationService } from '../../src/parlant/parlant-integration.service';
@@ -131,7 +131,6 @@ interface StreamingTestCase {
  * Real-time streaming test utilities
  */
 class StreamingTestUtils {
-
   /**
    * Generate progressive validation scenarios
    */
@@ -149,8 +148,8 @@ class StreamingTestUtils {
           updateInterval: 100,
           maxUpdateCount: 5,
           compressionEnabled: true,
-          priorityBoost: true
-        }
+          priorityBoost: true,
+        },
       },
       {
         name: 'Detailed Progressive Validation',
@@ -164,8 +163,8 @@ class StreamingTestUtils {
           updateInterval: 50,
           maxUpdateCount: 20,
           compressionEnabled: true,
-          priorityBoost: false
-        }
+          priorityBoost: false,
+        },
       },
       {
         name: 'Complex Progressive Validation',
@@ -179,9 +178,9 @@ class StreamingTestUtils {
           updateInterval: 25,
           maxUpdateCount: 50,
           compressionEnabled: true,
-          priorityBoost: false
-        }
-      }
+          priorityBoost: false,
+        },
+      },
     ];
   }
 
@@ -197,7 +196,7 @@ class StreamingTestUtils {
         concurrentStreams: 1,
         compressionEnabled: false,
         expectedLatency: 25,
-        expectedThroughput: 2000
+        expectedThroughput: 2000,
       },
       {
         testName: 'Concurrent Stream Management',
@@ -206,7 +205,7 @@ class StreamingTestUtils {
         concurrentStreams: 10,
         compressionEnabled: true,
         expectedLatency: 75,
-        expectedThroughput: 1000
+        expectedThroughput: 1000,
       },
       {
         testName: 'High-Throughput Bulk Streaming',
@@ -215,7 +214,7 @@ class StreamingTestUtils {
         concurrentStreams: 5,
         compressionEnabled: true,
         expectedLatency: 100,
-        expectedThroughput: 5000
+        expectedThroughput: 5000,
       },
       {
         testName: 'Large Message Streaming',
@@ -224,8 +223,8 @@ class StreamingTestUtils {
         concurrentStreams: 2,
         compressionEnabled: true,
         expectedLatency: 200,
-        expectedThroughput: 500
-      }
+        expectedThroughput: 500,
+      },
     ];
   }
 
@@ -235,7 +234,7 @@ class StreamingTestUtils {
   static async executeProgressiveValidationTest(
     scenario: ProgressiveValidationScenario,
     client: WebSocket,
-    conversationalBridge: ConversationalWebSocketBridgeService
+    conversationalBridge: ConversationalWebSocketBridgeService,
   ): Promise<{
     success: boolean;
     metrics: StreamingMetrics;
@@ -269,8 +268,8 @@ class StreamingTestUtils {
               authenticationLevel: 'basic',
               permissions: ['stream'],
               auditRequired: false,
-              complianceFlags: []
-            }
+              complianceFlags: [],
+            },
           },
           action: {
             actionType: 'progressive_validation',
@@ -281,99 +280,115 @@ class StreamingTestUtils {
               scope: 'local',
               dataAccess: false,
               stateChanges: false,
-              userInteraction: false
-            }
+              userInteraction: false,
+            },
           },
           riskLevel: 'low' as const,
-          streamingOptions: scenario.streamingOptions
+          streamingOptions: scenario.streamingOptions,
         },
         metadata: {
           priority: 'high',
           requiresAck: true,
           compression: scenario.streamingOptions.compressionEnabled,
-          routingHints: ['streaming']
-        }
+          routingHints: ['streaming'],
+        },
       };
 
       // Send validation request
       await StreamingTestUtils.sendMessage(client, validationRequest);
 
       // Listen for progress updates
-      const progressPromise = new Promise<StreamingMetrics>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Progressive validation timeout'));
-        }, scenario.expectedDuration + 2000);
+      const progressPromise = new Promise<StreamingMetrics>(
+        (resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Progressive validation timeout'));
+          }, scenario.expectedDuration + 2000);
 
-        let updateCount = 0;
-        let lastUpdateTime = performance.now();
+          let updateCount = 0;
+          let lastUpdateTime = performance.now();
 
-        const messageHandler = (data: Buffer) => {
-          try {
-            const message = JSON.parse(data.toString()) as ConversationalMessage;
-            const receiveTime = performance.now();
+          const messageHandler = (data: Buffer) => {
+            try {
+              const message = JSON.parse(
+                data.toString(),
+              ) as ConversationalMessage;
+              const receiveTime = performance.now();
 
-            if (message.type === ConversationalMessageType.PROGRESS_UPDATE) {
-              const progressMessage = message as ProgressUpdateMessage;
-              progressUpdates.push(progressMessage);
+              if (message.type === ConversationalMessageType.PROGRESS_UPDATE) {
+                const progressMessage = message as ProgressUpdateMessage;
+                progressUpdates.push(progressMessage);
 
-              // Calculate latency
-              const latency = receiveTime - lastUpdateTime;
-              latencies.push(latency);
-              lastUpdateTime = receiveTime;
+                // Calculate latency
+                const latency = receiveTime - lastUpdateTime;
+                latencies.push(latency);
+                lastUpdateTime = receiveTime;
 
-              updateCount++;
+                updateCount++;
 
-              // Check if streaming is complete
-              if (updateCount >= scenario.totalSteps ||
-                  message.type === ConversationalMessageType.STREAMING_COMPLETE) {
-                clearTimeout(timeout);
-                client.off('message', messageHandler);
+                // Check if streaming is complete
+                if (
+                  updateCount >= scenario.totalSteps ||
+                  message.type === ConversationalMessageType.STREAMING_COMPLETE
+                ) {
+                  clearTimeout(timeout);
+                  client.off('message', messageHandler);
 
-                const totalDuration = receiveTime - startTime;
-                const avgLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+                  const totalDuration = receiveTime - startTime;
+                  const avgLatency =
+                    latencies.reduce((sum, lat) => sum + lat, 0) /
+                    latencies.length;
 
-                const metrics: StreamingMetrics = {
-                  averageLatency: avgLatency,
-                  p95Latency: StreamingTestUtils.calculatePercentile(latencies, 0.95),
-                  p99Latency: StreamingTestUtils.calculatePercentile(latencies, 0.99),
-                  minLatency: Math.min(...latencies),
-                  maxLatency: Math.max(...latencies),
-                  messagesPerSecond: (updateCount * 1000) / totalDuration,
-                  bytesPerSecond: (updateCount * 1024 * 1000) / totalDuration, // Estimated
-                  compressionRatio: scenario.streamingOptions.compressionEnabled ? 0.7 : 1.0,
-                  messageDeliveryRate: updateCount / scenario.totalSteps,
-                  sequenceErrorRate: 0, // Calculate based on sequence numbers
-                  duplicateRate: 0, // Calculate based on message IDs
-                  streamEstablishmentTime: 100, // Estimated
-                  streamTeardownTime: 50, // Estimated
-                  bufferUtilization: 0.95 // Estimated
-                };
+                  const metrics: StreamingMetrics = {
+                    averageLatency: avgLatency,
+                    p95Latency: StreamingTestUtils.calculatePercentile(
+                      latencies,
+                      0.95,
+                    ),
+                    p99Latency: StreamingTestUtils.calculatePercentile(
+                      latencies,
+                      0.99,
+                    ),
+                    minLatency: Math.min(...latencies),
+                    maxLatency: Math.max(...latencies),
+                    messagesPerSecond: (updateCount * 1000) / totalDuration,
+                    bytesPerSecond: (updateCount * 1024 * 1000) / totalDuration, // Estimated
+                    compressionRatio: scenario.streamingOptions
+                      .compressionEnabled
+                      ? 0.7
+                      : 1.0,
+                    messageDeliveryRate: updateCount / scenario.totalSteps,
+                    sequenceErrorRate: 0, // Calculate based on sequence numbers
+                    duplicateRate: 0, // Calculate based on message IDs
+                    streamEstablishmentTime: 100, // Estimated
+                    streamTeardownTime: 50, // Estimated
+                    bufferUtilization: 0.95, // Estimated
+                  };
 
-                resolve(metrics);
+                  resolve(metrics);
+                }
               }
+            } catch (_error) {
+              // Ignore non-JSON messages
             }
-          } catch (_error) {
-            // Ignore non-JSON messages
-          }
-        };
+          };
 
-        client.on('message', messageHandler);
-      });
+          client.on('message', messageHandler);
+        },
+      );
 
       const metrics = await progressPromise;
 
       return {
         success: true,
         metrics,
-        progressUpdates
+        progressUpdates,
       };
-
     } catch (error) {
       return {
         success: false,
         metrics: StreamingTestUtils.createEmptyMetrics(),
         progressUpdates,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -383,7 +398,7 @@ class StreamingTestUtils {
    */
   static async executeConcurrentStreamingTest(
     testCase: StreamingTestCase,
-    conversationalBridge: ConversationalWebSocketBridgeService
+    conversationalBridge: ConversationalWebSocketBridgeService,
   ): Promise<{
     success: boolean;
     overallMetrics: StreamingMetrics;
@@ -400,7 +415,8 @@ class StreamingTestUtils {
     for (let streamId = 0; streamId < testCase.concurrentStreams; streamId++) {
       const streamPromise = (async () => {
         const client = await StreamingTestUtils.createTestClient();
-        const streamMetrics: StreamingMetrics = StreamingTestUtils.createEmptyMetrics();
+        const streamMetrics: StreamingMetrics =
+          StreamingTestUtils.createEmptyMetrics();
         const latencies: number[] = [];
         const startTime = performance.now();
 
@@ -418,7 +434,7 @@ class StreamingTestUtils {
               payload: {
                 operationId: `concurrent_operation_${streamId}`,
                 stage: `step_${msgId}`,
-                progress: (msgId + 1) / testCase.messageCount * 100,
+                progress: ((msgId + 1) / testCase.messageCount) * 100,
                 status: 'active' as const,
                 details: {
                   currentStep: `Processing step ${msgId + 1}`,
@@ -430,16 +446,17 @@ class StreamingTestUtils {
                     processingTime: performance.now() - messageStartTime,
                     memoryUsage: process.memoryUsage().heapUsed,
                     networkLatency: 0,
-                    throughput: msgId / ((performance.now() - startTime) / 1000)
-                  }
-                }
+                    throughput:
+                      msgId / ((performance.now() - startTime) / 1000),
+                  },
+                },
               },
               metadata: {
                 priority: 'normal',
                 requiresAck: false,
                 compression: testCase.compressionEnabled,
-                routingHints: ['concurrent']
-              }
+                routingHints: ['concurrent'],
+              },
             };
 
             // Send message
@@ -453,22 +470,33 @@ class StreamingTestUtils {
           const totalDuration = performance.now() - startTime;
 
           // Calculate stream metrics
-          streamMetrics.averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
-          streamMetrics.p95Latency = StreamingTestUtils.calculatePercentile(latencies, 0.95);
-          streamMetrics.p99Latency = StreamingTestUtils.calculatePercentile(latencies, 0.99);
+          streamMetrics.averageLatency =
+            latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+          streamMetrics.p95Latency = StreamingTestUtils.calculatePercentile(
+            latencies,
+            0.95,
+          );
+          streamMetrics.p99Latency = StreamingTestUtils.calculatePercentile(
+            latencies,
+            0.99,
+          );
           streamMetrics.minLatency = Math.min(...latencies);
           streamMetrics.maxLatency = Math.max(...latencies);
-          streamMetrics.messagesPerSecond = (testCase.messageCount * 1000) / totalDuration;
-          streamMetrics.bytesPerSecond = (testCase.messageCount * testCase.messageSize * 1000) / totalDuration;
+          streamMetrics.messagesPerSecond =
+            (testCase.messageCount * 1000) / totalDuration;
+          streamMetrics.bytesPerSecond =
+            (testCase.messageCount * testCase.messageSize * 1000) /
+            totalDuration;
           streamMetrics.messageDeliveryRate = 1.0;
-          streamMetrics.compressionRatio = testCase.compressionEnabled ? 0.7 : 1.0;
+          streamMetrics.compressionRatio = testCase.compressionEnabled
+            ? 0.7
+            : 1.0;
 
           return {
             streamId,
             metrics: streamMetrics,
-            success: streamMetrics.averageLatency <= testCase.expectedLatency
+            success: streamMetrics.averageLatency <= testCase.expectedLatency,
           };
-
         } finally {
           client.close();
         }
@@ -481,38 +509,47 @@ class StreamingTestUtils {
       const results = await Promise.all(streamPromises);
 
       // Calculate overall metrics
-      const allMetrics = results.map(r => r.metrics);
+      const allMetrics = results.map((r) => r.metrics);
       const overallMetrics: StreamingMetrics = {
-        averageLatency: allMetrics.reduce((sum, m) => sum + m.averageLatency, 0) / allMetrics.length,
-        p95Latency: Math.max(...allMetrics.map(m => m.p95Latency)),
-        p99Latency: Math.max(...allMetrics.map(m => m.p99Latency)),
-        minLatency: Math.min(...allMetrics.map(m => m.minLatency)),
-        maxLatency: Math.max(...allMetrics.map(m => m.maxLatency)),
-        messagesPerSecond: allMetrics.reduce((sum, m) => sum + m.messagesPerSecond, 0),
-        bytesPerSecond: allMetrics.reduce((sum, m) => sum + m.bytesPerSecond, 0),
+        averageLatency:
+          allMetrics.reduce((sum, m) => sum + m.averageLatency, 0) /
+          allMetrics.length,
+        p95Latency: Math.max(...allMetrics.map((m) => m.p95Latency)),
+        p99Latency: Math.max(...allMetrics.map((m) => m.p99Latency)),
+        minLatency: Math.min(...allMetrics.map((m) => m.minLatency)),
+        maxLatency: Math.max(...allMetrics.map((m) => m.maxLatency)),
+        messagesPerSecond: allMetrics.reduce(
+          (sum, m) => sum + m.messagesPerSecond,
+          0,
+        ),
+        bytesPerSecond: allMetrics.reduce(
+          (sum, m) => sum + m.bytesPerSecond,
+          0,
+        ),
         compressionRatio: allMetrics[0]?.compressionRatio || 1.0,
-        messageDeliveryRate: allMetrics.reduce((sum, m) => sum + m.messageDeliveryRate, 0) / allMetrics.length,
+        messageDeliveryRate:
+          allMetrics.reduce((sum, m) => sum + m.messageDeliveryRate, 0) /
+          allMetrics.length,
         sequenceErrorRate: 0,
         duplicateRate: 0,
         streamEstablishmentTime: 100,
         streamTeardownTime: 50,
-        bufferUtilization: 0.95
+        bufferUtilization: 0.95,
       };
 
-      const successCount = results.filter(r => r.success).length;
+      const successCount = results.filter((r) => r.success).length;
 
       return {
         success: successCount === testCase.concurrentStreams,
         overallMetrics,
-        streamMetrics: allMetrics
+        streamMetrics: allMetrics,
       };
-
     } catch (error) {
       return {
         success: false,
         overallMetrics: StreamingTestUtils.createEmptyMetrics(),
         streamMetrics: [],
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -522,7 +559,7 @@ class StreamingTestUtils {
    */
   static async testStreamInterruptionRecovery(
     client: WebSocket,
-    conversationalBridge: ConversationalWebSocketBridgeService
+    conversationalBridge: ConversationalWebSocketBridgeService,
   ): Promise<{
     success: boolean;
     interruptionDetected: boolean;
@@ -554,7 +591,7 @@ class StreamingTestUtils {
             payload: {
               operationId: 'interruption_test',
               stage: `step_${i}`,
-              progress: (i + 1) / 50 * 100,
+              progress: ((i + 1) / 50) * 100,
               status: 'active' as const,
               details: {
                 currentStep: `Interruption test step ${i + 1}`,
@@ -566,16 +603,16 @@ class StreamingTestUtils {
                   processingTime: performance.now() - startTime,
                   memoryUsage: process.memoryUsage().heapUsed,
                   networkLatency: 0,
-                  throughput: i / ((performance.now() - startTime) / 1000)
-                }
-              }
+                  throughput: i / ((performance.now() - startTime) / 1000),
+                },
+              },
             },
             metadata: {
               priority: 'normal',
               requiresAck: true,
               compression: false,
-              routingHints: ['interruption']
-            }
+              routingHints: ['interruption'],
+            },
           };
 
           await StreamingTestUtils.sendMessage(client, message);
@@ -586,7 +623,7 @@ class StreamingTestUtils {
             client.terminate();
 
             // Wait before reconnecting
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
 
             // Note: In a real scenario, we would need to handle reconnection
             // For this test, we simulate recovery by noting the time
@@ -594,7 +631,7 @@ class StreamingTestUtils {
             break;
           }
 
-          await new Promise(resolve => setTimeout(resolve, 20));
+          await new Promise((resolve) => setTimeout(resolve, 20));
         }
       })();
 
@@ -621,16 +658,15 @@ class StreamingTestUtils {
         success: recoveryTime < 2000, // Recovery should be under 2 seconds
         interruptionDetected,
         recoveryTime,
-        messagesLost
+        messagesLost,
       };
-
     } catch (error) {
       return {
         success: false,
         interruptionDetected: false,
         recoveryTime: 0,
         messagesLost: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -638,7 +674,10 @@ class StreamingTestUtils {
   /**
    * Send WebSocket message
    */
-  private static async sendMessage(client: WebSocket, message: ConversationalMessage): Promise<void> {
+  private static async sendMessage(
+    client: WebSocket,
+    message: ConversationalMessage,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (client.readyState !== WebSocket.OPEN) {
         reject(new Error('WebSocket not open'));
@@ -658,7 +697,9 @@ class StreamingTestUtils {
   /**
    * Create test WebSocket client
    */
-  private static async createTestClient(port: number = 8081): Promise<WebSocket> {
+  private static async createTestClient(
+    port: number = 8081,
+  ): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
       const client = new WebSocket(`ws://localhost:${port}`);
 
@@ -677,7 +718,10 @@ class StreamingTestUtils {
   /**
    * Calculate percentile from array of numbers
    */
-  private static calculatePercentile(values: number[], percentile: number): number {
+  private static calculatePercentile(
+    values: number[],
+    percentile: number,
+  ): number {
     const sorted = [...values].sort((a, b) => a - b);
     const index = Math.ceil(sorted.length * percentile) - 1;
     return sorted[index] || 0;
@@ -701,7 +745,7 @@ class StreamingTestUtils {
       duplicateRate: 0,
       streamEstablishmentTime: 0,
       streamTeardownTime: 0,
-      bufferUtilization: 0
+      bufferUtilization: 0,
     };
   }
 
@@ -720,7 +764,7 @@ class StreamingTestUtils {
       compressionEnabled: true,
       flowControlEnabled: true,
       maxConcurrentStreams: 100,
-      streamOverlapAllowed: true
+      streamOverlapAllowed: true,
     };
   }
 }
@@ -742,26 +786,30 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
           load: [
             () => ({
               CONVERSATIONAL_WEBSOCKET_PORT: 8081,
-              NODE_ENV: 'test'
-            })
-          ]
-        })
+              NODE_ENV: 'test',
+            }),
+          ],
+        }),
       ],
       providers: [
         ConversationalWebSocketBridgeService,
         ParlantIntegrationService,
-        Logger
-      ]
+        Logger,
+      ],
     }).compile();
 
-    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
+    conversationalBridge = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
 
     // Allow time for WebSocket server to start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   afterAll(async () => {
@@ -772,8 +820,11 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
 
   describe('Progressive Validation Streaming', () => {
     it('should execute fast progressive validation with real-time updates', async () => {
-      const scenarios = StreamingTestUtils.generateProgressiveValidationScenarios();
-      const fastScenario = scenarios.find(s => s.name === 'Fast Progressive Validation');
+      const scenarios =
+        StreamingTestUtils.generateProgressiveValidationScenarios();
+      const fastScenario = scenarios.find(
+        (s) => s.name === 'Fast Progressive Validation',
+      );
 
       if (!fastScenario) {
         throw new Error('Fast progressive validation scenario not found');
@@ -784,11 +835,12 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
       const client = await StreamingTestUtils.createTestClient();
 
       try {
-        const result = await StreamingTestUtils.executeProgressiveValidationTest(
-          fastScenario,
-          client,
-          conversationalBridge
-        );
+        const result =
+          await StreamingTestUtils.executeProgressiveValidationTest(
+            fastScenario,
+            client,
+            conversationalBridge,
+          );
 
         logger.log(`Fast Progressive Validation Results:
           Success: ${result.success}
@@ -799,11 +851,16 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
           Delivery Rate: ${(result.metrics.messageDeliveryRate * 100).toFixed(1)}%`);
 
         expect(result.success).toBe(true);
-        expect(result.progressUpdates.length).toBeGreaterThanOrEqual(fastScenario.totalSteps);
-        expect(result.metrics.averageLatency).toBeLessThan(streamingConfig.targetLatency);
-        expect(result.metrics.p95Latency).toBeLessThan(streamingConfig.maxLatency);
+        expect(result.progressUpdates.length).toBeGreaterThanOrEqual(
+          fastScenario.totalSteps,
+        );
+        expect(result.metrics.averageLatency).toBeLessThan(
+          streamingConfig.targetLatency,
+        );
+        expect(result.metrics.p95Latency).toBeLessThan(
+          streamingConfig.maxLatency,
+        );
         expect(result.metrics.messageDeliveryRate).toBeGreaterThan(0.95);
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -812,8 +869,11 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
     }, 30000);
 
     it('should handle detailed progressive validation with granular updates', async () => {
-      const scenarios = StreamingTestUtils.generateProgressiveValidationScenarios();
-      const detailedScenario = scenarios.find(s => s.name === 'Detailed Progressive Validation');
+      const scenarios =
+        StreamingTestUtils.generateProgressiveValidationScenarios();
+      const detailedScenario = scenarios.find(
+        (s) => s.name === 'Detailed Progressive Validation',
+      );
 
       if (!detailedScenario) {
         throw new Error('Detailed progressive validation scenario not found');
@@ -824,11 +884,12 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
       const client = await StreamingTestUtils.createTestClient();
 
       try {
-        const result = await StreamingTestUtils.executeProgressiveValidationTest(
-          detailedScenario,
-          client,
-          conversationalBridge
-        );
+        const result =
+          await StreamingTestUtils.executeProgressiveValidationTest(
+            detailedScenario,
+            client,
+            conversationalBridge,
+          );
 
         logger.log(`Detailed Progressive Validation Results:
           Success: ${result.success}
@@ -839,11 +900,14 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
           Buffer Utilization: ${(result.metrics.bufferUtilization * 100).toFixed(1)}%`);
 
         expect(result.success).toBe(true);
-        expect(result.progressUpdates.length).toBeGreaterThanOrEqual(detailedScenario.totalSteps);
-        expect(result.metrics.averageLatency).toBeLessThan(streamingConfig.maxLatency);
+        expect(result.progressUpdates.length).toBeGreaterThanOrEqual(
+          detailedScenario.totalSteps,
+        );
+        expect(result.metrics.averageLatency).toBeLessThan(
+          streamingConfig.maxLatency,
+        );
         expect(result.metrics.messagesPerSecond).toBeGreaterThan(100);
         expect(result.metrics.compressionRatio).toBeLessThan(1.0); // Compression should be effective
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -852,8 +916,11 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
     }, 45000);
 
     it('should handle complex progressive validation with optimal performance', async () => {
-      const scenarios = StreamingTestUtils.generateProgressiveValidationScenarios();
-      const complexScenario = scenarios.find(s => s.name === 'Complex Progressive Validation');
+      const scenarios =
+        StreamingTestUtils.generateProgressiveValidationScenarios();
+      const complexScenario = scenarios.find(
+        (s) => s.name === 'Complex Progressive Validation',
+      );
 
       if (!complexScenario) {
         throw new Error('Complex progressive validation scenario not found');
@@ -864,17 +931,19 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
       const client = await StreamingTestUtils.createTestClient();
 
       try {
-        const result = await StreamingTestUtils.executeProgressiveValidationTest(
-          complexScenario,
-          client,
-          conversationalBridge
-        );
+        const result =
+          await StreamingTestUtils.executeProgressiveValidationTest(
+            complexScenario,
+            client,
+            conversationalBridge,
+          );
 
         // Validate sequence order in progress updates
         let sequenceValid = true;
         for (let i = 1; i < result.progressUpdates.length; i++) {
           const currentProgress = result.progressUpdates[i].payload.progress;
-          const previousProgress = result.progressUpdates[i-1].payload.progress;
+          const previousProgress =
+            result.progressUpdates[i - 1].payload.progress;
           if (currentProgress < previousProgress) {
             sequenceValid = false;
             break;
@@ -891,11 +960,14 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
           Sequence Error Rate: ${(result.metrics.sequenceErrorRate * 100).toFixed(2)}%`);
 
         expect(result.success).toBe(true);
-        expect(result.progressUpdates.length).toBeGreaterThanOrEqual(complexScenario.totalSteps * 0.9);
+        expect(result.progressUpdates.length).toBeGreaterThanOrEqual(
+          complexScenario.totalSteps * 0.9,
+        );
         expect(sequenceValid).toBe(true);
-        expect(result.metrics.averageLatency).toBeLessThan(streamingConfig.maxLatency * 1.5);
+        expect(result.metrics.averageLatency).toBeLessThan(
+          streamingConfig.maxLatency * 1.5,
+        );
         expect(result.metrics.sequenceErrorRate).toBeLessThan(0.01);
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();
@@ -909,7 +981,9 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
   describe('Concurrent Streaming Performance', () => {
     it('should handle high-frequency low-latency streaming', async () => {
       const testCases = StreamingTestUtils.generateStreamingTestCases();
-      const highFreqCase = testCases.find(c => c.testName === 'High-Frequency Low-Latency Streaming');
+      const highFreqCase = testCases.find(
+        (c) => c.testName === 'High-Frequency Low-Latency Streaming',
+      );
 
       if (!highFreqCase) {
         throw new Error('High-frequency streaming test case not found');
@@ -919,7 +993,7 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
 
       const result = await StreamingTestUtils.executeConcurrentStreamingTest(
         highFreqCase,
-        conversationalBridge
+        conversationalBridge,
       );
 
       logger.log(`High-Frequency Streaming Results:
@@ -931,14 +1005,20 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
         Delivery Rate: ${(result.overallMetrics.messageDeliveryRate * 100).toFixed(1)}%`);
 
       expect(result.success).toBe(true);
-      expect(result.overallMetrics.averageLatency).toBeLessThan(highFreqCase.expectedLatency);
-      expect(result.overallMetrics.messagesPerSecond).toBeGreaterThan(highFreqCase.expectedThroughput);
+      expect(result.overallMetrics.averageLatency).toBeLessThan(
+        highFreqCase.expectedLatency,
+      );
+      expect(result.overallMetrics.messagesPerSecond).toBeGreaterThan(
+        highFreqCase.expectedThroughput,
+      );
       expect(result.overallMetrics.messageDeliveryRate).toBeGreaterThan(0.98);
     }, 30000);
 
     it('should manage multiple concurrent streams effectively', async () => {
       const testCases = StreamingTestUtils.generateStreamingTestCases();
-      const concurrentCase = testCases.find(c => c.testName === 'Concurrent Stream Management');
+      const concurrentCase = testCases.find(
+        (c) => c.testName === 'Concurrent Stream Management',
+      );
 
       if (!concurrentCase) {
         throw new Error('Concurrent stream management test case not found');
@@ -948,14 +1028,15 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
 
       const result = await StreamingTestUtils.executeConcurrentStreamingTest(
         concurrentCase,
-        conversationalBridge
+        conversationalBridge,
       );
 
       // Validate that all streams performed within acceptable ranges
       const performantStreams = result.streamMetrics.filter(
-        m => m.averageLatency <= concurrentCase.expectedLatency
+        (m) => m.averageLatency <= concurrentCase.expectedLatency,
       ).length;
-      const streamPerformanceRate = performantStreams / result.streamMetrics.length;
+      const streamPerformanceRate =
+        performantStreams / result.streamMetrics.length;
 
       logger.log(`Concurrent Stream Management Results:
         Success: ${result.success}
@@ -967,13 +1048,17 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
 
       expect(result.success).toBe(true);
       expect(streamPerformanceRate).toBeGreaterThan(0.8); // 80% of streams should perform well
-      expect(result.overallMetrics.messagesPerSecond).toBeGreaterThan(concurrentCase.expectedThroughput);
+      expect(result.overallMetrics.messagesPerSecond).toBeGreaterThan(
+        concurrentCase.expectedThroughput,
+      );
       expect(result.overallMetrics.compressionRatio).toBeLessThan(1.0);
     }, 45000);
 
     it('should handle high-throughput bulk streaming', async () => {
       const testCases = StreamingTestUtils.generateStreamingTestCases();
-      const bulkCase = testCases.find(c => c.testName === 'High-Throughput Bulk Streaming');
+      const bulkCase = testCases.find(
+        (c) => c.testName === 'High-Throughput Bulk Streaming',
+      );
 
       if (!bulkCase) {
         throw new Error('High-throughput bulk streaming test case not found');
@@ -983,11 +1068,13 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
 
       const result = await StreamingTestUtils.executeConcurrentStreamingTest(
         bulkCase,
-        conversationalBridge
+        conversationalBridge,
       );
 
-      const totalMessagesProcessed = bulkCase.messageCount * bulkCase.concurrentStreams;
-      const totalDataTransferred = totalMessagesProcessed * bulkCase.messageSize;
+      const totalMessagesProcessed =
+        bulkCase.messageCount * bulkCase.concurrentStreams;
+      const totalDataTransferred =
+        totalMessagesProcessed * bulkCase.messageSize;
 
       logger.log(`High-Throughput Bulk Streaming Results:
         Success: ${result.success}
@@ -998,7 +1085,9 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
         Buffer Utilization: ${(result.overallMetrics.bufferUtilization * 100).toFixed(1)}%`);
 
       expect(result.success).toBe(true);
-      expect(result.overallMetrics.messagesPerSecond).toBeGreaterThan(bulkCase.expectedThroughput);
+      expect(result.overallMetrics.messagesPerSecond).toBeGreaterThan(
+        bulkCase.expectedThroughput,
+      );
       expect(result.overallMetrics.bufferUtilization).toBeGreaterThan(0.85);
     }, 60000);
   });
@@ -1014,7 +1103,7 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
       try {
         const result = await StreamingTestUtils.testStreamInterruptionRecovery(
           client,
-          conversationalBridge
+          conversationalBridge,
         );
 
         logger.log(`Stream Interruption Recovery Results:
@@ -1026,7 +1115,6 @@ describe('PARLANT Real-time Streaming Validation Test Suite', () => {
         expect(result.interruptionDetected).toBe(true);
         expect(result.recoveryTime).toBeLessThan(2000); // Should recover within 2 seconds
         expect(result.messagesLost).toBeLessThan(10); // Minimal message loss
-
       } finally {
         if (client.readyState === WebSocket.OPEN) {
           client.close();

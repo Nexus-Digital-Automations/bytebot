@@ -31,7 +31,8 @@ import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
 import { createServer, Server } from 'http';
 import { randomUUID } from 'crypto';
-import {ConversationalWebSocketBridgeService,
+import {
+  ConversationalWebSocketBridgeService,
   ConversationalMessage,
   ConversationalMessageType,
   ValidationRequestMessage,
@@ -45,14 +46,17 @@ import { createSafeWebSocketServer } from '../websocket-types';
  * Message sequence tracker for ordering validation
  */
 class MessageSequenceTracker {
-  private sentMessages = new Map<string, {
-    message: ConversationalMessage;
-    sentTime: number;
-    acknowledged: boolean;
-    ackTime?: number;
-    delivered: boolean;
-    deliveryTime?: number;
-  }>();
+  private sentMessages = new Map<
+    string,
+    {
+      message: ConversationalMessage;
+      sentTime: number;
+      acknowledged: boolean;
+      ackTime?: number;
+      delivered: boolean;
+      deliveryTime?: number;
+    }
+  >();
 
   private receivedMessages: Array<{
     message: ConversationalMessage;
@@ -60,11 +64,14 @@ class MessageSequenceTracker {
     sequencePosition: number;
   }> = [];
 
-  private acknowledgments = new Map<string, {
-    messageId: string;
-    ackTime: number;
-    latency: number;
-  }>();
+  private acknowledgments = new Map<
+    string,
+    {
+      messageId: string;
+      ackTime: number;
+      latency: number;
+    }
+  >();
 
   private sequenceMetrics = {
     totalSent: 0,
@@ -93,8 +100,8 @@ class MessageSequenceTracker {
     const sequencePosition = this.receivedMessages.length;
 
     // Check for duplicates
-    const isDuplicate = this.receivedMessages.some(received =>
-      received.message.messageId === message.messageId
+    const isDuplicate = this.receivedMessages.some(
+      (received) => received.message.messageId === message.messageId,
     );
 
     if (isDuplicate) {
@@ -145,8 +152,12 @@ class MessageSequenceTracker {
       this.sequenceMetrics.totalAcknowledged++;
       this.sequenceMetrics.ackLatencies.push(latency);
       this.sequenceMetrics.averageAckLatency =
-        this.sequenceMetrics.ackLatencies.reduce((sum, lat) => sum + lat, 0) / this.sequenceMetrics.ackLatencies.length;
-      this.sequenceMetrics.maxAckLatency = Math.max(this.sequenceMetrics.maxAckLatency, latency);
+        this.sequenceMetrics.ackLatencies.reduce((sum, lat) => sum + lat, 0) /
+        this.sequenceMetrics.ackLatencies.length;
+      this.sequenceMetrics.maxAckLatency = Math.max(
+        this.sequenceMetrics.maxAckLatency,
+        latency,
+      );
     }
   }
 
@@ -156,12 +167,15 @@ class MessageSequenceTracker {
       expectedSequence: number;
       actualSequence: number;
       messageId: string;
-      violationType: 'out_of_order' | 'gap' | 'duplicate_sequence';}>;} {
+      violationType: 'out_of_order' | 'gap' | 'duplicate_sequence';
+    }>;
+  } {
     const violations: Array<{
       expectedSequence: number;
       actualSequence: number;
       messageId: string;
-      violationType: 'out_of_order' | 'gap' | 'duplicate_sequence';}> = [];// Group messages by session
+      violationType: 'out_of_order' | 'gap' | 'duplicate_sequence';
+    }> = []; // Group messages by session
     const sessionMessages = new Map<string, typeof this.receivedMessages>();
 
     for (const received of this.receivedMessages) {
@@ -176,7 +190,7 @@ class MessageSequenceTracker {
     for (const [sessionId, messages] of sessionMessages) {
       // Sort by sequence number
       const sortedMessages = messages
-        .filter(m => m.message.sequence !== undefined)
+        .filter((m) => m.message.sequence !== undefined)
         .sort((a, b) => a.message.sequence - b.message.sequence);
 
       for (let i = 0; i < sortedMessages.length; i++) {
@@ -185,9 +199,14 @@ class MessageSequenceTracker {
         const actualSequence = current.message.sequence;
 
         if (actualSequence !== expectedSequence) {
-          let violationType: 'out_of_order' | 'gap' | 'duplicate_sequence' = 'out_of_order';
-if (actualSequence > expectedSequence) {violationType = 'gap';} else if (actualSequence < expectedSequence) {violationType = 'duplicate_sequence';}
-violations.push({
+          let violationType: 'out_of_order' | 'gap' | 'duplicate_sequence' =
+            'out_of_order';
+          if (actualSequence > expectedSequence) {
+            violationType = 'gap';
+          } else if (actualSequence < expectedSequence) {
+            violationType = 'duplicate_sequence';
+          }
+          violations.push({
             expectedSequence,
             actualSequence,
             messageId: current.message.messageId,
@@ -221,37 +240,52 @@ violations.push({
       if (!sentMessage.delivered && !sentMessage.acknowledged) {
         lostMessages.push(messageId);
         this.sequenceMetrics.messagesLost++;
-      } else if (sentMessage.delivered && !sentMessage.acknowledged && sentMessage.message.metadata.requiresAck) {
+      } else if (
+        sentMessage.delivered &&
+        !sentMessage.acknowledged &&
+        sentMessage.message.metadata.requiresAck
+      ) {
         unacknowledgedMessages.push(messageId);
       }
 
-  if(sentMessage.deliveryTime) {
+      if (sentMessage.deliveryTime) {
         deliveryTimes.push(sentMessage.deliveryTime - sentMessage.sentTime);
       }
     }
 
-    const deliveryRate = this.sequenceMetrics.totalSent > 0
-      ? (this.sequenceMetrics.totalSent - lostMessages.length) / this.sequenceMetrics.totalSent
-      : 0;
+    const deliveryRate =
+      this.sequenceMetrics.totalSent > 0
+        ? (this.sequenceMetrics.totalSent - lostMessages.length) /
+          this.sequenceMetrics.totalSent
+        : 0;
 
-    const expectedAcks = Array.from(this.sentMessages.values())
-      .filter(msg => msg.message.metadata.requiresAck).length;
+    const expectedAcks = Array.from(this.sentMessages.values()).filter(
+      (msg) => msg.message.metadata.requiresAck,
+    ).length;
 
-    const acknowledgmentRate = expectedAcks > 0
-      ? this.sequenceMetrics.totalAcknowledged / expectedAcks
-      : 1;
+    const acknowledgmentRate =
+      expectedAcks > 0
+        ? this.sequenceMetrics.totalAcknowledged / expectedAcks
+        : 1;
 
-    const averageDeliveryTime = deliveryTimes.length > 0
-      ? deliveryTimes.reduce((sum, time) => sum + time, 0) / deliveryTimes.length
-      : 0;
+    const averageDeliveryTime =
+      deliveryTimes.length > 0
+        ? deliveryTimes.reduce((sum, time) => sum + time, 0) /
+          deliveryTimes.length
+        : 0;
 
     // Calculate overall reliability score (weighted combination of factors)
-    const reliabilityScore = (
+    const reliabilityScore =
       deliveryRate * 0.4 +
       acknowledgmentRate * 0.3 +
-      (1 - (this.sequenceMetrics.sequenceViolations / this.sequenceMetrics.totalReceived)) * 0.2 +
-      (1 - (this.sequenceMetrics.duplicatesDetected / this.sequenceMetrics.totalReceived)) * 0.1
-    );
+      (1 -
+        this.sequenceMetrics.sequenceViolations /
+          this.sequenceMetrics.totalReceived) *
+        0.2 +
+      (1 -
+        this.sequenceMetrics.duplicatesDetected /
+          this.sequenceMetrics.totalReceived) *
+        0.1;
 
     return {
       deliveryRate,
@@ -290,7 +324,10 @@ violations.push({
  */
 class MessagePriorityTester {
   private priorityQueues = {
-    critical: [] as Array<{ message: ConversationalMessage; timestamp: number }>,
+    critical: [] as Array<{
+      message: ConversationalMessage;
+      timestamp: number;
+    }>,
     high: [] as Array<{ message: ConversationalMessage; timestamp: number }>,
     normal: [] as Array<{ message: ConversationalMessage; timestamp: number }>,
     low: [] as Array<{ message: ConversationalMessage; timestamp: number }>,
@@ -305,7 +342,8 @@ class MessagePriorityTester {
   enqueueMessage(message: ConversationalMessage): void {
     const timestamp = performance.now();
     const priority = message.metadata.priority || 'normal';
-if (priority in this.priorityQueues) {this.priorityQueues[priority as keyof typeof this.priorityQueues].push({
+    if (priority in this.priorityQueues) {
+      this.priorityQueues[priority as keyof typeof this.priorityQueues].push({
         message,
         timestamp,
       });
@@ -314,13 +352,27 @@ if (priority in this.priorityQueues) {this.priorityQueues[priority as keyof type
     }
   }
 
-  processQueue(): Array<{ message: ConversationalMessage; processTime: number; queueTime: number }> {
-    const processingOrder: Array<{ message: ConversationalMessage; processTime: number; queueTime: number }> = [];
+  processQueue(): Array<{
+    message: ConversationalMessage;
+    processTime: number;
+    queueTime: number;
+  }> {
+    const processingOrder: Array<{
+      message: ConversationalMessage;
+      processTime: number;
+      queueTime: number;
+    }> = [];
     const processTime = performance.now();
 
     // Process in priority order: critical -> high -> normal -> low
-    const priorities: Array<keyof typeof this.priorityQueues>  =  ['critical', 'high', 'normal', 'low'];
-    for (const priority of priorities) {const queue = this.priorityQueues[priority];
+    const priorities: Array<keyof typeof this.priorityQueues> = [
+      'critical',
+      'high',
+      'normal',
+      'low',
+    ];
+    for (const priority of priorities) {
+      const queue = this.priorityQueues[priority];
 
       while (queue.length > 0) {
         const item = queue.shift()!;
@@ -346,35 +398,50 @@ if (priority in this.priorityQueues) {this.priorityQueues[priority as keyof type
       messageId: string;
       expectedPriority: string;
       actualPosition: number;
-      violationType: 'priority_inversion' | 'starvation';}>;} {
+      violationType: 'priority_inversion' | 'starvation';
+    }>;
+  } {
     const violations: Array<{
       messageId: string;
       expectedPriority: string;
       actualPosition: number;
-      violationType: 'priority_inversion' | 'starvation';}>  =  [];
-    const priorityOrder = ['critical', 'high', 'normal', 'low'];let lastPriorityIndex = -1;for (let i = 0; i < this.processedMessages.length; i++) {
+      violationType: 'priority_inversion' | 'starvation';
+    }> = [];
+    const priorityOrder = ['critical', 'high', 'normal', 'low'];
+    let lastPriorityIndex = -1;
+    for (let i = 0; i < this.processedMessages.length; i++) {
       const processed = this.processedMessages[i];
       const priority = processed.message.metadata.priority || 'normal';
-const currentPriorityIndex = priorityOrder.indexOf(priority);// Check for priority inversion (lower priority processed before higher priority)
-      if (currentPriorityIndex > lastPriorityIndex && lastPriorityIndex !== -1) {
+      const currentPriorityIndex = priorityOrder.indexOf(priority); // Check for priority inversion (lower priority processed before higher priority)
+      if (
+        currentPriorityIndex > lastPriorityIndex &&
+        lastPriorityIndex !== -1
+      ) {
         violations.push({
           messageId: processed.message.messageId,
           expectedPriority: priority,
           actualPosition: i,
-          violationType: 'priority_inversion',});}
+          violationType: 'priority_inversion',
+        });
+      }
 
       lastPriorityIndex = Math.max(lastPriorityIndex, currentPriorityIndex);
     }
 
     // Check for starvation (low priority messages waiting too long)
     const lowPriorityMessages = this.processedMessages.filter(
-      p => p.message.metadata.priority === 'low');for (const lowPriority of lowPriorityMessages) {
-      if (lowPriority.queueTime > 5000) { // 5 second threshold
+      (p) => p.message.metadata.priority === 'low',
+    );
+    for (const lowPriority of lowPriorityMessages) {
+      if (lowPriority.queueTime > 5000) {
+        // 5 second threshold
         violations.push({
           messageId: lowPriority.message.messageId,
           expectedPriority: 'low',
-      actualPosition: this.processedMessages.indexOf(lowPriority),
-      violationType: 'starvation',});}
+          actualPosition: this.processedMessages.indexOf(lowPriority),
+          violationType: 'starvation',
+        });
+      }
     }
 
     return {
@@ -384,22 +451,34 @@ const currentPriorityIndex = priorityOrder.indexOf(priority);// Check for priori
   }
 
   getQueueStatistics() {
-    const queueSizes = Object.entries(this.priorityQueues).map(([priority, queue]) => ({
-      priority,
-      size: queue.length,
-    }));
+    const queueSizes = Object.entries(this.priorityQueues).map(
+      ([priority, queue]) => ({
+        priority,
+        size: queue.length,
+      }),
+    );
 
-    const averageQueueTime = this.processedMessages.length > 0
-      ? this.processedMessages.reduce((sum, p) => sum + p.queueTime, 0) / this.processedMessages.length: 0;
+    const averageQueueTime =
+      this.processedMessages.length > 0
+        ? this.processedMessages.reduce((sum, p) => sum + p.queueTime, 0) /
+          this.processedMessages.length
+        : 0;
 
     const queueTimesByPriority = {
-
-      critical: this.processedMessages.filter(p => p.message.metadata.priority === 'critical').map(p => p.queueTime),
-      high: this.processedMessages.filter(p => p.message.metadata.priority === 'high').map(p => p.queueTime),
-      normal: this.processedMessages.filter(p => (p.message.metadata.priority || 'normal') === 'normal').map(p => p.queueTime),
-      low: this.processedMessages.filter(p => p.message.metadata.priority === 'low').map(p => p.queueTime),
-};
-return {
+      critical: this.processedMessages
+        .filter((p) => p.message.metadata.priority === 'critical')
+        .map((p) => p.queueTime),
+      high: this.processedMessages
+        .filter((p) => p.message.metadata.priority === 'high')
+        .map((p) => p.queueTime),
+      normal: this.processedMessages
+        .filter((p) => (p.message.metadata.priority || 'normal') === 'normal')
+        .map((p) => p.queueTime),
+      low: this.processedMessages
+        .filter((p) => p.message.metadata.priority === 'low')
+        .map((p) => p.queueTime),
+    };
+    return {
       queueSizes,
       totalProcessed: this.processedMessages.length,
       averageQueueTime,
@@ -408,7 +487,7 @@ return {
   }
 
   reset(): void {
-    Object.keys(this.priorityQueues).forEach(key => {
+    Object.keys(this.priorityQueues).forEach((key) => {
       this.priorityQueues[key as keyof typeof this.priorityQueues] = [];
     });
     this.processedMessages = [];
@@ -428,51 +507,74 @@ class ReliabilityTestClient extends EventEmitter {
     super();
   }
 
-  async connect(): Promise<void>  {
+  async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket.WebSocket(this.url);
 
-      this.ws.on('open', () => {this.connected = true;this.emit('connected');
-resolve();});
+      this.ws.on('open', () => {
+        this.connected = true;
+        this.emit('connected');
+        resolve();
+      });
 
-      this.ws.on('message', (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;this.sequenceTracker.trackReceivedMessage(message);this.emit('message', message);} catch (error) {this.emit('error', new Error(`Failed to parse message: ${error}`));
+      this.ws.on('message', (data: WebSocket.RawData) => {
+        try {
+          const message = JSON.parse(
+            Buffer.from(data as ArrayBuffer).toString('utf8'),
+          ) as ConversationalMessage;
+          this.sequenceTracker.trackReceivedMessage(message);
+          this.emit('message', message);
+        } catch (error) {
+          this.emit('error', new Error(`Failed to parse message: ${error}`));
         }
       });
 
-      this.ws.on('error', (error) => {this.connected = false;this.emit('error', error);
-reject(error);});
+      this.ws.on('error', (error) => {
+        this.connected = false;
+        this.emit('error', error);
+        reject(error);
+      });
 
-      this.ws.on('close', () => {this.connected = false;this.emit('disconnected');});});
+      this.ws.on('close', () => {
+        this.connected = false;
+        this.emit('disconnected');
+      });
+    });
   }
 
   sendMessage(message: ConversationalMessage): Promise<void> {
     if (!this.ws || !this.connected) {
-      throw new Error('WebSocket not connected');}
-this.sequenceTracker.trackSentMessage(message);
+      throw new Error('WebSocket not connected');
+    }
+    this.sequenceTracker.trackSentMessage(message);
     this.priorityTester.enqueueMessage(message);
     this.ws.send(JSON.stringify(message));
     return Promise.resolve();
   }
 
-  async sendSequencedMessages(count: number,
+  async sendSequencedMessages(
+    count: number,
     sessionId: string,
     options: {
       delay?: number;
       priority?: 'critical' | 'high' | 'normal' | 'low';
-requiresAck?: boolean;
-  messageType?: ConversationalMessageType;
-    } = {}
-  ): Promise<void>  {
+      requiresAck?: boolean;
+      messageType?: ConversationalMessageType;
+    } = {},
+  ): Promise<void> {
     const delay = options.delay || 0;
     const priority = options.priority || 'normal';
     const requiresAck = options.requiresAck || false;
-    const messageType: ConversationalMessageType = options.messageType || ConversationalMessageType.STATUS_UPDATE;
+    const messageType: ConversationalMessageType =
+      options.messageType || ConversationalMessageType.STATUS_UPDATE;
 
     for (let i = 1; i <= count; i++) {
       const message: ConversationalMessage = {
         messageId: `seq_msg_${sessionId}
 _${i}
-_${Date.now()}`,sessionId,timestamp: Date.now(),
+_${Date.now()}`,
+        sessionId,
+        timestamp: Date.now(),
         sequence: i,
         type: messageType as ConversationalMessageType,
         payload: {
@@ -484,18 +586,28 @@ _${Date.now()}`,sessionId,timestamp: Date.now(),
           priority,
           requiresAck,
           compression: false,
-          routingHints: ['sequence-test'],},};
+          routingHints: ['sequence-test'],
+        },
+      };
 
       await this.sendMessage(message);
 
       if (delay > 0 && i < count) {
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
 
-  async sendPriorityTestMessages(messageCount: number, sessionId: string): Promise<void>  {
-    const priorities: Array<'critical' | 'high' | 'normal' | 'low'> = ['critical', 'high', 'normal', 'low'];
+  async sendPriorityTestMessages(
+    messageCount: number,
+    sessionId: string,
+  ): Promise<void> {
+    const priorities: Array<'critical' | 'high' | 'normal' | 'low'> = [
+      'critical',
+      'high',
+      'normal',
+      'low',
+    ];
     const messagesPerPriority = Math.floor(messageCount / priorities.length);
 
     // Send messages in random order to test priority sorting
@@ -514,11 +626,15 @@ _${Date.now()}`,
           payload: {
             priority,
             index: i,
-            testType: 'priority',},metadata: {
+            testType: 'priority',
+          },
+          metadata: {
             priority,
             requiresAck: false,
             compression: false,
-            routingHints: ['priority-test'],},});
+            routingHints: ['priority-test'],
+          },
+        });
       }
     }
 
@@ -531,7 +647,7 @@ _${Date.now()}`,
     // Send all messages rapidly
     for (const message of messages) {
       await this.sendMessage(message);
-      await new Promise(resolve => setTimeout(resolve, 5)); // Small delay
+      await new Promise((resolve) => setTimeout(resolve, 5)); // Small delay
     }
 
     // Process priority queue
@@ -562,19 +678,22 @@ _${Date.now()}`,
 // ===== MOCK CONFIGURATION =====
 
 const mockConfigService = {
-
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8187,'PARLANT_WEBSOCKET_PORT': 8188,'WEBSOCKET_MESSAGE_ACK_TIMEOUT': 5000,'WEBSOCKET_MAX_RETRY_ATTEMPTS': 3,'WEBSOCKET_SEQUENCE_VALIDATION': true,'WEBSOCKET_PRIORITY_QUEUE_ENABLED': true,
-};
-return config[key] ?? defaultValue;
+      CONVERSATIONAL_WEBSOCKET_PORT: 8187,
+      PARLANT_WEBSOCKET_PORT: 8188,
+      WEBSOCKET_MESSAGE_ACK_TIMEOUT: 5000,
+      WEBSOCKET_MAX_RETRY_ATTEMPTS: 3,
+      WEBSOCKET_SEQUENCE_VALIDATION: true,
+      WEBSOCKET_PRIORITY_QUEUE_ENABLED: true,
+    };
+    return config[key] ?? defaultValue;
   }),
 };
 
 // ===== MESSAGE ORDERING AND RELIABILITY TEST SUITE =====
 
 describe('Message Ordering and Reliability Tests', () => {
-
   let conversationalService: ConversationalWebSocketBridgeService;
   let module: TestingModule;
   let testServer: Server;
@@ -596,22 +715,28 @@ describe('Message Ordering and Reliability Tests', () => {
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
 
     // Create test WebSocket server with ordering and reliability features
     testServer = createServer();
     wsServer = createSafeWebSocketServer({ server: testServer });
 
     // Track sessions and implement ordering/reliability features
-    const sessions = new Map<string, {
-      ws: WebSocket.WebSocket;
-      sessionId: string;
-      messageSequence: number;
-      receivedMessages: ConversationalMessage[];
-      sentAcks: Set<string>;
-    }>();
+    const sessions = new Map<
+      string,
+      {
+        ws: WebSocket.WebSocket;
+        sessionId: string;
+        messageSequence: number;
+        receivedMessages: ConversationalMessage[];
+        sentAcks: Set<string>;
+      }
+    >();
 
-    wsServer.on('connection', (ws: WebSocket.WebSocket, req) => {const sessionId = req.headers['x-session-id'] as string || randomUUID();
+    wsServer.on('connection', (ws: WebSocket.WebSocket, req) => {
+      const sessionId = (req.headers['x-session-id'] as string) || randomUUID();
 
       const sessionInfo = {
         ws,
@@ -624,8 +749,16 @@ describe('Message Ordering and Reliability Tests', () => {
       sessions.set(sessionId, sessionInfo);
       console.log(`Session ${sessionId} connected for reliability testing`);
 
-      ws.on('message', async (data: WebSocket.RawData) => {try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;sessionInfo.receivedMessages.push(message);// Send acknowledgment if required
-          if (message.metadata.requiresAck && !sessionInfo.sentAcks.has(message.messageId)) {
+      ws.on('message', async (data: WebSocket.RawData) => {
+        try {
+          const message = JSON.parse(
+            Buffer.from(data as ArrayBuffer).toString('utf8'),
+          ) as ConversationalMessage;
+          sessionInfo.receivedMessages.push(message); // Send acknowledgment if required
+          if (
+            message.metadata.requiresAck &&
+            !sessionInfo.sentAcks.has(message.messageId)
+          ) {
             const ackMessage: ConversationalMessage = {
               messageId: randomUUID(),
               sessionId,
@@ -635,9 +768,11 @@ describe('Message Ordering and Reliability Tests', () => {
               payload: { acknowledgedMessageId: message.messageId },
               metadata: {
                 priority: 'high',
-      requiresAck: false,
-      compression: false,
-                routingHints: ['ack'],},};
+                requiresAck: false,
+                compression: false,
+                routingHints: ['ack'],
+              },
+            };
 
             ws.send(JSON.stringify(ackMessage));
             sessionInfo.sentAcks.add(message.messageId);
@@ -659,12 +794,16 @@ describe('Message Ordering and Reliability Tests', () => {
               },
               metadata: {
                 priority: message.metadata.priority || 'normal',
-      requiresAck: false,
-      compression: false,
-                routingHints: ['echo'],},};
+                requiresAck: false,
+                compression: false,
+                routingHints: ['echo'],
+              },
+            };
 
             // Simulate processing delay based on priority
-            const delay = getPriorityDelay(message.metadata.priority || 'normal');
+            const delay = getPriorityDelay(
+              message.metadata.priority || 'normal',
+            );
             setTimeout(() => {
               ws.send(JSON.stringify(echoMessage));
             }, delay);
@@ -675,9 +814,11 @@ describe('Message Ordering and Reliability Tests', () => {
             const validationRequest = message as ValidationRequestMessage;
             await handleValidationWithProgress(sessionInfo, validationRequest);
           }
-
         } catch (error) {
-          console.error(`Error processing message in session ${sessionId}:`, error);
+          console.error(
+            `Error processing message in session ${sessionId}:`,
+            error,
+          );
         }
       });
 
@@ -694,22 +835,27 @@ describe('Message Ordering and Reliability Tests', () => {
 
     function getPriorityDelay(priority: string): number {
       switch (priority) {
-
         case 'critical':
-        return 1;
-        case 'high': return 5;
-    case 'normal':
-        return 10;
-        case 'low': return 20;
-  default:
-        return 10;
-        break;
-    }
+          return 1;
+        case 'high':
+          return 5;
+        case 'normal':
+          return 10;
+        case 'low':
+          return 20;
+        default:
+          return 10;
+          break;
+      }
     }
 
-  function handleValidationWithProgress(
-      sessionInfo: { ws: WebSocket.WebSocket; sessionId: string; messageSequence: number },
-      request: ValidationRequestMessage
+    function handleValidationWithProgress(
+      sessionInfo: {
+        ws: WebSocket.WebSocket;
+        sessionId: string;
+        messageSequence: number;
+      },
+      request: ValidationRequestMessage,
     ): Promise<void> {
       const { validationId, streamingOptions } = request.payload;
 
@@ -733,12 +879,16 @@ describe('Message Ordering and Reliability Tests', () => {
                 progress,
                 message: `Progress: ${progress.toFixed(1)}%`,
                 status: i === updateCount ? 'completed' : 'active',
-      estimatedTimeRemaining: i === updateCount ? 0 : (updateCount - i) * interval,},
+                estimatedTimeRemaining:
+                  i === updateCount ? 0 : (updateCount - i) * interval,
+              },
               metadata: {
                 priority: 'normal',
-      requiresAck: false,
-      compression: false,
-                routingHints: ['progress'],},};
+                requiresAck: false,
+                compression: false,
+                routingHints: ['progress'],
+              },
+            };
 
             sessionInfo.ws.send(JSON.stringify(progressMessage));
           }, i * interval);
@@ -746,30 +896,37 @@ describe('Message Ordering and Reliability Tests', () => {
       }
 
       // Send final validation response
-      setTimeout(() => {
-        const response: ConversationalMessage = {
-          type: ConversationalMessageType.VALIDATION_RESPONSE,
-          messageId: randomUUID(),
-          sessionId: sessionInfo.sessionId,
-          timestamp: Date.now(),
-          sequence: ++sessionInfo.messageSequence,
-          payload: {
-            validationId,
-            approved: true,
-            confidence: 0.95,
-            reasoning: 'Validation completed successfully',
-            conversationId: `conv_${validationId}`,
-            requiresUserConfirmation: false,
-            metadata: { processingTime: 150 },
-          },
-          metadata: {
-            priority: 'high',
-      requiresAck: true,
-      compression: false,
-            routingHints: ['validation-response'],},};
+      setTimeout(
+        () => {
+          const response: ConversationalMessage = {
+            type: ConversationalMessageType.VALIDATION_RESPONSE,
+            messageId: randomUUID(),
+            sessionId: sessionInfo.sessionId,
+            timestamp: Date.now(),
+            sequence: ++sessionInfo.messageSequence,
+            payload: {
+              validationId,
+              approved: true,
+              confidence: 0.95,
+              reasoning: 'Validation completed successfully',
+              conversationId: `conv_${validationId}`,
+              requiresUserConfirmation: false,
+              metadata: { processingTime: 150 },
+            },
+            metadata: {
+              priority: 'high',
+              requiresAck: true,
+              compression: false,
+              routingHints: ['validation-response'],
+            },
+          };
 
-        sessionInfo.ws.send(JSON.stringify(response));
-      }, (streamingOptions?.maxUpdateCount || 3) * (streamingOptions?.updateInterval || 100) + 50);
+          sessionInfo.ws.send(JSON.stringify(response));
+        },
+        (streamingOptions?.maxUpdateCount || 3) *
+          (streamingOptions?.updateInterval || 100) +
+          50,
+      );
 
       return Promise.resolve();
     }
@@ -798,21 +955,22 @@ describe('Message Ordering and Reliability Tests', () => {
       await client.connect();
 
       const sessionId = 'sequence-test-session';
-const messageCount = 100;// Send sequenced messages
+      const messageCount = 100; // Send sequenced messages
       await client.sendSequencedMessages(messageCount, sessionId, {
         delay: 10,
         requiresAck: true,
       });
 
       // Wait for all responses
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       const sequenceTracker = client.getSequenceTracker();
       const orderingValidation = sequenceTracker.validateSequenceOrdering();
       const metrics = sequenceTracker.getMetrics();
 
-      console.log('Sequential Ordering Results:', {messagesSent: messageCount,
-      messagesReceived: metrics.totalReceived,
+      console.log('Sequential Ordering Results:', {
+        messagesSent: messageCount,
+        messagesReceived: metrics.totalReceived,
         sequenceViolations: metrics.sequenceViolations,
         isValidOrdering: orderingValidation.isValid,
         violationDetails: orderingValidation.violations.slice(0, 5),
@@ -825,13 +983,12 @@ const messageCount = 100;// Send sequenced messages
       await client.disconnect();
     });
 
-
-
     it('should handle rapid message bursts while maintaining order', async () => {
-const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'burst-test-session';
-const messageCount = 200;// Send rapid burst of messages (no delay)
+      const messageCount = 200; // Send rapid burst of messages (no delay)
       await client.sendSequencedMessages(messageCount, sessionId, {
         delay: 0,
         requiresAck: false,
@@ -839,7 +996,7 @@ const messageCount = 200;// Send rapid burst of messages (no delay)
       });
 
       // Wait for all responses
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       const sequenceTracker = client.getSequenceTracker();
       const orderingValidation = sequenceTracker.validateSequenceOrdering();
@@ -859,8 +1016,6 @@ const messageCount = 200;// Send rapid burst of messages (no delay)
       await client.disconnect();
     });
 
-
-
     it('should handle out-of-order delivery and recovery', async () => {
       const client = new ReliabilityTestClient(TEST_URL);
       await client.connect();
@@ -876,7 +1031,12 @@ const messageCount = 200;// Send rapid burst of messages (no delay)
           sequence: 3,
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: { order: 'third' },
-          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] }
+          metadata: {
+            priority: 'normal',
+            requiresAck: false,
+            compression: false,
+            routingHints: [],
+          },
         },
         {
           messageId: 'msg-1',
@@ -885,7 +1045,12 @@ const messageCount = 200;// Send rapid burst of messages (no delay)
           sequence: 1,
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: { order: 'first' },
-          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] }
+          metadata: {
+            priority: 'normal',
+            requiresAck: false,
+            compression: false,
+            routingHints: [],
+          },
         },
         {
           messageId: 'msg-2',
@@ -894,29 +1059,38 @@ const messageCount = 200;// Send rapid burst of messages (no delay)
           sequence: 2,
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: { order: 'second' },
-          metadata: { priority: 'normal', requiresAck: false, compression: false, routingHints: [] }
-        }
+          metadata: {
+            priority: 'normal',
+            requiresAck: false,
+            compression: false,
+            routingHints: [],
+          },
+        },
       ];
 
       // Send messages in out-of-order sequence
       for (const message of messages) {
         await client.sendMessage(message);
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const orderingValidation = sequenceTracker.validateSequenceOrdering();
 
-      console.log('Out-of-order Handling Results:', {sentMessages: messages.length,
-      sequenceViolations: sequenceTracker.getMetrics().sequenceViolations,
+      console.log('Out-of-order Handling Results:', {
+        sentMessages: messages.length,
+        sequenceViolations: sequenceTracker.getMetrics().sequenceViolations,
         violations: orderingValidation.violations,
-        recoveryCapable: orderingValidation.violations.length <= messages.length,
+        recoveryCapable:
+          orderingValidation.violations.length <= messages.length,
       });
 
       // Should detect out-of-order messages
       expect(orderingValidation.violations.length).toBeGreaterThan(0);
-      expect(orderingValidation.violations.some(v => v.violationType === 'gap')).toBe(true);
+      expect(
+        orderingValidation.violations.some((v) => v.violationType === 'gap'),
+      ).toBe(true);
       await client.disconnect();
     });
   });
@@ -934,22 +1108,26 @@ const messageCount = 200;// Send rapid burst of messages (no delay)
       // Send critical priority messages requiring acknowledgment
       for (let i = 1; i <= messageCount; i++) {
         const message: ConversationalMessage = {
-          messageId: `critical-msg-${i}`,sessionId,timestamp: Date.now(),
+          messageId: `critical-msg-${i}`,
+          sessionId,
+          timestamp: Date.now(),
           sequence: i,
           type: ConversationalMessageType.STATUS_UPDATE,
           payload: { criticalData: `Important data ${i}` },
           metadata: {
             priority: 'critical',
-      requiresAck: true,
-      compression: false,
-            routingHints: ['critical'],},};
+            requiresAck: true,
+            compression: false,
+            routingHints: ['critical'],
+          },
+        };
 
         await client.sendMessage(message);
-        await new Promise(resolve => setTimeout(resolve, 20));
+        await new Promise((resolve) => setTimeout(resolve, 20));
       }
 
       // Wait for all acknowledgments
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const sequenceTracker = client.getSequenceTracker();
       const reliability = sequenceTracker.analyzeDeliveryReliability();
@@ -958,18 +1136,19 @@ const messageCount = 200;// Send rapid burst of messages (no delay)
       console.log('Acknowledgment Latency Results:', {
         messagesSent: messageCount,
         acknowledged: metrics.totalAcknowledged,
-        acknowledgmentRate: `${(reliability.acknowledgmentRate * 100).toFixed(2)}%`,averageAckLatency: `${metrics.averageAckLatency.toFixed(2)}
-ms`,maxAckLatency: `${metrics.maxAckLatency.toFixed(2)}
+        acknowledgmentRate: `${(reliability.acknowledgmentRate * 100).toFixed(2)}%`,
+        averageAckLatency: `${metrics.averageAckLatency.toFixed(2)}
 ms`,
-        target: '5ms average',});
-expect(reliability.acknowledgmentRate).toBeGreaterThan(0.95); // 95%+ ack rate
+        maxAckLatency: `${metrics.maxAckLatency.toFixed(2)}
+ms`,
+        target: '5ms average',
+      });
+      expect(reliability.acknowledgmentRate).toBeGreaterThan(0.95); // 95%+ ack rate
       expect(metrics.averageAckLatency).toBeLessThan(20); // Sub-20ms average (adjusted for test environment)
       expect(metrics.maxAckLatency).toBeLessThan(100); // Max under 100ms
 
       await client.disconnect();
     });
-
-
 
     it('should achieve 99.95% message delivery success rate', async () => {
       const client = new ReliabilityTestClient(TEST_URL);
@@ -986,7 +1165,7 @@ expect(reliability.acknowledgmentRate).toBeGreaterThan(0.95); // 95%+ ack rate
       });
 
       // Wait for all deliveries and acknowledgments
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise((resolve) => setTimeout(resolve, 10000));
 
       const sequenceTracker = client.getSequenceTracker();
       const reliability = sequenceTracker.analyzeDeliveryReliability();
@@ -996,17 +1175,18 @@ expect(reliability.acknowledgmentRate).toBeGreaterThan(0.95); // 95%+ ack rate
         messagesSent: messageCount,
         messagesReceived: metrics.totalReceived,
         acknowledged: metrics.totalAcknowledged,
-        deliveryRate: `${(reliability.deliveryRate * 100).toFixed(3)}%`,acknowledgmentRate: `${(reliability.acknowledgmentRate * 100).toFixed(3)}%`,lostMessages: reliability.lostMessages.length,
-      reliabilityScore: `${(reliability.reliabilityScore * 100).toFixed(2)}%`,
-        target: '99.95%',});
-expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
+        deliveryRate: `${(reliability.deliveryRate * 100).toFixed(3)}%`,
+        acknowledgmentRate: `${(reliability.acknowledgmentRate * 100).toFixed(3)}%`,
+        lostMessages: reliability.lostMessages.length,
+        reliabilityScore: `${(reliability.reliabilityScore * 100).toFixed(2)}%`,
+        target: '99.95%',
+      });
+      expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
       expect(reliability.acknowledgmentRate).toBeGreaterThan(0.99); // 99%+ ack rate
       expect(reliability.reliabilityScore).toBeGreaterThan(0.95); // 95%+ overall reliability
 
       await client.disconnect();
     });
-
-
 
     it('should handle acknowledgment timeouts and retries', async () => {
       const client = new ReliabilityTestClient(TEST_URL);
@@ -1028,8 +1208,8 @@ expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
             priority: 'normal',
             requiresAck: true,
             compression: false,
-            routingHints: ['timeout-test']
-          }
+            routingHints: ['timeout-test'],
+          },
         };
 
         timeoutMessages.push(message);
@@ -1037,7 +1217,7 @@ expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
       }
 
       // Wait for partial responses (some may timeout)
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       const sequenceTracker = client.getSequenceTracker();
       const reliability = sequenceTracker.analyzeDeliveryReliability();
@@ -1051,7 +1231,9 @@ expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
       });
 
       // Expect some timeouts in this test scenario
-      expect(reliability.unacknowledgedMessages.length).toBeLessThan(timeoutMessages.length);
+      expect(reliability.unacknowledgedMessages.length).toBeLessThan(
+        timeoutMessages.length,
+      );
 
       await client.disconnect();
     });
@@ -1071,7 +1253,7 @@ expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
       await client.sendPriorityTestMessages(messageCount, sessionId);
 
       // Wait for processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const priorityTester = client.getPriorityTester();
       const orderingValidation = priorityTester.validatePriorityOrdering();
@@ -1083,7 +1265,9 @@ expect(reliability.deliveryRate).toBeGreaterThan(0.995); // 99.5%+ delivery rate
 ms`,
         priorityOrderingValid: orderingValidation.isValid,
         violations: orderingValidation.violations.length,
-        violationTypes: orderingValidation.violations.map(v => v.violationType),
+        violationTypes: orderingValidation.violations.map(
+          (v) => v.violationType,
+        ),
       });
 
       expect(orderingValidation.isValid).toBe(true);
@@ -1092,8 +1276,6 @@ ms`,
 
       await client.disconnect();
     });
-
-
 
     it('should prevent starvation of low priority messages', async () => {
       const client = new ReliabilityTestClient(TEST_URL);
@@ -1115,8 +1297,8 @@ ms`,
             priority: 'high',
             requiresAck: false,
             compression: false,
-            routingHints: ['starvation-test']
-          }
+            routingHints: ['starvation-test'],
+          },
         };
 
         await client.sendMessage(highPriorityMessage);
@@ -1135,8 +1317,8 @@ ms`,
             priority: 'low',
             requiresAck: false,
             compression: false,
-            routingHints: ['starvation-test']
-          }
+            routingHints: ['starvation-test'],
+          },
         };
 
         await client.sendMessage(lowPriorityMessage);
@@ -1148,14 +1330,22 @@ ms`,
       const orderingValidation = priorityTester.validatePriorityOrdering();
       const queueStats = priorityTester.getQueueStatistics();
 
-      console.log('Starvation Prevention Results:', {totalProcessed: queueStats.totalProcessed,
-      starvationViolations: orderingValidation.violations.filter(v => v.violationType === 'starvation').length,
-      lowPriorityQueueTimes: queueStats.queueTimesByPriority.low,
-      maxLowPriorityQueueTime: Math.max(...queueStats.queueTimesByPriority.low, 0),
+      console.log('Starvation Prevention Results:', {
+        totalProcessed: queueStats.totalProcessed,
+        starvationViolations: orderingValidation.violations.filter(
+          (v) => v.violationType === 'starvation',
+        ).length,
+        lowPriorityQueueTimes: queueStats.queueTimesByPriority.low,
+        maxLowPriorityQueueTime: Math.max(
+          ...queueStats.queueTimesByPriority.low,
+          0,
+        ),
       });
 
-      const starvationViolations = orderingValidation.violations.filter(v => v.violationType === 'starvation');
-expect(starvationViolations.length).toBe(0); // No starvation should occurawait client.disconnect();
+      const starvationViolations = orderingValidation.violations.filter(
+        (v) => v.violationType === 'starvation',
+      );
+      expect(starvationViolations.length).toBe(0); // No starvation should occurawait client.disconnect();
     });
   });
 
@@ -1185,16 +1375,17 @@ expect(starvationViolations.length).toBe(0); // No starvation should occurawait 
       // Send the same message multiple times
       for (let i = 0; i < 5; i++) {
         await client.sendMessage(originalMessage);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const sequenceTracker = client.getSequenceTracker();
       const metrics = sequenceTracker.getMetrics();
 
-      console.log('Deduplication Test Results:', {messagesSent: 5,
-      duplicatesDetected: metrics.duplicatesDetected,
+      console.log('Deduplication Test Results:', {
+        messagesSent: 5,
+        duplicatesDetected: metrics.duplicatesDetected,
         uniqueMessagesReceived: metrics.totalReceived,
         deduplicationEffective: metrics.duplicatesDetected > 0,
       });
@@ -1204,8 +1395,6 @@ expect(starvationViolations.length).toBe(0); // No starvation should occurawait 
 
       await client.disconnect();
     });
-
-
 
     it('should maintain idempotency for validation requests', async () => {
       const client = new ReliabilityTestClient(TEST_URL);
@@ -1265,10 +1454,10 @@ expect(starvationViolations.length).toBe(0); // No starvation should occurawait 
       // Send the same validation request multiple times
       for (let i = 0; i < 3; i++) {
         await client.sendMessage(validationRequest);
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
       }
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const sequenceTracker = client.getSequenceTracker();
       const metrics = sequenceTracker.getMetrics();

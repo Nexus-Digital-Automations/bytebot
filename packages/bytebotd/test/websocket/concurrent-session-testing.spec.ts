@@ -216,7 +216,7 @@ class ConcurrentSessionClient extends EventEmitter {
     private url: string,
     private sessionId: string,
     private clientId: string,
-    private config: ConcurrentSessionTestConfig
+    private config: ConcurrentSessionTestConfig,
   ) {
     super();
 
@@ -296,12 +296,16 @@ class ConcurrentSessionClient extends EventEmitter {
         this.ws.on('open', () => {
           this.connected = true;
           this.metrics.connectionTime = Date.now();
-          this.metrics.performanceMetrics.connectionLatency = performance.now() - connectStartTime;
+          this.metrics.performanceMetrics.connectionLatency =
+            performance.now() - connectStartTime;
 
           // Start resource monitoring for this session
           this.startResourceMonitoring();
 
-          this.emit('connected', { sessionId: this.sessionId, clientId: this.clientId });
+          this.emit('connected', {
+            sessionId: this.sessionId,
+            clientId: this.clientId,
+          });
           resolve();
         });
 
@@ -323,7 +327,6 @@ class ConcurrentSessionClient extends EventEmitter {
           this.stopResourceMonitoring();
           this.emit('disconnected', { sessionId: this.sessionId });
         });
-
       } catch (error) {
         reject(error);
       }
@@ -372,9 +375,11 @@ class ConcurrentSessionClient extends EventEmitter {
         message,
         latency: performance.now() - messageReceiveTime,
       });
-
     } catch (error) {
-      this.recordError('message_parsing', error instanceof Error ? error.message : String(error));
+      this.recordError(
+        'message_parsing',
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -382,17 +387,24 @@ class ConcurrentSessionClient extends EventEmitter {
     // Check if message is intended for this session
     if (message.sessionId && message.sessionId !== this.sessionId) {
       this.metrics.isolationViolations++;
-      this.recordError('session_isolation_violation',
-        `Received message for session ${message.sessionId} in session ${this.sessionId}`);
+      this.recordError(
+        'session_isolation_violation',
+        `Received message for session ${message.sessionId} in session ${this.sessionId}`,
+      );
     }
 
     // Check for conversation state contamination
     if (message.payload && typeof message.payload === 'object') {
       const payload = message.payload as Record<string, unknown>;
-      if (payload.conversationId && payload.conversationId !== this.conversationState.conversationId) {
+      if (
+        payload.conversationId &&
+        payload.conversationId !== this.conversationState.conversationId
+      ) {
         this.metrics.isolationViolations++;
-        this.recordError('conversation_contamination',
-          `Message contains foreign conversation ID: ${payload.conversationId}`);
+        this.recordError(
+          'conversation_contamination',
+          `Message contains foreign conversation ID: ${payload.conversationId}`,
+        );
       }
     }
   }
@@ -447,16 +459,25 @@ class ConcurrentSessionClient extends EventEmitter {
   }
 
   private handleErrorMessage(message: ConversationalMessage): void {
-    const errorPayload = message.payload as { error?: string; validationId?: string };
+    const errorPayload = message.payload as {
+      error?: string;
+      validationId?: string;
+    };
 
     if (errorPayload.validationId) {
       this.metrics.validationsFailed++;
     }
 
-    this.recordError('server_error', errorPayload.error ?? 'Unknown server error');
+    this.recordError(
+      'server_error',
+      errorPayload.error ?? 'Unknown server error',
+    );
   }
 
-  async sendValidationRequest(action: ValidationAction, context: ValidationContext): Promise<string> {
+  async sendValidationRequest(
+    action: ValidationAction,
+    context: ValidationContext,
+  ): Promise<string> {
     const validationId = `validation_${this.sessionId}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     const validationRequest: ValidationRequestMessage = {
@@ -550,7 +571,8 @@ class ConcurrentSessionClient extends EventEmitter {
       });
 
       // Record first message latency
-      this.metrics.performanceMetrics.firstMessageLatency = performance.now() - workloadStartTime;
+      this.metrics.performanceMetrics.firstMessageLatency =
+        performance.now() - workloadStartTime;
 
       // Execute validation workload
       for (let i = 0; i < this.config.validationsPerSession; i++) {
@@ -587,11 +609,12 @@ class ConcurrentSessionClient extends EventEmitter {
         await this.sendValidationRequest(action, context);
 
         // Small delay between validations to simulate realistic usage
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
       // Send additional messages to reach target message count
-      const remainingMessages = this.config.messagesPerSession - this.metrics.messagesSent;
+      const remainingMessages =
+        this.config.messagesPerSession - this.metrics.messagesSent;
       for (let i = 0; i < remainingMessages; i++) {
         await this.sendMessage({
           type: ConversationalMessageType.HEARTBEAT,
@@ -613,11 +636,13 @@ class ConcurrentSessionClient extends EventEmitter {
         });
 
         // Small delay to prevent flooding
-        await new Promise(resolve => setTimeout(resolve, 25));
+        await new Promise((resolve) => setTimeout(resolve, 25));
       }
-
     } catch (error) {
-      this.recordError('workload_execution', error instanceof Error ? error.message : String(error));
+      this.recordError(
+        'workload_execution',
+        error instanceof Error ? error.message : String(error),
+      );
       throw error;
     }
   }
@@ -642,7 +667,8 @@ class ConcurrentSessionClient extends EventEmitter {
   private updateLatencyMetrics(): void {
     if (this.messageLatencies.length > 0) {
       this.metrics.averageMessageLatency =
-        this.messageLatencies.reduce((sum, lat) => sum + lat, 0) / this.messageLatencies.length;
+        this.messageLatencies.reduce((sum, lat) => sum + lat, 0) /
+        this.messageLatencies.length;
       this.metrics.maxMessageLatency = Math.max(...this.messageLatencies);
       this.metrics.minMessageLatency = Math.min(...this.messageLatencies);
     }
@@ -651,7 +677,8 @@ class ConcurrentSessionClient extends EventEmitter {
   private updateValidationMetrics(): void {
     if (this.validationLatencies.length > 0) {
       this.metrics.averageValidationTime =
-        this.validationLatencies.reduce((sum, lat) => sum + lat, 0) / this.validationLatencies.length;
+        this.validationLatencies.reduce((sum, lat) => sum + lat, 0) /
+        this.validationLatencies.length;
     }
   }
 
@@ -679,7 +706,8 @@ class ConcurrentSessionClient extends EventEmitter {
   }
 
   private calculateFinalMetrics(): void {
-    const sessionDuration = this.metrics.disconnectionTime! - this.metrics.connectionTime;
+    const sessionDuration =
+      this.metrics.disconnectionTime! - this.metrics.connectionTime;
 
     // Calculate performance metrics
     this.metrics.performanceMetrics.throughput =
@@ -688,15 +716,20 @@ class ConcurrentSessionClient extends EventEmitter {
     this.metrics.performanceMetrics.validationThroughput =
       (this.metrics.validationsCompleted / sessionDuration) * 1000; // validations per second
 
-    this.metrics.performanceMetrics.averageRoundTripTime = this.metrics.averageMessageLatency;
+    this.metrics.performanceMetrics.averageRoundTripTime =
+      this.metrics.averageMessageLatency;
 
     // Calculate resource efficiency (lower memory usage = higher efficiency)
-    const memoryGrowth = this.metrics.memoryUsagePeak - this.metrics.memoryUsageStart;
-    this.metrics.performanceMetrics.resourceEfficiency =
-      Math.max(0, 1 - (memoryGrowth / (100 * 1024 * 1024))); // Normalize to 100MB baseline
+    const memoryGrowth =
+      this.metrics.memoryUsagePeak - this.metrics.memoryUsageStart;
+    this.metrics.performanceMetrics.resourceEfficiency = Math.max(
+      0,
+      1 - memoryGrowth / (100 * 1024 * 1024),
+    ); // Normalize to 100MB baseline
 
     // Calculate stability score (fewer errors = higher stability)
-    const errorRate = this.metrics.errors.length / Math.max(this.metrics.messagesSent, 1);
+    const errorRate =
+      this.metrics.errors.length / Math.max(this.metrics.messagesSent, 1);
     this.metrics.performanceMetrics.stabilityScore = Math.max(0, 1 - errorRate);
 
     // Store final conversation state
@@ -738,7 +771,7 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
 
   constructor(
     private baseUrl: string,
-    private config: ConcurrentSessionTestConfig
+    private config: ConcurrentSessionTestConfig,
   ) {
     super();
   }
@@ -762,7 +795,6 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
 
       // Phase 4: Test graceful session cleanup
       await this.testGracefulSessionCleanup();
-
     } finally {
       clearInterval(monitoringInterval);
       this.testEndTime = performance.now();
@@ -772,15 +804,23 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
   }
 
   private async establishConcurrentSessions(): Promise<void> {
-    this.emit('phase', { name: 'Concurrent Session Establishment', status: 'starting' });
+    this.emit('phase', {
+      name: 'Concurrent Session Establishment',
+      status: 'starting',
+    });
 
-    const batches = Math.ceil(this.config.maxConcurrentSessions / this.config.sessionsPerBatch);
+    const batches = Math.ceil(
+      this.config.maxConcurrentSessions / this.config.sessionsPerBatch,
+    );
     let establishedSessions = 0;
     let failedSessions = 0;
 
     for (let batch = 0; batch < batches; batch++) {
       const batchStart = batch * this.config.sessionsPerBatch;
-      const batchEnd = Math.min(batchStart + this.config.sessionsPerBatch, this.config.maxConcurrentSessions);
+      const batchEnd = Math.min(
+        batchStart + this.config.sessionsPerBatch,
+        this.config.maxConcurrentSessions,
+      );
 
       const batchPromises: Promise<void>[] = [];
 
@@ -788,7 +828,12 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
         const sessionId = `concurrent_session_${i.toString().padStart(4, '0')}`;
         const clientId = `client_${i.toString().padStart(4, '0')}`;
 
-        const session = new ConcurrentSessionClient(this.baseUrl, sessionId, clientId, this.config);
+        const session = new ConcurrentSessionClient(
+          this.baseUrl,
+          sessionId,
+          clientId,
+          this.config,
+        );
         this.sessions.set(sessionId, session);
 
         session.on('connected', () => {
@@ -796,7 +841,7 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
           this.emit('sessionEstablished', {
             sessionId,
             total: establishedSessions,
-            target: this.config.maxConcurrentSessions
+            target: this.config.maxConcurrentSessions,
           });
         });
 
@@ -806,9 +851,12 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
         });
 
         batchPromises.push(
-          session.connect().catch(error => {
-            console.warn(`Session ${sessionId} failed to connect:`, error.message);
-          })
+          session.connect().catch((error) => {
+            console.warn(
+              `Session ${sessionId} failed to connect:`,
+              error.message,
+            );
+          }),
         );
       }
 
@@ -817,14 +865,16 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
 
       // Delay between batches
       if (batch < batches - 1) {
-        await new Promise(resolve => setTimeout(resolve, this.config.batchDelay));
+        await new Promise((resolve) =>
+          setTimeout(resolve, this.config.batchDelay),
+        );
       }
 
       this.emit('batchCompleted', {
         batch: batch + 1,
         totalBatches: batches,
         establishedInBatch: batchEnd - batchStart,
-        totalEstablished: establishedSessions
+        totalEstablished: establishedSessions,
       });
     }
 
@@ -839,12 +889,14 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
   private async executeWorkloadAcrossAllSessions(): Promise<void> {
     this.emit('phase', { name: 'Workload Execution', status: 'starting' });
 
-    const connectedSessions = Array.from(this.sessions.values()).filter(session => session.isConnected());
+    const connectedSessions = Array.from(this.sessions.values()).filter(
+      (session) => session.isConnected(),
+    );
 
-    const workloadPromises = connectedSessions.map(session =>
-      session.executeSessionWorkload().catch(error => {
+    const workloadPromises = connectedSessions.map((session) =>
+      session.executeSessionWorkload().catch((error) => {
         this.emit('workloadError', { sessionId: session['sessionId'], error });
-      })
+      }),
     );
 
     await Promise.allSettled(workloadPromises);
@@ -853,7 +905,10 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
   }
 
   private async monitorSessionIsolationAndPerformance(): Promise<void> {
-    this.emit('phase', { name: 'Isolation and Performance Monitoring', status: 'starting' });
+    this.emit('phase', {
+      name: 'Isolation and Performance Monitoring',
+      status: 'starting',
+    });
 
     // Monitor for the duration specified in config
     const monitoringDuration = this.config.sessionDuration;
@@ -867,18 +922,21 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
       // Check for session isolation violations
       this.validateSessionIsolationAcrossAllSessions();
 
-      await new Promise(resolve => setTimeout(resolve, monitoringInterval));
+      await new Promise((resolve) => setTimeout(resolve, monitoringInterval));
     }
 
-    this.emit('phase', { name: 'Isolation and Performance Monitoring', status: 'completed' });
+    this.emit('phase', {
+      name: 'Isolation and Performance Monitoring',
+      status: 'completed',
+    });
   }
 
   private async testGracefulSessionCleanup(): Promise<void> {
     this.emit('phase', { name: 'Session Cleanup', status: 'starting' });
 
     const disconnectPromises = Array.from(this.sessions.values())
-      .filter(session => session.isConnected())
-      .map(session => session.disconnect());
+      .filter((session) => session.isConnected())
+      .map((session) => session.disconnect());
 
     await Promise.allSettled(disconnectPromises);
 
@@ -894,7 +952,9 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
     return setInterval(() => {
       const memUsage = process.memoryUsage().heapUsed;
       const cpuUsage = process.cpuUsage();
-      const activeSessions = Array.from(this.sessions.values()).filter(s => s.isConnected()).length;
+      const activeSessions = Array.from(this.sessions.values()).filter((s) =>
+        s.isConnected(),
+      ).length;
 
       this.resourceSnapshots.push({
         timestamp: Date.now(),
@@ -917,13 +977,20 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
     latency: number;
     sessionCount: number;
   } {
-    const connectedSessions = Array.from(this.sessions.values()).filter(s => s.isConnected());
-    const sessionMetrics = connectedSessions.map(s => s.getMetrics());
+    const connectedSessions = Array.from(this.sessions.values()).filter((s) =>
+      s.isConnected(),
+    );
+    const sessionMetrics = connectedSessions.map((s) => s.getMetrics());
 
-    const totalThroughput = sessionMetrics.reduce((sum, m) => sum + m.performanceMetrics.throughput, 0);
-    const averageLatency = sessionMetrics.length > 0
-      ? sessionMetrics.reduce((sum, m) => sum + m.averageMessageLatency, 0) / sessionMetrics.length
-      : 0;
+    const totalThroughput = sessionMetrics.reduce(
+      (sum, m) => sum + m.performanceMetrics.throughput,
+      0,
+    );
+    const averageLatency =
+      sessionMetrics.length > 0
+        ? sessionMetrics.reduce((sum, m) => sum + m.averageMessageLatency, 0) /
+          sessionMetrics.length
+        : 0;
 
     return {
       timestamp: Date.now(),
@@ -934,11 +1001,17 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
   }
 
   private validateSessionIsolationAcrossAllSessions(): void {
-    const allConversationStates = Array.from(this.sessions.values())
-      .map(session => ({ sessionId: session['sessionId'], state: session.getConversationState() }));
+    const allConversationStates = Array.from(this.sessions.values()).map(
+      (session) => ({
+        sessionId: session['sessionId'],
+        state: session.getConversationState(),
+      }),
+    );
 
     // Check for conversation ID collisions
-    const conversationIds = allConversationStates.map(s => s.state.conversationId);
+    const conversationIds = allConversationStates.map(
+      (s) => s.state.conversationId,
+    );
     const uniqueConversationIds = new Set(conversationIds);
 
     if (conversationIds.length !== uniqueConversationIds.size) {
@@ -949,7 +1022,9 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
     }
 
     // Check for user profile contamination
-    const userIds = allConversationStates.map(s => s.state.userProfile.userId);
+    const userIds = allConversationStates.map(
+      (s) => s.state.userProfile.userId,
+    );
     const uniqueUserIds = new Set(userIds);
 
     if (userIds.length !== uniqueUserIds.size) {
@@ -960,25 +1035,36 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
     }
   }
 
-  private calculateComprehensiveResults(initialMemory: number): ConcurrentTestResults {
-    const sessionMetrics = Array.from(this.sessions.values()).map(session => session.getMetrics());
-    const connectedSessions = sessionMetrics.filter(m => m.disconnectionTime);
+  private calculateComprehensiveResults(
+    initialMemory: number,
+  ): ConcurrentTestResults {
+    const sessionMetrics = Array.from(this.sessions.values()).map((session) =>
+      session.getMetrics(),
+    );
+    const connectedSessions = sessionMetrics.filter((m) => m.disconnectionTime);
     const testDuration = this.testEndTime - this.testStartTime;
 
     // Calculate execution summary
-    const totalValidations = sessionMetrics.reduce((sum, m) => sum + m.validationsCompleted, 0);
+    const totalValidations = sessionMetrics.reduce(
+      (sum, m) => sum + m.validationsCompleted,
+      0,
+    );
     const successfulSessions = connectedSessions.length;
-    const failedSessions = this.config.maxConcurrentSessions - successfulSessions;
-    const overallSuccessRate = successfulSessions / this.config.maxConcurrentSessions;
+    const failedSessions =
+      this.config.maxConcurrentSessions - successfulSessions;
+    const overallSuccessRate =
+      successfulSessions / this.config.maxConcurrentSessions;
     const overallThroughput = totalValidations / (testDuration / 1000);
 
     // Calculate resource usage
     const finalMemory = process.memoryUsage().heapUsed;
-    const peakMemory = Math.max(...this.resourceSnapshots.map(s => s.memory));
+    const peakMemory = Math.max(...this.resourceSnapshots.map((s) => s.memory));
     const memoryLeaked = finalMemory - initialMemory;
 
     // Calculate performance analysis
-    const allLatencies = sessionMetrics.flatMap(m => [m.averageMessageLatency]).filter(l => l > 0);
+    const allLatencies = sessionMetrics
+      .flatMap((m) => [m.averageMessageLatency])
+      .filter((l) => l > 0);
     allLatencies.sort((a, b) => a - b);
 
     const latencyDistribution = {
@@ -989,12 +1075,18 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
     };
 
     // Calculate isolation validation results
-    const totalIsolationViolations = sessionMetrics.reduce((sum, m) => sum + m.isolationViolations, 0);
+    const totalIsolationViolations = sessionMetrics.reduce(
+      (sum, m) => sum + m.isolationViolations,
+      0,
+    );
 
     // Calculate compliance report
-    const targetLatencyMet = latencyDistribution.p95 <= this.config.targetLatencyThreshold;
-    const targetThroughputMet = overallThroughput >= this.config.targetThroughputThreshold;
-    const memoryLeakThresholdMet = memoryLeaked <= this.config.memoryLeakThreshold;
+    const targetLatencyMet =
+      latencyDistribution.p95 <= this.config.targetLatencyThreshold;
+    const targetThroughputMet =
+      overallThroughput >= this.config.targetThroughputThreshold;
+    const memoryLeakThresholdMet =
+      memoryLeaked <= this.config.memoryLeakThreshold;
     const sessionIsolationMaintained = totalIsolationViolations === 0;
 
     return {
@@ -1017,15 +1109,23 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
           leakSources: this.identifyMemoryLeakSources(),
         },
         cpuUsage: {
-          average: this.resourceSnapshots.length > 0
-            ? this.resourceSnapshots.reduce((sum, s) => sum + s.cpu, 0) / this.resourceSnapshots.length
-            : 0,
-          peak: Math.max(...this.resourceSnapshots.map(s => s.cpu)),
-          samples: this.resourceSnapshots.map(s => s.cpu),
+          average:
+            this.resourceSnapshots.length > 0
+              ? this.resourceSnapshots.reduce((sum, s) => sum + s.cpu, 0) /
+                this.resourceSnapshots.length
+              : 0,
+          peak: Math.max(...this.resourceSnapshots.map((s) => s.cpu)),
+          samples: this.resourceSnapshots.map((s) => s.cpu),
         },
         networkUsage: {
-          bytesTransmitted: sessionMetrics.reduce((sum, m) => sum + (m.messagesSent * 500), 0), // Estimate
-          bytesReceived: sessionMetrics.reduce((sum, m) => sum + (m.messagesReceived * 500), 0), // Estimate
+          bytesTransmitted: sessionMetrics.reduce(
+            (sum, m) => sum + m.messagesSent * 500,
+            0,
+          ), // Estimate
+          bytesReceived: sessionMetrics.reduce(
+            (sum, m) => sum + m.messagesReceived * 500,
+            0,
+          ), // Estimate
           connectionsCreated: this.config.maxConcurrentSessions,
           connectionsDropped: failedSessions,
         },
@@ -1033,10 +1133,16 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
       performanceAnalysis: {
         latencyDistribution,
         throughputAnalysis: {
-          peakThroughput: Math.max(...this.performanceSnapshots.map(s => s.throughput)),
-          sustainedThroughput: this.performanceSnapshots.length > 0
-            ? this.performanceSnapshots.reduce((sum, s) => sum + s.throughput, 0) / this.performanceSnapshots.length
-            : 0,
+          peakThroughput: Math.max(
+            ...this.performanceSnapshots.map((s) => s.throughput),
+          ),
+          sustainedThroughput:
+            this.performanceSnapshots.length > 0
+              ? this.performanceSnapshots.reduce(
+                  (sum, s) => sum + s.throughput,
+                  0,
+                ) / this.performanceSnapshots.length
+              : 0,
           degradationPoints: this.identifyPerformanceDegradationPoints(),
         },
         scalabilityMetrics: {
@@ -1048,7 +1154,10 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
       isolationValidation: {
         crossSessionLeaks: totalIsolationViolations,
         stateContamination: 0, // Would need specific detection
-        messageDeliveryErrors: sessionMetrics.reduce((sum, m) => sum + m.errors.length, 0),
+        messageDeliveryErrors: sessionMetrics.reduce(
+          (sum, m) => sum + m.errors.length,
+          0,
+        ),
         conversationMixups: 0, // Would need specific detection
       },
       complianceReport: {
@@ -1056,7 +1165,11 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
         targetThroughputMet,
         memoryLeakThresholdMet,
         sessionIsolationMaintained,
-        overallCompliance: targetLatencyMet && targetThroughputMet && memoryLeakThresholdMet && sessionIsolationMaintained,
+        overallCompliance:
+          targetLatencyMet &&
+          targetThroughputMet &&
+          memoryLeakThresholdMet &&
+          sessionIsolationMaintained,
       },
     };
   }
@@ -1066,16 +1179,24 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
 
     // Analyze memory growth patterns
     if (this.resourceSnapshots.length > 1) {
-      const memoryGrowth = this.resourceSnapshots[this.resourceSnapshots.length - 1].memory - this.resourceSnapshots[0].memory;
-      const sessionCount = this.resourceSnapshots[this.resourceSnapshots.length - 1].activeSessions;
+      const memoryGrowth =
+        this.resourceSnapshots[this.resourceSnapshots.length - 1].memory -
+        this.resourceSnapshots[0].memory;
+      const sessionCount =
+        this.resourceSnapshots[this.resourceSnapshots.length - 1]
+          .activeSessions;
 
-      if (memoryGrowth > (sessionCount * 1024 * 1024)) { // More than 1MB per session
+      if (memoryGrowth > sessionCount * 1024 * 1024) {
+        // More than 1MB per session
         leakSources.push('excessive_per_session_memory_growth');
       }
 
       // Check for memory growth after session cleanup
-      const postCleanupMemory = this.resourceSnapshots[this.resourceSnapshots.length - 1].memory;
-      const preCleanupMemory = this.resourceSnapshots[Math.floor(this.resourceSnapshots.length * 0.8)].memory;
+      const postCleanupMemory =
+        this.resourceSnapshots[this.resourceSnapshots.length - 1].memory;
+      const preCleanupMemory =
+        this.resourceSnapshots[Math.floor(this.resourceSnapshots.length * 0.8)]
+          .memory;
 
       if (postCleanupMemory > preCleanupMemory * 0.8) {
         leakSources.push('incomplete_session_cleanup');
@@ -1085,8 +1206,14 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
     return leakSources;
   }
 
-  private identifyPerformanceDegradationPoints(): Array<{ sessionCount: number; throughputDrop: number }> {
-    const degradationPoints: Array<{ sessionCount: number; throughputDrop: number }> = [];
+  private identifyPerformanceDegradationPoints(): Array<{
+    sessionCount: number;
+    throughputDrop: number;
+  }> {
+    const degradationPoints: Array<{
+      sessionCount: number;
+      throughputDrop: number;
+    }> = [];
 
     if (this.performanceSnapshots.length > 5) {
       let peakThroughput = 0;
@@ -1097,9 +1224,11 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
         if (snapshot.throughput > peakThroughput) {
           peakThroughput = snapshot.throughput;
         } else if (peakThroughput > 0) {
-          const degradation = (peakThroughput - snapshot.throughput) / peakThroughput;
+          const degradation =
+            (peakThroughput - snapshot.throughput) / peakThroughput;
 
-          if (degradation > 0.2) { // 20% degradation
+          if (degradation > 0.2) {
+            // 20% degradation
             degradationPoints.push({
               sessionCount: snapshot.sessionCount,
               throughputDrop: degradation,
@@ -1114,10 +1243,11 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
 
   private calculateLinearScalingLimit(): number {
     // Analyze throughput vs session count to find where linear scaling breaks
-    if (this.performanceSnapshots.length < 5) return this.config.maxConcurrentSessions;
+    if (this.performanceSnapshots.length < 5)
+      return this.config.maxConcurrentSessions;
 
-    const sessionCounts = this.performanceSnapshots.map(s => s.sessionCount);
-    const throughputs = this.performanceSnapshots.map(s => s.throughput);
+    const sessionCounts = this.performanceSnapshots.map((s) => s.sessionCount);
+    const throughputs = this.performanceSnapshots.map((s) => s.throughput);
 
     // Find the point where throughput per session starts to decline significantly
     let linearLimit = this.config.maxConcurrentSessions;
@@ -1145,18 +1275,26 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
 
     // Analyze resource usage patterns
     if (this.resourceSnapshots.length > 0) {
-      const avgCpuUsage = this.resourceSnapshots.reduce((sum, s) => sum + s.cpu, 0) / this.resourceSnapshots.length;
-      const peakCpuUsage = Math.max(...this.resourceSnapshots.map(s => s.cpu));
+      const avgCpuUsage =
+        this.resourceSnapshots.reduce((sum, s) => sum + s.cpu, 0) /
+        this.resourceSnapshots.length;
+      const peakCpuUsage = Math.max(
+        ...this.resourceSnapshots.map((s) => s.cpu),
+      );
 
       if (avgCpuUsage > 80) {
         bottlenecks.push('cpu_saturation');
       }
 
-      const memoryGrowthRate = this.resourceSnapshots.length > 1
-        ? (this.resourceSnapshots[this.resourceSnapshots.length - 1].memory - this.resourceSnapshots[0].memory) / this.resourceSnapshots.length
-        : 0;
+      const memoryGrowthRate =
+        this.resourceSnapshots.length > 1
+          ? (this.resourceSnapshots[this.resourceSnapshots.length - 1].memory -
+              this.resourceSnapshots[0].memory) /
+            this.resourceSnapshots.length
+          : 0;
 
-      if (memoryGrowthRate > 1024 * 1024) { // 1MB per snapshot
+      if (memoryGrowthRate > 1024 * 1024) {
+        // 1MB per snapshot
         bottlenecks.push('memory_pressure');
       }
     }
@@ -1198,15 +1336,15 @@ class ConcurrentSessionTestOrchestrator extends EventEmitter {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
-      'CONCURRENT_SESSION_MAX_CONNECTIONS': 150,
-      'CONCURRENT_SESSION_BATCH_SIZE': 25,
-      'CONCURRENT_SESSION_MEMORY_THRESHOLD': 500 * 1024 * 1024, // 500MB
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
+      CONCURRENT_SESSION_MAX_CONNECTIONS: 150,
+      CONCURRENT_SESSION_BATCH_SIZE: 25,
+      CONCURRENT_SESSION_MEMORY_THRESHOLD: 500 * 1024 * 1024, // 500MB
     };
     return config[key] ?? defaultValue;
   }),
@@ -1236,13 +1374,17 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
 
     await integrationService.onModuleInit();
 
     // Allow extra time for service initialization
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
   });
 
   afterAll(async () => {
@@ -1269,7 +1411,10 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
         memoryLeakThreshold: 200 * 1024 * 1024, // 200MB
       };
 
-      const orchestrator = new ConcurrentSessionTestOrchestrator(TEST_URL, config);
+      const orchestrator = new ConcurrentSessionTestOrchestrator(
+        TEST_URL,
+        config,
+      );
 
       // Track test progress
       let batchesCompleted = 0;
@@ -1277,7 +1422,9 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
 
       orchestrator.on('batchCompleted', (data) => {
         batchesCompleted++;
-        console.log(`Batch ${data.batch}/${data.totalBatches} completed: ${data.establishedInBatch} sessions, total: ${data.totalEstablished}`);
+        console.log(
+          `Batch ${data.batch}/${data.totalBatches} completed: ${data.establishedInBatch} sessions, total: ${data.totalEstablished}`,
+        );
       });
 
       orchestrator.on('phase', (data) => {
@@ -1288,13 +1435,17 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
       });
 
       orchestrator.on('isolationViolation', (data) => {
-        console.warn(`Session isolation violation detected: ${data.type} - ${data.details}`);
+        console.warn(
+          `Session isolation violation detected: ${data.type} - ${data.details}`,
+        );
       });
 
       const results = await orchestrator.executeConcurrentSessionTest();
 
       // Validate concurrent session establishment
-      expect(results.executionSummary.successfulSessions).toBeGreaterThanOrEqual(100);
+      expect(
+        results.executionSummary.successfulSessions,
+      ).toBeGreaterThanOrEqual(100);
       expect(results.executionSummary.overallSuccessRate).toBeGreaterThan(0.8); // 80% success rate
       expect(phasesCompleted).toBeGreaterThan(0);
 
@@ -1303,25 +1454,47 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
       expect(results.isolationValidation.conversationMixups).toBe(0);
 
       // Validate memory management
-      expect(results.resourceUsage.memoryUsage.leaked).toBeLessThan(config.memoryLeakThreshold);
+      expect(results.resourceUsage.memoryUsage.leaked).toBeLessThan(
+        config.memoryLeakThreshold,
+      );
 
       // Validate performance targets
-      expect(results.performanceAnalysis.latencyDistribution.p95).toBeLessThan(config.targetLatencyThreshold);
-      expect(results.executionSummary.overallThroughput).toBeGreaterThan(config.targetThroughputThreshold);
+      expect(results.performanceAnalysis.latencyDistribution.p95).toBeLessThan(
+        config.targetLatencyThreshold,
+      );
+      expect(results.executionSummary.overallThroughput).toBeGreaterThan(
+        config.targetThroughputThreshold,
+      );
 
       // Validate compliance
       expect(results.complianceReport.overallCompliance).toBe(true);
 
       // Log comprehensive results
       console.log('\n=== 100+ Concurrent Session Test Results ===');
-      console.log(`Successful Sessions: ${results.executionSummary.successfulSessions}/${config.maxConcurrentSessions}`);
-      console.log(`Success Rate: ${(results.executionSummary.overallSuccessRate * 100).toFixed(2)}%`);
-      console.log(`Total Validations: ${results.executionSummary.totalValidationsProcessed}`);
-      console.log(`Overall Throughput: ${results.executionSummary.overallThroughput.toFixed(2)} validations/sec`);
-      console.log(`P95 Latency: ${results.performanceAnalysis.latencyDistribution.p95.toFixed(2)}ms`);
-      console.log(`Memory Leak: ${(results.resourceUsage.memoryUsage.leaked / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Session Isolation Violations: ${results.isolationValidation.crossSessionLeaks}`);
-      console.log(`Overall Compliance: ${results.complianceReport.overallCompliance ? 'PASS' : 'FAIL'}`);
+      console.log(
+        `Successful Sessions: ${results.executionSummary.successfulSessions}/${config.maxConcurrentSessions}`,
+      );
+      console.log(
+        `Success Rate: ${(results.executionSummary.overallSuccessRate * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Total Validations: ${results.executionSummary.totalValidationsProcessed}`,
+      );
+      console.log(
+        `Overall Throughput: ${results.executionSummary.overallThroughput.toFixed(2)} validations/sec`,
+      );
+      console.log(
+        `P95 Latency: ${results.performanceAnalysis.latencyDistribution.p95.toFixed(2)}ms`,
+      );
+      console.log(
+        `Memory Leak: ${(results.resourceUsage.memoryUsage.leaked / 1024 / 1024).toFixed(2)}MB`,
+      );
+      console.log(
+        `Session Isolation Violations: ${results.isolationValidation.crossSessionLeaks}`,
+      );
+      console.log(
+        `Overall Compliance: ${results.complianceReport.overallCompliance ? 'PASS' : 'FAIL'}`,
+      );
       console.log('=============================================\n');
     });
 
@@ -1342,7 +1515,10 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
         memoryLeakThreshold: 150 * 1024 * 1024,
       };
 
-      const orchestrator = new ConcurrentSessionTestOrchestrator(TEST_URL, config);
+      const orchestrator = new ConcurrentSessionTestOrchestrator(
+        TEST_URL,
+        config,
+      );
 
       let isolationViolations = 0;
       orchestrator.on('isolationViolation', () => {
@@ -1358,21 +1534,33 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
       expect(isolationViolations).toBe(0);
 
       // Verify each session maintained unique state
-      const sessionIds = results.sessionMetrics.map(m => m.sessionId);
+      const sessionIds = results.sessionMetrics.map((m) => m.sessionId);
       const uniqueSessionIds = new Set(sessionIds);
       expect(sessionIds.length).toBe(uniqueSessionIds.size);
 
-      const conversationIds = results.sessionMetrics.map(m => m.conversationState.conversationId);
+      const conversationIds = results.sessionMetrics.map(
+        (m) => m.conversationState.conversationId,
+      );
       const uniqueConversationIds = new Set(conversationIds);
       expect(conversationIds.length).toBe(uniqueConversationIds.size);
 
       console.log('\n=== Session Isolation Test Results ===');
       console.log(`Sessions Tested: ${results.sessionMetrics.length}`);
-      console.log(`Cross-Session Leaks: ${results.isolationValidation.crossSessionLeaks}`);
-      console.log(`State Contamination: ${results.isolationValidation.stateContamination}`);
-      console.log(`Message Delivery Errors: ${results.isolationValidation.messageDeliveryErrors}`);
-      console.log(`Unique Session IDs: ${uniqueSessionIds.size}/${sessionIds.length}`);
-      console.log(`Unique Conversation IDs: ${uniqueConversationIds.size}/${conversationIds.length}`);
+      console.log(
+        `Cross-Session Leaks: ${results.isolationValidation.crossSessionLeaks}`,
+      );
+      console.log(
+        `State Contamination: ${results.isolationValidation.stateContamination}`,
+      );
+      console.log(
+        `Message Delivery Errors: ${results.isolationValidation.messageDeliveryErrors}`,
+      );
+      console.log(
+        `Unique Session IDs: ${uniqueSessionIds.size}/${sessionIds.length}`,
+      );
+      console.log(
+        `Unique Conversation IDs: ${uniqueConversationIds.size}/${conversationIds.length}`,
+      );
       console.log('=====================================\n');
     });
   });
@@ -1395,31 +1583,57 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
         memoryLeakThreshold: 100 * 1024 * 1024, // 100MB
       };
 
-      const orchestrator = new ConcurrentSessionTestOrchestrator(TEST_URL, config);
+      const orchestrator = new ConcurrentSessionTestOrchestrator(
+        TEST_URL,
+        config,
+      );
 
       const results = await orchestrator.executeConcurrentSessionTest();
 
       // Memory leak detection
-      expect(results.resourceUsage.memoryUsage.leaked).toBeLessThan(config.memoryLeakThreshold);
-      expect(results.resourceUsage.memoryUsage.leakSources.length).toBeLessThanOrEqual(1); // Minimal leak sources
+      expect(results.resourceUsage.memoryUsage.leaked).toBeLessThan(
+        config.memoryLeakThreshold,
+      );
+      expect(
+        results.resourceUsage.memoryUsage.leakSources.length,
+      ).toBeLessThanOrEqual(1); // Minimal leak sources
 
       // Resource efficiency validation
-      const avgResourceEfficiency = results.sessionMetrics.reduce((sum, m) =>
-        sum + m.performanceMetrics.resourceEfficiency, 0) / results.sessionMetrics.length;
+      const avgResourceEfficiency =
+        results.sessionMetrics.reduce(
+          (sum, m) => sum + m.performanceMetrics.resourceEfficiency,
+          0,
+        ) / results.sessionMetrics.length;
       expect(avgResourceEfficiency).toBeGreaterThan(0.6); // 60% resource efficiency
 
       // CPU usage should remain reasonable
       expect(results.resourceUsage.cpuUsage.average).toBeLessThan(80); // Less than 80% CPU usage
 
       console.log('\n=== Resource Monitoring Test Results ===');
-      console.log(`Initial Memory: ${(results.resourceUsage.memoryUsage.initial / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Peak Memory: ${(results.resourceUsage.memoryUsage.peak / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Final Memory: ${(results.resourceUsage.memoryUsage.final / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Memory Leaked: ${(results.resourceUsage.memoryUsage.leaked / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Leak Sources: ${results.resourceUsage.memoryUsage.leakSources.join(', ') || 'None'}`);
-      console.log(`Average CPU Usage: ${results.resourceUsage.cpuUsage.average.toFixed(2)}%`);
-      console.log(`Peak CPU Usage: ${results.resourceUsage.cpuUsage.peak.toFixed(2)}%`);
-      console.log(`Average Resource Efficiency: ${(avgResourceEfficiency * 100).toFixed(2)}%`);
+      console.log(
+        `Initial Memory: ${(results.resourceUsage.memoryUsage.initial / 1024 / 1024).toFixed(2)}MB`,
+      );
+      console.log(
+        `Peak Memory: ${(results.resourceUsage.memoryUsage.peak / 1024 / 1024).toFixed(2)}MB`,
+      );
+      console.log(
+        `Final Memory: ${(results.resourceUsage.memoryUsage.final / 1024 / 1024).toFixed(2)}MB`,
+      );
+      console.log(
+        `Memory Leaked: ${(results.resourceUsage.memoryUsage.leaked / 1024 / 1024).toFixed(2)}MB`,
+      );
+      console.log(
+        `Leak Sources: ${results.resourceUsage.memoryUsage.leakSources.join(', ') || 'None'}`,
+      );
+      console.log(
+        `Average CPU Usage: ${results.resourceUsage.cpuUsage.average.toFixed(2)}%`,
+      );
+      console.log(
+        `Peak CPU Usage: ${results.resourceUsage.cpuUsage.peak.toFixed(2)}%`,
+      );
+      console.log(
+        `Average Resource Efficiency: ${(avgResourceEfficiency * 100).toFixed(2)}%`,
+      );
       console.log('=======================================\n');
     });
   });
@@ -1442,33 +1656,68 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
         memoryLeakThreshold: 300 * 1024 * 1024,
       };
 
-      const orchestrator = new ConcurrentSessionTestOrchestrator(TEST_URL, config);
+      const orchestrator = new ConcurrentSessionTestOrchestrator(
+        TEST_URL,
+        config,
+      );
 
       const results = await orchestrator.executeConcurrentSessionTest();
 
       // Performance analysis validation
-      expect(results.performanceAnalysis.throughputAnalysis.peakThroughput).toBeGreaterThan(10);
-      expect(results.performanceAnalysis.throughputAnalysis.sustainedThroughput).toBeGreaterThan(5);
-      expect(results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions).toBeGreaterThan(20);
+      expect(
+        results.performanceAnalysis.throughputAnalysis.peakThroughput,
+      ).toBeGreaterThan(10);
+      expect(
+        results.performanceAnalysis.throughputAnalysis.sustainedThroughput,
+      ).toBeGreaterThan(5);
+      expect(
+        results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions,
+      ).toBeGreaterThan(20);
 
       // Latency distribution should be reasonable
-      expect(results.performanceAnalysis.latencyDistribution.p95).toBeLessThan(2000); // 2 seconds
-      expect(results.performanceAnalysis.latencyDistribution.p50).toBeLessThan(1000); // 1 second
+      expect(results.performanceAnalysis.latencyDistribution.p95).toBeLessThan(
+        2000,
+      ); // 2 seconds
+      expect(results.performanceAnalysis.latencyDistribution.p50).toBeLessThan(
+        1000,
+      ); // 1 second
 
       // Linear scaling limit should be identified
-      expect(results.performanceAnalysis.scalabilityMetrics.linearScalingLimit).toBeGreaterThan(0);
-      expect(results.performanceAnalysis.scalabilityMetrics.linearScalingLimit).toBeLessThanOrEqual(config.maxConcurrentSessions);
+      expect(
+        results.performanceAnalysis.scalabilityMetrics.linearScalingLimit,
+      ).toBeGreaterThan(0);
+      expect(
+        results.performanceAnalysis.scalabilityMetrics.linearScalingLimit,
+      ).toBeLessThanOrEqual(config.maxConcurrentSessions);
 
       console.log('\n=== Performance Benchmarking Results ===');
-      console.log(`Peak Throughput: ${results.performanceAnalysis.throughputAnalysis.peakThroughput.toFixed(2)} validations/sec`);
-      console.log(`Sustained Throughput: ${results.performanceAnalysis.throughputAnalysis.sustainedThroughput.toFixed(2)} validations/sec`);
-      console.log(`P50 Latency: ${results.performanceAnalysis.latencyDistribution.p50.toFixed(2)}ms`);
-      console.log(`P95 Latency: ${results.performanceAnalysis.latencyDistribution.p95.toFixed(2)}ms`);
-      console.log(`P99 Latency: ${results.performanceAnalysis.latencyDistribution.p99.toFixed(2)}ms`);
-      console.log(`Linear Scaling Limit: ${results.performanceAnalysis.scalabilityMetrics.linearScalingLimit} sessions`);
-      console.log(`Recommended Max Sessions: ${results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions} sessions`);
-      console.log(`Identified Bottlenecks: ${results.performanceAnalysis.scalabilityMetrics.bottleneckIdentification.join(', ') || 'None'}`);
-      console.log(`Degradation Points: ${results.performanceAnalysis.throughputAnalysis.degradationPoints.length}`);
+      console.log(
+        `Peak Throughput: ${results.performanceAnalysis.throughputAnalysis.peakThroughput.toFixed(2)} validations/sec`,
+      );
+      console.log(
+        `Sustained Throughput: ${results.performanceAnalysis.throughputAnalysis.sustainedThroughput.toFixed(2)} validations/sec`,
+      );
+      console.log(
+        `P50 Latency: ${results.performanceAnalysis.latencyDistribution.p50.toFixed(2)}ms`,
+      );
+      console.log(
+        `P95 Latency: ${results.performanceAnalysis.latencyDistribution.p95.toFixed(2)}ms`,
+      );
+      console.log(
+        `P99 Latency: ${results.performanceAnalysis.latencyDistribution.p99.toFixed(2)}ms`,
+      );
+      console.log(
+        `Linear Scaling Limit: ${results.performanceAnalysis.scalabilityMetrics.linearScalingLimit} sessions`,
+      );
+      console.log(
+        `Recommended Max Sessions: ${results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions} sessions`,
+      );
+      console.log(
+        `Identified Bottlenecks: ${results.performanceAnalysis.scalabilityMetrics.bottleneckIdentification.join(', ') || 'None'}`,
+      );
+      console.log(
+        `Degradation Points: ${results.performanceAnalysis.throughputAnalysis.degradationPoints.length}`,
+      );
       console.log('=======================================\n');
     });
 
@@ -1489,18 +1738,33 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
         memoryLeakThreshold: 200 * 1024 * 1024,
       };
 
-      const orchestrator = new ConcurrentSessionTestOrchestrator(TEST_URL, config);
+      const orchestrator = new ConcurrentSessionTestOrchestrator(
+        TEST_URL,
+        config,
+      );
 
       const results = await orchestrator.executeConcurrentSessionTest();
 
       // Validation-specific metrics
-      const totalValidations = results.sessionMetrics.reduce((sum, m) => sum + m.validationsRequested, 0);
-      const completedValidations = results.sessionMetrics.reduce((sum, m) => sum + m.validationsCompleted, 0);
-      const failedValidations = results.sessionMetrics.reduce((sum, m) => sum + m.validationsFailed, 0);
+      const totalValidations = results.sessionMetrics.reduce(
+        (sum, m) => sum + m.validationsRequested,
+        0,
+      );
+      const completedValidations = results.sessionMetrics.reduce(
+        (sum, m) => sum + m.validationsCompleted,
+        0,
+      );
+      const failedValidations = results.sessionMetrics.reduce(
+        (sum, m) => sum + m.validationsFailed,
+        0,
+      );
 
       const validationSuccessRate = completedValidations / totalValidations;
-      const averageValidationTime = results.sessionMetrics.reduce((sum, m) =>
-        sum + m.averageValidationTime, 0) / results.sessionMetrics.length;
+      const averageValidationTime =
+        results.sessionMetrics.reduce(
+          (sum, m) => sum + m.averageValidationTime,
+          0,
+        ) / results.sessionMetrics.length;
 
       // Validation requirements
       expect(totalValidations).toBeGreaterThan(300); // Significant validation load
@@ -1512,9 +1776,15 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
       console.log(`Total Validations Requested: ${totalValidations}`);
       console.log(`Validations Completed: ${completedValidations}`);
       console.log(`Validations Failed: ${failedValidations}`);
-      console.log(`Validation Success Rate: ${(validationSuccessRate * 100).toFixed(2)}%`);
-      console.log(`Average Validation Time: ${averageValidationTime.toFixed(2)}ms`);
-      console.log(`Validation Throughput: ${results.executionSummary.overallThroughput.toFixed(2)} validations/sec`);
+      console.log(
+        `Validation Success Rate: ${(validationSuccessRate * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Average Validation Time: ${averageValidationTime.toFixed(2)}ms`,
+      );
+      console.log(
+        `Validation Throughput: ${results.executionSummary.overallThroughput.toFixed(2)} validations/sec`,
+      );
       console.log('============================================\n');
     });
   });
@@ -1537,30 +1807,52 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
         memoryLeakThreshold: 50 * 1024 * 1024, // Strict memory limit
       };
 
-      const orchestrator = new ConcurrentSessionTestOrchestrator(TEST_URL, config);
+      const orchestrator = new ConcurrentSessionTestOrchestrator(
+        TEST_URL,
+        config,
+      );
 
       const results = await orchestrator.executeConcurrentSessionTest();
 
       // All sessions should be properly disconnected
-      const disconnectedSessions = results.sessionMetrics.filter(m => m.disconnectionTime).length;
-      expect(disconnectedSessions).toBe(results.executionSummary.successfulSessions);
+      const disconnectedSessions = results.sessionMetrics.filter(
+        (m) => m.disconnectionTime,
+      ).length;
+      expect(disconnectedSessions).toBe(
+        results.executionSummary.successfulSessions,
+      );
 
       // Memory should be cleaned up
-      expect(results.resourceUsage.memoryUsage.leaked).toBeLessThan(config.memoryLeakThreshold);
-      expect(results.resourceUsage.memoryUsage.leakSources).not.toContain('incomplete_session_cleanup');
+      expect(results.resourceUsage.memoryUsage.leaked).toBeLessThan(
+        config.memoryLeakThreshold,
+      );
+      expect(results.resourceUsage.memoryUsage.leakSources).not.toContain(
+        'incomplete_session_cleanup',
+      );
 
       // Network connections should be properly closed
-      const connectionDropRate = results.resourceUsage.networkUsage.connectionsDropped /
-                                 results.resourceUsage.networkUsage.connectionsCreated;
+      const connectionDropRate =
+        results.resourceUsage.networkUsage.connectionsDropped /
+        results.resourceUsage.networkUsage.connectionsCreated;
       expect(connectionDropRate).toBeLessThan(0.1); // Less than 10% dropped connections
 
       console.log('\n=== Session Cleanup Test Results ===');
-      console.log(`Sessions Created: ${results.resourceUsage.networkUsage.connectionsCreated}`);
+      console.log(
+        `Sessions Created: ${results.resourceUsage.networkUsage.connectionsCreated}`,
+      );
       console.log(`Sessions Disconnected: ${disconnectedSessions}`);
-      console.log(`Connections Dropped: ${results.resourceUsage.networkUsage.connectionsDropped}`);
-      console.log(`Connection Drop Rate: ${(connectionDropRate * 100).toFixed(2)}%`);
-      console.log(`Memory Cleaned Up: ${((results.resourceUsage.memoryUsage.peak - results.resourceUsage.memoryUsage.final) / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Resource Leak Sources: ${results.resourceUsage.memoryUsage.leakSources.join(', ') || 'None'}`);
+      console.log(
+        `Connections Dropped: ${results.resourceUsage.networkUsage.connectionsDropped}`,
+      );
+      console.log(
+        `Connection Drop Rate: ${(connectionDropRate * 100).toFixed(2)}%`,
+      );
+      console.log(
+        `Memory Cleaned Up: ${((results.resourceUsage.memoryUsage.peak - results.resourceUsage.memoryUsage.final) / 1024 / 1024).toFixed(2)}MB`,
+      );
+      console.log(
+        `Resource Leak Sources: ${results.resourceUsage.memoryUsage.leakSources.join(', ') || 'None'}`,
+      );
       console.log('===================================\n');
     });
   });
@@ -1583,7 +1875,10 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
         memoryLeakThreshold: 250 * 1024 * 1024,
       };
 
-      const orchestrator = new ConcurrentSessionTestOrchestrator(TEST_URL, config);
+      const orchestrator = new ConcurrentSessionTestOrchestrator(
+        TEST_URL,
+        config,
+      );
 
       const results = await orchestrator.executeConcurrentSessionTest();
 
@@ -1633,22 +1928,47 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
 
       // Validate overall compliance
       expect(complianceReport.overallCompliance).toBe(true);
-      expect(complianceReport.phase1Requirements.concurrent100PlusSessions.compliant).toBe(true);
-      expect(complianceReport.phase1Requirements.sessionIsolation.compliant).toBe(true);
-      expect(complianceReport.phase1Requirements.performanceTargets.latencyP95.compliant).toBe(true);
-      expect(complianceReport.phase1Requirements.resourceManagement.memoryLeak.compliant).toBe(true);
+      expect(
+        complianceReport.phase1Requirements.concurrent100PlusSessions.compliant,
+      ).toBe(true);
+      expect(
+        complianceReport.phase1Requirements.sessionIsolation.compliant,
+      ).toBe(true);
+      expect(
+        complianceReport.phase1Requirements.performanceTargets.latencyP95
+          .compliant,
+      ).toBe(true);
+      expect(
+        complianceReport.phase1Requirements.resourceManagement.memoryLeak
+          .compliant,
+      ).toBe(true);
 
       // Write compliance report to file
-      const reportPath = join(__dirname, '../../reports/parlant-phase1-concurrent-session-compliance-report.json');
+      const reportPath = join(
+        __dirname,
+        '../../reports/parlant-phase1-concurrent-session-compliance-report.json',
+      );
       await fs.writeFile(reportPath, JSON.stringify(complianceReport, null, 2));
 
       console.log('\n=== PARLANT Phase 1 Compliance Report ===');
-      console.log(`Overall Compliance: ${complianceReport.overallCompliance ? 'PASS' : 'FAIL'}`);
-      console.log(`100+ Sessions: ${complianceReport.phase1Requirements.concurrent100PlusSessions.achieved}/${complianceReport.phase1Requirements.concurrent100PlusSessions.target} (${complianceReport.phase1Requirements.concurrent100PlusSessions.compliant ? 'PASS' : 'FAIL'})`);
-      console.log(`Session Isolation: ${complianceReport.phase1Requirements.sessionIsolation.violationsDetected} violations (${complianceReport.phase1Requirements.sessionIsolation.compliant ? 'PASS' : 'FAIL'})`);
-      console.log(`P95 Latency: ${complianceReport.phase1Requirements.performanceTargets.latencyP95.achieved.toFixed(2)}ms/${complianceReport.phase1Requirements.performanceTargets.latencyP95.target}ms (${complianceReport.phase1Requirements.performanceTargets.latencyP95.compliant ? 'PASS' : 'FAIL'})`);
-      console.log(`Throughput: ${complianceReport.phase1Requirements.performanceTargets.throughput.achieved.toFixed(2)}/${complianceReport.phase1Requirements.performanceTargets.throughput.target} val/sec (${complianceReport.phase1Requirements.performanceTargets.throughput.compliant ? 'PASS' : 'FAIL'})`);
-      console.log(`Memory Management: ${(complianceReport.phase1Requirements.resourceManagement.memoryLeak.detected / 1024 / 1024).toFixed(2)}MB leak (${complianceReport.phase1Requirements.resourceManagement.memoryLeak.compliant ? 'PASS' : 'FAIL'})`);
+      console.log(
+        `Overall Compliance: ${complianceReport.overallCompliance ? 'PASS' : 'FAIL'}`,
+      );
+      console.log(
+        `100+ Sessions: ${complianceReport.phase1Requirements.concurrent100PlusSessions.achieved}/${complianceReport.phase1Requirements.concurrent100PlusSessions.target} (${complianceReport.phase1Requirements.concurrent100PlusSessions.compliant ? 'PASS' : 'FAIL'})`,
+      );
+      console.log(
+        `Session Isolation: ${complianceReport.phase1Requirements.sessionIsolation.violationsDetected} violations (${complianceReport.phase1Requirements.sessionIsolation.compliant ? 'PASS' : 'FAIL'})`,
+      );
+      console.log(
+        `P95 Latency: ${complianceReport.phase1Requirements.performanceTargets.latencyP95.achieved.toFixed(2)}ms/${complianceReport.phase1Requirements.performanceTargets.latencyP95.target}ms (${complianceReport.phase1Requirements.performanceTargets.latencyP95.compliant ? 'PASS' : 'FAIL'})`,
+      );
+      console.log(
+        `Throughput: ${complianceReport.phase1Requirements.performanceTargets.throughput.achieved.toFixed(2)}/${complianceReport.phase1Requirements.performanceTargets.throughput.target} val/sec (${complianceReport.phase1Requirements.performanceTargets.throughput.compliant ? 'PASS' : 'FAIL'})`,
+      );
+      console.log(
+        `Memory Management: ${(complianceReport.phase1Requirements.resourceManagement.memoryLeak.detected / 1024 / 1024).toFixed(2)}MB leak (${complianceReport.phase1Requirements.resourceManagement.memoryLeak.compliant ? 'PASS' : 'FAIL'})`,
+      );
       console.log(`Report saved to: ${reportPath}`);
       console.log('========================================\n');
     });
@@ -1656,20 +1976,34 @@ describe('PARLANT Phase 1 Concurrent WebSocket Session Testing Suite', () => {
     function generateRecommendations(results: ConcurrentTestResults): string[] {
       const recommendations: string[] = [];
 
-      if (results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions < 100) {
-        recommendations.push(`Consider optimizing for higher concurrency. Current recommended limit: ${results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions} sessions`);
+      if (
+        results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions <
+        100
+      ) {
+        recommendations.push(
+          `Consider optimizing for higher concurrency. Current recommended limit: ${results.performanceAnalysis.scalabilityMetrics.recommendedMaxSessions} sessions`,
+        );
       }
 
       if (results.resourceUsage.memoryUsage.leaked > 100 * 1024 * 1024) {
-        recommendations.push('Investigate memory leak sources and implement better cleanup mechanisms');
+        recommendations.push(
+          'Investigate memory leak sources and implement better cleanup mechanisms',
+        );
       }
 
       if (results.performanceAnalysis.latencyDistribution.p95 > 800) {
-        recommendations.push('Optimize message processing pipeline to reduce P95 latency');
+        recommendations.push(
+          'Optimize message processing pipeline to reduce P95 latency',
+        );
       }
 
-      if (results.performanceAnalysis.scalabilityMetrics.bottleneckIdentification.length > 0) {
-        recommendations.push(`Address identified bottlenecks: ${results.performanceAnalysis.scalabilityMetrics.bottleneckIdentification.join(', ')}`);
+      if (
+        results.performanceAnalysis.scalabilityMetrics.bottleneckIdentification
+          .length > 0
+      ) {
+        recommendations.push(
+          `Address identified bottlenecks: ${results.performanceAnalysis.scalabilityMetrics.bottleneckIdentification.join(', ')}`,
+        );
       }
 
       return recommendations;

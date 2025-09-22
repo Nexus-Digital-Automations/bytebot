@@ -8,9 +8,7 @@
  * @fileoverview Enterprise security headers middleware for BytebotD service
  * @version 1.0.0
  * @author Security Headers & CORS Specialist
- */;
-
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
+ */ import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
 import helmet, { HelmetOptions } from 'helmet';
@@ -255,7 +253,8 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * Apply security headers to request
    */
   use(req: Request, res: Response, next: NextFunction): void {
-    const operationId = `security-headers-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;    const startTime = Date.now();
+    const operationId = `security-headers-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const startTime = Date.now();
 
     // Set correlation ID for request tracking with type safety
     const safeReq = req as SafeRequest;

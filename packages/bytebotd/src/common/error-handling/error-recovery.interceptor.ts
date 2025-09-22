@@ -9,7 +9,11 @@ import {
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
-import { AutomationErrorHandlerService, AutomationErrorCategory, ErrorSeverity } from './automation-error-handler.service';/*** Error Recovery Interceptor
+import {
+  AutomationErrorHandlerService,
+  AutomationErrorCategory,
+  ErrorSeverity,
+} from './automation-error-handler.service'; /*** Error Recovery Interceptor
  *
  * Automatically handles errors in automation endpoints with intelligent recovery strategies.
  * This interceptor integrates with the AutomationErrorHandlerService to provide:
@@ -30,7 +34,8 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
   private readonly logger = new Logger(ErrorRecoveryInterceptor.name);
 
   constructor(private readonly errorHandler: AutomationErrorHandlerService) {
-    this.logger.log('ErrorRecoveryInterceptor initialized');}
+    this.logger.log('ErrorRecoveryInterceptor initialized');
+  }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest() as {
@@ -46,36 +51,43 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       timeout(30000), // 30-second timeout for automation operations
-      catchError((error) => this.handleError(error, operationContext, context))
+      catchError((error) => this.handleError(error, operationContext, context)),
     );
   }
 
-  private async handleError(error: unknown,
+  private async handleError(
+    error: unknown,
     operationContext: Record<string, unknown>,
-    _executionContext: ExecutionContext
-  ): Promise<Observable<never>>  {
+    _executionContext: ExecutionContext,
+  ): Promise<Observable<never>> {
     const startTime = Date.now();
 
-    this.logger.warn('Interceptor handling error', {error: (error as { message?: string }).message ?? 'Unknown error',operation: operationContext.operationName,
-      url: operationContext.url
+    this.logger.warn('Interceptor handling error', {
+      error: (error as { message?: string }).message ?? 'Unknown error',
+      operation: operationContext.operationName,
+      url: operationContext.url,
     });
 
     try {
       // Handle error through the centralized error handler
-      const handlingResult = await this.errorHandler.handleError(error, operationContext);
+      const handlingResult = await this.errorHandler.handleError(
+        error,
+        operationContext,
+      );
 
       const processingTime = Date.now() - startTime;
 
       // If recovery was successful, return the recovered result
       if (handlingResult.success && handlingResult.result !== undefined) {
-        this.logger.log('Error recovery successful via interceptor', {operation: operationContext.operationName,
-      strategy: handlingResult.strategy,
+        this.logger.log('Error recovery successful via interceptor', {
+          operation: operationContext.operationName,
+          strategy: handlingResult.strategy,
           retryCount: handlingResult.retryCount,
-          processingTime
+          processingTime,
         });
 
         // Return the recovered result wrapped in an observable
-        return new Observable(subscriber => {
+        return new Observable((subscriber) => {
           subscriber.next({
             success: true,
             data: handlingResult.result,
@@ -83,8 +95,8 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
             recovery: {
               strategy: handlingResult.strategy,
               retryCount: handlingResult.retryCount,
-              recoveryTime: handlingResult.recoveryTime
-            }
+              recoveryTime: handlingResult.recoveryTime,
+            },
           });
           subscriber.complete();
         });
@@ -92,34 +104,53 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
 
       // Recovery failed, create enhanced error response
       const enhancedError = this.createEnhancedErrorResponse(
-        handlingResult.finalError ?? (error as { category?: string; message?: string; severity?: string; errorId?: string }),
+        handlingResult.finalError ??
+          (error as {
+            category?: string;
+            message?: string;
+            severity?: string;
+            errorId?: string;
+          }),
         operationContext,
-        handlingResult
+        handlingResult,
       );
 
-      this.logger.error('Error recovery failed via interceptor', {operation: operationContext.operationName,
-      strategy: handlingResult.strategy,
+      this.logger.error('Error recovery failed via interceptor', {
+        operation: operationContext.operationName,
+        strategy: handlingResult.strategy,
         processingTime,
-        errorCategory: handlingResult.finalError?.category
+        errorCategory: handlingResult.finalError?.category,
       });
 
       return throwError(() => enhancedError);
-
     } catch (handlerError) {
-      this.logger.error('Error handler itself failed', {originalError: (error as { message?: string }).message ?? 'Unknown error',
+      this.logger.error('Error handler itself failed', {
+        originalError:
+          (error as { message?: string }).message ?? 'Unknown error',
         handlerError: (handlerError as Error).message,
-        operation: operationContext.operationName
+        operation: operationContext.operationName,
       });
 
       // Fallback to basic error handling
-      const fallbackError = this.createFallbackErrorResponse(error, operationContext);
+      const fallbackError = this.createFallbackErrorResponse(
+        error,
+        operationContext,
+      );
       return throwError(() => fallbackError);
     }
   }
 
   private extractOperationContext(
     context: ExecutionContext,
-    request: { url: string; method: string; headers?: Record<string, string>; user?: { id: string }; sessionID?: string; body?: unknown; query?: unknown }
+    request: {
+      url: string;
+      method: string;
+      headers?: Record<string, string>;
+      user?: { id: string };
+      sessionID?: string;
+      body?: unknown;
+      query?: unknown;
+    },
   ): Record<string, unknown> {
     const controllerClass = context.getClass().name;
     const handlerMethod = context.getHandler().name;
@@ -137,37 +168,54 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       timestamp: new Date().toISOString(),
       requestBody: request.body,
       queryParams: request.query,
-      headers: this.sanitizeHeaders(request.headers)
+      headers: this.sanitizeHeaders(request.headers),
     };
   }
 
   private extractComponentName(controllerClass: string): string {
     if (controllerClass.includes('FormAutomation')) return 'form-automation';
-if (controllerClass.includes('DataExtraction')) return 'data-extraction';
-if (controllerClass.includes('WorkflowAutomation')) return 'workflow-automation';
-if (controllerClass.includes('FileManagement')) return 'file-management';
-if (controllerClass.includes('ContentMonitoring')) return 'content-monitoring';
-return 'unknown';}
-private sanitizeHeaders(headers: Record<string, string> | undefined): Record<string, string> {
+    if (controllerClass.includes('DataExtraction')) return 'data-extraction';
+    if (controllerClass.includes('WorkflowAutomation'))
+      return 'workflow-automation';
+    if (controllerClass.includes('FileManagement')) return 'file-management';
+    if (controllerClass.includes('ContentMonitoring'))
+      return 'content-monitoring';
+    return 'unknown';
+  }
+  private sanitizeHeaders(
+    headers: Record<string, string> | undefined,
+  ): Record<string, string> {
     const sanitized = { ...headers } as Record<string, string>;
 
     // Remove sensitive headers
     delete sanitized.authorization;
     delete sanitized.cookie;
-    delete sanitized['x-api-key'];return sanitized;}
+    delete sanitized['x-api-key'];
+    return sanitized;
+  }
 
   private createEnhancedErrorResponse(
-    error: { category?: string; message?: string; severity?: string; errorId?: string },
+    error: {
+      category?: string;
+      message?: string;
+      severity?: string;
+      errorId?: string;
+    },
     operationContext: Record<string, unknown>,
-    handlingResult: { strategy: string; retryCount: number; recoveryTime: number; success: boolean }
+    handlingResult: {
+      strategy: string;
+      retryCount: number;
+      recoveryTime: number;
+      success: boolean;
+    },
   ): HttpException {
     const errorResponse = {
       success: false,
       error: {
         type: error.category ?? AutomationErrorCategory.UNKNOWN_ERROR,
         message: error.message ?? 'An automation error occurred',
-      severity: error.severity ?? ErrorSeverity.MEDIUM,
-      operation: operationContext.operationName,
+        severity: error.severity ?? ErrorSeverity.MEDIUM,
+        operation: operationContext.operationName,
         component: operationContext.component,
         timestamp: new Date().toISOString(),
         requestId: operationContext.requestId,
@@ -176,15 +224,15 @@ private sanitizeHeaders(headers: Record<string, string> | undefined): Record<str
           strategy: handlingResult.strategy,
           retryCount: handlingResult.retryCount,
           recoveryTime: handlingResult.recoveryTime,
-          success: handlingResult.success
-        }
+          success: handlingResult.success,
+        },
       },
       metadata: {
         errorId: error.errorId ?? 'unknown',
-      url: operationContext.url,
-      method: operationContext.httpMethod,
-        userAgent: operationContext.userAgent
-      }
+        url: operationContext.url,
+        method: operationContext.httpMethod,
+        userAgent: operationContext.userAgent,
+      },
     };
 
     // Determine HTTP status based on error type and severity
@@ -195,35 +243,42 @@ private sanitizeHeaders(headers: Record<string, string> | undefined): Record<str
 
   private createFallbackErrorResponse(
     error: { message?: string },
-    operationContext: Record<string, unknown>
+    operationContext: Record<string, unknown>,
   ): HttpException {
     const fallbackResponse = {
       success: false,
       error: {
         type: 'system_error',
-      message: 'An unexpected error occurred during automation operation',
-      severity: 'high',
-      operation: operationContext.operationName,
-      component: operationContext.component,
+        message: 'An unexpected error occurred during automation operation',
+        severity: 'high',
+        operation: operationContext.operationName,
+        component: operationContext.component,
         timestamp: new Date().toISOString(),
         requestId: operationContext.requestId,
         recovery: {
           attempted: false,
-          reason: 'Error handler failure'}},
+          reason: 'Error handler failure',
+        },
+      },
       metadata: {
         originalError: error.message ?? 'Unknown error',
         url: operationContext.url,
-        method: operationContext.httpMethod
-      }
+        method: operationContext.httpMethod,
+      },
     };
 
-    return new HttpException(fallbackResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    return new HttpException(
+      fallbackResponse,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 
-  private determineHttpStatus(error: { category?: string; severity?: string }): HttpStatus {
+  private determineHttpStatus(error: {
+    category?: string;
+    severity?: string;
+  }): HttpStatus {
     if (error.category) {
       switch (error.category) {
-
         case AutomationErrorCategory.AUTHENTICATION_ERROR:
           return HttpStatus.UNAUTHORIZED;
         case AutomationErrorCategory.VALIDATION_ERROR:
@@ -243,15 +298,13 @@ private sanitizeHeaders(headers: Record<string, string> | undefined): Record<str
         case AutomationErrorCategory.SYSTEM_ERROR:
           return HttpStatus.INTERNAL_SERVER_ERROR;
         default:
-        return HttpStatus.INTERNAL_SERVER_ERROR;
-        break;
-      
-    }
+          return HttpStatus.INTERNAL_SERVER_ERROR;
+          break;
+      }
     }
 
-  if(error.severity) {
+    if (error.severity) {
       switch (error.severity) {
-
         case ErrorSeverity.CRITICAL:
           return HttpStatus.INTERNAL_SERVER_ERROR;
         case ErrorSeverity.HIGH:
@@ -261,10 +314,9 @@ private sanitizeHeaders(headers: Record<string, string> | undefined): Record<str
         case ErrorSeverity.LOW:
           return HttpStatus.BAD_REQUEST;
         default:
-        return HttpStatus.INTERNAL_SERVER_ERROR;
-        break;
-      
-    }
+          return HttpStatus.INTERNAL_SERVER_ERROR;
+          break;
+      }
     }
 
     // Default fallback

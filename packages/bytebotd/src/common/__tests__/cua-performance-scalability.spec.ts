@@ -1,10 +1,10 @@
 /**
  * CUA Performance and Scalability Integration Tests
- * 
+ *
  * This test suite provides comprehensive performance and scalability testing
  * for the Computer Use Agent integration architecture, ensuring system
  * performance under various load conditions and scalability requirements.
- * 
+ *
  * Performance Coverage:
  * - Throughput testing under concurrent loads
  * - Response time benchmarking across integration points
@@ -12,7 +12,7 @@
  * - CPU utilization under stress conditions
  * - Network I/O performance optimization
  * - Database connection pooling and query performance
- * 
+ *
  * Scalability Coverage:
  * - Horizontal scaling simulation with multiple instances
  * - Load balancing effectiveness across services
@@ -20,7 +20,7 @@
  * - Performance degradation analysis under increasing load
  * - Bottleneck identification and mitigation strategies
  * - Auto-scaling trigger validation
- * 
+ *
  * @author Claude Code - Subagent 6
  * @version 1.0.0
  */
@@ -156,10 +156,10 @@ export class PerformanceMonitorService {
 
   startMonitoring(intervalMs: number = 1000): void {
     if (this.isMonitoring) return;
-    
+
     this.isMonitoring = true;
     this.clearMetrics();
-    
+
     this.monitoringInterval = setInterval(() => {
       this.collectSystemMetrics();
     }, intervalMs);
@@ -167,7 +167,7 @@ export class PerformanceMonitorService {
 
   stopMonitoring(): void {
     if (!this.isMonitoring) return;
-    
+
     this.isMonitoring = false;
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
@@ -175,12 +175,16 @@ export class PerformanceMonitorService {
     }
   }
 
-  recordOperation(operationType: string, responseTime: number, success: boolean): void {
+  recordOperation(
+    operationType: string,
+    responseTime: number,
+    success: boolean,
+  ): void {
     this.metrics.responseTimeSamples.push(responseTime);
-    
+
     const operationCount = this.metrics.operationCounts.get(operationType) ?? 0;
     this.metrics.operationCounts.set(operationType, operationCount + 1);
-    
+
     if (!success) {
       const errorCount = this.metrics.errorCounts.get(operationType) ?? 0;
       this.metrics.errorCounts.set(operationType, errorCount + 1);
@@ -188,14 +192,22 @@ export class PerformanceMonitorService {
   }
 
   getMetricsSummary(): Partial<PerformanceMetrics> {
-    const responseTimes = this.metrics.responseTimeSamples.sort((a, b) => a - b);
-    const cpuAverage = this.metrics.cpuUsage.reduce((sum, cpu) => sum + cpu, 0) / this.metrics.cpuUsage.length;
-    
+    const responseTimes = this.metrics.responseTimeSamples.sort(
+      (a, b) => a - b,
+    );
+    const cpuAverage =
+      this.metrics.cpuUsage.reduce((sum, cpu) => sum + cpu, 0) /
+      this.metrics.cpuUsage.length;
+
     return {
-      averageResponseTime: responseTimes.reduce((sum, rt) => sum + rt, 0) / responseTimes.length,
-      p50ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.5)] ?? 0,
-      p95ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.95)] ?? 0,
-      p99ResponseTime: responseTimes[Math.floor(responseTimes.length * 0.99)] ?? 0,
+      averageResponseTime:
+        responseTimes.reduce((sum, rt) => sum + rt, 0) / responseTimes.length,
+      p50ResponseTime:
+        responseTimes[Math.floor(responseTimes.length * 0.5)] ?? 0,
+      p95ResponseTime:
+        responseTimes[Math.floor(responseTimes.length * 0.95)] ?? 0,
+      p99ResponseTime:
+        responseTimes[Math.floor(responseTimes.length * 0.99)] ?? 0,
       maxResponseTime: Math.max(...responseTimes),
       minResponseTime: Math.min(...responseTimes),
       cpuUsage: {
@@ -205,7 +217,9 @@ export class PerformanceMonitorService {
       memoryUsage: {
         initial: this.metrics.memoryUsage[0] ?? process.memoryUsage(),
         peak: this.getPeakMemoryUsage(),
-        final: this.metrics.memoryUsage[this.metrics.memoryUsage.length - 1] ?? process.memoryUsage(),
+        final:
+          this.metrics.memoryUsage[this.metrics.memoryUsage.length - 1] ??
+          process.memoryUsage(),
         growth: 0, // Will be calculated
       },
     };
@@ -226,15 +240,17 @@ export class PerformanceMonitorService {
     const cpuUsage = process.cpuUsage();
     const cpuPercent = (cpuUsage.user + cpuUsage.system) / 1000000; // Convert to seconds
     this.metrics.cpuUsage.push(cpuPercent);
-    
+
     // Collect memory usage
     this.metrics.memoryUsage.push(process.memoryUsage());
   }
 
   private getPeakMemoryUsage(): NodeJS.MemoryUsage {
-    return this.metrics.memoryUsage.reduce((peak, current) =>
-      current.heapUsed > peak.heapUsed ? current : peak
-    ) ?? process.memoryUsage();
+    return (
+      this.metrics.memoryUsage.reduce((peak, current) =>
+        current.heapUsed > peak.heapUsed ? current : peak,
+      ) ?? process.memoryUsage()
+    );
   }
 }
 
@@ -245,34 +261,39 @@ export class PerformanceMonitorService {
 export class LoadGeneratorService {
   private activeLoadTests: Map<string, boolean> = new Map();
 
-  async generateConcurrentLoad(operations: TestOperation[],
-    configuration: LoadTestConfiguration
-  ): Promise<LoadTestResult[]>  {
-    const { concurrentUsers, operationsPerUser, rampUpTime, sustainedLoadTime } = configuration;
+  async generateConcurrentLoad(
+    operations: TestOperation[],
+    configuration: LoadTestConfiguration,
+  ): Promise<LoadTestResult[]> {
+    const {
+      concurrentUsers,
+      operationsPerUser,
+      rampUpTime,
+      sustainedLoadTime,
+    } = configuration;
     const testId = `load${Date.now()}`;
-    
+
     this.activeLoadTests.set(testId, true);
-    
+
     try {
       // Ramp up phase
       const userPromises: Promise<LoadTestResult[]>[] = [];
       const userStartDelay = rampUpTime / concurrentUsers;
-      
+
       for (let userId = 0; userId < concurrentUsers; userId++) {
         const userPromise = this.simulateUser(
           userId,
           operations,
           operationsPerUser,
           userStartDelay * userId,
-          sustainedLoadTime
+          sustainedLoadTime,
         );
         userPromises.push(userPromise);
       }
-      
+
       // Wait for all users to complete
       const results = await Promise.all(userPromises);
       return results.flat();
-      
     } finally {
       this.activeLoadTests.delete(testId);
     }
@@ -281,12 +302,12 @@ export class LoadGeneratorService {
   async generateStressLoad(
     operation: () => Promise<unknown>,
     maxConcurrency: number,
-    durationMs: number
+    durationMs: number,
   ): Promise<LoadTestResult[]> {
     const results: LoadTestResult[] = [];
     const startTime = Date.now();
     let activeOperations = 0;
-    
+
     return new Promise((resolve) => {
       const executeOperation = async () => {
         if (Date.now() - startTime > durationMs) {
@@ -295,10 +316,10 @@ export class LoadGeneratorService {
           }
           return;
         }
-        
+
         activeOperations++;
         const operationStartTime = Date.now();
-        
+
         try {
           await operation();
           results.push({
@@ -313,16 +334,22 @@ export class LoadGeneratorService {
           });
         } finally {
           activeOperations--;
-          
+
           // Continue if we haven't exceeded duration and can handle more operations
-          if (activeOperations < maxConcurrency && Date.now() - startTime < durationMs) {
+          if (
+            activeOperations < maxConcurrency &&
+            Date.now() - startTime < durationMs
+          ) {
             setImmediate(executeOperation);
-          } else if (activeOperations === 0 && Date.now() - startTime > durationMs) {
+          } else if (
+            activeOperations === 0 &&
+            Date.now() - startTime > durationMs
+          ) {
             resolve(results);
           }
         }
       };
-      
+
       // Start initial operations
       for (let i = 0; i < Math.min(maxConcurrency, 10); i++) {
         setImmediate(executeOperation);
@@ -330,22 +357,23 @@ export class LoadGeneratorService {
     });
   }
 
-  private async simulateUser(userId: number,
+  private async simulateUser(
+    userId: number,
     operations: TestOperation[],
     operationsPerUser: number,
     startDelay: number,
-    sustainedLoadTime: number
-  ): Promise<LoadTestResult[]>  {
+    sustainedLoadTime: number,
+  ): Promise<LoadTestResult[]> {
     // Wait for ramp-up delay
-    await new Promise(resolve => setTimeout(resolve, startDelay));
-    
+    await new Promise((resolve) => setTimeout(resolve, startDelay));
+
     const userResults: LoadTestResult[] = [];
     const operationDelay = sustainedLoadTime / operationsPerUser;
-    
+
     for (let opIndex = 0; opIndex < operationsPerUser; opIndex++) {
       const operation = operations[opIndex % operations.length];
       const operationStartTime = Date.now();
-      
+
       try {
         await operation();
         userResults.push({
@@ -359,20 +387,20 @@ export class LoadGeneratorService {
           error: error as Error,
         });
       }
-      
+
       // Wait between operations
       if (opIndex < operationsPerUser - 1) {
-        await new Promise(resolve => setTimeout(resolve, operationDelay));
+        await new Promise((resolve) => setTimeout(resolve, operationDelay));
       }
     }
-    
+
     return userResults;
   }
 }
 
-  describe('CUA Performance and Scalability Tests', () => {
-let context: PerformanceContext;
-let testModule: TestingModule;
+describe('CUA Performance and Scalability Tests', () => {
+  let context: PerformanceContext;
+  let testModule: TestingModule;
   const performanceResults: PerformanceMetrics[] = [];
   const scalabilityResults: ScalabilityTestResult[] = [];
 
@@ -399,16 +427,26 @@ let testModule: TestingModule;
 
     context = {
       app,
-      computerUseService: testModule.get<ComputerUseService>(ComputerUseService),
+      computerUseService:
+        testModule.get<ComputerUseService>(ComputerUseService),
       mcpTools: testModule.get<ComputerUseTools>(ComputerUseTools),
-      parlantValidatedService: testModule.get<ParlantValidatedComputerUseService>(ParlantValidatedComputerUseService),
-      parlantIntegrationService: testModule.get<ParlantIntegrationService>(ParlantIntegrationService),
-      enterpriseApiController: testModule.get<EnterpriseApiGatewayController>(EnterpriseApiGatewayController),
+      parlantValidatedService:
+        testModule.get<ParlantValidatedComputerUseService>(
+          ParlantValidatedComputerUseService,
+        ),
+      parlantIntegrationService: testModule.get<ParlantIntegrationService>(
+        ParlantIntegrationService,
+      ),
+      enterpriseApiController: testModule.get<EnterpriseApiGatewayController>(
+        EnterpriseApiGatewayController,
+      ),
       metricsService: testModule.get<MetricsService>(MetricsService),
       cacheService: testModule.get<CacheService>(CacheService),
       nutService: testModule.get<NutService>(NutService),
       eventEmitter: testModule.get<EventEmitter2>(EventEmitter2),
-      performanceMonitor: testModule.get<PerformanceMonitorService>(PerformanceMonitorService),
+      performanceMonitor: testModule.get<PerformanceMonitorService>(
+        PerformanceMonitorService,
+      ),
       loadGenerator: testModule.get<LoadGeneratorService>(LoadGeneratorService),
     };
   });
@@ -424,14 +462,12 @@ let testModule: TestingModule;
     context.performanceMonitor.clearMetrics();
   });
 
-
-
   describe('Throughput Performance Tests', () => {
     it('should handle high-throughput computer use operations', async () => {
       const testConfig: LoadTestConfiguration = {
         testName: 'high_throughput_computer_use',
-      concurrentUsers: 50,
-      operationsPerUser: 20,
+        concurrentUsers: 50,
+        operationsPerUser: 20,
         rampUpTime: 5000,
         sustainedLoadTime: 30000,
         rampDownTime: 2000,
@@ -442,49 +478,75 @@ let testModule: TestingModule;
 
       const testId = generateTestId();
       const startTime = Date.now();
-      
+
       context.performanceMonitor.startMonitoring(500);
 
       // Create diverse computer use operations
       const operations: (() => Promise<unknown>)[] = [
         async (): Promise<unknown> => {
-          return await context.computerUseService.action({ action: 'move_mouse', coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 } });
+          return await context.computerUseService.action({
+            action: 'move_mouse',
+            coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 },
+          });
         },
         async (): Promise<unknown> => {
-          return await context.computerUseService.action({ action: 'click_mouse', coordinates: { x: 100, y: 200 }, button: 'left', clickCount: 1 });
+          return await context.computerUseService.action({
+            action: 'click_mouse',
+            coordinates: { x: 100, y: 200 },
+            button: 'left',
+            clickCount: 1,
+          });
         },
         async (): Promise<unknown> => {
-          return await context.computerUseService.action({ action: 'cursor_position' });
+          return await context.computerUseService.action({
+            action: 'cursor_position',
+          });
         },
         async (): Promise<unknown> => {
-          return await context.computerUseService.action({ action: 'screenshot' });
+          return await context.computerUseService.action({
+            action: 'screenshot',
+          });
         },
         async (): Promise<unknown> => {
-          if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
-            return await context.mcpTools.moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } });
+          if (
+            context.mcpTools &&
+            typeof context.mcpTools.moveMouse === 'function'
+          ) {
+            return await context.mcpTools.moveMouse({
+              coordinates: { x: Math.random() * 500, y: Math.random() * 500 },
+            });
           }
           throw new Error('mcpTools.moveMouse not available');
         },
         async (): Promise<unknown> => {
-          return await (context.mcpTools as ComputerUseTools).clickMouse({ coordinates: { x: 200, y: 300 }, button: 'left', clickCount: 1 });
+          return await (context.mcpTools as ComputerUseTools).clickMouse({
+            coordinates: { x: 200, y: 300 },
+            button: 'left',
+            clickCount: 1,
+          });
         },
         async (): Promise<unknown> => {
-          return await (context.mcpTools as ComputerUseTools).typeText({ text: 'performance test' });
+          return await (context.mcpTools as ComputerUseTools).typeText({
+            text: 'performance test',
+          });
         },
         async (): Promise<unknown> => {
           return await (context.mcpTools as ComputerUseTools).cursorPosition();
         },
       ];
 
-      const loadResults = await context.loadGenerator.generateConcurrentLoad(operations, testConfig);
+      const loadResults = await context.loadGenerator.generateConcurrentLoad(
+        operations,
+        testConfig,
+      );
       const endTime = Date.now();
-      
+
       context.performanceMonitor.stopMonitoring();
       const monitoringMetrics = context.performanceMonitor.getMetricsSummary();
 
       // Calculate performance metrics
       const totalOperations = loadResults.length;
-      const successfulOperations = loadResults.filter(r => r.success).length;
+      const successfulOperations = loadResults.filter((r) => r.success).length;
       const failedOperations = totalOperations - successfulOperations;
       const duration = endTime - startTime;
       const operationsPerSecond = (totalOperations / duration) * 1000;
@@ -492,7 +554,8 @@ let testModule: TestingModule;
       const metrics: PerformanceMetrics = {
         testId,
         testType: 'throughput',
-      startTime,endTime,
+        startTime,
+        endTime,
         duration,
         totalOperations,
         successfulOperations,
@@ -505,23 +568,31 @@ let testModule: TestingModule;
       performanceResults.push(metrics);
 
       // Performance assertions
-      expect(operationsPerSecond).toBeGreaterThan(testConfig.targetThroughput * 0.8); // Within 20% of target
-      expect(successfulOperations / totalOperations).toBeGreaterThan(1 - testConfig.errorThreshold);
-      expect(metrics.averageResponseTime).toBeLessThan(testConfig.maxResponseTime);
-      expect(metrics.p95ResponseTime).toBeLessThan(testConfig.maxResponseTime * 2);
+      expect(operationsPerSecond).toBeGreaterThan(
+        testConfig.targetThroughput * 0.8,
+      ); // Within 20% of target
+      expect(successfulOperations / totalOperations).toBeGreaterThan(
+        1 - testConfig.errorThreshold,
+      );
+      expect(metrics.averageResponseTime).toBeLessThan(
+        testConfig.maxResponseTime,
+      );
+      expect(metrics.p95ResponseTime).toBeLessThan(
+        testConfig.maxResponseTime * 2,
+      );
 
       // Memory usage should be reasonable
-      const memoryGrowth = metrics.memoryUsage.peak.heapUsed - metrics.memoryUsage.initial.heapUsed;
+      const memoryGrowth =
+        metrics.memoryUsage.peak.heapUsed -
+        metrics.memoryUsage.initial.heapUsed;
       expect(memoryGrowth).toBeLessThan(200 * 1024 * 1024); // Less than 200MB growth
     });
-
-
 
     it('should maintain performance under mixed operation types', async () => {
       const testConfig: LoadTestConfiguration = {
         testName: 'mixed_operations_throughput',
-      concurrentUsers: 30,
-      operationsPerUser: 15,
+        concurrentUsers: 30,
+        operationsPerUser: 15,
         rampUpTime: 3000,
         sustainedLoadTime: 20000,
         rampDownTime: 1000,
@@ -532,25 +603,39 @@ let testModule: TestingModule;
 
       const testId = generateTestId();
       const startTime = Date.now();
-      
+
       context.performanceMonitor.startMonitoring(500);
 
       // Mock Parlant validation for performance testing
-      jest.spyOn(context.parlantIntegrationService, 'validateFunctionExecution').mockResolvedValue({approved: true,
+      jest
+        .spyOn(context.parlantIntegrationService, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
           conversationId: 'perf-test',
-      validationTimestamp: new Date(),
-      reasoning: 'Performance test validation',
-      confidence: 0.9,});
+          validationTimestamp: new Date(),
+          reasoning: 'Performance test validation',
+          confidence: 0.9,
+        });
 
       // Mixed operations including validated actions
       const operations = [
         // Direct computer use operations
-        () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 300, y: 400 } }),() => context.computerUseService.action({ action: 'screenshot' }),
-        
+        () =>
+          context.computerUseService.action({
+            action: 'move_mouse',
+            coordinates: { x: 300, y: 400 },
+          }),
+        () => context.computerUseService.action({ action: 'screenshot' }),
+
         // MCP tool operations
         async (): Promise<unknown> => {
-          if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
-            return await context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } });
+          if (
+            context.mcpTools &&
+            typeof context.mcpTools.moveMouse === 'function'
+          ) {
+            return await context.mcpTools.moveMouse({
+              coordinates: { x: 150, y: 250 },
+            });
           }
           throw new Error('mcpTools.moveMouse not available');
         },
@@ -560,42 +645,53 @@ let testModule: TestingModule;
         },
         async (): Promise<unknown> => {
           const tools = context.mcpTools as ComputerUseTools;
-          return await tools.typeText({ text: `perf-${Math.random().toString(36).substring(7)}` });
+          return await tools.typeText({
+            text: `perf-${Math.random().toString(36).substring(7)}`,
+          });
         },
-        
+
         // Validated operations (with Parlant)
-        () => context.parlantValidatedService.action(
-          { action: 'cursor_position' },{userId: 'perf-user',
-      sessionId: 'perf-session',
-      agentRole: 'OPERATOR',
-      securityLevel: 'HIGH',
-      conversationHistory: [],
-      metadata: { operationId: 'perf-op' },recentActions: [],
-      systemState: {
-              cpuUsage: 30,
-              memoryUsage: 50,
-              networkActivity: false,
-              securityAlerts: [],
-              maintenanceMode: false,
+        () =>
+          context.parlantValidatedService.action(
+            { action: 'cursor_position' },
+            {
+              userId: 'perf-user',
+              sessionId: 'perf-session',
+              agentRole: 'OPERATOR',
+              securityLevel: 'HIGH',
+              conversationHistory: [],
+              metadata: { operationId: 'perf-op' },
+              recentActions: [],
+              systemState: {
+                cpuUsage: 30,
+                memoryUsage: 50,
+                networkActivity: false,
+                securityAlerts: [],
+                maintenanceMode: false,
+              },
             },
-          }
-        ),
+          ),
       ];
 
-      const loadResults = await context.loadGenerator.generateConcurrentLoad(operations, testConfig);
+      const loadResults = await context.loadGenerator.generateConcurrentLoad(
+        operations,
+        testConfig,
+      );
       const endTime = Date.now();
-      
+
       context.performanceMonitor.stopMonitoring();
       const monitoringMetrics = context.performanceMonitor.getMetricsSummary();
 
       const totalOperations = loadResults.length;
-      const successfulOperations = loadResults.filter(r => r.success).length;
-      const operationsPerSecond = (totalOperations / (endTime - startTime)) * 1000;
+      const successfulOperations = loadResults.filter((r) => r.success).length;
+      const operationsPerSecond =
+        (totalOperations / (endTime - startTime)) * 1000;
 
       const metrics: PerformanceMetrics = {
         testId,
         testType: 'throughput',
-      startTime,endTime,
+        startTime,
+        endTime,
         duration: endTime - startTime,
         totalOperations,
         successfulOperations,
@@ -608,30 +704,37 @@ let testModule: TestingModule;
       performanceResults.push(metrics);
 
       // Verify mixed operations performance
-      expect(operationsPerSecond).toBeGreaterThan(testConfig.targetThroughput * 0.7);
+      expect(operationsPerSecond).toBeGreaterThan(
+        testConfig.targetThroughput * 0.7,
+      );
       expect(successfulOperations / totalOperations).toBeGreaterThan(0.95);
-      expect(metrics.averageResponseTime).toBeLessThan(testConfig.maxResponseTime);
+      expect(metrics.averageResponseTime).toBeLessThan(
+        testConfig.maxResponseTime,
+      );
     });
   });
 
-
-
   describe('Latency Performance Tests', () => {
-it('should maintain low latency for critical operations', async () => {
+    it('should maintain low latency for critical operations', async () => {
       const criticalOperations = [
         {
           name: 'cursor_position',
           operation: async (): Promise<unknown> => {
-            return await context.computerUseService.action({ action: 'cursor_position' });
+            return await context.computerUseService.action({
+              action: 'cursor_position',
+            });
           },
-          maxLatency: 50
+          maxLatency: 50,
         },
         {
           name: 'move_mouse',
           operation: async (): Promise<unknown> => {
-            return await context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } });
+            return await context.computerUseService.action({
+              action: 'move_mouse',
+              coordinates: { x: 100, y: 200 },
+            });
           },
-          maxLatency: 100
+          maxLatency: 100,
         },
         {
           name: 'mcp_cursor_position',
@@ -639,17 +742,22 @@ it('should maintain low latency for critical operations', async () => {
             const tools = context.mcpTools as ComputerUseTools;
             return await tools.cursorPosition();
           },
-          maxLatency: 75
+          maxLatency: 75,
         },
         {
           name: 'mcp_move_mouse',
           operation: async (): Promise<unknown> => {
-            if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
-              return await context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } });
+            if (
+              context.mcpTools &&
+              typeof context.mcpTools.moveMouse === 'function'
+            ) {
+              return await context.mcpTools.moveMouse({
+                coordinates: { x: 150, y: 250 },
+              });
             }
             throw new Error('mcpTools.moveMouse not available');
           },
-          maxLatency: 150
+          maxLatency: 150,
         },
       ];
 
@@ -660,15 +768,19 @@ it('should maintain low latency for critical operations', async () => {
 
       for (const criticalOp of criticalOperations) {
         latencyResults[criticalOp.name] = [];
-        
+
         // Test each operation multiple times
         for (let i = 0; i < 50; i++) {
           const startTime = Date.now();
           await criticalOp.operation();
           const responseTime = Date.now() - startTime;
-          
+
           latencyResults[criticalOp.name]?.push(responseTime);
-          context.performanceMonitor.recordOperation(criticalOp.name, responseTime, true);
+          context.performanceMonitor.recordOperation(
+            criticalOp.name,
+            responseTime,
+            true,
+          );
         }
       }
 
@@ -676,13 +788,22 @@ it('should maintain low latency for critical operations', async () => {
 
       // Analyze latency results
       for (const [operationName, latencies] of Object.entries(latencyResults)) {
-        const operation = criticalOperations.find(op => op.name === operationName);
+        const operation = criticalOperations.find(
+          (op) => op.name === operationName,
+        );
         if (!operation) {
-          throw new Error(`Operation ${operationName} not found in critical operations`);
+          throw new Error(
+            `Operation ${operationName} not found in critical operations`,
+          );
         }
-        const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
-        const p95Latency = latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.95)];
-        const p99Latency = latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.99)];
+        const averageLatency =
+          latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+        const p95Latency = latencies.sort((a, b) => a - b)[
+          Math.floor(latencies.length * 0.95)
+        ];
+        const p99Latency = latencies.sort((a, b) => a - b)[
+          Math.floor(latencies.length * 0.99)
+        ];
 
         expect(averageLatency).toBeLessThan(operation.maxLatency);
         expect(p95Latency).toBeLessThan(operation.maxLatency * 2);
@@ -692,12 +813,13 @@ it('should maintain low latency for critical operations', async () => {
       const metrics: PerformanceMetrics = {
         testId,
         testType: 'latency',
-      startTime: Date.now() - 10000, // ApproximateendTime: Date.now(),
+        startTime: Date.now() - 10000, // ApproximateendTime: Date.now(),
         duration: 10000,
         totalOperations: Object.values(latencyResults).flat().length,
         successfulOperations: Object.values(latencyResults).flat().length,
         failedOperations: 0,
-        operationsPerSecond: (Object.values(latencyResults).flat().length / 10) * 1000,
+        operationsPerSecond:
+          (Object.values(latencyResults).flat().length / 10) * 1000,
         ...context.performanceMonitor.getMetricsSummary(),
         errorTypes: new Map(),
       };
@@ -705,10 +827,9 @@ it('should maintain low latency for critical operations', async () => {
       performanceResults.push(metrics);
     });
 
-
-
     it('should handle latency under cache pressure', async () => {
-const testId = generateTestId();const operationCount = 100;
+      const testId = generateTestId();
+      const operationCount = 100;
       const startTime = Date.now();
 
       context.performanceMonitor.startMonitoring(100);
@@ -716,38 +837,57 @@ const testId = generateTestId();const operationCount = 100;
       // Mock cache service to simulate cache pressure
       let cacheHits = 0;
       let cacheMisses = 0;
-      
-      jest.spyOn(context.cacheService, 'get')
+
+      jest
+        .spyOn(context.cacheService, 'get')
         .mockImplementation(async (key) => {
           // Simulate cache hit/miss pattern
-          if (Math.random() < 0.7) { // 70% cache hit rate
+          if (Math.random() < 0.7) {
+            // 70% cache hit rate
             cacheHits++;
-            await new Promise(resolve => setTimeout(resolve, 5)); // Fast cache hit
+            await new Promise((resolve) => setTimeout(resolve, 5)); // Fast cache hit
             return { cached: true, data: `cached-${key}` };
           } else {
             cacheMisses++;
-            await new Promise(resolve => setTimeout(resolve, 50)); // Slower cache miss
+            await new Promise((resolve) => setTimeout(resolve, 50)); // Slower cache miss
             return null;
           }
         });
 
       // Execute operations that depend on caching
       const operations = Array.from({ length: operationCount }, (_, _i) =>
-        context.computerUseService.action({ action: 'cursor_position' }));const results = await Promise.all(operations.map(async (op, _index) => {
-        const opStartTime = Date.now();
-        try {
-          await op;
-          const responseTime = Date.now() - opStartTime;
-          context.performanceMonitor.recordOperation('cached_operation', responseTime, true);return { success: true, responseTime };} catch (_error) {
-          const responseTime = Date.now() - opStartTime;
-          context.performanceMonitor.recordOperation('cached_operation', responseTime, false);return { success: false, responseTime };}
-      }));
+        context.computerUseService.action({ action: 'cursor_position' }),
+      );
+      const results = await Promise.all(
+        operations.map(async (op, _index) => {
+          const opStartTime = Date.now();
+          try {
+            await op;
+            const responseTime = Date.now() - opStartTime;
+            context.performanceMonitor.recordOperation(
+              'cached_operation',
+              responseTime,
+              true,
+            );
+            return { success: true, responseTime };
+          } catch (_error) {
+            const responseTime = Date.now() - opStartTime;
+            context.performanceMonitor.recordOperation(
+              'cached_operation',
+              responseTime,
+              false,
+            );
+            return { success: false, responseTime };
+          }
+        }),
+      );
 
       const endTime = Date.now();
       context.performanceMonitor.stopMonitoring();
 
-      const successfulOps = results.filter(r => r.success).length;
-      const avgResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
+      const successfulOps = results.filter((r) => r.success).length;
+      const avgResponseTime =
+        results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
 
       expect(successfulOps).toBe(operationCount);
       expect(avgResponseTime).toBeLessThan(200); // Should be fast with caching
@@ -756,7 +896,8 @@ const testId = generateTestId();const operationCount = 100;
       const metrics: PerformanceMetrics = {
         testId,
         testType: 'latency',
-      startTime,endTime,
+        startTime,
+        endTime,
         duration: endTime - startTime,
         totalOperations: operationCount,
         successfulOperations: successfulOps,
@@ -770,10 +911,8 @@ const testId = generateTestId();const operationCount = 100;
     });
   });
 
-
-
   describe('Stress Testing', () => {
-it('should handle extreme concurrent load', async () => {
+    it('should handle extreme concurrent load', async () => {
       const maxConcurrency = 200;
       const stressDuration = 30000; // 30 seconds
       const testId = generateTestId();
@@ -784,44 +923,60 @@ it('should handle extreme concurrent load', async () => {
         // Randomly select operation type to create varied load
         const operations: (() => Promise<unknown>)[] = [
           async (): Promise<unknown> => {
-            return await context.computerUseService.action({ action: 'move_mouse', coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 } });
+            return await context.computerUseService.action({
+              action: 'move_mouse',
+              coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 },
+            });
           },
           async (): Promise<unknown> => {
-            return await context.computerUseService.action({ action: 'cursor_position' });
+            return await context.computerUseService.action({
+              action: 'cursor_position',
+            });
           },
           async (): Promise<unknown> => {
-            if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
-              return await context.mcpTools.moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } });
+            if (
+              context.mcpTools &&
+              typeof context.mcpTools.moveMouse === 'function'
+            ) {
+              return await context.mcpTools.moveMouse({
+                coordinates: { x: Math.random() * 500, y: Math.random() * 500 },
+              });
             }
             throw new Error('mcpTools.moveMouse not available');
           },
           async (): Promise<unknown> => {
-            return await (context.mcpTools as ComputerUseTools).cursorPosition();
+            return await (
+              context.mcpTools as ComputerUseTools
+            ).cursorPosition();
           },
         ];
-        
-        const selectedOperation = operations[Math.floor(Math.random() * operations.length)];
+
+        const selectedOperation =
+          operations[Math.floor(Math.random() * operations.length)];
         return selectedOperation() as Promise<unknown>;
       };
 
       const stressResults = await context.loadGenerator.generateStressLoad(
         stressOperation,
         maxConcurrency,
-        stressDuration
+        stressDuration,
       );
 
       context.performanceMonitor.stopMonitoring();
       const monitoringMetrics = context.performanceMonitor.getMetricsSummary();
 
       const totalOperations = stressResults.length;
-      const successfulOperations = stressResults.filter(r => r.success).length;
-      const failureRate = (totalOperations - successfulOperations) / totalOperations;
+      const successfulOperations = stressResults.filter(
+        (r) => r.success,
+      ).length;
+      const failureRate =
+        (totalOperations - successfulOperations) / totalOperations;
 
       const metrics: PerformanceMetrics = {
         testId,
         testType: 'stress',
-      startTime: Date.now() - stressDuration,
-      endTime: Date.now(),
+        startTime: Date.now() - stressDuration,
+        endTime: Date.now(),
         duration: stressDuration,
         totalOperations,
         successfulOperations,
@@ -840,45 +995,57 @@ it('should handle extreme concurrent load', async () => {
       expect(metrics.cpuUsage.peak).toBeLessThan(100); // Should not max out CPU
     });
 
-
-
     it('should recover gracefully from memory pressure', async () => {
-const testId = generateTestId();const memoryIntensiveOperations = 500;
+      const testId = generateTestId();
+      const memoryIntensiveOperations = 500;
       const startTime = Date.now();
 
       context.performanceMonitor.startMonitoring(500);
 
       // Create memory-intensive operations
-      const largeDataOperations = Array.from({ length: memoryIntensiveOperations }, (_, i) => {
-        return async () => {
-          // Create large data payload to simulate memory pressure
-          const largeData = Buffer.alloc(1024 * 1024, i); // 1MB buffer
-          
-          // Perform operation with large data
-          const result = await context.computerUseService.action({
-            action: 'write_file',
-            path: `/tmp/memory-test-${i}.bin`,
-            data: largeData.toString('base64'),});// Cleanup to prevent actual memory issues
-          largeData.fill(0);
-          
-          return result;
-        };
-      });
+      const largeDataOperations = Array.from(
+        { length: memoryIntensiveOperations },
+        (_, i) => {
+          return async () => {
+            // Create large data payload to simulate memory pressure
+            const largeData = Buffer.alloc(1024 * 1024, i); // 1MB buffer
 
-      const results = await Promise.allSettled(largeDataOperations.map(op => op()));
+            // Perform operation with large data
+            const result = await context.computerUseService.action({
+              action: 'write_file',
+              path: `/tmp/memory-test-${i}.bin`,
+              data: largeData.toString('base64'),
+            }); // Cleanup to prevent actual memory issues
+            largeData.fill(0);
+
+            return result;
+          };
+        },
+      );
+
+      const results = await Promise.allSettled(
+        largeDataOperations.map((op) => op()),
+      );
       const endTime = Date.now();
 
       context.performanceMonitor.stopMonitoring();
       const monitoringMetrics = context.performanceMonitor.getMetricsSummary();
 
-      const successfulOps = results.filter(r => r.status === 'fulfilled').length;const failedOps = results.filter(r => r.status === 'rejected').length;const metrics: PerformanceMetrics = {testId,
+      const successfulOps = results.filter(
+        (r) => r.status === 'fulfilled',
+      ).length;
+      const failedOps = results.filter((r) => r.status === 'rejected').length;
+      const metrics: PerformanceMetrics = {
+        testId,
         testType: 'stress',
-      startTime,endTime,
+        startTime,
+        endTime,
         duration: endTime - startTime,
         totalOperations: memoryIntensiveOperations,
         successfulOperations: successfulOps,
         failedOperations: failedOps,
-        operationsPerSecond: (memoryIntensiveOperations / (endTime - startTime)) * 1000,
+        operationsPerSecond:
+          (memoryIntensiveOperations / (endTime - startTime)) * 1000,
         ...monitoringMetrics,
         errorTypes: new Map(),
       };
@@ -891,18 +1058,23 @@ const testId = generateTestId();const memoryIntensiveOperations = 500;
     });
   });
 
-
-
   describe('Scalability Testing', () => {
-it('should demonstrate linear scaling characteristics', async () => {
+    it('should demonstrate linear scaling characteristics', async () => {
       const scalabilityConfigurations = [
         { concurrentUsers: 10, operationsPerUser: 10, expectedThroughput: 20 },
         { concurrentUsers: 25, operationsPerUser: 10, expectedThroughput: 45 },
         { concurrentUsers: 50, operationsPerUser: 10, expectedThroughput: 80 },
-        { concurrentUsers: 100, operationsPerUser: 10, expectedThroughput: 140 },
+        {
+          concurrentUsers: 100,
+          operationsPerUser: 10,
+          expectedThroughput: 140,
+        },
       ];
 
-      const scalabilityResults: Array<{ config: ScalabilityConfig; metrics: PerformanceMetrics }> = [];
+      const scalabilityResults: Array<{
+        config: ScalabilityConfig;
+        metrics: PerformanceMetrics;
+      }> = [];
 
       for (const config of scalabilityConfigurations) {
         const testConfig: LoadTestConfiguration = {
@@ -924,37 +1096,55 @@ it('should demonstrate linear scaling characteristics', async () => {
 
         const operations: (() => Promise<unknown>)[] = [
           async (): Promise<unknown> => {
-            return await context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 200, y: 300 } });
+            return await context.computerUseService.action({
+              action: 'move_mouse',
+              coordinates: { x: 200, y: 300 },
+            });
           },
           async (): Promise<unknown> => {
-            return await context.computerUseService.action({ action: 'cursor_position' });
+            return await context.computerUseService.action({
+              action: 'cursor_position',
+            });
           },
           async (): Promise<unknown> => {
-            if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
-              return await context.mcpTools.moveMouse({ coordinates: { x: 100, y: 150 } });
+            if (
+              context.mcpTools &&
+              typeof context.mcpTools.moveMouse === 'function'
+            ) {
+              return await context.mcpTools.moveMouse({
+                coordinates: { x: 100, y: 150 },
+              });
             }
             throw new Error('mcpTools.moveMouse not available');
           },
           async (): Promise<unknown> => {
-            return await (context.mcpTools as ComputerUseTools).cursorPosition();
+            return await (
+              context.mcpTools as ComputerUseTools
+            ).cursorPosition();
           },
         ];
 
-        const loadResults = await context.loadGenerator.generateConcurrentLoad(operations, testConfig);
+        const loadResults = await context.loadGenerator.generateConcurrentLoad(
+          operations,
+          testConfig,
+        );
         const endTime = Date.now();
 
         context.performanceMonitor.stopMonitoring();
-        const monitoringMetrics = context.performanceMonitor.getMetricsSummary();
+        const monitoringMetrics =
+          context.performanceMonitor.getMetricsSummary();
 
         const metrics: PerformanceMetrics = {
           testId,
           testType: 'scalability',
-      startTime,endTime,
+          startTime,
+          endTime,
           duration: endTime - startTime,
           totalOperations: loadResults.length,
-          successfulOperations: loadResults.filter(r => r.success).length,
-          failedOperations: loadResults.filter(r => !r.success).length,
-          operationsPerSecond: (loadResults.length / (endTime - startTime)) * 1000,
+          successfulOperations: loadResults.filter((r) => r.success).length,
+          failedOperations: loadResults.filter((r) => !r.success).length,
+          operationsPerSecond:
+            (loadResults.length / (endTime - startTime)) * 1000,
           ...monitoringMetrics,
           errorTypes: new Map(),
         };
@@ -963,7 +1153,7 @@ it('should demonstrate linear scaling characteristics', async () => {
         performanceResults.push(metrics);
 
         // Allow system to recover between tests
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
       // Analyze scaling characteristics
@@ -972,28 +1162,31 @@ it('should demonstrate linear scaling characteristics', async () => {
         const previous = scalabilityResults[i - 1];
 
         if (!current || !previous) continue;
-        
-        const userScaleFactor = current.config.concurrentUsers / previous.config.concurrentUsers;
-        const throughputScaleFactor = current.metrics.operationsPerSecond / previous.metrics.operationsPerSecond;
-        
+
+        const userScaleFactor =
+          current.config.concurrentUsers / previous.config.concurrentUsers;
+        const throughputScaleFactor =
+          current.metrics.operationsPerSecond /
+          previous.metrics.operationsPerSecond;
+
         // Scaling should be reasonably linear (within 50% of expected)
         expect(throughputScaleFactor).toBeGreaterThan(userScaleFactor * 0.5);
         expect(throughputScaleFactor).toBeLessThan(userScaleFactor * 1.5);
-        
+
         // Error rate should not increase significantly with scale
-        const currentErrorRate = current.metrics.failedOperations / current.metrics.totalOperations;
-        const previousErrorRate = previous.metrics.failedOperations / previous.metrics.totalOperations;
+        const currentErrorRate =
+          current.metrics.failedOperations / current.metrics.totalOperations;
+        const previousErrorRate =
+          previous.metrics.failedOperations / previous.metrics.totalOperations;
         expect(currentErrorRate).toBeLessThan(previousErrorRate + 0.05); // Max 5% increase in error rate
       }
     });
 
-
-
     it('should identify performance bottlenecks under load', async () => {
       const bottleneckTestConfig: LoadTestConfiguration = {
         testName: 'bottleneck_identification',
-      concurrentUsers: 75,
-      operationsPerUser: 20,
+        concurrentUsers: 75,
+        operationsPerUser: 20,
         rampUpTime: 5000,
         sustainedLoadTime: 25000,
         rampDownTime: 2000,
@@ -1010,20 +1203,23 @@ it('should demonstrate linear scaling characteristics', async () => {
       // Create operations that stress different components
       const componentOperations = [
         // CPU-intensive operations
-        () => context.computerUseService.action({ action: 'screenshot' }),() => context.mcpTools.screenshot(),// I/O intensive operations
-        () => context.computerUseService.action({
-          action: 'write_file',
-          path: `/tmp/bottleneck-test-${Date.now()}.txt`,
-          data: Buffer.from('bottleneck test data').toString('base64'),}),// Memory intensive operations
+        () => context.computerUseService.action({ action: 'screenshot' }),
+        () => context.mcpTools.screenshot(), // I/O intensive operations
+        () =>
+          context.computerUseService.action({
+            action: 'write_file',
+            path: `/tmp/bottleneck-test-${Date.now()}.txt`,
+            data: Buffer.from('bottleneck test data').toString('base64'),
+          }), // Memory intensive operations
         () => context.mcpTools.typeText({ text: 'x'.repeat(1000) }),
-        
+
         // Network simulation (cache operations)
         () => context.cacheService.get(`bottleneck-key-${Math.random()}`),
       ];
 
       const loadResults = await context.loadGenerator.generateConcurrentLoad(
         componentOperations,
-        bottleneckTestConfig
+        bottleneckTestConfig,
       );
       const endTime = Date.now();
 
@@ -1031,9 +1227,12 @@ it('should demonstrate linear scaling characteristics', async () => {
       const monitoringMetrics = context.performanceMonitor.getMetricsSummary();
 
       // Analyze bottlenecks
-      const responseTimes = loadResults.map(r => r.responseTime);
-      const highLatencyOperations = responseTimes.filter(rt => rt > bottleneckTestConfig.maxResponseTime);
-      const bottleneckPercentage = highLatencyOperations.length / responseTimes.length;
+      const responseTimes = loadResults.map((r) => r.responseTime);
+      const highLatencyOperations = responseTimes.filter(
+        (rt) => rt > bottleneckTestConfig.maxResponseTime,
+      );
+      const bottleneckPercentage =
+        highLatencyOperations.length / responseTimes.length;
 
       const metrics: PerformanceMetrics = {
         testId,
@@ -1042,9 +1241,10 @@ it('should demonstrate linear scaling characteristics', async () => {
         endTime,
         duration: endTime - startTime,
         totalOperations: loadResults.length,
-        successfulOperations: loadResults.filter(r => r.success).length,
-        failedOperations: loadResults.filter(r => !r.success).length,
-        operationsPerSecond: (loadResults.length / (endTime - startTime)) * 1000,
+        successfulOperations: loadResults.filter((r) => r.success).length,
+        failedOperations: loadResults.filter((r) => !r.success).length,
+        operationsPerSecond:
+          (loadResults.length / (endTime - startTime)) * 1000,
         ...monitoringMetrics,
         errorTypes: new Map(),
       };
@@ -1066,7 +1266,9 @@ it('should demonstrate linear scaling characteristics', async () => {
 
       // Bottleneck identification assertions
       expect(bottleneckPercentage).toBeLessThan(0.15); // Less than 15% high-latency operations
-      expect(scalabilityResult.scalabilityFactors.resourceUtilization).toBeLessThan(0.9); // Under 90% resource utilization
+      expect(
+        scalabilityResult.scalabilityFactors.resourceUtilization,
+      ).toBeLessThan(0.9); // Under 90% resource utilization
     });
   });
 
@@ -1085,17 +1287,21 @@ ${Math.random().toString(36).substring(7)}`;
    */
   function identifyBottleneckServices(metrics: PerformanceMetrics): string[] {
     const bottlenecks: string[] = [];
-    
+
     // Simple heuristics for bottleneck identification
     if (metrics.cpuUsage.peak > 80) {
-      bottlenecks.push('CPU');}
+      bottlenecks.push('CPU');
+    }
 
-  if(metrics.memoryUsage.growth > 100 * 1024 * 1024) { // > 100MB growth
-      bottlenecks.push('Memory');}
+    if (metrics.memoryUsage.growth > 100 * 1024 * 1024) {
+      // > 100MB growth
+      bottlenecks.push('Memory');
+    }
 
-  if(metrics.p95ResponseTime > metrics.averageResponseTime * 3) {
-      bottlenecks.push('ResponseTime');}
-return bottlenecks;
+    if (metrics.p95ResponseTime > metrics.averageResponseTime * 3) {
+      bottlenecks.push('ResponseTime');
+    }
+    return bottlenecks;
   }
 
   /**
@@ -1103,8 +1309,11 @@ return bottlenecks;
    */
   function calculateResourceUtilization(metrics: PerformanceMetrics): number {
     const cpuUtilization = Math.min(metrics.cpuUsage.average / 100, 1);
-    const memoryUtilization = Math.min(metrics.memoryUsage.peak.heapUsed / (1024 * 1024 * 1024), 1); // Normalize to 1GB
-    
+    const memoryUtilization = Math.min(
+      metrics.memoryUsage.peak.heapUsed / (1024 * 1024 * 1024),
+      1,
+    ); // Normalize to 1GB
+
     return (cpuUtilization + memoryUtilization) / 2;
   }
 
@@ -1115,11 +1324,11 @@ return bottlenecks;
     return {
       mouseMoveEvent: jest.fn().mockImplementation(async (_x, _y) => {
         // Simulate realistic processing time
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 10));
         return { success: true };
       }),
       mouseClickEvent: jest.fn().mockImplementation(async () => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 15));
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 15));
         return { success: true };
       }),
       mouseButtonEvent: jest.fn().mockResolvedValue({ success: true }),
@@ -1128,18 +1337,20 @@ return bottlenecks;
       sendKeys: jest.fn().mockResolvedValue({ success: true }),
       typeText: jest.fn().mockImplementation(async (text: string) => {
         // Simulate typing time based on text length
-        await new Promise(resolve => setTimeout(resolve, text.length * 2));
+        await new Promise((resolve) => setTimeout(resolve, text.length * 2));
         return { success: true };
       }),
       pasteText: jest.fn().mockResolvedValue({ success: true }),
       screendump: jest.fn().mockImplementation(async () => {
         // Simulate screenshot processing time
-        await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 100));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 50 + Math.random() * 100),
+        );
         return Buffer.from('mocked-performance-screenshot');
       }),
       getCursorPosition: jest.fn().mockImplementation(async () => {
         // Very fast operation
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 5));
+        await new Promise((resolve) => setTimeout(resolve, Math.random() * 5));
         return { x: 500, y: 600 };
       }),
     };

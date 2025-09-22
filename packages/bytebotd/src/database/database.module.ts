@@ -27,16 +27,9 @@ import { ParlantModule } from '../parlant/parlant.module';
  */
 @Global()
 @Module({
-  imports: [
-    ConfigModule,
-    ParlantModule,
-  ],
-  providers: [
-    ConversationalDatabaseService,
-  ],
-  exports: [
-    ConversationalDatabaseService,
-  ],
+  imports: [ConfigModule, ParlantModule],
+  providers: [ConversationalDatabaseService],
+  exports: [ConversationalDatabaseService],
 })
 export class DatabaseModule {
   constructor(private readonly databaseService: ConversationalDatabaseService) {

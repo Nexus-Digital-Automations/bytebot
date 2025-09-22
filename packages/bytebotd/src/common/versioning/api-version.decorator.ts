@@ -152,45 +152,45 @@ export const ApiVersion = (config: string | ApiVersionConfig) => {
 /**
  * Deprecated API decorator for BytebotD - marks desktop endpoints as deprecated
  * @param config - Deprecation configuration with desktop-specific notes
- */;
-
-export const DeprecatedApi = (config: {
+ */ export const DeprecatedApi = (config: {
   since: Date;
   sunset?: Date;
   migration?: string;
   reason?: string;
   desktopMigrationNotes?: string;
-
 }) => {
   return applyDecorators(
-    SetMetadata('deprecated', true),SetMetadata('deprecation_config', config),ApiHeader({name: 'Deprecation',
+    SetMetadata('deprecated', true),
+    SetMetadata('deprecation_config', config),
+    ApiHeader({
+      name: 'Deprecation',
       description: 'BytebotD API deprecation warning header',
       required: false,
       schema: {
-  type: 'string',
+        type: 'string',
         example: `date="${config.since.toISOString()}"`,
       },
     }),
     config.sunset
       ? ApiHeader({
-  name: 'Sunset',
-      description: 'BytebotD API sunset date header',
-      required: false,
-      schema: {
-  type: 'string',
-      example: config.sunset.toISOString(),
-},
+          name: 'Sunset',
+          description: 'BytebotD API sunset date header',
+          required: false,
+          schema: {
+            type: 'string',
+            example: config.sunset.toISOString(),
+          },
         })
       : () => {},
     config.desktopMigrationNotes
       ? ApiHeader({
-  name: 'X-Desktop-Migration-Notes',
-      description: 'Desktop-specific migration guidance',
-      required: false,
-      schema: {
-  type: 'string',
-      example: config.desktopMigrationNotes,
-},
+          name: 'X-Desktop-Migration-Notes',
+          description: 'Desktop-specific migration guidance',
+          required: false,
+          schema: {
+            type: 'string',
+            example: config.desktopMigrationNotes,
+          },
         })
       : () => {},
   );
@@ -200,19 +200,19 @@ export const DeprecatedApi = (config: {
  * Version-specific endpoint decorator for BytebotD
  * @param version - Specific version this desktop endpoint supports
  * @param config - Optional version configuration with desktop compatibility
- */;
-
-export const ForVersion = (
+ */ export const ForVersion = (
   version: SupportedVersion,
   config?: Partial<ApiVersionConfig>,
 ) => {
   const versionConfig: ApiVersionConfig = {
     version,
     stability: 'stable',
-      desktopCompatibility: {minDesktopVersion: '1.0.0',
+    desktopCompatibility: {
+      minDesktopVersion: '1.0.0',
       vncRequirements: ['noVNC 1.3.0+'],
       computerUseFeatures: ['screenshot', 'click', 'type', 'scroll'],
-},...config,
+    },
+    ...config,
   };
 
   return ApiVersion(versionConfig);
@@ -325,7 +325,13 @@ export const ComputerUseApi = (
       desktopCompatibility: {
         minDesktopVersion: '1.0.0',
         vncRequirements: ['noVNC 1.3.0+', 'WebSocket support'],
-        computerUseFeatures: features ?? ['screenshot', 'click', 'type', 'scroll', 'key'],
+        computerUseFeatures: features ?? [
+          'screenshot',
+          'click',
+          'type',
+          'scroll',
+          'key',
+        ],
       },
     }),
     SetMetadata('computer_use', true),
@@ -418,5 +424,4 @@ export default {
   getMultiVersions,
   isDesktopApiVersion,
   getDesktopCompatibility,
-
 };

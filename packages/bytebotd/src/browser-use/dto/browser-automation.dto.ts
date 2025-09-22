@@ -3,7 +3,17 @@
  * Service Layer Implementation for Browser-Use API Endpoints
  */
 
-import { IsString, IsOptional, IsBoolean, IsNumber, IsEnum, ValidateNested, IsObject, IsArray, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsNumber,
+  IsEnum,
+  ValidateNested,
+  IsObject,
+  IsArray,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -22,7 +32,10 @@ export class CreateBrowserSessionDto {
 }
 
 export class BrowserSessionConfigDto {
-  @ApiPropertyOptional({ description: 'Run browser in headless mode', default: true })
+  @ApiPropertyOptional({
+    description: 'Run browser in headless mode',
+    default: true,
+  })
   @IsOptional()
   @IsBoolean()
   headless?: boolean;
@@ -42,7 +55,10 @@ export class BrowserSessionConfigDto {
   @IsString()
   userAgent?: string;
 
-  @ApiPropertyOptional({ description: 'Default timeout in milliseconds', default: 30000 })
+  @ApiPropertyOptional({
+    description: 'Default timeout in milliseconds',
+    default: 30000,
+  })
   @IsOptional()
   @IsNumber()
   timeout?: number;
@@ -81,9 +97,29 @@ export class CreateBrowserTaskDto {
   @IsString()
   sessionId: string;
 
-  @ApiProperty({ description: 'Task type', enum: ['navigation', 'interaction', 'extraction', 'automation', 'screenshot'] })
-  @IsEnum(['navigation', 'interaction', 'extraction', 'automation', 'screenshot'])
-  type: 'navigation' | 'interaction' | 'extraction' | 'automation' | 'screenshot';
+  @ApiProperty({
+    description: 'Task type',
+    enum: [
+      'navigation',
+      'interaction',
+      'extraction',
+      'automation',
+      'screenshot',
+    ],
+  })
+  @IsEnum([
+    'navigation',
+    'interaction',
+    'extraction',
+    'automation',
+    'screenshot',
+  ])
+  type:
+    | 'navigation'
+    | 'interaction'
+    | 'extraction'
+    | 'automation'
+    | 'screenshot';
 
   @ApiProperty({ description: 'Natural language instruction for the task' })
   @IsString()
@@ -94,7 +130,11 @@ export class CreateBrowserTaskDto {
   @IsObject()
   params?: Record<string, any>;
 
-  @ApiPropertyOptional({ description: 'Task priority level', enum: ['low', 'medium', 'high', 'critical'], default: 'medium' })
+  @ApiPropertyOptional({
+    description: 'Task priority level',
+    enum: ['low', 'medium', 'high', 'critical'],
+    default: 'medium',
+  })
   @IsOptional()
   @IsEnum(['low', 'medium', 'high', 'critical'])
   priority?: 'low' | 'medium' | 'high' | 'critical';
@@ -125,7 +165,10 @@ export class BrowserTaskResponseDto {
 
 // Browser Interaction DTOs
 export class BrowserInteractionDto {
-  @ApiProperty({ description: 'Interaction type', enum: ['click', 'type', 'select', 'hover', 'scroll', 'wait', 'navigate'] })
+  @ApiProperty({
+    description: 'Interaction type',
+    enum: ['click', 'type', 'select', 'hover', 'scroll', 'wait', 'navigate'],
+  })
   @IsEnum(['click', 'type', 'select', 'hover', 'scroll', 'wait', 'navigate'])
   type: 'click' | 'type' | 'select' | 'hover' | 'scroll' | 'wait' | 'navigate';
 
@@ -134,11 +177,15 @@ export class BrowserInteractionDto {
   @IsString()
   selector?: string;
 
-  @ApiPropertyOptional({ description: 'Value to input (for type, select operations)' })
+  @ApiPropertyOptional({
+    description: 'Value to input (for type, select operations)',
+  })
   @IsOptional()
   value?: string | number | boolean;
 
-  @ApiPropertyOptional({ description: 'Coordinate position for click operations' })
+  @ApiPropertyOptional({
+    description: 'Coordinate position for click operations',
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => CoordinatesDto)
@@ -149,7 +196,9 @@ export class BrowserInteractionDto {
   @IsObject()
   options?: Record<string, any>;
 
-  @ApiPropertyOptional({ description: 'Timeout for this interaction in milliseconds' })
+  @ApiPropertyOptional({
+    description: 'Timeout for this interaction in milliseconds',
+  })
   @IsOptional()
   @IsNumber()
   timeout?: number;
@@ -175,7 +224,9 @@ export class BrowserInteractionResponseDto {
   @ApiPropertyOptional({ description: 'Screenshot after interaction (base64)' })
   screenshot?: string;
 
-  @ApiPropertyOptional({ description: 'Error information if interaction failed' })
+  @ApiPropertyOptional({
+    description: 'Error information if interaction failed',
+  })
   error?: BrowserErrorDto;
 }
 
@@ -248,7 +299,10 @@ export class BrowserErrorDto {
   @ApiProperty({ description: 'Error timestamp' })
   timestamp: Date;
 
-  @ApiProperty({ description: 'Error severity', enum: ['info', 'warning', 'error', 'critical'] })
+  @ApiProperty({
+    description: 'Error severity',
+    enum: ['info', 'warning', 'error', 'critical'],
+  })
   @IsEnum(['info', 'warning', 'error', 'critical'])
   severity: 'info' | 'warning' | 'error' | 'critical';
 }
@@ -337,12 +391,18 @@ export class GetSessionsQueryDto {
   @IsEnum(['initializing', 'active', 'paused', 'error', 'destroyed'])
   status?: 'initializing' | 'active' | 'paused' | 'error' | 'destroyed';
 
-  @ApiPropertyOptional({ description: 'Maximum number of sessions to return', default: 10 })
+  @ApiPropertyOptional({
+    description: 'Maximum number of sessions to return',
+    default: 10,
+  })
   @IsOptional()
   @IsNumber()
   limit?: number;
 
-  @ApiPropertyOptional({ description: 'Number of sessions to skip', default: 0 })
+  @ApiPropertyOptional({
+    description: 'Number of sessions to skip',
+    default: 0,
+  })
   @IsOptional()
   @IsNumber()
   offset?: number;
@@ -360,10 +420,24 @@ export class GetTasksQueryDto {
 
   @ApiPropertyOptional({ description: 'Filter by task type' })
   @IsOptional()
-  @IsEnum(['navigation', 'interaction', 'extraction', 'automation', 'screenshot'])
-  type?: 'navigation' | 'interaction' | 'extraction' | 'automation' | 'screenshot';
+  @IsEnum([
+    'navigation',
+    'interaction',
+    'extraction',
+    'automation',
+    'screenshot',
+  ])
+  type?:
+    | 'navigation'
+    | 'interaction'
+    | 'extraction'
+    | 'automation'
+    | 'screenshot';
 
-  @ApiPropertyOptional({ description: 'Maximum number of tasks to return', default: 20 })
+  @ApiPropertyOptional({
+    description: 'Maximum number of tasks to return',
+    default: 20,
+  })
   @IsOptional()
   @IsNumber()
   limit?: number;

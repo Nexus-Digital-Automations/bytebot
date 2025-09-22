@@ -19,7 +19,10 @@ import { Injectable, Logger } from '@nestjs/common';import {keyboard,
   Key,
   Button,
   FileType,
-} from '@nut-tree-fork/nut-js';// Define interfaces for nut-js configurationinterface NutConfigurable {
+} from '@nut-tree-fork/nut-js';
+
+// Define interfaces for nut-js configuration
+interface NutConfigurable {
   config: {
     autoDelayMs: number;
     [key: string]: unknown;
@@ -29,7 +32,10 @@ import { Injectable, Logger } from '@nestjs/common';import {keyboard,
 // Type assertions for nut-js objects
 const typedMouse = mouse as unknown as NutConfigurable;
 const typedKeyboard = keyboard as unknown as NutConfigurable;
-import { spawn } from 'child_process';import * as path from 'path';/*** Interface for standard service responses
+import { spawn } from 'child_process';
+import * as path from 'path';
+
+/*** Interface for standard service responses
  */
 interface ServiceResponse {
   success: boolean;
@@ -55,9 +61,13 @@ interface KeyInfo {
 /**
  * Type definition for mouse button types
  */
-type MouseButton = 'left' | 'right' | 'middle';/*** Type definition for scroll directions
+type MouseButton = 'left' | 'right' | 'middle';
+
+/*** Type definition for scroll directions
  */
-type ScrollDirection = 'up' | 'down' | 'left' | 'right';/*** Enum representing key codes supported by nut-js.
+type ScrollDirection = 'up' | 'down' | 'left' | 'right';
+
+/*** Enum representing key codes supported by nut-js.
  * Maps to the same structure as QKeyCode for compatibility.
  */
 
@@ -262,7 +272,10 @@ export class NutService {
    * @param delayMs Delay between keypresses in ms.
    */
   async typeText(text: string, delayMs: number = 0): Promise<void> {
-    this.logger.log(`Typing text: ${text}`);try {for (let i = 0, len = text.length; i < len; i++) {
+    this.logger.log(`Typing text: ${text}`);
+
+    try {
+      for (let i = 0, len = text.length; i < len; i++) {
         const char = text[i];
         if (!char) continue;
         const keyInfo = this.charToKeyInfo(char);
@@ -279,10 +292,15 @@ export class NutService {
             await new Promise((resolve) => setTimeout(resolve, delayMs));
           }
         } else {
-          throw new Error(`No key mapping found for character: ${char}`);}}
+          throw new Error(`No key mapping found for character: ${char}`);
+        }
+      }
     } catch (_error) {
       const errorMessage = this.getErrorMessage(_error);
-      this.logger.error(`Failed to type text: ${errorMessage}`);throw new Error(`Failed to type text: ${errorMessage}`);}}
+      this.logger.error(`Failed to type text: ${errorMessage}`);
+      throw new Error(`Failed to type text: ${errorMessage}`);
+    }
+  }
 
   async pasteText(text: string): Promise<void> {
     this.logger.log(`Pasting text: ${text}`);
@@ -290,11 +308,19 @@ export class NutService {
     try {
       // Copy text to clipboard using xclip via spawn
       await new Promise<void>((resolve, reject) => {
-        const child = spawn('xclip', ['-selection', 'clipboard'], {env: { ...process.env, DISPLAY: ':0.0' },stdio: ['pipe', 'ignore', 'inherit'],});child.once('error', reject);child.once('close', (code) => {
+        const child = spawn('xclip', ['-selection', 'clipboard'], {
+          env: { ...process.env, DISPLAY: ':0.0' },
+          stdio: ['pipe', 'ignore', 'inherit'],
+        });
+
+        child.once('error', reject);
+        child.once('close', (code) => {
           if (code === 0) {
             resolve();
           } else {
-            reject(new Error(`xclip exited with code ${code}`));}});
+            reject(new Error(`xclip exited with code ${code}`));
+          }
+        });
 
         child.stdin.write(text);
         child.stdin.end();

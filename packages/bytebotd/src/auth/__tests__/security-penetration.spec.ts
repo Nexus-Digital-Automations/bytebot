@@ -35,8 +35,6 @@ interface JwtHeaderOptions {
   algorithm?: string;
   headerInjection?: Record<string, unknown>;
   customSignature?: string;
-
-
 }
 
 interface SecurityTestPayload {
@@ -45,21 +43,20 @@ interface SecurityTestPayload {
   role?: string;
   exp?: number;
   iat?: number;
-
-
 }
 
 interface PentestHeaders {
   [key: string]: string | string[] | undefined;
-  'user-agent'?: string;'x-forwarded-for'?: string;'x-real-ip'?: string;'x-attack-vector'?: string;
-
-}interface PentestMetadata {
+  'user-agent'?: string;
+  'x-forwarded-for'?: string;
+  'x-real-ip'?: string;
+  'x-attack-vector'?: string;
+}
+interface PentestMetadata {
   ip?: string;
   url?: string;
   method?: string;
   attackVector?: string;
-
-
 }
 
 // Interface for security testing user objects
@@ -67,7 +64,6 @@ interface SecurityTestUser extends Partial<ByteBotdUser> {
   [key: string]: unknown;
   __proto__?: unknown;
   constructor?: unknown;
-
 }
 
 // Interface for audit events
@@ -75,11 +71,7 @@ interface AuditEvent {
   level: string;
   message: string;
   timestamp: number;
-
-
 }
-
-
 
 /**
  * Security Penetration Testing Suite
@@ -96,8 +88,7 @@ describe('Security Penetration Testing Suite', () => {
   const operationId = `penetration_test${Date.now()}`;
   const pentestLogger = {
     info: (message: string, meta?: Record<string, unknown>) =>
-      console.log(`[PENTEST] ${message
-}`, meta ?? ''),
+      console.log(`[PENTEST] ${message}`, meta ?? ''),
     warn: (message: string, meta?: Record<string, unknown>) =>
       console.warn(`[PENTEST-WARNING] ${message}`, meta ?? ''),
     error: (message: string, meta?: Record<string, unknown>) =>
@@ -108,20 +99,22 @@ describe('Security Penetration Testing Suite', () => {
 
   // Advanced JWT manipulation toolkit
   const JWTManipulator = {
-  // Create JWT with specific vulnerabilities,
-  createVulnerableJWT: (payload: SecurityTestPayload, options: JwtHeaderOptions = {
-}) => {
-  const header = {
+    // Create JWT with specific vulnerabilities,
+    createVulnerableJWT: (
+      payload: SecurityTestPayload,
+      options: JwtHeaderOptions = {},
+    ) => {
+      const header = {
         alg: options.algorithm ?? 'HS256',
         typ: 'JWT',
         ...options.headerInjection,
-};
+      };
 
       const encodedHeader = Buffer.from(JSON.stringify(header)).toString(
         'base64url',
       );
       const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
-        'base64url'
+        'base64url',
       );
 
       if (options.algorithm === 'none') {
@@ -136,16 +129,16 @@ describe('Security Penetration Testing Suite', () => {
     createAlgorithmConfusionTokens: (_payload: SecurityTestPayload) => {
       return {
         noneAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
-          algorithm: 'none'
+          algorithm: 'none',
         }),
         rsaToHmac: JWTManipulator.createVulnerableJWT(_payload, {
-          algorithm: 'RS256'
+          algorithm: 'RS256',
         }),
         weakAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
-          algorithm: 'HS1'
+          algorithm: 'HS1',
         }),
         invalidAlgorithm: JWTManipulator.createVulnerableJWT(_payload, {
-          algorithm: 'INVALID'
+          algorithm: 'INVALID',
         }),
       };
     },
@@ -155,39 +148,38 @@ describe('Security Penetration Testing Suite', () => {
       return {
         prototypeInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          __proto__: { role: UserRole._ADMIN, isAdmin: true }
+          __proto__: { role: UserRole._ADMIN, isAdmin: true },
         }),
         constructorInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
-          constructor: { prototype: { role: UserRole._ADMIN } }
+          constructor: { prototype: { role: UserRole._ADMIN } },
         }),
         roleConfusion: JWTManipulator.createVulnerableJWT({
           ...basePayload,
           role: UserRole._VIEWER,
           admin: true,
           roles: [UserRole._ADMIN],
-          privileges: ['admin']
+          privileges: ['admin'],
         }),
         xssInjection: JWTManipulator.createVulnerableJWT({
           ...basePayload,
           sub: '<script>alert("XSS")</script>',
-          email: '<img src=x onerror=alert("XSS")>@test.com'
+          email: '<img src=x onerror=alert("XSS")>@test.com',
         }),
       };
     },
 
     // Timing attack utilities
     measureTokenProcessingTime: async (
-      token: string, verifyFunction: (token: string) => Promise<unknown>,
+      token: string,
+      verifyFunction: (token: string) => Promise<unknown>,
     ): Promise<number> => {
-  const startTime = process.hrtime.bigint();
+      const startTime = process.hrtime.bigint();
       try {
         await verifyFunction(token);
-      
-} catch (_error) {
-  // Ignore errors for timing measurement
-      
-}
+      } catch (_error) {
+        // Ignore errors for timing measurement
+      }
       const endTime = process.hrtime.bigint();
       return Number(endTime - startTime) / 1000000; // Convert to milliseconds
     },
@@ -198,7 +190,7 @@ describe('Security Penetration Testing Suite', () => {
     // Brute force attack simulation
     simulateBruteForceAttack: async (
       targetFunction: (token: string) => Promise<unknown>,
-      attempts: number = 100
+      attempts: number = 100,
     ): Promise<{
       totalTime: number;
       attempts: number;
@@ -224,14 +216,14 @@ describe('Security Penetration Testing Suite', () => {
           results.push({
             success: true,
             token: attackToken,
-            time: Date.now() - attackStart
+            time: Date.now() - attackStart,
           });
         } catch (_error) {
           results.push({
             success: false,
             token: attackToken,
             error: _error instanceof Error ? _error.message : String(_error),
-            time: Date.now() - attackStart
+            time: Date.now() - attackStart,
           });
         }
       }
@@ -241,7 +233,8 @@ describe('Security Penetration Testing Suite', () => {
         attempts: attempts,
         successful: results.filter((r) => r.success).length,
         failed: results.filter((r) => !r.success).length,
-        averageTime: results.reduce((sum, r) => sum + r.time, 0) / results.length,
+        averageTime:
+          results.reduce((sum, r) => sum + r.time, 0) / results.length,
         results: results,
       };
     },
@@ -249,7 +242,7 @@ describe('Security Penetration Testing Suite', () => {
     // Session replay attack simulation
     simulateSessionReplayAttack: async (
       validToken: string,
-      targetFunction: (token: string) => Promise<unknown>
+      targetFunction: (token: string) => Promise<unknown>,
     ): Promise<
       Array<{
         token: string;
@@ -272,7 +265,7 @@ describe('Security Penetration Testing Suite', () => {
           await targetFunction(token);
           results.push({ token, success: true });
         } catch (error: unknown) {
-  // Type guard for Error-like objects with message property
+          // Type guard for Error-like objects with message property
           const errorMessage =
             error && typeof error === 'object' && 'message' in error
               ? (error as { message: string }).message
@@ -287,7 +280,7 @@ describe('Security Penetration Testing Suite', () => {
     // Race condition attack simulation
     simulateRaceConditionAttack: async (
       user: ByteBotdUser,
-      targetFunction: (user: ByteBotdUser) => Promise<unknown>
+      targetFunction: (user: ByteBotdUser) => Promise<unknown>,
     ): Promise<
       Array<{
         success: boolean;
@@ -314,7 +307,7 @@ describe('Security Penetration Testing Suite', () => {
             return {
               success: true,
               index: _index,
-              userRole: user.role
+              userRole: user.role,
             };
           } catch (_error) {
             return {
@@ -367,14 +360,14 @@ describe('Security Penetration Testing Suite', () => {
       getHandler: jest.fn().mockReturnValue({ name: 'pentestHandler' }),
       getClass: jest.fn().mockReturnValue({ name: 'PentestController' }),
       getArgs: jest.fn().mockReturnValue([]),
-        getArgByIndex: jest.fn().mockReturnValue(undefined),
-      getType: jest.fn().mockReturnValue('http')} as jest.Mocked<ExecutionContext>;
+      getArgByIndex: jest.fn().mockReturnValue(undefined),
+      getType: jest.fn().mockReturnValue('http'),
+    } as jest.Mocked<ExecutionContext>;
   };
 
   beforeEach(async () => {
-  pentestLogger.info(
-      `[${operationId
-}] Setting up Security Penetration Testing environment`,
+    pentestLogger.info(
+      `[${operationId}] Setting up Security Penetration Testing environment`,
     );
 
     module = await Test.createTestingModule({
@@ -408,8 +401,9 @@ describe('Security Penetration Testing Suite', () => {
           useValue: {
             getAllAndOverride: jest.fn(),
           },
-        }]
-      }).compile();
+        },
+      ],
+    }).compile();
 
     jwtAuthGuard = module.get<JwtAuthGuard>(JwtAuthGuard);
     rolesGuard = module.get<RolesGuard>(RolesGuard);
@@ -418,20 +412,22 @@ describe('Security Penetration Testing Suite', () => {
     reflector = module.get<Reflector>(Reflector);
 
     pentestLogger.info(
-      `[${operationId}] Penetration testing environment ready`);});
-
-    afterEach(async () => {
-  await module.close();
-    pentestLogger.info(
-      `[${operationId
-}] Penetration testing environment cleaned up`,
+      `[${operationId}] Penetration testing environment ready`,
     );
   });
 
-    describe('JWT Token Manipulation Attacks', () => {
-  it('should resist algorithm confusion attacks', async () => {
-      const testId = `${operationId
-}_algorithm_confusion`;pentestLogger.warn(`[${testId}] EXECUTING: Algorithm confusion attack simulation`,
+  afterEach(async () => {
+    await module.close();
+    pentestLogger.info(
+      `[${operationId}] Penetration testing environment cleaned up`,
+    );
+  });
+
+  describe('JWT Token Manipulation Attacks', () => {
+    it('should resist algorithm confusion attacks', async () => {
+      const testId = `${operationId}_algorithm_confusion`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Algorithm confusion attack simulation`,
       );
 
       const basePayload = {
@@ -446,23 +442,29 @@ describe('Security Penetration Testing Suite', () => {
       const attackResults = [];
 
       for (const [attackType, token] of Object.entries(maliciousTokens)) {
-  const context = createPentestExecutionContext(
+        const context = createPentestExecutionContext(
           undefined,
           { authorization: `Bearer ${token}` },
           { attackVector: `algorithm-confusion-${attackType}` },
         );
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-        jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Algorithm confusion detected'));
+        jest
+          .spyOn(jwtService, 'verifyAsync')
+          .mockRejectedValue(new Error('Algorithm confusion detected'));
         try {
-  await jwtAuthGuard.canActivate(context);
+          await jwtAuthGuard.canActivate(context);
           attackResults.push({
-  attackType: attackType,
+            attackType: attackType,
             success: true,
-            vulnerability: 'CRITICAL'
-});
+            vulnerability: 'CRITICAL',
+          });
         } catch (_error) {
-          attackResults.push({ attackType: attackType, success: false, blocked: true });
+          attackResults.push({
+            attackType: attackType,
+            success: false,
+            blocked: true,
+          });
         }
       }
 
@@ -477,7 +479,8 @@ describe('Security Penetration Testing Suite', () => {
 
     it('should prevent JWT header manipulation exploits', async () => {
       const testId = `${operationId}_header_manipulation`;
-      pentestLogger.warn(`[${testId}] EXECUTING: JWT header manipulation attack simulation`,
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: JWT header manipulation attack simulation`,
       );
 
       const headerInjectionPayloads = [
@@ -490,33 +493,36 @@ describe('Security Penetration Testing Suite', () => {
       const attackResults = [];
 
       for (const headerInjection of headerInjectionPayloads) {
-  const maliciousToken = JWTManipulator.createVulnerableJWT(
-          { sub: 'attacker', role: UserRole._ADMIN 
-},
+        const maliciousToken = JWTManipulator.createVulnerableJWT(
+          { sub: 'attacker', role: UserRole._ADMIN },
           { headerInjection },
         );
 
         const context = createPentestExecutionContext(
           undefined,
           { authorization: `Bearer ${maliciousToken}` },
-          { attackVector: `header-injection-${Object.keys(headerInjection)[0]}` },
+          {
+            attackVector: `header-injection-${Object.keys(headerInjection)[0]}`,
+          },
         );
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-        jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Header manipulation detected'));
+        jest
+          .spyOn(jwtService, 'verifyAsync')
+          .mockRejectedValue(new Error('Header manipulation detected'));
 
         try {
           await jwtAuthGuard.canActivate(context);
           attackResults.push({
             header: Object.keys(headerInjection)[0],
             success: true,
-            vulnerability: 'HIGH'
+            vulnerability: 'HIGH',
           });
         } catch (_error) {
           attackResults.push({
             header: Object.keys(headerInjection)[0],
             success: false,
-            blocked: true
+            blocked: true,
           });
         }
       }
@@ -531,7 +537,9 @@ describe('Security Penetration Testing Suite', () => {
     });
 
     it('should resist _payload injection attacks', async () => {
-      const testId = `${operationId}_payload_injection`;pentestLogger.warn(`[${testId}] EXECUTING: JWT _payload injection attack simulation`,
+      const testId = `${operationId}_payload_injection`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: JWT _payload injection attack simulation`,
       );
 
       const basePayload = {
@@ -562,7 +570,8 @@ describe('Security Penetration Testing Suite', () => {
           Buffer.from(tokenPart, 'base64url').toString(),
         ) as object;
         jest
-          .spyOn(jwtService, 'verifyAsync').mockResolvedValue(maliciousPayload);
+          .spyOn(jwtService, 'verifyAsync')
+          .mockResolvedValue(maliciousPayload);
         try {
           const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest() as {
@@ -583,20 +592,21 @@ describe('Security Penetration Testing Suite', () => {
           attackResults.push({
             attackType: attackType,
             success: escalationSuccess,
-            vulnerability: escalationSuccess ? 'CRITICAL' : 'NONE'
+            vulnerability: escalationSuccess ? 'CRITICAL' : 'NONE',
           });
         } catch (_error) {
           attackResults.push({
             attackType: attackType,
             success: false,
-            blocked: true
+            blocked: true,
           });
         }
       }
 
       // All payload injection attacks should be neutralized
       const successfulEscalations = attackResults.filter(
-        (r) => r.success).length;
+        (r) => r.success,
+      ).length;
       expect(successfulEscalations).toBe(0);
 
       pentestLogger.critical(
@@ -605,10 +615,11 @@ describe('Security Penetration Testing Suite', () => {
     });
   });
 
-    describe('Role Escalation Attack Simulation', () => {
-  it('should prevent concurrent role escalation attacks', async () => {
-      const testId = `${operationId
-}_concurrent_escalation`;pentestLogger.warn(`[${testId}] EXECUTING: Concurrent role escalation attack simulation`,
+  describe('Role Escalation Attack Simulation', () => {
+    it('should prevent concurrent role escalation attacks', async () => {
+      const testId = `${operationId}_concurrent_escalation`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Concurrent role escalation attack simulation`,
       );
 
       const _targetUser: ByteBotdUser = {
@@ -621,14 +632,15 @@ describe('Security Penetration Testing Suite', () => {
       };
 
       jest
-        .spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole._ADMIN]);const raceAttackResults =
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValue([UserRole._ADMIN]);
+      const raceAttackResults =
         await AttackSimulator.simulateRaceConditionAttack(
           _targetUser,
           async (_user: ByteBotdUser) => {
-  const context = createPentestExecutionContext(
+            const context = createPentestExecutionContext(
               _user,
-              {
-},
+              {},
               { attackVector: 'race-condition-escalation' },
             );
             return await rolesGuard.canActivate(context);
@@ -638,7 +650,8 @@ describe('Security Penetration Testing Suite', () => {
       // Race condition attacks should not lead to inconsistent authorization
       const successful = raceAttackResults.filter((r) => r.success).length;
       const inconsistent = raceAttackResults.filter(
-        (r) => r.success && r.userRole !== UserRole._VIEWER).length;
+        (r) => r.success && r.userRole !== UserRole._VIEWER,
+      ).length;
 
       expect(inconsistent).toBe(0);
       expect(successful).toBeLessThan(5); // Should mostly fail
@@ -650,7 +663,9 @@ describe('Security Penetration Testing Suite', () => {
 
     it('should resist privilege escalation through object manipulation', async () => {
       const testId = `${operationId}_object_manipulation`;
-      pentestLogger.warn(`[${testId}] EXECUTING: Object manipulation privilege escalation attack`);
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Object manipulation privilege escalation attack`,
+      );
 
       const attackVectors = [
         {
@@ -661,7 +676,7 @@ describe('Security Penetration Testing Suite', () => {
             username: 'attacker1',
             role: UserRole._VIEWER,
             isActive: true,
-            __proto__: { role: UserRole._ADMIN, isAdmin: true }
+            __proto__: { role: UserRole._ADMIN, isAdmin: true },
           } as SecurityTestUser,
         },
         {
@@ -704,27 +719,30 @@ describe('Security Penetration Testing Suite', () => {
         );
 
         jest
-          .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([UserRole._ADMIN]).mockReturnValueOnce(undefined);
+          .spyOn(reflector, 'getAllAndOverride')
+          .mockReturnValueOnce([UserRole._ADMIN])
+          .mockReturnValueOnce(undefined);
 
         try {
           const result = await rolesGuard.canActivate(context);
           escalationResults.push({
             attack: attackVector.name,
             success: result,
-            vulnerability: result ? 'CRITICAL' : 'NONE'
+            vulnerability: result ? 'CRITICAL' : 'NONE',
           });
         } catch (_error) {
           escalationResults.push({
             attack: attackVector.name,
             success: false,
-            blocked: true
+            blocked: true,
           });
         }
       }
 
       // All object manipulation attacks should be blocked
       const successfulEscalations = escalationResults.filter(
-        (r) => r.success).length;
+        (r) => r.success,
+      ).length;
       expect(successfulEscalations).toBe(0);
 
       pentestLogger.critical(
@@ -733,15 +751,20 @@ describe('Security Penetration Testing Suite', () => {
     });
   });
 
-    describe('Timing Attack Vulnerability Assessment', () => {
-  it('should resist authentication timing attacks', async () => {
-      const testId = `${operationId
-}_auth_timing_attacks`;pentestLogger.warn(`[${testId}] EXECUTING: Authentication timing attack analysis`,
+  describe('Timing Attack Vulnerability Assessment', () => {
+    it('should resist authentication timing attacks', async () => {
+      const testId = `${operationId}_auth_timing_attacks`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Authentication timing attack analysis`,
       );
 
       const timingTestCases = [
         { name: 'valid-token', token: 'valid-token-123', shouldSucceed: true },
-        { name: 'invalid-format', token: 'not-a-jwt-token', shouldSucceed: false },
+        {
+          name: 'invalid-format',
+          token: 'not-a-jwt-token',
+          shouldSucceed: false,
+        },
         {
           name: 'expired-token',
           token: 'expired.token.signature',
@@ -775,11 +798,12 @@ describe('Security Penetration Testing Suite', () => {
             sub: 'user',
             email: 'user@test.com',
             role: UserRole._VIEWER,
-            exp: Math.floor(Date.now() / 1000) + 3600
+            exp: Math.floor(Date.now() / 1000) + 3600,
           });
         } else {
           jest
-            .spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Invalid token'));
+            .spyOn(jwtService, 'verifyAsync')
+            .mockRejectedValue(new Error('Invalid token'));
         }
         const processingTime = await JWTManipulator.measureTokenProcessingTime(
           testCase.token ?? '',
@@ -798,7 +822,8 @@ describe('Security Penetration Testing Suite', () => {
         timingResults.reduce((sum, r) => sum + r.time, 0) /
         timingResults.length;
       const maxDeviation = Math.max(
-        ...timingResults.map((r) => Math.abs(r.time - avgTime)));
+        ...timingResults.map((r) => Math.abs(r.time - avgTime)),
+      );
       const timingVarianceThreshold = 50; // 50ms threshold
 
       // Timing should be consistent to prevent timing attacks
@@ -811,7 +836,9 @@ describe('Security Penetration Testing Suite', () => {
 
     it('should prevent authorization timing side-channels', async () => {
       const testId = `${operationId}_authz_timing_attacks`;
-      pentestLogger.warn(`[${testId}] EXECUTING: Authorization timing side-channel analysis`);
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Authorization timing side-channel analysis`,
+      );
 
       const roleTestCases = [
         {
@@ -837,8 +864,8 @@ describe('Security Penetration Testing Suite', () => {
         {
           role: null as unknown as UserRole,
           requiredRole: UserRole._ADMIN,
-          shouldPass: false
-        }
+          shouldPass: false,
+        },
       ];
 
       const authzTimingResults = [];
@@ -860,17 +887,17 @@ describe('Security Penetration Testing Suite', () => {
         );
 
         jest
-          .spyOn(reflector, 'getAllAndOverride').mockReturnValueOnce([testCase.requiredRole]).mockReturnValueOnce(undefined);
+          .spyOn(reflector, 'getAllAndOverride')
+          .mockReturnValueOnce([testCase.requiredRole])
+          .mockReturnValueOnce(undefined);
 
         const startTime = process.hrtime.bigint();
 
         try {
-  await rolesGuard.canActivate(context);
-        
-} catch (_error) {
-  // Expected for unauthorized cases
-        
-}
+          await rolesGuard.canActivate(context);
+        } catch (_error) {
+          // Expected for unauthorized cases
+        }
 
         const endTime = process.hrtime.bigint();
         const processingTime = Number(endTime - startTime) / 1000000;
@@ -878,7 +905,7 @@ describe('Security Penetration Testing Suite', () => {
         authzTimingResults.push({
           userRole: testCase.role ?? 'null',
           time: processingTime,
-          shouldPass: testCase.shouldPass
+          shouldPass: testCase.shouldPass,
         });
       }
 
@@ -887,7 +914,8 @@ describe('Security Penetration Testing Suite', () => {
         authzTimingResults.reduce((sum, r) => sum + r.time, 0) /
         authzTimingResults.length;
       const maxAuthzDeviation = Math.max(
-        ...authzTimingResults.map((r) => Math.abs(r.time - avgAuthzTime)));
+        ...authzTimingResults.map((r) => Math.abs(r.time - avgAuthzTime)),
+      );
       const authzTimingThreshold = 25; // 25ms threshold for authorization
 
       expect(maxAuthzDeviation).toBeLessThan(authzTimingThreshold);
@@ -898,11 +926,12 @@ describe('Security Penetration Testing Suite', () => {
     });
   });
 
-    describe('Brute Force and Credential Stuffing Simulation', () => {
-  it('should resist brute force authentication attacks', async () => {
-      const testId = `${operationId
-}_brute_force_auth`;
-      pentestLogger.warn(`[${testId}] EXECUTING: Brute force authentication attack simulation`);
+  describe('Brute Force and Credential Stuffing Simulation', () => {
+    it('should resist brute force authentication attacks', async () => {
+      const testId = `${operationId}_brute_force_auth`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Brute force authentication attack simulation`,
+      );
       const bruteForceResults = await AttackSimulator.simulateBruteForceAttack(
         async (attackToken: string) => {
           const context = createPentestExecutionContext(
@@ -911,11 +940,13 @@ describe('Security Penetration Testing Suite', () => {
             { attackVector: 'brute-force-auth', ip: '192.168.1.100' },
           );
           jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-          jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Brute force token'));
+          jest
+            .spyOn(jwtService, 'verifyAsync')
+            .mockRejectedValue(new Error('Brute force token'));
 
           return await jwtAuthGuard.canActivate(context);
         },
-        500 // 500 brute force attempts
+        500, // 500 brute force attempts
       );
 
       // All brute force attempts should fail
@@ -931,7 +962,9 @@ describe('Security Penetration Testing Suite', () => {
     });
 
     it('should resist credential stuffing attacks', async () => {
-      const testId = `${operationId}_credential_stuffing`;pentestLogger.warn(`[${testId}] EXECUTING: Credential stuffing attack simulation`,
+      const testId = `${operationId}_credential_stuffing`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Credential stuffing attack simulation`,
       );
 
       // Simulate common credential stuffing patterns
@@ -949,26 +982,29 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: 'credential-stuffing', ip: '10.0.0.200' },
         );
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-        jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Credential stuffing detected'));
+        jest
+          .spyOn(jwtService, 'verifyAsync')
+          .mockRejectedValue(new Error('Credential stuffing detected'));
         try {
           await jwtAuthGuard.canActivate(context);
           stuffingResults.push({
             token: stuffingToken.substring(0, 20) + '...',
             success: true,
-            vulnerability: 'CRITICAL'
+            vulnerability: 'CRITICAL',
           });
         } catch (_error) {
           stuffingResults.push({
             token: stuffingToken.substring(0, 20) + '...',
             success: false,
-            blocked: true
+            blocked: true,
           });
         }
       }
 
       const attackDuration = Date.now() - attackStartTime;
       const successfulStuffing = stuffingResults.filter(
-        (r) => r.success).length;
+        (r) => r.success,
+      ).length;
 
       // All credential stuffing should be blocked
       expect(successfulStuffing).toBe(0);
@@ -979,10 +1015,11 @@ describe('Security Penetration Testing Suite', () => {
     });
   });
 
-    describe('Session Hijacking and Replay Attack Simulation', () => {
-  it('should prevent session replay attacks', async () => {
-      const testId = `${operationId
-}_session_replay`;pentestLogger.warn(`[${testId}] EXECUTING: Session replay attack simulation`,
+  describe('Session Hijacking and Replay Attack Simulation', () => {
+    it('should prevent session replay attacks', async () => {
+      const testId = `${operationId}_session_replay`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Session replay attack simulation`,
       );
 
       const legitimateToken =
@@ -1003,11 +1040,12 @@ describe('Security Penetration Testing Suite', () => {
               sub: 'user123',
               email: 'user@test.com',
               role: UserRole._VIEWER,
-              exp: 9999999999
+              exp: 9999999999,
             });
           } else {
             jest
-              .spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Replay token invalid'));
+              .spyOn(jwtService, 'verifyAsync')
+              .mockRejectedValue(new Error('Replay token invalid'));
           }
 
           return await jwtAuthGuard.canActivate(context);
@@ -1024,11 +1062,15 @@ describe('Security Penetration Testing Suite', () => {
     });
 
     it('should detect token manipulation attempts', async () => {
-      const testId = `${operationId}_token_manipulation_detection`;pentestLogger.warn(`[${testId}] EXECUTING: Token manipulation detection test`,
+      const testId = `${operationId}_token_manipulation_detection`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Token manipulation detection test`,
       );
 
       const baseToken =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6InZpZXdlciJ9.signature';const manipulationAttempts = [baseToken.replace('viewer', 'admin'), // Role manipulationbaseToken.replace(/.$/, 'X'), // Signature manipulationbaseToken + '.extra', // Token extensionbaseToken.replace('user', 'admin'), // Subject manipulationbaseToken.split('.').reverse().join('.'), // Token reversal
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyIiwicm9sZSI6InZpZXdlciJ9.signature';
+      const manipulationAttempts = [
+        baseToken.replace('viewer', 'admin'), // Role manipulationbaseToken.replace(/.$/, 'X'), // Signature manipulationbaseToken + '.extra', // Token extensionbaseToken.replace('user', 'admin'), // Subject manipulationbaseToken.split('.').reverse().join('.'), // Token reversal
       ];
 
       const manipulationResults = [];
@@ -1040,12 +1082,14 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: 'token-manipulation', ip: '203.0.113.100' },
         );
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-        jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Token manipulation detected'));
+        jest
+          .spyOn(jwtService, 'verifyAsync')
+          .mockRejectedValue(new Error('Token manipulation detected'));
         try {
           await jwtAuthGuard.canActivate(context);
           manipulationResults.push({
             success: true,
-            vulnerability: 'CRITICAL'
+            vulnerability: 'CRITICAL',
           });
         } catch (_error) {
           manipulationResults.push({ success: false, blocked: true });
@@ -1054,7 +1098,8 @@ describe('Security Penetration Testing Suite', () => {
 
       // All token manipulation should be detected and blocked
       const successfulManipulations = manipulationResults.filter(
-        (r) => r.success).length;
+        (r) => r.success,
+      ).length;
       expect(successfulManipulations).toBe(0);
 
       pentestLogger.critical(
@@ -1063,40 +1108,51 @@ describe('Security Penetration Testing Suite', () => {
     });
   });
 
-    describe('Advanced Persistent Threat (APT) Simulation', () => {
-  it('should resist advanced evasion techniques', async () => {
-      const testId = `${operationId
-}_apt_evasion`;pentestLogger.warn(`[${testId}] EXECUTING: Advanced Persistent Threat evasion simulation`,
+  describe('Advanced Persistent Threat (APT) Simulation', () => {
+    it('should resist advanced evasion techniques', async () => {
+      const testId = `${operationId}_apt_evasion`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Advanced Persistent Threat evasion simulation`,
       );
 
       // APT-style evasion techniques
       const evasionTechniques = [
         {
           name: 'unicode-normalization',
-          payload: {sub: 'admin\u0041\u0044\u004D\u0049\u004E', role: UserRole._ADMIN},
+          payload: {
+            sub: 'admin\u0041\u0044\u004D\u0049\u004E',
+            role: UserRole._ADMIN,
+          },
         },
         {
-  name: 'null-byte-injection',
-      payload: { sub: 'user\x00admin', role: UserRole._VIEWER 
-},},{
-  name: 'homograph-attack',
-      payload: {sub: 'admin', email: 'аdmin@test.com', role: UserRole._ADMIN}
-    }, // Cyrillic 'а'
-    {
-      name: 'polyglot-payload',
-      payload: { sub: '/*admin*/viewer/*admin*/', role: UserRole._VIEWER }
-    },{
-  name: 'encoding-confusion',
-      payload: {sub: Buffer.from('admin').toString('base64'), role: UserRole._ADMIN,
-          
-},
+          name: 'null-byte-injection',
+          payload: { sub: 'user\x00admin', role: UserRole._VIEWER },
+        },
+        {
+          name: 'homograph-attack',
+          payload: {
+            sub: 'admin',
+            email: 'аdmin@test.com',
+            role: UserRole._ADMIN,
+          },
+        }, // Cyrillic 'а'
+        {
+          name: 'polyglot-payload',
+          payload: { sub: '/*admin*/viewer/*admin*/', role: UserRole._VIEWER },
+        },
+        {
+          name: 'encoding-confusion',
+          payload: {
+            sub: Buffer.from('admin').toString('base64'),
+            role: UserRole._ADMIN,
+          },
         },
       ];
 
       const evasionResults = [];
 
       for (const technique of evasionTechniques) {
-  const evasionToken = JWTManipulator.createVulnerableJWT(
+        const evasionToken = JWTManipulator.createVulnerableJWT(
           technique.payload,
         );
         const context = createPentestExecutionContext(
@@ -1105,15 +1161,17 @@ describe('Security Penetration Testing Suite', () => {
           { attackVector: `apt-${technique.name}`, ip: '198.51.100.100' },
         );
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-        jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(technique.payload as object);try {
-  const _result = await jwtAuthGuard.canActivate(context);
+        jest
+          .spyOn(jwtService, 'verifyAsync')
+          .mockResolvedValue(technique.payload as object);
+        try {
+          const _result = await jwtAuthGuard.canActivate(context);
           const request = context.switchToHttp().getRequest() as {
             user?: {
               role?: UserRole;
               admin?: boolean;
               roles?: UserRole[];
-            
-};
+            };
           };
 
           // Check if evasion led to privilege escalation
@@ -1123,13 +1181,13 @@ describe('Security Penetration Testing Suite', () => {
           evasionResults.push({
             technique: technique.name,
             success: escalationSuccess,
-            vulnerability: escalationSuccess ? 'CRITICAL' : 'LOW'
+            vulnerability: escalationSuccess ? 'CRITICAL' : 'LOW',
           });
         } catch (_error) {
           evasionResults.push({
             technique: technique.name,
             success: false,
-            blocked: true
+            blocked: true,
           });
         }
       }
@@ -1144,8 +1202,12 @@ describe('Security Penetration Testing Suite', () => {
     });
 
     it('should detect and prevent low-and-slow attacks', async () => {
-      const testId = `${operationId}_low_and_slow`;pentestLogger.warn(`[${testId}] EXECUTING: Low-and-slow attack pattern detection`,);const slowAttackSimulation = async () => {
-  const attackResults = [];
+      const testId = `${operationId}_low_and_slow`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Low-and-slow attack pattern detection`,
+      );
+      const slowAttackSimulation = async () => {
+        const attackResults = [];
         const attackDuration = 30000; // 30 seconds
         const startTime = Date.now();
         let attemptCount = 0;
@@ -1163,7 +1225,9 @@ describe('Security Penetration Testing Suite', () => {
           );
 
           jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-          jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Low and slow attack'));
+          jest
+            .spyOn(jwtService, 'verifyAsync')
+            .mockRejectedValue(new Error('Low and slow attack'));
 
           try {
             await jwtAuthGuard.canActivate(context);
@@ -1195,17 +1259,19 @@ describe('Security Penetration Testing Suite', () => {
     }, 35000); // Extend timeout for this test
   });
 
-    describe('Security Resilience Assessment', () => {
-  it('should maintain security under sustained attack conditions', async () => {
+  describe('Security Resilience Assessment', () => {
+    it('should maintain security under sustained attack conditions', async () => {
       const testId = `${operationId}_sustained_attack_resilience`;
-      pentestLogger.warn(`[${testId}] EXECUTING: Sustained attack resilience assessment`);
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Sustained attack resilience assessment`,
+      );
 
       const sustainedAttackResults = {
         totalAttacks: 0,
         blockedAttacks: 0,
         memoryLeakDetected: false,
         performanceDegraded: false,
-        systemStable: true
+        systemStable: true,
       };
 
       const initialMemory = process.memoryUsage();
@@ -1213,15 +1279,14 @@ describe('Security Penetration Testing Suite', () => {
 
       // Simulate sustained mixed attack pattern
       for (let round = 0; round < 10; round++) {
-  const roundPromises = [];
+        const roundPromises = [];
 
         // JWT manipulation attacks
         for (let i = 0; i < 20; i++) {
           roundPromises.push(
             (async () => {
               const maliciousToken = JWTManipulator.createVulnerableJWT(
-                { sub: `attacker-${round
-}-${i}`, role: UserRole._ADMIN },
+                { sub: `attacker-${round}-${i}`, role: UserRole._ADMIN },
                 { algorithm: 'none' },
               );
 
@@ -1232,7 +1297,9 @@ describe('Security Penetration Testing Suite', () => {
               );
 
               jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-              jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Sustained attack'));
+              jest
+                .spyOn(jwtService, 'verifyAsync')
+                .mockRejectedValue(new Error('Sustained attack'));
 
               try {
                 await jwtAuthGuard.canActivate(context);
@@ -1240,12 +1307,13 @@ describe('Security Penetration Testing Suite', () => {
               } catch (_error) {
                 return { success: false, blocked: true };
               }
-            })());
+            })(),
+          );
         }
 
         // Role escalation attacks
         for (let i = 0; i < 15; i++) {
-  roundPromises.push(
+          roundPromises.push(
             (async () => {
               // Intentional prototype pollution attack test - using type assertion for security testing
               const _maliciousUser: ByteBotdUser = {
@@ -1255,8 +1323,10 @@ describe('Security Penetration Testing Suite', () => {
                 role: UserRole._VIEWER,
                 isActive: true,
                 sub: `role-attacker-${round}-${i}`,
-                ...({__proto__: { role: UserRole._ADMIN },
-                } as Record<string, unknown>),
+                ...({ __proto__: { role: UserRole._ADMIN } } as Record<
+                  string,
+                  unknown
+                >),
               } as ByteBotdUser;
 
               const context = createPentestExecutionContext(
@@ -1270,7 +1340,7 @@ describe('Security Penetration Testing Suite', () => {
                 .mockReturnValue([UserRole._ADMIN]);
 
               try {
-  await rolesGuard.canActivate(context);
+                await rolesGuard.canActivate(context);
                 return { success: true };
               } catch (_error) {
                 return { success: false, blocked: true };
@@ -1290,10 +1360,9 @@ describe('Security Penetration Testing Suite', () => {
         const memoryGrowth = currentMemory.heapUsed - initialMemory.heapUsed;
 
         if (memoryGrowth > 50 * 1024 * 1024) {
-  // 50MB threshold
+          // 50MB threshold
           sustainedAttackResults.memoryLeakDetected = true;
-        
-}
+        }
 
         // Brief pause between rounds
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -1305,7 +1374,8 @@ describe('Security Penetration Testing Suite', () => {
 
       // Security resilience assertions
       expect(sustainedAttackResults.blockedAttacks).toBeGreaterThan(
-        sustainedAttackResults.totalAttacks * 0.95); // 95%+ blocked
+        sustainedAttackResults.totalAttacks * 0.95,
+      ); // 95%+ blocked
       expect(sustainedAttackResults.memoryLeakDetected).toBe(false);
       expect(totalMemoryGrowth).toBeLessThan(100 * 1024 * 1024); // Less than 100MB growth
       expect(attackDuration).toBeLessThan(30000); // Complete within 30 seconds
@@ -1316,7 +1386,9 @@ describe('Security Penetration Testing Suite', () => {
     });
 
     it('should generate comprehensive security audit trail', async () => {
-      const testId = `${operationId}_security_audit_trail`;pentestLogger.warn(`[${testId}] EXECUTING: Security audit trail validation`,
+      const testId = `${operationId}_security_audit_trail`;
+      pentestLogger.warn(
+        `[${testId}] EXECUTING: Security audit trail validation`,
       );
 
       // Mock security audit logger
@@ -1324,30 +1396,42 @@ describe('Security Penetration Testing Suite', () => {
       const originalConsole = { ...console };
 
       console.warn = (...args) => {
-  auditEvents.push({
-  level: 'warn', message: args.join(' '), timestamp: Date.now()
-      
-});
+        auditEvents.push({
+          level: 'warn',
+          message: args.join(' '),
+          timestamp: Date.now(),
+        });
         originalConsole.warn(...args);
       };
 
       console.error = (...args) => {
-  auditEvents.push({
-  level: 'error', message: args.join(' '), timestamp: Date.now()
-      
-});
+        auditEvents.push({
+          level: 'error',
+          message: args.join(' '),
+          timestamp: Date.now(),
+        });
         originalConsole.error(...args);
       };
 
       // Generate various security events
       const securityEventTypes = [
-        { type: 'auth-failure', token: 'invalid-token' },{type: 'role-escalation', user: { role: UserRole._VIEWER },
-      requiredRole: UserRole._ADMIN,
+        { type: 'auth-failure', token: 'invalid-token' },
+        {
+          type: 'role-escalation',
+          user: { role: UserRole._VIEWER },
+          requiredRole: UserRole._ADMIN,
         },
-        { type: 'timing-attack', tokens: ['token1', 'token2', 'token3'] },{ type: 'brute-force', attempts: 50 },{type: 'session-replay', originalToken: 'valid', replayToken: 'modified',},];
+        { type: 'timing-attack', tokens: ['token1', 'token2', 'token3'] },
+        { type: 'brute-force', attempts: 50 },
+        {
+          type: 'session-replay',
+          originalToken: 'valid',
+          replayToken: 'modified',
+        },
+      ];
 
       for (const eventType of securityEventTypes) {
-  switch (eventType.type) {
+        switch (eventType.type) {
           case 'auth-failure': {
             {
               const authContext = createPentestExecutionContext(
@@ -1356,32 +1440,33 @@ describe('Security Penetration Testing Suite', () => {
                 { attackVector: eventType.type, ip: '192.168.100.100' },
               );
               jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-              jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Audit test failure'));try {
-  await jwtAuthGuard.canActivate(authContext);
-              
-} catch (_error) {
-  // Expected failure
-              
-}
+              jest
+                .spyOn(jwtService, 'verifyAsync')
+                .mockRejectedValue(new Error('Audit test failure'));
+              try {
+                await jwtAuthGuard.canActivate(authContext);
+              } catch (_error) {
+                // Expected failure
+              }
             }
             break;
           }
 
           case 'role-escalation': {
-  {const _escalationUser: ByteBotdUser = {
-  sub: 'audit-user',
-      id: 'audit-user',
-        email: 'audit@test.com',
-              username: 'audituser',
-              role: eventType.user?.role ?? UserRole._VIEWER,
-              isActive: true,
-              
-};
+            {
+              const _escalationUser: ByteBotdUser = {
+                sub: 'audit-user',
+                id: 'audit-user',
+                email: 'audit@test.com',
+                username: 'audituser',
+                role: eventType.user?.role ?? UserRole._VIEWER,
+                isActive: true,
+              };
 
               const roleContext = createPentestExecutionContext(
                 _escalationUser,
                 {},
-                { attackVector: eventType.type, ip: '10.0.100.100' }
+                { attackVector: eventType.type, ip: '10.0.100.100' },
               );
 
               jest
@@ -1416,8 +1501,7 @@ describe('Security Penetration Testing Suite', () => {
         const message = event.message ?? '';
         const ipAddresses = ['192.168.100.100', '10.0.100.100'];
         return ipAddresses.some((ip) => message.includes(ip));
-      
-});
+      });
       expect(hasIPTracking).toBe(true);
 
       pentestLogger.critical(

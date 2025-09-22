@@ -35,7 +35,12 @@ export interface IBrowserSessionConfig {
 export interface IBrowserTask {
   taskId: string;
   sessionId: string;
-  type: 'navigation' | 'interaction' | 'extraction' | 'automation' | 'screenshot';
+  type:
+    | 'navigation'
+    | 'interaction'
+    | 'extraction'
+    | 'automation'
+    | 'screenshot';
   instruction: string;
   params?: Record<string, any>;
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';

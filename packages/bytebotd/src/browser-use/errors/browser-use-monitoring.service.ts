@@ -21,12 +21,17 @@
  * @since Browser-Use API Integration
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { EventEmitter } from 'events';
 import {
   BrowserUseErrorClassificationService,
   BrowserUseError,
-  BrowserUseErrorCategory
+  BrowserUseErrorCategory,
 } from './browser-use-error-classification.service';
 import { BrowserUseExceptionFilter } from './browser-use-exception.filter';
 
@@ -133,9 +138,17 @@ export interface APIUsageAnalytics {
   };
   totalRequests: number;
   uniqueSessions: number;
-  topOperations: Array<{ operation: string; count: number; averageTime: number }>;
+  topOperations: Array<{
+    operation: string;
+    count: number;
+    averageTime: number;
+  }>;
   errorDistribution: Record<string, number>;
-  performanceTrends: Array<{ timestamp: Date; responseTime: number; errorRate: number }>;
+  performanceTrends: Array<{
+    timestamp: Date;
+    responseTime: number;
+    errorRate: number;
+  }>;
   geographicDistribution: Record<string, number>;
   userAgentDistribution: Record<string, number>;
   statusCodeDistribution: Record<number, number>;
@@ -145,7 +158,10 @@ export interface APIUsageAnalytics {
  * Browser-Use monitoring service
  */
 @Injectable()
-export class BrowserUseMonitoringService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class BrowserUseMonitoringService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(BrowserUseMonitoringService.name);
 
   // Real-time metrics storage
@@ -159,7 +175,10 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
 
   // Session tracking
   private sessionAnalytics: Map<string, SessionAnalytics> = new Map();
-  private requestTracker: Map<string, { startTime: Date; operation: string; sessionId?: string }> = new Map();
+  private requestTracker: Map<
+    string,
+    { startTime: Date; operation: string; sessionId?: string }
+  > = new Map();
 
   // Performance tracking
   private performanceMetrics = {
@@ -168,7 +187,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     failedRequests: 0,
     totalResponseTime: 0,
     uptimeStart: new Date(),
-    lastDowntime: null as Date | null
+    lastDowntime: null as Date | null,
   };
 
   // Intervals
@@ -178,7 +197,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
 
   constructor(
     private readonly errorClassificationService: BrowserUseErrorClassificationService,
-    private readonly exceptionFilter: BrowserUseExceptionFilter
+    private readonly exceptionFilter: BrowserUseExceptionFilter,
   ) {
     super();
     this.initializeDefaultAlerts();
@@ -200,11 +219,15 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
   /**
    * Record API request start
    */
-  recordRequestStart(requestId: string, operation: string, sessionId?: string): void {
+  recordRequestStart(
+    requestId: string,
+    operation: string,
+    sessionId?: string,
+  ): void {
     this.requestTracker.set(requestId, {
       startTime: new Date(),
       operation,
-      sessionId
+      sessionId,
     });
 
     this.performanceMetrics.totalRequests++;
@@ -222,7 +245,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     requestId: string,
     success: boolean,
     responseTime: number,
-    error?: BrowserUseError
+    error?: BrowserUseError,
   ): void {
     const requestInfo = this.requestTracker.get(requestId);
     if (!requestInfo) return;
@@ -244,7 +267,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
         success,
         responseTime,
         operation: requestInfo.operation,
-        error: error?.browserUseCategory
+        error: error?.browserUseCategory,
       });
     }
 
@@ -255,7 +278,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
       sessionId: requestInfo.sessionId,
       success,
       responseTime,
-      error
+      error,
     });
   }
 
@@ -267,7 +290,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     if (error.sessionId) {
       this.updateSessionAnalytics(error.sessionId, 'error', {
         category: error.browserUseCategory,
-        severity: error.severity
+        severity: error.severity,
       });
     }
 
@@ -278,7 +301,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
       errorId: error.errorId,
       category: error.browserUseCategory,
       severity: error.severity,
-      sessionId: error.sessionId
+      sessionId: error.sessionId,
     });
   }
 
@@ -292,15 +315,22 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
 
     return {
       timestamp: now,
-      errorRate: totalRequests > 0 ? (this.performanceMetrics.failedRequests / totalRequests) * 100 : 0,
-      averageResponseTime: totalRequests > 0 ? this.performanceMetrics.totalResponseTime / totalRequests : 0,
+      errorRate:
+        totalRequests > 0
+          ? (this.performanceMetrics.failedRequests / totalRequests) * 100
+          : 0,
+      averageResponseTime:
+        totalRequests > 0
+          ? this.performanceMetrics.totalResponseTime / totalRequests
+          : 0,
       activeOperations: this.requestTracker.size,
       activeSessions: this.sessionAnalytics.size,
       circuitBreakerStatus: this.getCircuitBreakerStatus(),
       memoryUsage: this.getMemoryUsage(),
       cpuUsage: this.getCPUUsage(),
       requestsPerMinute: this.calculateRequestsPerMinute(),
-      successRate: totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0
+      successRate:
+        totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0,
     };
   }
 
@@ -309,39 +339,54 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
    */
   getPerformanceSLA(timeRange?: { start: Date; end: Date }): PerformanceSLA {
     const metrics = timeRange
-      ? this.metricsHistory.filter(m => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end)
+      ? this.metricsHistory.filter(
+          (m) => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end,
+        )
       : this.metricsHistory;
 
-    const responseTimes = metrics.map(m => m.averageResponseTime).filter(rt => rt > 0);
-    const errorRates = metrics.map(m => m.errorRate);
+    const responseTimes = metrics
+      .map((m) => m.averageResponseTime)
+      .filter((rt) => rt > 0);
+    const errorRates = metrics.map((m) => m.errorRate);
 
     return {
       responseTime: {
         p50: this.calculatePercentile(responseTimes, 50),
         p95: this.calculatePercentile(responseTimes, 95),
         p99: this.calculatePercentile(responseTimes, 99),
-        average: responseTimes.length > 0 ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length : 0
+        average:
+          responseTimes.length > 0
+            ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+            : 0,
       },
       availability: this.calculateAvailability(timeRange),
       errorRates: {
-        total: errorRates.length > 0 ? errorRates.reduce((a, b) => a + b, 0) / errorRates.length : 0,
+        total:
+          errorRates.length > 0
+            ? errorRates.reduce((a, b) => a + b, 0) / errorRates.length
+            : 0,
         byCategory: this.getErrorRatesByCategory(timeRange),
-        bySeverity: this.getErrorRatesBySeverity(timeRange)
+        bySeverity: this.getErrorRatesBySeverity(timeRange),
       },
       throughput: {
         requestsPerSecond: this.calculateThroughput('second', timeRange),
         requestsPerMinute: this.calculateThroughput('minute', timeRange),
-        requestsPerHour: this.calculateThroughput('hour', timeRange)
-      }
+        requestsPerHour: this.calculateThroughput('hour', timeRange),
+      },
     };
   }
 
   /**
    * Get session analytics
    */
-  getSessionAnalytics(sessionId?: string): SessionAnalytics | SessionAnalytics[] {
+  getSessionAnalytics(
+    sessionId?: string,
+  ): SessionAnalytics | SessionAnalytics[] {
     if (sessionId) {
-      return this.sessionAnalytics.get(sessionId) || this.createEmptySessionAnalytics(sessionId);
+      return (
+        this.sessionAnalytics.get(sessionId) ||
+        this.createEmptySessionAnalytics(sessionId)
+      );
     }
 
     return Array.from(this.sessionAnalytics.values());
@@ -350,9 +395,12 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
   /**
    * Get API usage analytics
    */
-  getAPIUsageAnalytics(timeRange: { start: Date; end: Date }): APIUsageAnalytics {
+  getAPIUsageAnalytics(timeRange: {
+    start: Date;
+    end: Date;
+  }): APIUsageAnalytics {
     const filteredMetrics = this.metricsHistory.filter(
-      m => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end
+      (m) => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end,
     );
 
     return {
@@ -361,14 +409,14 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
       uniqueSessions: this.sessionAnalytics.size,
       topOperations: this.getTopOperations(timeRange),
       errorDistribution: this.getErrorDistribution(timeRange),
-      performanceTrends: filteredMetrics.map(m => ({
+      performanceTrends: filteredMetrics.map((m) => ({
         timestamp: m.timestamp,
         responseTime: m.averageResponseTime,
-        errorRate: m.errorRate
+        errorRate: m.errorRate,
       })),
       geographicDistribution: this.getGeographicDistribution(timeRange),
       userAgentDistribution: this.getUserAgentDistribution(timeRange),
-      statusCodeDistribution: this.getStatusCodeDistribution(timeRange)
+      statusCodeDistribution: this.getStatusCodeDistribution(timeRange),
     };
   }
 
@@ -380,7 +428,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     this.logger.log(`Alert configured: ${config.name}`, {
       condition: config.condition,
       threshold: config.threshold,
-      severity: config.severity
+      severity: config.severity,
     });
   }
 
@@ -434,7 +482,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
         cooldownMs: 300000, // 5 minutes
         enabled: true,
         channels: ['log', 'email'],
-        description: 'Error rate exceeds acceptable threshold'
+        description: 'Error rate exceeds acceptable threshold',
       },
       {
         name: 'slow_response_time',
@@ -444,7 +492,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
         cooldownMs: 600000, // 10 minutes
         enabled: true,
         channels: ['log'],
-        description: 'Average response time is too slow'
+        description: 'Average response time is too slow',
       },
       {
         name: 'circuit_breaker_open',
@@ -454,7 +502,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
         cooldownMs: 60000, // 1 minute
         enabled: true,
         channels: ['log', 'email', 'slack'],
-        description: 'Circuit breaker is open'
+        description: 'Circuit breaker is open',
       },
       {
         name: 'memory_exhaustion',
@@ -464,7 +512,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
         cooldownMs: 300000, // 5 minutes
         enabled: true,
         channels: ['log', 'email'],
-        description: 'Memory usage is critically high'
+        description: 'Memory usage is critically high',
       },
       {
         name: 'session_failure_rate',
@@ -474,11 +522,11 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
         cooldownMs: 600000, // 10 minutes
         enabled: true,
         channels: ['log'],
-        description: 'Session failure rate is elevated'
-      }
+        description: 'Session failure rate is elevated',
+      },
     ];
 
-    defaultAlerts.forEach(alert => this.configureAlert(alert));
+    defaultAlerts.forEach((alert) => this.configureAlert(alert));
   }
 
   private startMetricsCollection(): void {
@@ -488,7 +536,10 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
 
       // Keep history within limits
       if (this.metricsHistory.length > this.maxMetricsHistory) {
-        this.metricsHistory.splice(0, this.metricsHistory.length - this.maxMetricsHistory);
+        this.metricsHistory.splice(
+          0,
+          this.metricsHistory.length - this.maxMetricsHistory,
+        );
       }
 
       this.emit('metricsCollected', metrics);
@@ -538,7 +589,10 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
 
       // Check cooldown
       const lastTrigger = this.alertCooldowns.get(alertName);
-      if (lastTrigger && Date.now() - lastTrigger.getTime() < config.cooldownMs) {
+      if (
+        lastTrigger &&
+        Date.now() - lastTrigger.getTime() < config.cooldownMs
+      ) {
         continue;
       }
 
@@ -550,7 +604,10 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     }
   }
 
-  private evaluateAlertCondition(config: AlertConfiguration, metrics: RealTimeMetrics): boolean {
+  private evaluateAlertCondition(
+    config: AlertConfiguration,
+    metrics: RealTimeMetrics,
+  ): boolean {
     switch (config.condition) {
       case 'errorRate > threshold':
         return metrics.errorRate > config.threshold;
@@ -559,7 +616,9 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
       case 'memoryUsage > threshold':
         return metrics.memoryUsage > config.threshold;
       case 'circuitBreakerOpen':
-        return Object.values(metrics.circuitBreakerStatus).some(status => status === 'open');
+        return Object.values(metrics.circuitBreakerStatus).some(
+          (status) => status === 'open',
+        );
       case 'sessionFailureRate > threshold':
         return this.calculateSessionFailureRate() > config.threshold;
       default:
@@ -567,7 +626,10 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     }
   }
 
-  private triggerAlert(config: AlertConfiguration, metrics: RealTimeMetrics): void {
+  private triggerAlert(
+    config: AlertConfiguration,
+    metrics: RealTimeMetrics,
+  ): void {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const now = new Date();
 
@@ -580,7 +642,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
       value: this.getMetricValue(config.condition, metrics),
       threshold: config.threshold,
       context: { metrics },
-      resolved: false
+      resolved: false,
     };
 
     this.activeAlerts.set(alertId, alert);
@@ -594,19 +656,22 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
       alertId,
       severity: config.severity,
       value: alert.value,
-      threshold: alert.threshold
+      threshold: alert.threshold,
     });
   }
 
-  private sendAlertNotifications(alert: AlertTrigger, channels: string[]): void {
-    channels.forEach(channel => {
+  private sendAlertNotifications(
+    alert: AlertTrigger,
+    channels: string[],
+  ): void {
+    channels.forEach((channel) => {
       switch (channel) {
         case 'log':
           this.logger.error(`ALERT: ${alert.message}`, {
             alertId: alert.id,
             severity: alert.severity,
             value: alert.value,
-            threshold: alert.threshold
+            threshold: alert.threshold,
           });
           break;
         case 'email':
@@ -630,7 +695,9 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
       case 'memoryUsage > threshold':
         return metrics.memoryUsage;
       case 'circuitBreakerOpen':
-        return Object.values(metrics.circuitBreakerStatus).filter(status => status === 'open').length;
+        return Object.values(metrics.circuitBreakerStatus).filter(
+          (status) => status === 'open',
+        ).length;
       case 'sessionFailureRate > threshold':
         return this.calculateSessionFailureRate();
       default:
@@ -641,7 +708,7 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
   private updateSessionAnalytics(
     sessionId: string,
     eventType: string,
-    data: Record<string, unknown>
+    data: Record<string, unknown>,
   ): void {
     let analytics = this.sessionAnalytics.get(sessionId);
 
@@ -664,12 +731,15 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
         }
         if (typeof data.responseTime === 'number') {
           analytics.averageResponseTime =
-            (analytics.averageResponseTime * (analytics.totalRequests - 1) + data.responseTime) / analytics.totalRequests;
+            (analytics.averageResponseTime * (analytics.totalRequests - 1) +
+              data.responseTime) /
+            analytics.totalRequests;
         }
         break;
       case 'error':
         if (typeof data.category === 'string') {
-          analytics.errorsByCategory[data.category] = (analytics.errorsByCategory[data.category] || 0) + 1;
+          analytics.errorsByCategory[data.category] =
+            (analytics.errorsByCategory[data.category] || 0) + 1;
         }
         break;
     }
@@ -694,17 +764,21 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
       performanceScore: 100,
       resourceUsage: {
         memoryMB: 0,
-        cpuPercent: 0
+        cpuPercent: 0,
       },
-      healthScore: 100
+      healthScore: 100,
     };
   }
 
   private calculatePerformanceScore(analytics: SessionAnalytics): number {
     if (analytics.totalRequests === 0) return 100;
 
-    const successRate = (analytics.successfulRequests / analytics.totalRequests) * 100;
-    const responseTimePenalty = Math.min(analytics.averageResponseTime / 1000, 10); // Max 10 point penalty
+    const successRate =
+      (analytics.successfulRequests / analytics.totalRequests) * 100;
+    const responseTimePenalty = Math.min(
+      analytics.averageResponseTime / 1000,
+      10,
+    ); // Max 10 point penalty
 
     return Math.max(0, successRate - responseTimePenalty);
   }
@@ -714,7 +788,10 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     const errorWeight = 0.4;
 
     const performanceScore = this.calculatePerformanceScore(analytics);
-    const errorCount = Object.values(analytics.errorsByCategory).reduce((a, b) => a + b, 0);
+    const errorCount = Object.values(analytics.errorsByCategory).reduce(
+      (a, b) => a + b,
+      0,
+    );
     const errorPenalty = Math.min(errorCount * 5, 50); // Max 50 point penalty
     const errorScore = Math.max(0, 100 - errorPenalty);
 
@@ -724,15 +801,15 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
   private getCircuitBreakerStatus(): Record<string, string> {
     // Mock implementation - in real system, get from circuit breaker service
     return {
-      'browser_launch': 'closed',
-      'navigation': 'closed',
-      'element_interaction': 'closed'
+      browser_launch: 'closed',
+      navigation: 'closed',
+      element_interaction: 'closed',
     };
   }
 
   private getMemoryUsage(): number {
     const memUsage = process.memoryUsage();
-    return (memUsage.heapUsed / 1024 / 1024); // MB
+    return memUsage.heapUsed / 1024 / 1024; // MB
   }
 
   private getCPUUsage(): number {
@@ -742,19 +819,27 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
 
   private calculateRequestsPerMinute(): number {
     const oneMinuteAgo = new Date(Date.now() - 60000);
-    const recentMetrics = this.metricsHistory.filter(m => m.timestamp >= oneMinuteAgo);
+    const recentMetrics = this.metricsHistory.filter(
+      (m) => m.timestamp >= oneMinuteAgo,
+    );
 
     if (recentMetrics.length === 0) return 0;
 
-    const totalRequests = recentMetrics.reduce((sum, m) => sum + m.activeOperations, 0);
+    const totalRequests = recentMetrics.reduce(
+      (sum, m) => sum + m.activeOperations,
+      0,
+    );
     return totalRequests;
   }
 
   private calculateSessionFailureRate(): number {
-    const failedSessions = Array.from(this.sessionAnalytics.values())
-      .filter(s => s.failedRequests > s.successfulRequests).length;
+    const failedSessions = Array.from(this.sessionAnalytics.values()).filter(
+      (s) => s.failedRequests > s.successfulRequests,
+    ).length;
 
-    return this.sessionAnalytics.size > 0 ? (failedSessions / this.sessionAnalytics.size) * 100 : 0;
+    return this.sessionAnalytics.size > 0
+      ? (failedSessions / this.sessionAnalytics.size) * 100
+      : 0;
   }
 
   private calculatePercentile(values: number[], percentile: number): number {
@@ -785,76 +870,107 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     return {
       uptime,
       downtime,
-      uptimePercentage
+      uptimePercentage,
     };
   }
 
-  private getErrorRatesByCategory(timeRange?: { start: Date; end: Date }): Record<string, number> {
-    return this.errorClassificationService.getErrorAnalytics(timeRange).errorsByCategory;
+  private getErrorRatesByCategory(timeRange?: {
+    start: Date;
+    end: Date;
+  }): Record<string, number> {
+    return this.errorClassificationService.getErrorAnalytics(timeRange)
+      .errorsByCategory;
   }
 
-  private getErrorRatesBySeverity(timeRange?: { start: Date; end: Date }): Record<string, number> {
-    return this.errorClassificationService.getErrorAnalytics(timeRange).errorsBySeverity;
+  private getErrorRatesBySeverity(timeRange?: {
+    start: Date;
+    end: Date;
+  }): Record<string, number> {
+    return this.errorClassificationService.getErrorAnalytics(timeRange)
+      .errorsBySeverity;
   }
 
-  private calculateThroughput(unit: 'second' | 'minute' | 'hour', timeRange?: { start: Date; end: Date }): number {
-    const multiplier = unit === 'second' ? 1000 : unit === 'minute' ? 60000 : 3600000;
+  private calculateThroughput(
+    unit: 'second' | 'minute' | 'hour',
+    timeRange?: { start: Date; end: Date },
+  ): number {
+    const multiplier =
+      unit === 'second' ? 1000 : unit === 'minute' ? 60000 : 3600000;
     const duration = timeRange
       ? timeRange.end.getTime() - timeRange.start.getTime()
       : Date.now() - this.performanceMetrics.uptimeStart.getTime();
 
-    return duration > 0 ? (this.performanceMetrics.totalRequests * multiplier) / duration : 0;
+    return duration > 0
+      ? (this.performanceMetrics.totalRequests * multiplier) / duration
+      : 0;
   }
 
   // Placeholder implementations for missing analytics methods
-  private getTopOperations(timeRange: { start: Date; end: Date }): Array<{ operation: string; count: number; averageTime: number }> {
+  private getTopOperations(timeRange: {
+    start: Date;
+    end: Date;
+  }): Array<{ operation: string; count: number; averageTime: number }> {
     // Mock implementation
     return [
       { operation: 'navigate', count: 150, averageTime: 2500 },
       { operation: 'click', count: 300, averageTime: 800 },
-      { operation: 'type', count: 200, averageTime: 600 }
+      { operation: 'type', count: 200, averageTime: 600 },
     ];
   }
 
-  private getErrorDistribution(timeRange: { start: Date; end: Date }): Record<string, number> {
+  private getErrorDistribution(timeRange: {
+    start: Date;
+    end: Date;
+  }): Record<string, number> {
     return this.getErrorRatesByCategory(timeRange);
   }
 
-  private getGeographicDistribution(timeRange: { start: Date; end: Date }): Record<string, number> {
+  private getGeographicDistribution(timeRange: {
+    start: Date;
+    end: Date;
+  }): Record<string, number> {
     // Mock implementation
     return {
-      'US': 60,
-      'EU': 25,
-      'Asia': 15
+      US: 60,
+      EU: 25,
+      Asia: 15,
     };
   }
 
-  private getUserAgentDistribution(timeRange: { start: Date; end: Date }): Record<string, number> {
+  private getUserAgentDistribution(timeRange: {
+    start: Date;
+    end: Date;
+  }): Record<string, number> {
     // Mock implementation
     return {
-      'Chrome': 70,
-      'Firefox': 20,
-      'Safari': 10
+      Chrome: 70,
+      Firefox: 20,
+      Safari: 10,
     };
   }
 
-  private getStatusCodeDistribution(timeRange: { start: Date; end: Date }): Record<number, number> {
+  private getStatusCodeDistribution(timeRange: {
+    start: Date;
+    end: Date;
+  }): Record<number, number> {
     // Mock implementation
     return {
       200: 85,
       400: 8,
       401: 2,
       404: 3,
-      500: 2
+      500: 2,
     };
   }
 
   private cleanupOldData(): void {
-    const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // 24 hours
+    const cutoffTime = Date.now() - 24 * 60 * 60 * 1000; // 24 hours
 
     // Clean up old metrics
     const initialMetricsCount = this.metricsHistory.length;
-    this.metricsHistory = this.metricsHistory.filter(m => m.timestamp.getTime() > cutoffTime);
+    this.metricsHistory = this.metricsHistory.filter(
+      (m) => m.timestamp.getTime() > cutoffTime,
+    );
 
     // Clean up old session analytics
     const initialSessionCount = this.sessionAnalytics.size;
@@ -865,17 +981,24 @@ export class BrowserUseMonitoringService extends EventEmitter implements OnModul
     }
 
     // Clean up resolved alerts older than 7 days
-    const alertCutoffTime = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const alertCutoffTime = Date.now() - 7 * 24 * 60 * 60 * 1000;
     for (const [alertId, alert] of this.activeAlerts.entries()) {
-      if (alert.resolved && alert.resolvedAt && alert.resolvedAt.getTime() < alertCutoffTime) {
+      if (
+        alert.resolved &&
+        alert.resolvedAt &&
+        alert.resolvedAt.getTime() < alertCutoffTime
+      ) {
         this.activeAlerts.delete(alertId);
       }
     }
 
-    if (initialMetricsCount > this.metricsHistory.length || initialSessionCount > this.sessionAnalytics.size) {
+    if (
+      initialMetricsCount > this.metricsHistory.length ||
+      initialSessionCount > this.sessionAnalytics.size
+    ) {
       this.logger.debug('Cleaned up old monitoring data', {
         metricsRemoved: initialMetricsCount - this.metricsHistory.length,
-        sessionsRemoved: initialSessionCount - this.sessionAnalytics.size
+        sessionsRemoved: initialSessionCount - this.sessionAnalytics.size,
       });
     }
   }

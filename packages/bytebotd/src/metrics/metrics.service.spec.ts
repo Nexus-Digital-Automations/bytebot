@@ -58,7 +58,7 @@ describe('MetricsService', () => {
         .mockRejectedValueOnce(new Error('Test error'));
 
       await expect(service.getPrometheusMetrics()).rejects.toThrow(
-        'Test error'
+        'Test error',
       );
     });
   });
@@ -189,7 +189,7 @@ describe('MetricsService', () => {
           algorithm,
           originalSize,
           compressedSize,
-          duration
+          duration,
         );
       }).not.toThrow();
     });
@@ -211,7 +211,7 @@ describe('MetricsService', () => {
       service.clearMetrics();
       // Verify metrics registry is cleared
       expect(
-        register.getSingleMetric('bytebot_http_requests_total')
+        register.getSingleMetric('bytebot_http_requests_total'),
       ).toBeUndefined();
     });
   });

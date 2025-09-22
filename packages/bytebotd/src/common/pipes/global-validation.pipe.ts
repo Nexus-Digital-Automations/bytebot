@@ -8,16 +8,13 @@
  * @fileoverview Enterprise-grade validation pipe for BytebotD API security
  * @version 1.0.0
  * @author Input Validation & API Security Specialist
- */;
-
-import {
+ */ import {
   PipeTransform,
   Injectable,
   ArgumentMetadata,
   BadRequestException,
   Logger,
   PayloadTooLargeException,
-
 } from '@nestjs/common';
 import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
@@ -30,7 +27,6 @@ import {
   SecurityEventType,
   DEFAULT_SANITIZATION_OPTIONS,
   SanitizationOptions,
-
 } from '@bytebot/shared';
 
 /**
@@ -60,8 +56,6 @@ interface GlobalValidationPipeOptions {
 
   /** Skip validation for certain metadata types */
   skipMissingProperties?: boolean;
-
-
 }
 
 /**
@@ -75,9 +69,8 @@ const DEFAULT_OPTIONS: GlobalValidationPipeOptions = {
   sanitizationOptions: {
     ...DEFAULT_SANITIZATION_OPTIONS,
     // Allow slightly more flexible content for desktop operations,
-  maxLength: 100000, // 100KB for large desktop data
-  
-},
+    maxLength: 100000, // 100KB for large desktop data
+  },
   maxPayloadSize: 100 * 1024 * 1024, // 100MB for screenshots and large payloads
   enableThreatDetection: true,
   skipMissingProperties: false,
@@ -89,17 +82,15 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
   private readonly options: GlobalValidationPipeOptions;
 
   constructor(options?: Partial<GlobalValidationPipeOptions>) {
-    this.options = { ...DEFAULT_OPTIONS, ...options 
-};
+    this.options = { ...DEFAULT_OPTIONS, ...options };
 
     this.logger.log('BytebotD global validation pipe initialized', {
-  enableSanitization: this.options.enableSanitization,
+      enableSanitization: this.options.enableSanitization,
       enableThreatDetection: this.options.enableThreatDetection,
       maxPayloadSize: this.options.maxPayloadSize,
       whitelist: this.options.whitelist,
       forbidNonWhitelisted: this.options.forbidNonWhitelisted,
-    
-});
+    });
   }
 
   /**
@@ -108,30 +99,30 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
    * @param metadata - Argument metadata from NestJS
    * @return s Validated and transformed value
    */
-  async transform(value: unknown,
+  async transform(
+    value: unknown,
     metadata: ArgumentMetadata,
-  ): Promise<unknown>  {
+  ): Promise<unknown> {
     const operationId = `validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const startTime = Date.now();this.logger.debug(`[${operationId}] Starting BytebotD validation`, {
-  operationId,type: metadata.type,
+    const startTime = Date.now();
+    this.logger.debug(`[${operationId}] Starting BytebotD validation`, {
+      operationId,
+      type: metadata.type,
       metatype: metadata.metatype?.name,
       hasValue: value !== undefined && value !== null,
       valueType: typeof value,
-    
-});
+    });
 
     try {
-  // Skip validation for primitive types or when no metatype is provided
+      // Skip validation for primitive types or when no metatype is provided
       if (!metadata.metatype || this.isBasicType(metadata.metatype)) {
         this.logger.debug(
-          `[${operationId
-}] Skipping validation for basic type`,
+          `[${operationId}] Skipping validation for basic type`,
           {
-  operationId,
+            operationId,
             type: metadata.type,
             metatype: metadata.metatype?.name,
-          
-},
+          },
         );
         return this.sanitizeBasicValue(value, operationId);
       }
@@ -149,9 +140,8 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
       // Sanitize input if enabled
       let sanitizedValue = value;
       if (this.options.enableSanitization) {
-  sanitizedValue = this.sanitizeValue(value, operationId);
-      
-}
+        sanitizedValue = this.sanitizeValue(value, operationId);
+      }
 
       // Transform to class instance
       const transformedValue: unknown = this.options.transform
@@ -160,41 +150,38 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
 
       // Perform class-validator validation
       if (this.shouldValidate(metadata)) {
-  await this.validateValue(
+        await this.validateValue(
           transformedValue,
           metadata.metatype,
           operationId,
         );
-      
-}
+      }
 
       const processingTime = Date.now() - startTime;
 
       this.logger.debug(
-        `[${operationId}] BytebotD validation completed successfully`,{
-  operationId,
+        `[${operationId}] BytebotD validation completed successfully`,
+        {
+          operationId,
           type: metadata.type,
           metatype: metadata.metatype?.name,
           processingTimeMs: processingTime,
           sanitized: this.options.enableSanitization,
           threatDetected: false,
-        
-},
+        },
       );
 
       return transformedValue;
     } catch (error) {
-  const processingTime = Date.now() - startTime;
+      const processingTime = Date.now() - startTime;
 
-      this.logger.error(`[${operationId
-}] BytebotD validation failed`, {
-  operationId,
+      this.logger.error(`[${operationId}] BytebotD validation failed`, {
+        operationId,
         type: metadata.type,
         metatype: metadata.metatype?.name,
         error: (error as Error).message,
         processingTimeMs: processingTime,
-      
-});
+      });
 
       // Log security event for validation failures
       this.logSecurityEvent(operationId, error, value, metadata);
@@ -207,7 +194,7 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
    * Check if the metatype is a basic JavaScript type
    * @param metatype - The metatype to check
    * @returns True if it's a basic type*/
-private isBasicType(
+  private isBasicType(
     metatype: unknown,
   ): metatype is
     | ArrayConstructor
@@ -215,7 +202,7 @@ private isBasicType(
     | NumberConstructor
     | StringConstructor
     | BooleanConstructor {
-  const basicTypes: Array<
+    const basicTypes: Array<
       | ArrayConstructor
       | ObjectConstructor
       | NumberConstructor
@@ -230,8 +217,7 @@ private isBasicType(
         | StringConstructor
         | BooleanConstructor,
     );
-  
-}
+  }
 
   /**
    * Sanitize basic value (string, number, etc.)
@@ -240,17 +226,16 @@ private isBasicType(
    * @returns Sanitized value
    */
   private sanitizeBasicValue(value: unknown, operationId: string): unknown {
-  if (typeof value === 'string' && this.options.enableSanitization) {
+    if (typeof value === 'string' && this.options.enableSanitization) {
       const sanitized = sanitizeInput(value, this.options.sanitizationOptions);
 
       if (sanitized !== value) {
-        this.logger.debug(`[${operationId
-}] Basic value sanitized`, {
-  operationId,originalLength: value.length,
+        this.logger.debug(`[${operationId}] Basic value sanitized`, {
+          operationId,
+          originalLength: value.length,
           sanitizedLength: sanitized.length,
           changed: true,
-        
-});
+        });
       }
 
       return sanitized;
@@ -265,43 +250,41 @@ private isBasicType(
    * @param operationId - Operation tracking ID
    */
   private validatePayloadSize(value: unknown, operationId: string): void {
-  try {
+    try {
       const payloadSize = JSON.stringify(value).length;
 
       if (payloadSize > (this.options.maxPayloadSize ?? 0)) {
-        this.logger.warn(`[${operationId
-}] Payload size limit exceeded`, {
-  operationId,payloadSize,
+        this.logger.warn(`[${operationId}] Payload size limit exceeded`, {
+          operationId,
+          payloadSize,
           maxPayloadSize: this.options.maxPayloadSize,
           ratio: (payloadSize / (this.options.maxPayloadSize ?? 1)).toFixed(2),
-        
-});
+        });
 
         throw new PayloadTooLargeException(
-          `Request _payload too large. Maximum allowed: ${this.options.maxPayloadSize} bytes`,);}
+          `Request _payload too large. Maximum allowed: ${this.options.maxPayloadSize} bytes`,
+        );
+      }
 
       this.logger.debug(`[${operationId}] Payload size validation passed`, {
-  operationId,
+        operationId,
         payloadSize,
         maxPayloadSize: this.options.maxPayloadSize,
         utilizationPercent: (
           (payloadSize / (this.options.maxPayloadSize ?? 1)) *
           100
         ).toFixed(1),
-      
-});
+      });
     } catch (error) {
-  if (error instanceof PayloadTooLargeException) {
+      if (error instanceof PayloadTooLargeException) {
         throw error;
-      
-}
+      }
 
       // If we can't stringify the value, it might be too large or contain circular references
       this.logger.warn(`[${operationId}] Could not validate _payload size`, {
-  operationId,
+        operationId,
         error: (error as Error).message,
-      
-});
+      });
     }
   }
 
@@ -311,7 +294,7 @@ private isBasicType(
    * @param operationId - Operation tracking ID
    */
   private detectSecurityThreats(value: unknown, operationId: string): void {
-  const threats: string[] = [];
+    const threats: string[] = [];
 
     // Convert value to string for pattern analysis
     const stringValue =
@@ -365,17 +348,16 @@ private isBasicType(
    * @returns Sanitized value
    */
   private sanitizeValue(value: unknown, operationId: string): unknown {
-  const startTime = Date.now();
+    const startTime = Date.now();
     let sanitized: unknown;
 
-    if (typeof value === 'string') {sanitized = sanitizeInput(value, this.options.sanitizationOptions);
-} else if (typeof value === 'object' && value !== null) {
-  sanitized = sanitizeObject(value, this.options.sanitizationOptions);
-    
-} else {
-  sanitized = value;
-    
-}
+    if (typeof value === 'string') {
+      sanitized = sanitizeInput(value, this.options.sanitizationOptions);
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized = sanitizeObject(value, this.options.sanitizationOptions);
+    } else {
+      sanitized = value;
+    }
 
     const sanitizationTime = Date.now() - startTime;
     const hasChanges = JSON.stringify(sanitized) !== JSON.stringify(value);
@@ -383,15 +365,14 @@ private isBasicType(
     this.logger.debug(
       `[${operationId}] BytebotD input sanitization completed`,
       {
-  operationId,
+        operationId,
         inputType: typeof value,
         isObject: typeof value === 'object',
-      sanitizationTimeMs: sanitizationTime,
-      hasChanges,
+        sanitizationTimeMs: sanitizationTime,
+        hasChanges,
         originalSize: JSON.stringify(value).length,
         sanitizedSize: JSON.stringify(sanitized).length,
-      
-},
+      },
     );
 
     return sanitized;
@@ -407,9 +388,8 @@ private isBasicType(
 
     // Skip validation for certain types
     if (type === 'custom' || !metatype) {
-  return false;
-    
-}
+      return false;
+    }
 
     return true;
   }
@@ -420,47 +400,45 @@ private isBasicType(
    * @param metatype - Target class type
    * @param operationId - Operation tracking ID
    */
-  private async validateValue(value: unknown,
+  private async validateValue(
+    value: unknown,
     metatype: unknown,
     operationId: string,
-  ): Promise<void>  {
-  const startTime = Date.now();
+  ): Promise<void> {
+    const startTime = Date.now();
 
     const errors: ValidationError[] = await validate(value as object, {
-  whitelist: this.options.whitelist,
+      whitelist: this.options.whitelist,
       forbidNonWhitelisted: this.options.forbidNonWhitelisted,
       skipMissingProperties: this.options.skipMissingProperties,
-    
-});
+    });
 
     const validationTime = Date.now() - startTime;
 
     if (errors.length > 0) {
-  const formattedErrors = this.formatValidationErrors(errors);
+      const formattedErrors = this.formatValidationErrors(errors);
 
-      this.logger.warn(`[${operationId
-}] BytebotD class validation failed`, {
-  operationId,
-        metatype: (metatype as { name?: string 
-}).name ?? 'unknown',errorCount: errors.length,
-      validationTimeMs: validationTime,
+      this.logger.warn(`[${operationId}] BytebotD class validation failed`, {
+        operationId,
+        metatype: (metatype as { name?: string }).name ?? 'unknown',
+        errorCount: errors.length,
+        validationTimeMs: validationTime,
         errors: formattedErrors,
       });
 
       throw new BadRequestException({
-  message: 'Validation failed',
-      errors: formattedErrors,
-      timestamp: new Date().toISOString(),
+        message: 'Validation failed',
+        errors: formattedErrors,
+        timestamp: new Date().toISOString(),
         operationId,
         service: 'BytebotD',
-      
-});
+      });
     }
 
     this.logger.debug(`[${operationId}] BytebotD class validation passed`, {
-  operationId,
-      metatype: (metatype as { name?: string 
-}).name ?? 'unknown',validationTimeMs: validationTime,
+      operationId,
+      metatype: (metatype as { name?: string }).name ?? 'unknown',
+      validationTimeMs: validationTime,
       errorCount: 0,
     });
   }
@@ -471,22 +449,20 @@ private isBasicType(
    * @returns Formatted error array
    */
   private formatValidationErrors(errors: ValidationError[]): Array<{
-  property: string;
+    property: string;
     value: unknown;
     constraints?: Record<string, string>;
     children?: unknown;
-  
-}> {
-  return errors.map((error) => ({
-  property: error.property,
+  }> {
+    return errors.map((error) => ({
+      property: error.property,
       value: error.value as unknown,
       constraints: error.constraints,
       children:
         error.children && error.children.length > 0
           ? (this.formatValidationErrors(error.children) as unknown)
           : undefined,
-    
-}));
+    }));
   }
 
   /**
@@ -502,45 +478,46 @@ private isBasicType(
     value: unknown,
     metadata: ArgumentMetadata,
   ): void {
-  try {
+    try {
       let eventType = SecurityEventType._VALIDATION_FAILED;
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
-      if (errorMessage?.includes('XSS')) {eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
-} else if (errorMessage?.includes('SQL')) {
-  eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
-      
-}
+      if (errorMessage?.includes('XSS')) {
+        eventType = SecurityEventType._XSS_ATTEMPT_BLOCKED;
+      } else if (errorMessage?.includes('SQL')) {
+        eventType = SecurityEventType._INJECTION_ATTEMPT_BLOCKED;
+      }
 
       const securityEvent = createSecurityEvent(
         eventType,
         `validation-pipe-${metadata.type}`,
-        'POST',false,errorMessage ?? 'Validation failed',{
-  operationId,
+        'POST',
+        false,
+        errorMessage ?? 'Validation failed',
+        {
+          operationId,
           service: 'BytebotD',
-      inputType: typeof value,
-      metatype: metadata.metatype?.name,
+          inputType: typeof value,
+          metatype: metadata.metatype?.name,
           errorType:
             error instanceof Error ? error.constructor.name : 'unknown',
           threatDetection: this.options.enableThreatDetection,
           sanitizationEnabled: this.options.enableSanitization,
-        
-},
+        },
       );
 
       this.logger.warn(
         `BytebotD security event logged: ${securityEvent.eventId}`,
         {
-  eventId: securityEvent.eventId,
+          eventId: securityEvent.eventId,
           eventType: securityEvent.type,
           riskScore: securityEvent.riskScore,
           operationId,
-        
-},
+        },
       );
     } catch (loggingError) {
-  const loggingErrorMessage =
+      const loggingErrorMessage =
         loggingError instanceof Error
           ? loggingError.message
           : String(loggingError);
@@ -548,8 +525,7 @@ private isBasicType(
         operationId,
         originalError: error instanceof Error ? error.message : String(error),
         loggingError: loggingErrorMessage,
-      
-});
+      });
     }
   }
 }
@@ -558,13 +534,10 @@ private isBasicType(
  * Factory function to create validation pipe with custom options
  * @param options - Custom validation pipe options
  * @returns Configured validation pipe instance
- */;
-
-export function createBytebotDValidationPipe(
+ */ export function createBytebotDValidationPipe(
   options?: Partial<GlobalValidationPipeOptions>,
 ): GlobalValidationPipe {
   return new GlobalValidationPipe(options);
-
 }
 
 /**
@@ -623,14 +596,13 @@ export const BytebotDValidationPipes = {
    * Development-friendly validation with relaxed rules
    */
   DEVELOPMENT: createBytebotDValidationPipe({
-  transform: true,
+    transform: true,
     whitelist: false,
     forbidNonWhitelisted: false,
     enableSanitization: false,
     enableThreatDetection: false,
     maxPayloadSize: 200 * 1024 * 1024, // 200MB for development
-  
-}),
+  }),
 } as const;
 
 export default GlobalValidationPipe;

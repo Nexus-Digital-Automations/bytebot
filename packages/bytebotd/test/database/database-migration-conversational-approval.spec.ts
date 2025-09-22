@@ -31,7 +31,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
-import { ConversationalDatabaseService, DatabaseOperationType, DatabaseRiskLevel } from '../../src/database/conversational-database.service';
+import {
+  ConversationalDatabaseService,
+  DatabaseOperationType,
+  DatabaseRiskLevel,
+} from '../../src/database/conversational-database.service';
 import { ParlantIntegrationService } from '../../src/parlant/parlant-integration.service';
 
 // Define risk level type locally to avoid import issues
@@ -53,7 +57,7 @@ enum MigrationOperationType {
   RENAME_TABLE = 'RENAME_TABLE',
   RENAME_COLUMN = 'RENAME_COLUMN',
   DATA_MIGRATION = 'DATA_MIGRATION',
-  SCHEMA_RESTRUCTURE = 'SCHEMA_RESTRUCTURE'
+  SCHEMA_RESTRUCTURE = 'SCHEMA_RESTRUCTURE',
 }
 
 /**
@@ -143,8 +147,9 @@ class MigrationTestUtils {
         estimatedDuration: 30,
         rollbackSupported: true,
         requiresMultiPartyApproval: false,
-        migrationScript: 'ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;',
-        rollbackScript: 'ALTER TABLE users DROP COLUMN last_login_at;'
+        migrationScript:
+          'ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;',
+        rollbackScript: 'ALTER TABLE users DROP COLUMN last_login_at;',
       },
       {
         name: 'Add Database Index for Performance',
@@ -158,8 +163,9 @@ class MigrationTestUtils {
         estimatedDuration: 45,
         rollbackSupported: true,
         requiresMultiPartyApproval: false,
-        migrationScript: 'CREATE INDEX idx_users_email_status ON users(email, status);',
-        rollbackScript: 'DROP INDEX idx_users_email_status;'
+        migrationScript:
+          'CREATE INDEX idx_users_email_status ON users(email, status);',
+        rollbackScript: 'DROP INDEX idx_users_email_status;',
       },
 
       // Medium Risk Migrations
@@ -175,12 +181,15 @@ class MigrationTestUtils {
         estimatedDuration: 120,
         rollbackSupported: true,
         requiresMultiPartyApproval: false,
-        migrationScript: 'ALTER TABLE users ALTER COLUMN phone_number TYPE VARCHAR(20);',
-        rollbackScript: 'ALTER TABLE users ALTER COLUMN phone_number TYPE VARCHAR(15);'
+        migrationScript:
+          'ALTER TABLE users ALTER COLUMN phone_number TYPE VARCHAR(20);',
+        rollbackScript:
+          'ALTER TABLE users ALTER COLUMN phone_number TYPE VARCHAR(15);',
       },
       {
         name: 'Add Foreign Key Constraint',
-        description: 'Add foreign key constraint to enforce referential integrity',
+        description:
+          'Add foreign key constraint to enforce referential integrity',
         operationType: MigrationOperationType.ADD_CONSTRAINT,
         riskLevel: DatabaseRiskLevel.MEDIUM,
         breakingChange: false,
@@ -190,8 +199,9 @@ class MigrationTestUtils {
         estimatedDuration: 90,
         rollbackSupported: true,
         requiresMultiPartyApproval: false,
-        migrationScript: 'ALTER TABLE orders ADD CONSTRAINT fk_orders_user_id FOREIGN KEY (user_id) REFERENCES users(id);',
-        rollbackScript: 'ALTER TABLE orders DROP CONSTRAINT fk_orders_user_id;'
+        migrationScript:
+          'ALTER TABLE orders ADD CONSTRAINT fk_orders_user_id FOREIGN KEY (user_id) REFERENCES users(id);',
+        rollbackScript: 'ALTER TABLE orders DROP CONSTRAINT fk_orders_user_id;',
       },
 
       // High Risk Migrations
@@ -207,7 +217,7 @@ class MigrationTestUtils {
         estimatedDuration: 60,
         rollbackSupported: false,
         requiresMultiPartyApproval: true,
-        migrationScript: 'ALTER TABLE users DROP COLUMN deprecated_field;'
+        migrationScript: 'ALTER TABLE users DROP COLUMN deprecated_field;',
       },
       {
         name: 'Major Schema Restructure',
@@ -233,7 +243,7 @@ class MigrationTestUtils {
           SELECT DISTINCT profile_data FROM user_profiles;
           ALTER TABLE users ADD COLUMN profile_id INTEGER;
           -- Complex rollback logic would go here
-        `
+        `,
       },
 
       // Critical Risk Migrations
@@ -249,31 +259,37 @@ class MigrationTestUtils {
         estimatedDuration: 30,
         rollbackSupported: false,
         requiresMultiPartyApproval: true,
-        migrationScript: 'DROP TABLE legacy_data;'
-      }
+        migrationScript: 'DROP TABLE legacy_data;',
+      },
     ];
   }
 
   /**
    * Create migration approval workflow
    */
-  static createMigrationApprovalWorkflow(config: MigrationTestConfig): MigrationApprovalWorkflow {
+  static createMigrationApprovalWorkflow(
+    config: MigrationTestConfig,
+  ): MigrationApprovalWorkflow {
     const requiredApprovers = [];
 
     // Determine required approvers based on risk level
     if (config.riskLevel === DatabaseRiskLevel.MEDIUM) {
-      requiredApprovers.push({ role: 'database_admin', userId: 'db_admin_1', required: true });
+      requiredApprovers.push({
+        role: 'database_admin',
+        userId: 'db_admin_1',
+        required: true,
+      });
     } else if (config.riskLevel === DatabaseRiskLevel.HIGH) {
       requiredApprovers.push(
         { role: 'database_admin', userId: 'db_admin_1', required: true },
-        { role: 'tech_lead', userId: 'tech_lead_1', required: true }
+        { role: 'tech_lead', userId: 'tech_lead_1', required: true },
       );
     } else if (config.riskLevel === DatabaseRiskLevel.CRITICAL) {
       requiredApprovers.push(
         { role: 'database_admin', userId: 'db_admin_1', required: true },
         { role: 'tech_lead', userId: 'tech_lead_1', required: true },
         { role: 'engineering_manager', userId: 'eng_mgr_1', required: true },
-        { role: 'cto', userId: 'cto_1', required: true }
+        { role: 'cto', userId: 'cto_1', required: true },
       );
     }
 
@@ -286,11 +302,15 @@ class MigrationTestUtils {
       businessJustification: config.description,
       riskAssessment: `${config.riskLevel} risk migration affecting ${config.affectedTables.length} table(s) and ${config.affectedRecords} records`,
       impactAnalysis: {
-        affectedServices: config.affectedTables.map(table => `${table}_service`),
+        affectedServices: config.affectedTables.map(
+          (table) => `${table}_service`,
+        ),
         downtime: config.estimatedDuration,
-        rollbackTime: config.rollbackSupported ? config.estimatedDuration * 0.5 : 0,
-        dataIntegrityRisk: config.breakingChange ? 'HIGH' : 'LOW'
-      }
+        rollbackTime: config.rollbackSupported
+          ? config.estimatedDuration * 0.5
+          : 0,
+        dataIntegrityRisk: config.breakingChange ? 'HIGH' : 'LOW',
+      },
     };
   }
 
@@ -299,25 +319,40 @@ class MigrationTestUtils {
    */
   static async simulateMigrationApproval(
     workflow: MigrationApprovalWorkflow,
-    autoApprove = true
+    autoApprove = true,
   ): Promise<MigrationApprovalWorkflow> {
     const updatedWorkflow = { ...workflow };
 
     for (const approver of workflow.requiredApprovers) {
       // Simulate approval decision time
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.random() * 100 + 50),
+      );
 
       // Simulate approval decision (95% approval rate in auto mode)
-      const decision = autoApprove && Math.random() > 0.05 ? 'APPROVED' :
-                     Math.random() > 0.1 ? 'APPROVED' : 'REJECTED';
+      const decision =
+        autoApprove && Math.random() > 0.05
+          ? 'APPROVED'
+          : Math.random() > 0.1
+            ? 'APPROVED'
+            : 'REJECTED';
 
       updatedWorkflow.approvals.push({
         userId: approver.userId,
         role: approver.role,
         decision: decision as 'APPROVED' | 'REJECTED',
         timestamp: new Date(),
-        reason: decision === 'APPROVED' ? 'Migration approved for execution' : 'Migration rejected due to risk concerns',
-        conditions: decision === 'APPROVED' ? ['Execute during maintenance window', 'Monitor performance impact'] : undefined
+        reason:
+          decision === 'APPROVED'
+            ? 'Migration approved for execution'
+            : 'Migration rejected due to risk concerns',
+        conditions:
+          decision === 'APPROVED'
+            ? [
+                'Execute during maintenance window',
+                'Monitor performance impact',
+              ]
+            : undefined,
       });
 
       // If any required approver rejects, workflow is rejected
@@ -329,8 +364,12 @@ class MigrationTestUtils {
 
     // If all required approvers approved, workflow is approved
     if (updatedWorkflow.status === 'PENDING') {
-      const requiredApprovals = updatedWorkflow.requiredApprovers.filter(a => a.required);
-      const receivedApprovals = updatedWorkflow.approvals.filter(a => a.decision === 'APPROVED');
+      const requiredApprovals = updatedWorkflow.requiredApprovers.filter(
+        (a) => a.required,
+      );
+      const receivedApprovals = updatedWorkflow.approvals.filter(
+        (a) => a.decision === 'APPROVED',
+      );
 
       if (receivedApprovals.length >= requiredApprovals.length) {
         updatedWorkflow.status = 'APPROVED';
@@ -345,20 +384,22 @@ class MigrationTestUtils {
    */
   static async simulateMigrationExecution(
     config: MigrationTestConfig,
-    workflow: MigrationApprovalWorkflow
+    workflow: MigrationApprovalWorkflow,
   ): Promise<MigrationExecutionMetrics> {
     const executionStart = Date.now();
 
     // Simulate migration execution time
     const executionTime = config.estimatedDuration + (Math.random() * 20 - 10); // ±10ms variance
-    await new Promise(resolve => setTimeout(resolve, Math.min(executionTime, 200)));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.min(executionTime, 200)),
+    );
 
     // Simulate execution success rate based on complexity
     const complexityFactor = {
       [DatabaseRiskLevel.LOW]: 0.999,
       [DatabaseRiskLevel.MEDIUM]: 0.995,
       [DatabaseRiskLevel.HIGH]: 0.99,
-      [DatabaseRiskLevel.CRITICAL]: 0.985
+      [DatabaseRiskLevel.CRITICAL]: 0.985,
     }[config.riskLevel];
 
     const success = Math.random() < complexityFactor;
@@ -374,7 +415,7 @@ class MigrationTestUtils {
       dataIntegrityMaintained,
       performanceImpact: Math.random() * 100, // Simulated performance impact
       successRate: success ? 100 : 0,
-      auditTrailCompleteness: 100 // Perfect audit trail in testing
+      auditTrailCompleteness: 100, // Perfect audit trail in testing
     };
   }
 
@@ -383,14 +424,16 @@ class MigrationTestUtils {
    */
   static validateMigrationMetrics(
     metrics: MigrationExecutionMetrics,
-    config: MigrationTestConfig
+    config: MigrationTestConfig,
   ): { passed: boolean; violations: string[]; score: number } {
     const violations: string[] = [];
     let score = 100;
 
     // Execution time validation
     if (metrics.executionTime > config.estimatedDuration * 1.5) {
-      violations.push(`Execution time ${metrics.executionTime}ms exceeds estimate by 50%`);
+      violations.push(
+        `Execution time ${metrics.executionTime}ms exceeds estimate by 50%`,
+      );
       score -= 20;
     }
 
@@ -402,26 +445,32 @@ class MigrationTestUtils {
 
     // Success rate validation
     if (metrics.successRate < 100) {
-      violations.push(`Migration success rate ${metrics.successRate}% below 100% target`);
+      violations.push(
+        `Migration success rate ${metrics.successRate}% below 100% target`,
+      );
       score -= 30;
     }
 
     // Audit trail validation
     if (metrics.auditTrailCompleteness < 100) {
-      violations.push(`Audit trail completeness ${metrics.auditTrailCompleteness}% below 100% target`);
+      violations.push(
+        `Audit trail completeness ${metrics.auditTrailCompleteness}% below 100% target`,
+      );
       score -= 25;
     }
 
     // Performance impact validation
     if (metrics.performanceImpact > 200) {
-      violations.push(`Performance impact ${metrics.performanceImpact}ms exceeds 200ms target`);
+      violations.push(
+        `Performance impact ${metrics.performanceImpact}ms exceeds 200ms target`,
+      );
       score -= 15;
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      score: Math.max(0, score)
+      score: Math.max(0, score),
     };
   }
 }
@@ -436,14 +485,16 @@ describe('Database Migration Conversational Approval', () => {
     module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
-          load: [() => ({
-            DB_MIGRATION_APPROVAL_REQUIRED: 'true',
-            DB_MIGRATION_MULTI_PARTY_APPROVAL: 'true',
-            DB_MIGRATION_AUDIT_ENABLED: 'true',
-            DB_MIGRATION_ROLLBACK_ENABLED: 'true',
-            DB_MIGRATION_RISK_ASSESSMENT: 'true'
-          })]
-        })
+          load: [
+            () => ({
+              DB_MIGRATION_APPROVAL_REQUIRED: 'true',
+              DB_MIGRATION_MULTI_PARTY_APPROVAL: 'true',
+              DB_MIGRATION_AUDIT_ENABLED: 'true',
+              DB_MIGRATION_ROLLBACK_ENABLED: 'true',
+              DB_MIGRATION_RISK_ASSESSMENT: 'true',
+            }),
+          ],
+        }),
       ],
       providers: [
         ConversationalDatabaseService,
@@ -456,17 +507,21 @@ describe('Database Migration Conversational Approval', () => {
               const config: Record<string, unknown> = {
                 DB_MIGRATION_APPROVAL_REQUIRED: 'true',
                 DB_MIGRATION_MULTI_PARTY_APPROVAL: 'true',
-                DB_MIGRATION_AUDIT_ENABLED: 'true'
+                DB_MIGRATION_AUDIT_ENABLED: 'true',
               };
               return config[key];
-            })
-          }
-        }
-      ]
+            }),
+          },
+        },
+      ],
     }).compile();
 
-    conversationalDbService = module.get<ConversationalDatabaseService>(ConversationalDatabaseService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
+    conversationalDbService = module.get<ConversationalDatabaseService>(
+      ConversationalDatabaseService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
@@ -484,10 +539,14 @@ describe('Database Migration Conversational Approval', () => {
 
   describe('Low Risk Migration Approval', () => {
     it('should approve low-risk schema changes with minimal overhead', async () => {
-      const lowRiskConfigs = MigrationTestUtils.generateMigrationTestConfigs()
-        .filter(config => config.riskLevel === DatabaseRiskLevel.LOW);
+      const lowRiskConfigs =
+        MigrationTestUtils.generateMigrationTestConfigs().filter(
+          (config) => config.riskLevel === DatabaseRiskLevel.LOW,
+        );
 
-      logger.log(`Testing ${lowRiskConfigs.length} low-risk migration configurations`);
+      logger.log(
+        `Testing ${lowRiskConfigs.length} low-risk migration configurations`,
+      );
 
       const migrationResults: Array<{
         config: MigrationTestConfig;
@@ -496,43 +555,63 @@ describe('Database Migration Conversational Approval', () => {
       }> = [];
 
       // Mock Parlant service for low-risk approvals
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-migration-low-risk',
-        reasoning: 'Low-risk migration operation approved with standard validation',
-        confidence: 0.95,
-        validationTimestamp: new Date(),
-        riskLevel: 'LOW' as RiskLevelType
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-migration-low-risk',
+          reasoning:
+            'Low-risk migration operation approved with standard validation',
+          confidence: 0.95,
+          validationTimestamp: new Date(),
+          riskLevel: 'LOW' as RiskLevelType,
+        });
 
       for (const config of lowRiskConfigs) {
         logger.log(`Processing ${config.name}`);
 
         // Create approval workflow
-        const workflow = MigrationTestUtils.createMigrationApprovalWorkflow(config);
+        const workflow =
+          MigrationTestUtils.createMigrationApprovalWorkflow(config);
 
         // Simulate approval process (auto-approve for low risk)
-        const approvedWorkflow = await MigrationTestUtils.simulateMigrationApproval(workflow, true);
+        const approvedWorkflow =
+          await MigrationTestUtils.simulateMigrationApproval(workflow, true);
 
         // Execute migration
-        const executionMetrics = await MigrationTestUtils.simulateMigrationExecution(config, approvedWorkflow);
+        const executionMetrics =
+          await MigrationTestUtils.simulateMigrationExecution(
+            config,
+            approvedWorkflow,
+          );
 
         migrationResults.push({
           config,
           workflow: approvedWorkflow,
-          metrics: executionMetrics
+          metrics: executionMetrics,
         });
 
         // Validate individual migration
-        const validation = MigrationTestUtils.validateMigrationMetrics(executionMetrics, config);
+        const validation = MigrationTestUtils.validateMigrationMetrics(
+          executionMetrics,
+          config,
+        );
         expect(validation.passed).toBe(true);
       }
 
       // Aggregate metrics
       const totalMigrations = migrationResults.length;
-      const successfulMigrations = migrationResults.filter(r => r.metrics.successRate === 100).length;
-      const avgExecutionTime = migrationResults.reduce((sum, r) => sum + r.metrics.executionTime, 0) / totalMigrations;
-      const avgApprovalTime = migrationResults.reduce((sum, r) => sum + r.metrics.approvalWorkflowTime, 0) / totalMigrations;
+      const successfulMigrations = migrationResults.filter(
+        (r) => r.metrics.successRate === 100,
+      ).length;
+      const avgExecutionTime =
+        migrationResults.reduce((sum, r) => sum + r.metrics.executionTime, 0) /
+        totalMigrations;
+      const avgApprovalTime =
+        migrationResults.reduce(
+          (sum, r) => sum + r.metrics.approvalWorkflowTime,
+          0,
+        ) / totalMigrations;
 
       logger.log(`Low Risk Migration Results:
         Total Migrations: ${totalMigrations}
@@ -551,20 +630,27 @@ describe('Database Migration Conversational Approval', () => {
 
   describe('Medium Risk Migration Approval', () => {
     it('should require database admin approval for medium-risk changes', async () => {
-      const mediumRiskConfigs = MigrationTestUtils.generateMigrationTestConfigs()
-        .filter(config => config.riskLevel === DatabaseRiskLevel.MEDIUM);
+      const mediumRiskConfigs =
+        MigrationTestUtils.generateMigrationTestConfigs().filter(
+          (config) => config.riskLevel === DatabaseRiskLevel.MEDIUM,
+        );
 
-      logger.log(`Testing ${mediumRiskConfigs.length} medium-risk migration configurations`);
+      logger.log(
+        `Testing ${mediumRiskConfigs.length} medium-risk migration configurations`,
+      );
 
       // Mock Parlant service for medium-risk approvals
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-migration-medium-risk',
-        reasoning: 'Medium-risk migration approved with database admin validation required',
-        confidence: 0.88,
-        validationTimestamp: new Date(),
-        riskLevel: 'MEDIUM' as RiskLevelType
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-migration-medium-risk',
+          reasoning:
+            'Medium-risk migration approved with database admin validation required',
+          confidence: 0.88,
+          validationTimestamp: new Date(),
+          riskLevel: 'MEDIUM' as RiskLevelType,
+        });
 
       const migrationResults = [];
 
@@ -572,36 +658,51 @@ describe('Database Migration Conversational Approval', () => {
         logger.log(`Processing ${config.name}`);
 
         // Create approval workflow
-        const workflow = MigrationTestUtils.createMigrationApprovalWorkflow(config);
+        const workflow =
+          MigrationTestUtils.createMigrationApprovalWorkflow(config);
 
         // Verify required approvers for medium risk
         expect(workflow.requiredApprovers.length).toBeGreaterThan(0);
-        expect(workflow.requiredApprovers.some(a => a.role === 'database_admin')).toBe(true);
+        expect(
+          workflow.requiredApprovers.some((a) => a.role === 'database_admin'),
+        ).toBe(true);
 
         // Simulate approval process
-        const approvedWorkflow = await MigrationTestUtils.simulateMigrationApproval(workflow, true);
+        const approvedWorkflow =
+          await MigrationTestUtils.simulateMigrationApproval(workflow, true);
 
         // Verify approval status
         expect(approvedWorkflow.status).toBe('APPROVED');
-        expect(approvedWorkflow.approvals.length).toBe(workflow.requiredApprovers.length);
+        expect(approvedWorkflow.approvals.length).toBe(
+          workflow.requiredApprovers.length,
+        );
 
         // Execute migration
-        const executionMetrics = await MigrationTestUtils.simulateMigrationExecution(config, approvedWorkflow);
+        const executionMetrics =
+          await MigrationTestUtils.simulateMigrationExecution(
+            config,
+            approvedWorkflow,
+          );
 
         migrationResults.push({
           config,
           workflow: approvedWorkflow,
-          metrics: executionMetrics
+          metrics: executionMetrics,
         });
 
         // Validate migration metrics
-        const validation = MigrationTestUtils.validateMigrationMetrics(executionMetrics, config);
+        const validation = MigrationTestUtils.validateMigrationMetrics(
+          executionMetrics,
+          config,
+        );
         expect(validation.score).toBeGreaterThan(80);
       }
 
       // Aggregate validation
       const totalMigrations = migrationResults.length;
-      const approvedMigrations = migrationResults.filter(r => r.workflow.status === 'APPROVED').length;
+      const approvedMigrations = migrationResults.filter(
+        (r) => r.workflow.status === 'APPROVED',
+      ).length;
 
       logger.log(`Medium Risk Migration Results:
         Total Migrations: ${totalMigrations}
@@ -616,20 +717,27 @@ describe('Database Migration Conversational Approval', () => {
 
   describe('High Risk Migration Approval', () => {
     it('should require multi-party approval for high-risk schema changes', async () => {
-      const highRiskConfigs = MigrationTestUtils.generateMigrationTestConfigs()
-        .filter(config => config.riskLevel === DatabaseRiskLevel.HIGH);
+      const highRiskConfigs =
+        MigrationTestUtils.generateMigrationTestConfigs().filter(
+          (config) => config.riskLevel === DatabaseRiskLevel.HIGH,
+        );
 
-      logger.log(`Testing ${highRiskConfigs.length} high-risk migration configurations`);
+      logger.log(
+        `Testing ${highRiskConfigs.length} high-risk migration configurations`,
+      );
 
       // Mock Parlant service for high-risk approvals
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-migration-high-risk',
-        reasoning: 'High-risk migration requires comprehensive multi-party approval workflow',
-        confidence: 0.82,
-        validationTimestamp: new Date(),
-        riskLevel: 'HIGH' as RiskLevelType
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-migration-high-risk',
+          reasoning:
+            'High-risk migration requires comprehensive multi-party approval workflow',
+          confidence: 0.82,
+          validationTimestamp: new Date(),
+          riskLevel: 'HIGH' as RiskLevelType,
+        });
 
       const migrationResults = [];
 
@@ -637,38 +745,60 @@ describe('Database Migration Conversational Approval', () => {
         logger.log(`Processing ${config.name}`);
 
         // Create approval workflow
-        const workflow = MigrationTestUtils.createMigrationApprovalWorkflow(config);
+        const workflow =
+          MigrationTestUtils.createMigrationApprovalWorkflow(config);
 
         // Verify multi-party approval requirements
         expect(workflow.requiredApprovers.length).toBeGreaterThanOrEqual(2);
-        expect(workflow.requiredApprovers.some(a => a.role === 'database_admin')).toBe(true);
-        expect(workflow.requiredApprovers.some(a => a.role === 'tech_lead')).toBe(true);
+        expect(
+          workflow.requiredApprovers.some((a) => a.role === 'database_admin'),
+        ).toBe(true);
+        expect(
+          workflow.requiredApprovers.some((a) => a.role === 'tech_lead'),
+        ).toBe(true);
 
         // Simulate approval process with potential rejections
-        const approvedWorkflow = await MigrationTestUtils.simulateMigrationApproval(workflow, true);
+        const approvedWorkflow =
+          await MigrationTestUtils.simulateMigrationApproval(workflow, true);
 
         migrationResults.push({
           config,
           workflow: approvedWorkflow,
-          metrics: null // Will be filled if approved
+          metrics: null, // Will be filled if approved
         });
 
         // Only execute if approved
         if (approvedWorkflow.status === 'APPROVED') {
-          const executionMetrics = await MigrationTestUtils.simulateMigrationExecution(config, approvedWorkflow);
-          migrationResults[migrationResults.length - 1]!.metrics = executionMetrics;
+          const executionMetrics =
+            await MigrationTestUtils.simulateMigrationExecution(
+              config,
+              approvedWorkflow,
+            );
+          migrationResults[migrationResults.length - 1]!.metrics =
+            executionMetrics;
 
           // Validate high-risk migration execution
-          const validation = MigrationTestUtils.validateMigrationMetrics(executionMetrics, config);
-          logger.log(`${config.name} validation score: ${validation.score}/100`);
+          const validation = MigrationTestUtils.validateMigrationMetrics(
+            executionMetrics,
+            config,
+          );
+          logger.log(
+            `${config.name} validation score: ${validation.score}/100`,
+          );
         }
       }
 
       // Analyze approval patterns
       const totalMigrations = migrationResults.length;
-      const approvedMigrations = migrationResults.filter(r => r.workflow.status === 'APPROVED').length;
-      const rejectedMigrations = migrationResults.filter(r => r.workflow.status === 'REJECTED').length;
-      const executedMigrations = migrationResults.filter(r => r.metrics !== null).length;
+      const approvedMigrations = migrationResults.filter(
+        (r) => r.workflow.status === 'APPROVED',
+      ).length;
+      const rejectedMigrations = migrationResults.filter(
+        (r) => r.workflow.status === 'REJECTED',
+      ).length;
+      const executedMigrations = migrationResults.filter(
+        (r) => r.metrics !== null,
+      ).length;
 
       logger.log(`High Risk Migration Results:
         Total Migrations: ${totalMigrations}
@@ -686,20 +816,27 @@ describe('Database Migration Conversational Approval', () => {
 
   describe('Critical Risk Migration Approval', () => {
     it('should require comprehensive approval for critical schema operations', async () => {
-      const criticalRiskConfigs = MigrationTestUtils.generateMigrationTestConfigs()
-        .filter(config => config.riskLevel === DatabaseRiskLevel.CRITICAL);
+      const criticalRiskConfigs =
+        MigrationTestUtils.generateMigrationTestConfigs().filter(
+          (config) => config.riskLevel === DatabaseRiskLevel.CRITICAL,
+        );
 
-      logger.log(`Testing ${criticalRiskConfigs.length} critical-risk migration configurations`);
+      logger.log(
+        `Testing ${criticalRiskConfigs.length} critical-risk migration configurations`,
+      );
 
       // Mock Parlant service for critical-risk operations
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-migration-critical-risk',
-        reasoning: 'Critical migration requires maximum security validation and multi-party approval',
-        confidence: 0.75,
-        validationTimestamp: new Date(),
-        riskLevel: 'HIGH' as RiskLevelType // Critical operations map to HIGH risk in Parlant
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-migration-critical-risk',
+          reasoning:
+            'Critical migration requires maximum security validation and multi-party approval',
+          confidence: 0.75,
+          validationTimestamp: new Date(),
+          riskLevel: 'HIGH' as RiskLevelType, // Critical operations map to HIGH risk in Parlant
+        });
 
       const migrationResults = [];
 
@@ -707,37 +844,59 @@ describe('Database Migration Conversational Approval', () => {
         logger.log(`Processing CRITICAL migration: ${config.name}`);
 
         // Create approval workflow
-        const workflow = MigrationTestUtils.createMigrationApprovalWorkflow(config);
+        const workflow =
+          MigrationTestUtils.createMigrationApprovalWorkflow(config);
 
         // Verify comprehensive approval requirements for critical operations
         expect(workflow.requiredApprovers.length).toBeGreaterThanOrEqual(3);
-        expect(workflow.requiredApprovers.some(a => a.role === 'database_admin')).toBe(true);
-        expect(workflow.requiredApprovers.some(a => a.role === 'tech_lead')).toBe(true);
-        expect(workflow.requiredApprovers.some(a => a.role === 'engineering_manager')).toBe(true);
-        expect(workflow.requiredApprovers.some(a => a.role === 'cto')).toBe(true);
+        expect(
+          workflow.requiredApprovers.some((a) => a.role === 'database_admin'),
+        ).toBe(true);
+        expect(
+          workflow.requiredApprovers.some((a) => a.role === 'tech_lead'),
+        ).toBe(true);
+        expect(
+          workflow.requiredApprovers.some(
+            (a) => a.role === 'engineering_manager',
+          ),
+        ).toBe(true);
+        expect(workflow.requiredApprovers.some((a) => a.role === 'cto')).toBe(
+          true,
+        );
 
         // Simulate strict approval process (lower auto-approval rate for critical)
-        const approvedWorkflow = await MigrationTestUtils.simulateMigrationApproval(workflow, false);
+        const approvedWorkflow =
+          await MigrationTestUtils.simulateMigrationApproval(workflow, false);
 
         migrationResults.push({
           config,
           workflow: approvedWorkflow,
-          metrics: null
+          metrics: null,
         });
 
         // Log approval details
         logger.log(`${config.name} status: ${approvedWorkflow.status}`);
-        logger.log(`Approvals received: ${approvedWorkflow.approvals.length}/${workflow.requiredApprovers.length}`);
+        logger.log(
+          `Approvals received: ${approvedWorkflow.approvals.length}/${workflow.requiredApprovers.length}`,
+        );
 
         // Execute only if fully approved
         if (approvedWorkflow.status === 'APPROVED') {
           logger.log(`Executing critical migration: ${config.name}`);
 
-          const executionMetrics = await MigrationTestUtils.simulateMigrationExecution(config, approvedWorkflow);
-          migrationResults[migrationResults.length - 1]!.metrics = executionMetrics;
+          const executionMetrics =
+            await MigrationTestUtils.simulateMigrationExecution(
+              config,
+              approvedWorkflow,
+            );
+          migrationResults[migrationResults.length - 1]!.metrics =
+            executionMetrics;
 
           // Strict validation for critical migrations
-          const validation = MigrationTestUtils.validateMigrationMetrics(executionMetrics, config);
+          const validation = MigrationTestUtils.validateMigrationMetrics(
+            executionMetrics,
+            config,
+          );
           expect(validation.score).toBeGreaterThan(85); // Higher threshold for critical operations
           expect(executionMetrics.dataIntegrityMaintained).toBe(true);
         }
@@ -745,13 +904,26 @@ describe('Database Migration Conversational Approval', () => {
 
       // Comprehensive analysis of critical migration handling
       const totalMigrations = migrationResults.length;
-      const approvedMigrations = migrationResults.filter(r => r.workflow.status === 'APPROVED').length;
-      const rejectedMigrations = migrationResults.filter(r => r.workflow.status === 'REJECTED').length;
-      const executedMigrations = migrationResults.filter(r => r.metrics !== null).length;
+      const approvedMigrations = migrationResults.filter(
+        (r) => r.workflow.status === 'APPROVED',
+      ).length;
+      const rejectedMigrations = migrationResults.filter(
+        (r) => r.workflow.status === 'REJECTED',
+      ).length;
+      const executedMigrations = migrationResults.filter(
+        (r) => r.metrics !== null,
+      ).length;
 
-      const avgApprovalWorkflowTime = migrationResults
-        .filter(r => r.metrics)
-        .reduce((sum, r) => sum + (r.metrics as { approvalWorkflowTime: number })!.approvalWorkflowTime, 0) / (executedMigrations || 1);
+      const avgApprovalWorkflowTime =
+        migrationResults
+          .filter((r) => r.metrics)
+          .reduce(
+            (sum, r) =>
+              sum +
+              (r.metrics as { approvalWorkflowTime: number })!
+                .approvalWorkflowTime,
+            0,
+          ) / (executedMigrations || 1);
 
       logger.log(`Critical Risk Migration Results:
         Total Migrations: ${totalMigrations}
@@ -766,7 +938,9 @@ describe('Database Migration Conversational Approval', () => {
       expect(executedMigrations).toBeLessThanOrEqual(approvedMigrations);
 
       // All executed critical migrations must maintain data integrity
-      const executedResults = migrationResults.filter(r => r.metrics !== null);
+      const executedResults = migrationResults.filter(
+        (r) => r.metrics !== null,
+      );
       for (const result of executedResults) {
         expect(result.metrics!.dataIntegrityMaintained).toBe(true);
       }
@@ -779,31 +953,42 @@ describe('Database Migration Conversational Approval', () => {
     it('should handle migration rollbacks with conversational approval', async () => {
       logger.log('Testing migration rollback capabilities');
 
-      const rollbackTestConfigs = MigrationTestUtils.generateMigrationTestConfigs()
-        .filter(config => config.rollbackSupported);
+      const rollbackTestConfigs =
+        MigrationTestUtils.generateMigrationTestConfigs().filter(
+          (config) => config.rollbackSupported,
+        );
 
       // Mock Parlant service for rollback operations
-      jest.spyOn(parlantService as any, 'validateFunctionExecution').mockResolvedValue({
-        approved: true,
-        conversationId: 'conv-migration-rollback',
-        reasoning: 'Rollback operation approved due to migration failure',
-        confidence: 0.9,
-        validationTimestamp: new Date(),
-        riskLevel: 'MEDIUM' as RiskLevelType
-      });
+      jest
+        .spyOn(parlantService as any, 'validateFunctionExecution')
+        .mockResolvedValue({
+          approved: true,
+          conversationId: 'conv-migration-rollback',
+          reasoning: 'Rollback operation approved due to migration failure',
+          confidence: 0.9,
+          validationTimestamp: new Date(),
+          riskLevel: 'MEDIUM' as RiskLevelType,
+        });
 
       const rollbackResults = [];
 
-      for (const config of rollbackTestConfigs.slice(0, 3)) { // Test first 3 for time
+      for (const config of rollbackTestConfigs.slice(0, 3)) {
+        // Test first 3 for time
         logger.log(`Testing rollback for: ${config.name}`);
 
         // Create and approve migration
-        const workflow = MigrationTestUtils.createMigrationApprovalWorkflow(config);
-        const approvedWorkflow = await MigrationTestUtils.simulateMigrationApproval(workflow, true);
+        const workflow =
+          MigrationTestUtils.createMigrationApprovalWorkflow(config);
+        const approvedWorkflow =
+          await MigrationTestUtils.simulateMigrationApproval(workflow, true);
 
         if (approvedWorkflow.status === 'APPROVED') {
           // Execute migration
-          const executionMetrics = await MigrationTestUtils.simulateMigrationExecution(config, approvedWorkflow);
+          const executionMetrics =
+            await MigrationTestUtils.simulateMigrationExecution(
+              config,
+              approvedWorkflow,
+            );
 
           // Simulate rollback requirement (e.g., due to performance issues)
           const rollbackRequired = Math.random() < 0.3; // 30% chance of rollback need
@@ -813,19 +998,21 @@ describe('Database Migration Conversational Approval', () => {
 
             // Simulate rollback execution
             const rollbackStart = Date.now();
-            await new Promise(resolve => setTimeout(resolve, config.estimatedDuration * 0.3));
+            await new Promise((resolve) =>
+              setTimeout(resolve, config.estimatedDuration * 0.3),
+            );
             const rollbackTime = Date.now() - rollbackStart;
 
             const rollbackMetrics = {
               ...executionMetrics,
               rollbackTime,
-              rollbackExecuted: true
+              rollbackExecuted: true,
             };
 
             rollbackResults.push({
               config,
               originalMetrics: executionMetrics,
-              rollbackMetrics
+              rollbackMetrics,
             });
 
             // Verify rollback data integrity
@@ -837,12 +1024,14 @@ describe('Database Migration Conversational Approval', () => {
       logger.log(`Rollback Testing Results:
         Tested Configurations: ${rollbackTestConfigs.length}
         Rollbacks Executed: ${rollbackResults.length}
-        All Rollbacks Successful: ${rollbackResults.every(r => r.rollbackMetrics.dataIntegrityMaintained)}`);
+        All Rollbacks Successful: ${rollbackResults.every((r) => r.rollbackMetrics.dataIntegrityMaintained)}`);
 
       // All rollbacks should maintain data integrity
       for (const result of rollbackResults) {
         expect(result.rollbackMetrics.dataIntegrityMaintained).toBe(true);
-        expect(result.rollbackMetrics.rollbackTime).toBeLessThan(result.config.estimatedDuration);
+        expect(result.rollbackMetrics.rollbackTime).toBeLessThan(
+          result.config.estimatedDuration,
+        );
       }
     }, 90000);
   });

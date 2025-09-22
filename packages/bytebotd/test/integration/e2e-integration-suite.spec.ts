@@ -76,7 +76,15 @@ interface E2EUserJourney {
  */
 interface E2EJourneyStep {
   name: string;
-  type: 'AUTH' | 'API_CALL' | 'WEBSOCKET' | 'DATABASE' | 'COMPUTER_USE' | 'BROWSER_USE' | 'VALIDATION' | 'CLEANUP';
+  type:
+    | 'AUTH'
+    | 'API_CALL'
+    | 'WEBSOCKET'
+    | 'DATABASE'
+    | 'COMPUTER_USE'
+    | 'BROWSER_USE'
+    | 'VALIDATION'
+    | 'CLEANUP';
   action: string;
   input: Record<string, unknown>;
   expectedOutput: Record<string, unknown>;
@@ -210,7 +218,7 @@ class E2EIntegrationTestContext {
   }
 
   cleanup(): void {
-    this.connections.forEach(ws => ws.close());
+    this.connections.forEach((ws) => ws.close());
     this.connections.clear();
     this.activeTransactions.clear();
     this.performanceTimers.clear();
@@ -230,39 +238,70 @@ class E2EIntegrationTestUtils {
     return [
       {
         name: 'Complete PARLANT Validated Computer Use Journey',
-        description: 'End-to-end user journey with computer use operations validated through PARLANT',
+        description:
+          'End-to-end user journey with computer use operations validated through PARLANT',
         expectedDurationMs: 3000,
         steps: [
           {
             name: 'authenticate_user',
             type: 'AUTH',
             action: 'login',
-            input: { username: 'e2e-test-user', password: 'secure-password', role: 'employee' },
-            expectedOutput: { authenticated: true, token: 'string', sessionId: 'string' },
+            input: {
+              username: 'e2e-test-user',
+              password: 'secure-password',
+              role: 'employee',
+            },
+            expectedOutput: {
+              authenticated: true,
+              token: 'string',
+              sessionId: 'string',
+            },
             maxDurationMs: 500,
             dependencies: [],
             validationRules: ['valid_jwt_token', 'session_created'],
-            retryPolicy: { maxRetries: 3, backoffMs: 500, exponentialBackoff: true, retryableErrors: ['NETWORK_ERROR'] }
+            retryPolicy: {
+              maxRetries: 3,
+              backoffMs: 500,
+              exponentialBackoff: true,
+              retryableErrors: ['NETWORK_ERROR'],
+            },
           },
           {
             name: 'establish_parlant_session',
             type: 'API_CALL',
             action: 'create_parlant_session',
-            input: { token: '{{authenticate_user.token}}', conversationType: 'computer_use_validation' },
-            expectedOutput: { sessionId: 'string', conversationId: 'string', status: 'active' },
+            input: {
+              token: '{{authenticate_user.token}}',
+              conversationType: 'computer_use_validation',
+            },
+            expectedOutput: {
+              sessionId: 'string',
+              conversationId: 'string',
+              status: 'active',
+            },
             maxDurationMs: 800,
             dependencies: ['authenticate_user'],
-            validationRules: ['parlant_session_active', 'conversation_initialized']
+            validationRules: [
+              'parlant_session_active',
+              'conversation_initialized',
+            ],
           },
           {
             name: 'connect_websocket_stream',
             type: 'WEBSOCKET',
             action: 'establish_connection',
-            input: { sessionId: '{{establish_parlant_session.sessionId}}', protocol: 'parlant-validation' },
-            expectedOutput: { connected: true, connectionId: 'string', streamReady: true },
+            input: {
+              sessionId: '{{establish_parlant_session.sessionId}}',
+              protocol: 'parlant-validation',
+            },
+            expectedOutput: {
+              connected: true,
+              connectionId: 'string',
+              streamReady: true,
+            },
             maxDurationMs: 600,
             dependencies: ['establish_parlant_session'],
-            validationRules: ['websocket_connected', 'stream_ready']
+            validationRules: ['websocket_connected', 'stream_ready'],
           },
           {
             name: 'request_computer_use_operation',
@@ -271,12 +310,16 @@ class E2EIntegrationTestUtils {
             input: {
               coordinates: { x: 100, y: 200 },
               sessionId: '{{establish_parlant_session.sessionId}}',
-              requiresParlantValidation: true
+              requiresParlantValidation: true,
             },
-            expectedOutput: { operationQueued: true, validationRequired: true, validationId: 'string' },
+            expectedOutput: {
+              operationQueued: true,
+              validationRequired: true,
+              validationId: 'string',
+            },
             maxDurationMs: 300,
             dependencies: ['connect_websocket_stream'],
-            validationRules: ['operation_queued', 'validation_initiated']
+            validationRules: ['operation_queued', 'validation_initiated'],
           },
           {
             name: 'parlant_conversational_validation',
@@ -285,12 +328,16 @@ class E2EIntegrationTestUtils {
             input: {
               validationId: '{{request_computer_use_operation.validationId}}',
               userResponse: 'Yes, please click on the button',
-              confidence: 0.95
+              confidence: 0.95,
             },
-            expectedOutput: { approved: true, confidence: 'number', reasoning: 'string' },
+            expectedOutput: {
+              approved: true,
+              confidence: 'number',
+              reasoning: 'string',
+            },
             maxDurationMs: 1000,
             dependencies: ['request_computer_use_operation'],
-            validationRules: ['high_confidence_approval', 'reasoning_provided']
+            validationRules: ['high_confidence_approval', 'reasoning_provided'],
           },
           {
             name: 'execute_validated_operation',
@@ -298,12 +345,17 @@ class E2EIntegrationTestUtils {
             action: 'execute_approved_operation',
             input: {
               validationId: '{{request_computer_use_operation.validationId}}',
-              approvalToken: '{{parlant_conversational_validation.approvalToken}}'
+              approvalToken:
+                '{{parlant_conversational_validation.approvalToken}}',
             },
-            expectedOutput: { executed: true, result: 'object', executionTime: 'number' },
+            expectedOutput: {
+              executed: true,
+              result: 'object',
+              executionTime: 'number',
+            },
             maxDurationMs: 500,
             dependencies: ['parlant_conversational_validation'],
-            validationRules: ['operation_executed', 'result_captured']
+            validationRules: ['operation_executed', 'result_captured'],
           },
           {
             name: 'log_operation_to_database',
@@ -312,12 +364,16 @@ class E2EIntegrationTestUtils {
             input: {
               operationId: '{{execute_validated_operation.operationId}}',
               validationData: '{{parlant_conversational_validation}}',
-              executionResult: '{{execute_validated_operation.result}}'
+              executionResult: '{{execute_validated_operation.result}}',
             },
-            expectedOutput: { stored: true, auditId: 'string', timestamp: 'string' },
+            expectedOutput: {
+              stored: true,
+              auditId: 'string',
+              timestamp: 'string',
+            },
             maxDurationMs: 400,
             dependencies: ['execute_validated_operation'],
-            validationRules: ['audit_stored', 'data_integrity_maintained']
+            validationRules: ['audit_stored', 'data_integrity_maintained'],
           },
           {
             name: 'cleanup_session',
@@ -325,42 +381,66 @@ class E2EIntegrationTestUtils {
             action: 'close_all_connections',
             input: {
               sessionId: '{{establish_parlant_session.sessionId}}',
-              connectionId: '{{connect_websocket_stream.connectionId}}'
+              connectionId: '{{connect_websocket_stream.connectionId}}',
             },
             expectedOutput: { cleaned: true, sessionsTerminated: 'number' },
             maxDurationMs: 300,
             dependencies: ['log_operation_to_database'],
-            validationRules: ['all_connections_closed', 'resources_freed']
-          }
+            validationRules: ['all_connections_closed', 'resources_freed'],
+          },
         ],
         validationCriteria: {
-          requiredSuccessfulSteps: ['authenticate_user', 'parlant_conversational_validation', 'execute_validated_operation'],
-          dataIntegrityChecks: ['audit_log_consistency', 'session_data_cleanup'],
-          performanceThresholds: { 'total_duration': 3000, 'parlant_validation': 1000, 'operation_execution': 500 },
-          securityValidations: ['jwt_validation', 'session_security', 'operation_authorization']
+          requiredSuccessfulSteps: [
+            'authenticate_user',
+            'parlant_conversational_validation',
+            'execute_validated_operation',
+          ],
+          dataIntegrityChecks: [
+            'audit_log_consistency',
+            'session_data_cleanup',
+          ],
+          performanceThresholds: {
+            total_duration: 3000,
+            parlant_validation: 1000,
+            operation_execution: 500,
+          },
+          securityValidations: [
+            'jwt_validation',
+            'session_security',
+            'operation_authorization',
+          ],
         },
         performanceTargets: {
           totalDurationMaxMs: 3000,
           averageStepDurationMaxMs: 500,
           p95ResponseTimeMaxMs: 800,
           errorRateMaxPercent: 1,
-          throughputMinRequestsPerSecond: 10
-        }
+          throughputMinRequestsPerSecond: 10,
+        },
       },
       {
         name: 'Multi-Service Browser Use Integration Journey',
-        description: 'Cross-service integration with Browser-Use, PARLANT validation, and real-time streaming',
+        description:
+          'Cross-service integration with Browser-Use, PARLANT validation, and real-time streaming',
         expectedDurationMs: 4000,
         steps: [
           {
             name: 'initialize_browser_session',
             type: 'BROWSER_USE',
             action: 'start_browser',
-            input: { browserType: 'chrome', headless: false, viewport: { width: 1920, height: 1080 } },
-            expectedOutput: { browserStarted: true, sessionId: 'string', pageUrl: 'string' },
+            input: {
+              browserType: 'chrome',
+              headless: false,
+              viewport: { width: 1920, height: 1080 },
+            },
+            expectedOutput: {
+              browserStarted: true,
+              sessionId: 'string',
+              pageUrl: 'string',
+            },
             maxDurationMs: 1000,
             dependencies: [],
-            validationRules: ['browser_running', 'page_loaded']
+            validationRules: ['browser_running', 'page_loaded'],
           },
           {
             name: 'setup_parlant_browser_validation',
@@ -369,12 +449,12 @@ class E2EIntegrationTestUtils {
             input: {
               browserSessionId: '{{initialize_browser_session.sessionId}}',
               validationLevel: 'high',
-              realTimeValidation: true
+              realTimeValidation: true,
             },
             expectedOutput: { configured: true, validationStreamId: 'string' },
             maxDurationMs: 600,
             dependencies: ['initialize_browser_session'],
-            validationRules: ['validation_configured', 'stream_established']
+            validationRules: ['validation_configured', 'stream_established'],
           },
           {
             name: 'navigate_with_validation',
@@ -384,12 +464,16 @@ class E2EIntegrationTestUtils {
               url: 'https://example.com',
               sessionId: '{{initialize_browser_session.sessionId}}',
               requireValidation: true,
-              validationPrompt: 'Navigate to example website for testing'
+              validationPrompt: 'Navigate to example website for testing',
             },
-            expectedOutput: { navigationQueued: true, validationRequired: true, validationId: 'string' },
+            expectedOutput: {
+              navigationQueued: true,
+              validationRequired: true,
+              validationId: 'string',
+            },
             maxDurationMs: 500,
             dependencies: ['setup_parlant_browser_validation'],
-            validationRules: ['navigation_queued', 'validation_requested']
+            validationRules: ['navigation_queued', 'validation_requested'],
           },
           {
             name: 'stream_validation_conversation',
@@ -397,13 +481,18 @@ class E2EIntegrationTestUtils {
             action: 'real_time_validation',
             input: {
               validationId: '{{navigate_with_validation.validationId}}',
-              streamId: '{{setup_parlant_browser_validation.validationStreamId}}',
-              conversationType: 'browser_navigation_approval'
+              streamId:
+                '{{setup_parlant_browser_validation.validationStreamId}}',
+              conversationType: 'browser_navigation_approval',
             },
-            expectedOutput: { approved: true, streamingComplete: true, confidence: 'number' },
+            expectedOutput: {
+              approved: true,
+              streamingComplete: true,
+              confidence: 'number',
+            },
             maxDurationMs: 1200,
             dependencies: ['navigate_with_validation'],
-            validationRules: ['approval_received', 'high_confidence']
+            validationRules: ['approval_received', 'high_confidence'],
           },
           {
             name: 'execute_browser_navigation',
@@ -411,12 +500,16 @@ class E2EIntegrationTestUtils {
             action: 'complete_navigation',
             input: {
               validationId: '{{navigate_with_validation.validationId}}',
-              approvalData: '{{stream_validation_conversation}}'
+              approvalData: '{{stream_validation_conversation}}',
             },
-            expectedOutput: { navigated: true, pageLoaded: true, loadTime: 'number' },
+            expectedOutput: {
+              navigated: true,
+              pageLoaded: true,
+              loadTime: 'number',
+            },
             maxDurationMs: 800,
             dependencies: ['stream_validation_conversation'],
-            validationRules: ['page_loaded', 'navigation_successful']
+            validationRules: ['page_loaded', 'navigation_successful'],
           },
           {
             name: 'validate_page_interaction',
@@ -426,14 +519,18 @@ class E2EIntegrationTestUtils {
               sessionId: '{{initialize_browser_session.sessionId}}',
               interactions: [
                 { type: 'click', selector: '#main-button' },
-                { type: 'type', selector: '#input-field', text: 'test input' }
+                { type: 'type', selector: '#input-field', text: 'test input' },
               ],
-              requireValidation: true
+              requireValidation: true,
             },
-            expectedOutput: { interactionsQueued: true, validationRequired: true, validationIds: 'array' },
+            expectedOutput: {
+              interactionsQueued: true,
+              validationRequired: true,
+              validationIds: 'array',
+            },
             maxDurationMs: 600,
             dependencies: ['execute_browser_navigation'],
-            validationRules: ['interactions_queued', 'validations_required']
+            validationRules: ['interactions_queued', 'validations_required'],
           },
           {
             name: 'cleanup_browser_session',
@@ -443,23 +540,38 @@ class E2EIntegrationTestUtils {
             expectedOutput: { browserClosed: true, sessionTerminated: true },
             maxDurationMs: 400,
             dependencies: ['validate_page_interaction'],
-            validationRules: ['browser_closed', 'session_cleaned']
-          }
+            validationRules: ['browser_closed', 'session_cleaned'],
+          },
         ],
         validationCriteria: {
-          requiredSuccessfulSteps: ['initialize_browser_session', 'stream_validation_conversation', 'execute_browser_navigation'],
-          dataIntegrityChecks: ['browser_session_consistency', 'validation_data_integrity'],
-          performanceThresholds: { 'browser_startup': 1000, 'page_load': 800, 'validation_stream': 1200 },
-          securityValidations: ['browser_security', 'validation_authorization', 'interaction_safety']
+          requiredSuccessfulSteps: [
+            'initialize_browser_session',
+            'stream_validation_conversation',
+            'execute_browser_navigation',
+          ],
+          dataIntegrityChecks: [
+            'browser_session_consistency',
+            'validation_data_integrity',
+          ],
+          performanceThresholds: {
+            browser_startup: 1000,
+            page_load: 800,
+            validation_stream: 1200,
+          },
+          securityValidations: [
+            'browser_security',
+            'validation_authorization',
+            'interaction_safety',
+          ],
         },
         performanceTargets: {
           totalDurationMaxMs: 4000,
           averageStepDurationMaxMs: 650,
           p95ResponseTimeMaxMs: 1000,
           errorRateMaxPercent: 2,
-          throughputMinRequestsPerSecond: 8
-        }
-      }
+          throughputMinRequestsPerSecond: 8,
+        },
+      },
     ];
   }
 
@@ -470,7 +582,7 @@ class E2EIntegrationTestUtils {
     journey: E2EUserJourney,
     app: INestApplication,
     context: E2EIntegrationTestContext,
-    logger: Logger
+    logger: Logger,
   ): Promise<{
     success: boolean;
     totalDuration: number;
@@ -496,25 +608,39 @@ class E2EIntegrationTestUtils {
 
         context.startTimer(step.name);
 
-        const stepResult = await this.executeJourneyStep(step, app, context, stepResults, logger);
+        const stepResult = await this.executeJourneyStep(
+          step,
+          app,
+          context,
+          stepResults,
+          logger,
+        );
 
         const stepDuration = context.endTimer(step.name);
         performanceMetrics[step.name] = stepDuration;
 
         if (stepResult.success) {
           stepResults[step.name] = stepResult.output;
-          logger.log(`Step ${step.name} completed successfully in ${stepDuration}ms`);
+          logger.log(
+            `Step ${step.name} completed successfully in ${stepDuration}ms`,
+          );
 
           // Validate step performance
           if (stepDuration > step.maxDurationMs) {
-            logger.warn(`Step ${step.name} exceeded max duration: ${stepDuration}ms > ${step.maxDurationMs}ms`);
+            logger.warn(
+              `Step ${step.name} exceeded max duration: ${stepDuration}ms > ${step.maxDurationMs}ms`,
+            );
           }
         } else {
           errors.push(`Step ${step.name} failed: ${stepResult.error}`);
           logger.error(`Step ${step.name} failed: ${stepResult.error}`);
 
           // Check if this is a critical step
-          if (journey.validationCriteria.requiredSuccessfulSteps.includes(step.name)) {
+          if (
+            journey.validationCriteria.requiredSuccessfulSteps.includes(
+              step.name,
+            )
+          ) {
             logger.error(`Critical step ${step.name} failed, aborting journey`);
             break;
           }
@@ -524,10 +650,17 @@ class E2EIntegrationTestUtils {
       const totalDuration = context.endTimer('total_journey');
 
       // Validate journey completion criteria
-      const journeyValidation = this.validateJourneyCompletion(journey, stepResults, performanceMetrics, errors);
+      const journeyValidation = this.validateJourneyCompletion(
+        journey,
+        stepResults,
+        performanceMetrics,
+        errors,
+      );
 
       logger.log(`Journey ${journey.name} completed in ${totalDuration}ms`);
-      logger.log(`Performance metrics: ${JSON.stringify(performanceMetrics, null, 2)}`);
+      logger.log(
+        `Performance metrics: ${JSON.stringify(performanceMetrics, null, 2)}`,
+      );
 
       return {
         success: journeyValidation.overallSuccess,
@@ -535,15 +668,17 @@ class E2EIntegrationTestUtils {
         stepResults,
         performanceMetrics,
         validationResults: journeyValidation.validationResults,
-        errors
+        errors,
       };
-
     } catch (error) {
       const totalDuration = context.endTimer('total_journey');
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       errors.push(`Journey execution failed: ${errorMessage}`);
 
-      logger.error(`Journey ${journey.name} failed after ${totalDuration}ms: ${errorMessage}`);
+      logger.error(
+        `Journey ${journey.name} failed after ${totalDuration}ms: ${errorMessage}`,
+      );
 
       return {
         success: false,
@@ -551,7 +686,7 @@ class E2EIntegrationTestUtils {
         stepResults,
         performanceMetrics,
         validationResults: {},
-        errors
+        errors,
       };
     }
   }
@@ -564,9 +699,12 @@ class E2EIntegrationTestUtils {
     app: INestApplication,
     context: E2EIntegrationTestContext,
     previousResults: Record<string, unknown>,
-    logger: Logger
-  ): Promise<{ success: boolean; output: Record<string, unknown>; error?: string }> {
-
+    logger: Logger,
+  ): Promise<{
+    success: boolean;
+    output: Record<string, unknown>;
+    error?: string;
+  }> {
     try {
       // Resolve input variables from previous step results
       const resolvedInput = this.resolveStepInputs(step.input, previousResults);
@@ -578,34 +716,71 @@ class E2EIntegrationTestUtils {
           output = await this.executeAuthStep(step, resolvedInput, app, logger);
           break;
         case 'API_CALL':
-          output = await this.executeApiCallStep(step, resolvedInput, app, logger);
+          output = await this.executeApiCallStep(
+            step,
+            resolvedInput,
+            app,
+            logger,
+          );
           break;
         case 'WEBSOCKET':
-          output = await this.executeWebSocketStep(step, resolvedInput, context, app, logger);
+          output = await this.executeWebSocketStep(
+            step,
+            resolvedInput,
+            context,
+            app,
+            logger,
+          );
           break;
         case 'DATABASE':
-          output = await this.executeDatabaseStep(step, resolvedInput, app, logger);
+          output = await this.executeDatabaseStep(
+            step,
+            resolvedInput,
+            app,
+            logger,
+          );
           break;
         case 'COMPUTER_USE':
-          output = await this.executeComputerUseStep(step, resolvedInput, app, logger);
+          output = await this.executeComputerUseStep(
+            step,
+            resolvedInput,
+            app,
+            logger,
+          );
           break;
         case 'BROWSER_USE':
-          output = await this.executeBrowserUseStep(step, resolvedInput, app, logger);
+          output = await this.executeBrowserUseStep(
+            step,
+            resolvedInput,
+            app,
+            logger,
+          );
           break;
         case 'VALIDATION':
-          output = await this.executeValidationStep(step, resolvedInput, app, logger);
+          output = await this.executeValidationStep(
+            step,
+            resolvedInput,
+            app,
+            logger,
+          );
           break;
         case 'CLEANUP':
-          output = await this.executeCleanupStep(step, resolvedInput, context, app, logger);
+          output = await this.executeCleanupStep(
+            step,
+            resolvedInput,
+            context,
+            app,
+            logger,
+          );
           break;
         default:
           throw new Error(`Unknown step type: ${step.type}`);
       }
 
       return { success: true, output };
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       logger.error(`Step ${step.name} execution failed: ${errorMessage}`);
 
       return { success: false, output: {}, error: errorMessage };
@@ -619,7 +794,7 @@ class E2EIntegrationTestUtils {
     step: E2EJourneyStep,
     input: Record<string, unknown>,
     app: INestApplication,
-    logger: Logger
+    logger: Logger,
   ): Promise<Record<string, unknown>> {
     logger.log(`Executing auth step: ${step.action}`);
 
@@ -634,8 +809,8 @@ class E2EIntegrationTestUtils {
         sessionId,
         user: {
           username: input.username,
-          role: input.role
-        }
+          role: input.role,
+        },
       };
     }
 
@@ -649,7 +824,7 @@ class E2EIntegrationTestUtils {
     step: E2EJourneyStep,
     input: Record<string, unknown>,
     app: INestApplication,
-    logger: Logger
+    logger: Logger,
   ): Promise<Record<string, unknown>> {
     logger.log(`Executing API call step: ${step.action}`);
 
@@ -661,7 +836,7 @@ class E2EIntegrationTestUtils {
         sessionId,
         conversationId,
         status: 'active',
-        conversationType: input.conversationType
+        conversationType: input.conversationType,
       };
     }
 
@@ -672,7 +847,7 @@ class E2EIntegrationTestUtils {
         configured: true,
         validationStreamId,
         validationLevel: input.validationLevel,
-        realTimeValidation: input.realTimeValidation
+        realTimeValidation: input.realTimeValidation,
       };
     }
 
@@ -687,7 +862,7 @@ class E2EIntegrationTestUtils {
     input: Record<string, unknown>,
     context: E2EIntegrationTestContext,
     app: INestApplication,
-    logger: Logger
+    logger: Logger,
   ): Promise<Record<string, unknown>> {
     logger.log(`Executing WebSocket step: ${step.action}`);
 
@@ -702,20 +877,20 @@ class E2EIntegrationTestUtils {
         connected: true,
         connectionId,
         streamReady: true,
-        protocol: input.protocol
+        protocol: input.protocol,
       };
     }
 
     if (step.action === 'real_time_validation') {
       // Simulate real-time validation conversation
-      await new Promise(resolve => setTimeout(resolve, 200)); // Simulate processing time
+      await new Promise((resolve) => setTimeout(resolve, 200)); // Simulate processing time
 
       return {
         approved: true,
         streamingComplete: true,
         confidence: 0.92,
         reasoning: 'User provided clear approval for browser navigation',
-        validationTimestamp: new Date().toISOString()
+        validationTimestamp: new Date().toISOString(),
       };
     }
 
@@ -729,7 +904,7 @@ class E2EIntegrationTestUtils {
     step: E2EJourneyStep,
     input: Record<string, unknown>,
     app: INestApplication,
-    logger: Logger
+    logger: Logger,
   ): Promise<Record<string, unknown>> {
     logger.log(`Executing database step: ${step.action}`);
 
@@ -742,7 +917,7 @@ class E2EIntegrationTestUtils {
         auditId,
         timestamp,
         operationId: input.operationId,
-        dataIntegrityChecked: true
+        dataIntegrityChecked: true,
       };
     }
 
@@ -756,7 +931,7 @@ class E2EIntegrationTestUtils {
     step: E2EJourneyStep,
     input: Record<string, unknown>,
     app: INestApplication,
-    logger: Logger
+    logger: Logger,
   ): Promise<Record<string, unknown>> {
     logger.log(`Executing computer use step: ${step.action}`);
 
@@ -768,7 +943,7 @@ class E2EIntegrationTestUtils {
         validationRequired: input.requiresParlantValidation,
         validationId,
         coordinates: input.coordinates,
-        operationType: 'click'
+        operationType: 'click',
       };
     }
 
@@ -782,9 +957,9 @@ class E2EIntegrationTestUtils {
         result: {
           success: true,
           clickRegistered: true,
-          elementFound: true
+          elementFound: true,
         },
-        executionTime
+        executionTime,
       };
     }
 
@@ -798,7 +973,7 @@ class E2EIntegrationTestUtils {
     step: E2EJourneyStep,
     input: Record<string, unknown>,
     app: INestApplication,
-    logger: Logger
+    logger: Logger,
   ): Promise<Record<string, unknown>> {
     logger.log(`Executing browser use step: ${step.action}`);
 
@@ -811,7 +986,7 @@ class E2EIntegrationTestUtils {
         sessionId,
         pageUrl,
         browserType: input.browserType,
-        viewport: input.viewport
+        viewport: input.viewport,
       };
     }
 
@@ -822,7 +997,7 @@ class E2EIntegrationTestUtils {
         navigationQueued: true,
         validationRequired: input.requireValidation,
         validationId,
-        targetUrl: input.url
+        targetUrl: input.url,
       };
     }
 
@@ -833,20 +1008,20 @@ class E2EIntegrationTestUtils {
         navigated: true,
         pageLoaded: true,
         loadTime,
-        finalUrl: 'https://example.com'
+        finalUrl: 'https://example.com',
       };
     }
 
     if (step.action === 'interact_with_page') {
-      const validationIds = (input.interactions as Array<unknown>).map((_, index) =>
-        `interaction-validation-${Date.now()}-${index}`
+      const validationIds = (input.interactions as Array<unknown>).map(
+        (_, index) => `interaction-validation-${Date.now()}-${index}`,
       );
 
       return {
         interactionsQueued: true,
         validationRequired: input.requireValidation,
         validationIds,
-        interactionCount: validationIds.length
+        interactionCount: validationIds.length,
       };
     }
 
@@ -860,24 +1035,25 @@ class E2EIntegrationTestUtils {
     step: E2EJourneyStep,
     input: Record<string, unknown>,
     app: INestApplication,
-    logger: Logger
+    logger: Logger,
   ): Promise<Record<string, unknown>> {
     logger.log(`Executing validation step: ${step.action}`);
 
     if (step.action === 'validate_through_conversation') {
       // Simulate PARLANT conversational validation
-      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate processing time
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Simulate processing time
 
-      const confidence = input.confidence as number || 0.85;
+      const confidence = (input.confidence as number) || 0.85;
       const approvalToken = `approval-${Date.now()}`;
 
       return {
         approved: true,
         confidence,
-        reasoning: 'User provided clear consent for the requested computer operation',
+        reasoning:
+          'User provided clear consent for the requested computer operation',
         approvalToken,
         validationId: input.validationId,
-        validationTimestamp: new Date().toISOString()
+        validationTimestamp: new Date().toISOString(),
       };
     }
 
@@ -892,7 +1068,7 @@ class E2EIntegrationTestUtils {
     input: Record<string, unknown>,
     context: E2EIntegrationTestContext,
     app: INestApplication,
-    logger: Logger
+    logger: Logger,
   ): Promise<Record<string, unknown>> {
     logger.log(`Executing cleanup step: ${step.action}`);
 
@@ -907,7 +1083,7 @@ class E2EIntegrationTestUtils {
       return {
         cleaned: true,
         sessionsTerminated: 1,
-        connectionsClosed: 1
+        connectionsClosed: 1,
       };
     }
 
@@ -915,7 +1091,7 @@ class E2EIntegrationTestUtils {
       return {
         browserClosed: true,
         sessionTerminated: true,
-        sessionId: input.sessionId
+        sessionId: input.sessionId,
       };
     }
 
@@ -927,14 +1103,21 @@ class E2EIntegrationTestUtils {
    */
   private static resolveStepInputs(
     input: Record<string, unknown>,
-    previousResults: Record<string, unknown>
+    previousResults: Record<string, unknown>,
   ): Record<string, unknown> {
     const resolved: Record<string, unknown> = {};
 
     for (const [key, value] of Object.entries(input)) {
-      if (typeof value === 'string' && value.startsWith('{{') && value.endsWith('}}')) {
+      if (
+        typeof value === 'string' &&
+        value.startsWith('{{') &&
+        value.endsWith('}}')
+      ) {
         const variablePath = value.slice(2, -2);
-        const resolvedValue = this.getNestedValue(previousResults, variablePath);
+        const resolvedValue = this.getNestedValue(
+          previousResults,
+          variablePath,
+        );
         resolved[key] = resolvedValue !== undefined ? resolvedValue : value;
       } else {
         resolved[key] = value;
@@ -947,7 +1130,10 @@ class E2EIntegrationTestUtils {
   /**
    * Get nested value from object using dot notation
    */
-  private static getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+  private static getNestedValue(
+    obj: Record<string, unknown>,
+    path: string,
+  ): unknown {
     return path.split('.').reduce((current, key) => {
       if (current && typeof current === 'object' && key in current) {
         return (current as Record<string, unknown>)[key];
@@ -963,19 +1149,22 @@ class E2EIntegrationTestUtils {
     journey: E2EUserJourney,
     stepResults: Record<string, unknown>,
     performanceMetrics: Record<string, number>,
-    errors: string[]
+    errors: string[],
   ): { overallSuccess: boolean; validationResults: Record<string, boolean> } {
     const validationResults: Record<string, boolean> = {};
 
     // Check required successful steps
-    const requiredStepsSuccess = journey.validationCriteria.requiredSuccessfulSteps.every(stepName => {
-      const success = stepResults[stepName] !== undefined;
-      validationResults[`required_step_${stepName}`] = success;
-      return success;
-    });
+    const requiredStepsSuccess =
+      journey.validationCriteria.requiredSuccessfulSteps.every((stepName) => {
+        const success = stepResults[stepName] !== undefined;
+        validationResults[`required_step_${stepName}`] = success;
+        return success;
+      });
 
     // Check performance thresholds
-    const performanceValidation = Object.entries(journey.validationCriteria.performanceThresholds).every(([metric, threshold]) => {
+    const performanceValidation = Object.entries(
+      journey.validationCriteria.performanceThresholds,
+    ).every(([metric, threshold]) => {
       const actualValue = performanceMetrics[metric] || 0;
       const success = actualValue <= threshold;
       validationResults[`performance_${metric}`] = success;
@@ -983,10 +1172,14 @@ class E2EIntegrationTestUtils {
     });
 
     // Check error rate
-    const errorRateValid = errors.length <= (journey.steps.length * journey.performanceTargets.errorRateMaxPercent / 100);
+    const errorRateValid =
+      errors.length <=
+      (journey.steps.length * journey.performanceTargets.errorRateMaxPercent) /
+        100;
     validationResults['error_rate'] = errorRateValid;
 
-    const overallSuccess = requiredStepsSuccess && performanceValidation && errorRateValid;
+    const overallSuccess =
+      requiredStepsSuccess && performanceValidation && errorRateValid;
 
     return { overallSuccess, validationResults };
   }
@@ -1005,14 +1198,14 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: '.env.test'
+          envFilePath: '.env.test',
         }),
         AppModule,
         AuthModule,
         AiServicesModule,
         BrowserUseModule,
-        DatabaseModule
-      ]
+        DatabaseModule,
+      ],
     }).compile();
 
     app = testingModule.createNestApplication();
@@ -1039,7 +1232,9 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
   describe('Complete User Journey Testing', () => {
     it('should complete PARLANT validated computer use journey successfully', async () => {
       const scenarios = E2EIntegrationTestUtils.generateUserJourneyScenarios();
-      const computerUseJourney = scenarios.find(s => s.name === 'Complete PARLANT Validated Computer Use Journey');
+      const computerUseJourney = scenarios.find(
+        (s) => s.name === 'Complete PARLANT Validated Computer Use Journey',
+      );
 
       expect(computerUseJourney).toBeDefined();
 
@@ -1047,26 +1242,44 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         computerUseJourney,
         app,
         context,
-        logger
+        logger,
       );
 
-      logger.log(`Computer Use Journey Results: ${JSON.stringify({
-        success: result.success,
-        totalDuration: result.totalDuration,
-        errors: result.errors
-      }, null, 2)}`);
+      logger.log(
+        `Computer Use Journey Results: ${JSON.stringify(
+          {
+            success: result.success,
+            totalDuration: result.totalDuration,
+            errors: result.errors,
+          },
+          null,
+          2,
+        )}`,
+      );
 
       expect(result.success).toBe(true);
-      expect(result.totalDuration).toBeLessThan((computerUseJourney?.expectedDurationMs || 5000) + 1000); // Allow 1s buffer
+      expect(result.totalDuration).toBeLessThan(
+        (computerUseJourney?.expectedDurationMs || 5000) + 1000,
+      ); // Allow 1s buffer
       expect(result.errors).toHaveLength(0);
-      expect(result.validationResults['required_step_authenticate_user']).toBe(true);
-      expect(result.validationResults['required_step_parlant_conversational_validation']).toBe(true);
-      expect(result.validationResults['required_step_execute_validated_operation']).toBe(true);
+      expect(result.validationResults['required_step_authenticate_user']).toBe(
+        true,
+      );
+      expect(
+        result.validationResults[
+          'required_step_parlant_conversational_validation'
+        ],
+      ).toBe(true);
+      expect(
+        result.validationResults['required_step_execute_validated_operation'],
+      ).toBe(true);
     }, 15000);
 
     it('should handle multi-service browser use integration journey', async () => {
       const scenarios = E2EIntegrationTestUtils.generateUserJourneyScenarios();
-      const browserJourney = scenarios.find(s => s.name === 'Multi-Service Browser Use Integration Journey');
+      const browserJourney = scenarios.find(
+        (s) => s.name === 'Multi-Service Browser Use Integration Journey',
+      );
 
       expect(browserJourney).toBeDefined();
 
@@ -1074,20 +1287,32 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         browserJourney,
         app,
         context,
-        logger
+        logger,
       );
 
-      logger.log(`Browser Integration Journey Results: ${JSON.stringify({
-        success: result.success,
-        totalDuration: result.totalDuration,
-        performanceMetrics: result.performanceMetrics,
-        errors: result.errors
-      }, null, 2)}`);
+      logger.log(
+        `Browser Integration Journey Results: ${JSON.stringify(
+          {
+            success: result.success,
+            totalDuration: result.totalDuration,
+            performanceMetrics: result.performanceMetrics,
+            errors: result.errors,
+          },
+          null,
+          2,
+        )}`,
+      );
 
       expect(result.success).toBe(true);
-      expect(result.totalDuration).toBeLessThan((browserJourney?.expectedDurationMs || 5000) + 1000);
-      expect(result.performanceMetrics['initialize_browser_session']).toBeLessThan(1200);
-      expect(result.performanceMetrics['stream_validation_conversation']).toBeLessThan(1400);
+      expect(result.totalDuration).toBeLessThan(
+        (browserJourney?.expectedDurationMs || 5000) + 1000,
+      );
+      expect(
+        result.performanceMetrics['initialize_browser_session'],
+      ).toBeLessThan(1200);
+      expect(
+        result.performanceMetrics['stream_validation_conversation'],
+      ).toBeLessThan(1400);
       expect(result.errors.length).toBeLessThanOrEqual(1); // Allow minor non-critical errors
     }, 20000);
   });
@@ -1120,7 +1345,7 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         .send({
           operation: 'click',
           coordinates: { x: 100, y: 200 },
-          sessionId: parlantSessionResult.body.sessionId
+          sessionId: parlantSessionResult.body.sessionId,
         })
         .expect(201);
 
@@ -1147,7 +1372,10 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
             .set('Authorization', `Bearer ${authResult.body.token}`)
             .send({ conversationType: 'concurrent_test' });
 
-          return { authSuccess: authResult.status === 201, parlantSuccess: parlantResult.status === 201 };
+          return {
+            authSuccess: authResult.status === 201,
+            parlantSuccess: parlantResult.status === 201,
+          };
         })();
 
         requestPromises.push(requestPromise);
@@ -1157,14 +1385,21 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
       const results = await Promise.all(requestPromises);
       const totalDuration = Date.now() - startTime;
 
-      const successfulRequests = results.filter(r =>
-        (r as { authSuccess: boolean; parlantSuccess: boolean }).authSuccess &&
-        (r as { authSuccess: boolean; parlantSuccess: boolean }).parlantSuccess
+      const successfulRequests = results.filter(
+        (r) =>
+          (r as { authSuccess: boolean; parlantSuccess: boolean })
+            .authSuccess &&
+          (r as { authSuccess: boolean; parlantSuccess: boolean })
+            .parlantSuccess,
       ).length;
 
-      logger.log(`Concurrent requests: ${concurrentRequests}, Successful: ${successfulRequests}, Duration: ${totalDuration}ms`);
+      logger.log(
+        `Concurrent requests: ${concurrentRequests}, Successful: ${successfulRequests}, Duration: ${totalDuration}ms`,
+      );
 
-      expect(successfulRequests).toBeGreaterThanOrEqual(concurrentRequests * 0.9); // 90% success rate
+      expect(successfulRequests).toBeGreaterThanOrEqual(
+        concurrentRequests * 0.9,
+      ); // 90% success rate
       expect(totalDuration).toBeLessThan(5000);
     }, 15000);
   });
@@ -1179,7 +1414,9 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
       try {
         // Establish multiple WebSocket connections
         for (let i = 0; i < 5; i++) {
-          const ws = new WebSocket(`ws://localhost:3000/parlant-validation?userId=ws-test-${i}`);
+          const ws = new WebSocket(
+            `ws://localhost:3000/parlant-validation?userId=ws-test-${i}`,
+          );
           wsConnections.push(ws);
 
           await new Promise((resolve, reject) => {
@@ -1202,8 +1439,8 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
               data: {
                 operation: 'computer_click',
                 coordinates: { x: msgIndex * 10, y: msgIndex * 10 },
-                requiresApproval: true
-              }
+                requiresApproval: true,
+              },
             };
 
             ws.send(JSON.stringify(validationMessage));
@@ -1224,18 +1461,23 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
           }
         }
 
-        const averageLatency = messageLatencies.reduce((sum, lat) => sum + lat, 0) / messageLatencies.length;
-        const p95Latency = messageLatencies.sort((a, b) => a - b)[Math.floor(messageLatencies.length * 0.95)];
+        const averageLatency =
+          messageLatencies.reduce((sum, lat) => sum + lat, 0) /
+          messageLatencies.length;
+        const p95Latency = messageLatencies.sort((a, b) => a - b)[
+          Math.floor(messageLatencies.length * 0.95)
+        ];
 
-        logger.log(`WebSocket Performance: Avg Latency ${averageLatency.toFixed(2)}ms, P95 ${p95Latency}ms`);
+        logger.log(
+          `WebSocket Performance: Avg Latency ${averageLatency.toFixed(2)}ms, P95 ${p95Latency}ms`,
+        );
 
         expect(averageLatency).toBeLessThan(200);
         expect(p95Latency).toBeLessThan(500);
         expect(messageLatencies.length).toBeGreaterThan(40); // Most messages should succeed
-
       } finally {
         // Cleanup WebSocket connections
-        wsConnections.forEach(ws => {
+        wsConnections.forEach((ws) => {
           if (ws.readyState === WebSocket.OPEN) {
             ws.close();
           }
@@ -1257,7 +1499,7 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         table: 'user_data',
         criteria: { status: 'inactive' },
         estimatedAffectedRows: 150,
-        requiresConversationalApproval: true
+        requiresConversationalApproval: true,
       };
 
       const approvalResult = await request(app.getHttpServer())
@@ -1273,8 +1515,9 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         .post('/parlant/provide-database-approval')
         .send({
           conversationId: approvalResult.body.conversationId,
-          userResponse: 'Yes, please delete inactive user records older than 90 days',
-          confidence: 0.92
+          userResponse:
+            'Yes, please delete inactive user records older than 90 days',
+          confidence: 0.92,
         })
         .expect(201);
 
@@ -1286,14 +1529,16 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         .post('/database/execute-approved-operation')
         .send({
           transactionId,
-          approvalToken: conversationApproval.body.approvalToken
+          approvalToken: conversationApproval.body.approvalToken,
         })
         .expect(201);
 
       expect(executionResult.body.executed).toBe(true);
       expect(executionResult.body.auditLogId).toBeDefined();
 
-      logger.log(`Database integration workflow completed with audit log: ${executionResult.body.auditLogId}`);
+      logger.log(
+        `Database integration workflow completed with audit log: ${executionResult.body.auditLogId}`,
+      );
     }, 15000);
   });
 
@@ -1308,11 +1553,11 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         loadPatterns: ['steady', 'burst', 'gradual'],
         resourceMonitoring: true,
         performanceThresholds: {
-          'avgResponseTime': 1000,
-          'p95ResponseTime': 2000,
-          'errorRate': 0.05,
-          'throughput': 50
-        }
+          avgResponseTime: 1000,
+          p95ResponseTime: 2000,
+          errorRate: 0.05,
+          throughput: 50,
+        },
       };
 
       const performanceMetrics = {
@@ -1320,7 +1565,7 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         successfulRequests: 0,
         failedRequests: 0,
         responseTimes: [] as number[],
-        startTime: Date.now()
+        startTime: Date.now(),
       };
 
       const userPromises: Promise<void>[] = [];
@@ -1354,8 +1599,9 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
               }
 
               // Wait between requests to simulate realistic user behavior
-              await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 500));
-
+              await new Promise((resolve) =>
+                setTimeout(resolve, Math.random() * 2000 + 500),
+              );
             } catch (error) {
               performanceMetrics.failedRequests++;
               performanceMetrics.totalRequests++;
@@ -1367,17 +1613,28 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
 
         // Ramp up users gradually
         if (userId < loadConfig.concurrentUsers - 1) {
-          await new Promise(resolve => setTimeout(resolve, loadConfig.rampUpDurationMs / loadConfig.concurrentUsers));
+          await new Promise((resolve) =>
+            setTimeout(
+              resolve,
+              loadConfig.rampUpDurationMs / loadConfig.concurrentUsers,
+            ),
+          );
         }
       }
 
       await Promise.all(userPromises);
 
       const totalDuration = Date.now() - performanceMetrics.startTime;
-      const avgResponseTime = performanceMetrics.responseTimes.reduce((sum, time) => sum + time, 0) / performanceMetrics.responseTimes.length;
-      const p95ResponseTime = performanceMetrics.responseTimes.sort((a, b) => a - b)[Math.floor(performanceMetrics.responseTimes.length * 0.95)];
-      const errorRate = performanceMetrics.failedRequests / performanceMetrics.totalRequests;
-      const throughput = (performanceMetrics.totalRequests / totalDuration) * 1000; // requests per second
+      const avgResponseTime =
+        performanceMetrics.responseTimes.reduce((sum, time) => sum + time, 0) /
+        performanceMetrics.responseTimes.length;
+      const p95ResponseTime = performanceMetrics.responseTimes.sort(
+        (a, b) => a - b,
+      )[Math.floor(performanceMetrics.responseTimes.length * 0.95)];
+      const errorRate =
+        performanceMetrics.failedRequests / performanceMetrics.totalRequests;
+      const throughput =
+        (performanceMetrics.totalRequests / totalDuration) * 1000; // requests per second
 
       logger.log(`Performance Test Results:
         Total Duration: ${totalDuration}ms
@@ -1389,10 +1646,18 @@ describe('E2E Integration Testing Suite - PARLANT PHASE 1 Workflows', () => {
         Error Rate: ${(errorRate * 100).toFixed(2)}%
         Throughput: ${throughput.toFixed(2)} req/s`);
 
-      expect(avgResponseTime).toBeLessThan(loadConfig.performanceThresholds['avgResponseTime']);
-      expect(p95ResponseTime).toBeLessThan(loadConfig.performanceThresholds['p95ResponseTime']);
-      expect(errorRate).toBeLessThan(loadConfig.performanceThresholds['errorRate']);
-      expect(throughput).toBeGreaterThan(loadConfig.performanceThresholds['throughput']);
+      expect(avgResponseTime).toBeLessThan(
+        loadConfig.performanceThresholds['avgResponseTime'],
+      );
+      expect(p95ResponseTime).toBeLessThan(
+        loadConfig.performanceThresholds['p95ResponseTime'],
+      );
+      expect(errorRate).toBeLessThan(
+        loadConfig.performanceThresholds['errorRate'],
+      );
+      expect(throughput).toBeGreaterThan(
+        loadConfig.performanceThresholds['throughput'],
+      );
     }, 45000);
   });
 });

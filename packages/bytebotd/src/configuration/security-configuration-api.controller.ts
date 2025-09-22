@@ -35,7 +35,7 @@ import {
   Logger,
   HttpStatus,
   HttpException,
-  HttpCode
+  HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -45,7 +45,7 @@ import {
   ApiQuery,
   ApiBody,
   ApiBearerAuth,
-  ApiSecurity
+  ApiSecurity,
 } from '@nestjs/swagger';
 
 // PARLANT Validation Integration
@@ -55,7 +55,7 @@ import {
   ParlantValidated,
   ParlantCached,
   ParlantFast,
-  SecurityLevel
+  SecurityLevel,
 } from '@bytebot/shared/src/decorators/parlant-validation.decorator';
 import { ParlantValidationInterceptor } from '@bytebot/shared/src/interceptors/parlant-validation.interceptor';
 import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
@@ -82,7 +82,7 @@ export const ParlantSecurityPolicyRead = (description: string) =>
     securityLevel: SecurityLevel._HIGH,
     cacheable: true,
     cacheTtl: 60000, // 1 minute - security data should be fresh
-    timeout: 8000
+    timeout: 8000,
   });
 
 export const ParlantSecurityPolicyWrite = (description: string) =>
@@ -90,7 +90,7 @@ export const ParlantSecurityPolicyWrite = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 90000 // 90 seconds for comprehensive security validation
+    timeout: 90000, // 90 seconds for comprehensive security validation
   });
 
 export const ParlantEncryptionConfiguration = (description: string) =>
@@ -98,7 +98,7 @@ export const ParlantEncryptionConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 120000 // 2 minutes for encryption validation
+    timeout: 120000, // 2 minutes for encryption validation
   });
 
 export const ParlantAccessControlConfiguration = (description: string) =>
@@ -106,7 +106,7 @@ export const ParlantAccessControlConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 60000
+    timeout: 60000,
   });
 
 export const ParlantComplianceConfiguration = (description: string) =>
@@ -114,7 +114,7 @@ export const ParlantComplianceConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 75000
+    timeout: 75000,
   });
 
 export const ParlantThreatConfiguration = (description: string) =>
@@ -122,7 +122,7 @@ export const ParlantThreatConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._CRITICAL,
     cacheable: false,
-    timeout: 45000
+    timeout: 45000,
   });
 
 // ===== SECURITY CONFIGURATION DTOS =====
@@ -135,10 +135,25 @@ export interface SecurityPolicyConfigurationDto {
   name: string;
 
   /** Policy type */
-  type: 'AUTHENTICATION' | 'AUTHORIZATION' | 'ENCRYPTION' | 'AUDIT' | 'NETWORK' | 'DATA_PROTECTION' | 'INCIDENT_RESPONSE';
+  type:
+    | 'AUTHENTICATION'
+    | 'AUTHORIZATION'
+    | 'ENCRYPTION'
+    | 'AUDIT'
+    | 'NETWORK'
+    | 'DATA_PROTECTION'
+    | 'INCIDENT_RESPONSE';
 
   /** Policy framework */
-  framework: 'NIST' | 'ISO_27001' | 'SOC_2' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'FedRAMP' | 'CUSTOM';
+  framework:
+    | 'NIST'
+    | 'ISO_27001'
+    | 'SOC_2'
+    | 'GDPR'
+    | 'HIPAA'
+    | 'PCI_DSS'
+    | 'FedRAMP'
+    | 'CUSTOM';
 
   /** Policy configuration */
   configuration: {
@@ -337,7 +352,14 @@ export interface EncryptionConfigurationDto {
   name: string;
 
   /** Encryption scope */
-  scope: 'DATABASE' | 'FILESYSTEM' | 'COMMUNICATION' | 'BACKUP' | 'LOGS' | 'MEMORY' | 'APPLICATION';
+  scope:
+    | 'DATABASE'
+    | 'FILESYSTEM'
+    | 'COMMUNICATION'
+    | 'BACKUP'
+    | 'LOGS'
+    | 'MEMORY'
+    | 'APPLICATION';
 
   /** Encryption algorithms */
   algorithms: {
@@ -361,7 +383,13 @@ export interface EncryptionConfigurationDto {
 
   /** Key management */
   keyManagement: {
-    provider: 'AWS_KMS' | 'AZURE_KEY_VAULT' | 'GOOGLE_KMS' | 'HASHICORP_VAULT' | 'HSM' | 'LOCAL';
+    provider:
+      | 'AWS_KMS'
+      | 'AZURE_KEY_VAULT'
+      | 'GOOGLE_KMS'
+      | 'HASHICORP_VAULT'
+      | 'HSM'
+      | 'LOCAL';
     keyRotation: {
       enabled: boolean;
       interval: number; // days
@@ -395,7 +423,12 @@ export interface EncryptionConfigurationDto {
   compliance: {
     fipsCompliant: boolean;
     commonCriteria: string; // EAL level
-    certifications: ('FIPS_140_2' | 'COMMON_CRITERIA' | 'NIST_SP_800_57' | 'SUITE_B')[];
+    certifications: (
+      | 'FIPS_140_2'
+      | 'COMMON_CRITERIA'
+      | 'NIST_SP_800_57'
+      | 'SUITE_B'
+    )[];
     quantumResistant: boolean;
     exportRestrictions: {
       countries: string[];
@@ -475,7 +508,14 @@ export interface AccessControlConfigurationDto {
     attributes: {
       category: 'SUBJECT' | 'RESOURCE' | 'ACTION' | 'ENVIRONMENT';
       name: string;
-      type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'DATE' | 'TIME' | 'IP_ADDRESS' | 'REGEX';
+      type:
+        | 'STRING'
+        | 'NUMBER'
+        | 'BOOLEAN'
+        | 'DATE'
+        | 'TIME'
+        | 'IP_ADDRESS'
+        | 'REGEX';
       values: unknown[];
       required: boolean;
     }[];
@@ -489,7 +529,11 @@ export interface AccessControlConfigurationDto {
       priority: number;
     }[];
     algorithms: {
-      combining: 'FIRST_APPLICABLE' | 'ONLY_ONE_APPLICABLE' | 'PERMIT_OVERRIDES' | 'DENY_OVERRIDES';
+      combining:
+        | 'FIRST_APPLICABLE'
+        | 'ONLY_ONE_APPLICABLE'
+        | 'PERMIT_OVERRIDES'
+        | 'DENY_OVERRIDES';
       evaluation: 'EAGER' | 'LAZY';
     };
   };
@@ -560,7 +604,13 @@ export interface AccessControlConfigurationDto {
   integration: {
     identityProviders: {
       name: string;
-      type: 'LDAP' | 'ACTIVE_DIRECTORY' | 'SAML' | 'OAUTH' | 'OIDC' | 'KERBEROS';
+      type:
+        | 'LDAP'
+        | 'ACTIVE_DIRECTORY'
+        | 'SAML'
+        | 'OAUTH'
+        | 'OIDC'
+        | 'KERBEROS';
       configuration: Record<string, unknown>;
       priority: number;
       fallback: boolean;
@@ -587,7 +637,16 @@ export interface ComplianceConfigurationDto {
 
   /** Compliance frameworks */
   frameworks: {
-    name: 'SOX' | 'GDPR' | 'HIPAA' | 'PCI_DSS' | 'ISO_27001' | 'NIST' | 'FedRAMP' | 'SOC_2' | 'CUSTOM';
+    name:
+      | 'SOX'
+      | 'GDPR'
+      | 'HIPAA'
+      | 'PCI_DSS'
+      | 'ISO_27001'
+      | 'NIST'
+      | 'FedRAMP'
+      | 'SOC_2'
+      | 'CUSTOM';
     version: string;
     scope: 'FULL' | 'PARTIAL' | 'SPECIFIC_CONTROLS';
     applicableControls: string[];
@@ -605,7 +664,11 @@ export interface ComplianceConfigurationDto {
     category: 'ADMINISTRATIVE' | 'TECHNICAL' | 'PHYSICAL';
     priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     implementation: {
-      status: 'NOT_IMPLEMENTED' | 'PARTIALLY_IMPLEMENTED' | 'IMPLEMENTED' | 'VERIFIED';
+      status:
+        | 'NOT_IMPLEMENTED'
+        | 'PARTIALLY_IMPLEMENTED'
+        | 'IMPLEMENTED'
+        | 'VERIFIED';
       evidence: string[];
       owner: string;
       lastAssessment: Date;
@@ -692,7 +755,12 @@ export interface ThreatManagementConfigurationDto {
   threatIntelligence: {
     sources: {
       name: string;
-      type: 'COMMERCIAL' | 'OPEN_SOURCE' | 'GOVERNMENT' | 'INTERNAL' | 'PARTNERSHIP';
+      type:
+        | 'COMMERCIAL'
+        | 'OPEN_SOURCE'
+        | 'GOVERNMENT'
+        | 'INTERNAL'
+        | 'PARTNERSHIP';
       feed: string;
       credibility: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERIFIED';
       updateFrequency: number; // minutes
@@ -738,7 +806,12 @@ export interface ThreatManagementConfigurationDto {
       baselinePeriod: number; // days
       anomalyThreshold: number; // 0-100
       entities: ('USER' | 'DEVICE' | 'APPLICATION' | 'NETWORK')[];
-      behaviors: ('LOGIN' | 'DATA_ACCESS' | 'PRIVILEGE_USE' | 'NETWORK_ACTIVITY')[];
+      behaviors: (
+        | 'LOGIN'
+        | 'DATA_ACCESS'
+        | 'PRIVILEGE_USE'
+        | 'NETWORK_ACTIVITY'
+      )[];
     };
     soar: {
       enabled: boolean;
@@ -766,10 +839,24 @@ export interface ThreatManagementConfigurationDto {
         high: { responseTime: number; escalation: string[] };
         critical: { responseTime: number; escalation: string[] };
       };
-      categories: ('MALWARE' | 'PHISHING' | 'DDoS' | 'DATA_BREACH' | 'INSIDER_THREAT' | 'APT')[];
+      categories: (
+        | 'MALWARE'
+        | 'PHISHING'
+        | 'DDoS'
+        | 'DATA_BREACH'
+        | 'INSIDER_THREAT'
+        | 'APT'
+      )[];
     };
     workflow: {
-      stages: ('DETECTION' | 'ANALYSIS' | 'CONTAINMENT' | 'ERADICATION' | 'RECOVERY' | 'LESSONS_LEARNED')[];
+      stages: (
+        | 'DETECTION'
+        | 'ANALYSIS'
+        | 'CONTAINMENT'
+        | 'ERADICATION'
+        | 'RECOVERY'
+        | 'LESSONS_LEARNED'
+      )[];
       sla: {
         detection: number; // minutes
         response: number; // minutes
@@ -806,7 +893,9 @@ export class SecurityConfigurationApiController {
   private readonly logger = new Logger(SecurityConfigurationApiController.name);
 
   constructor() {
-    this.logger.log('Security Configuration API Controller initialized with CRITICAL PARLANT validation');
+    this.logger.log(
+      'Security Configuration API Controller initialized with CRITICAL PARLANT validation',
+    );
   }
 
   // ===== SECURITY POLICY MANAGEMENT =====
@@ -816,13 +905,41 @@ export class SecurityConfigurationApiController {
    */
   @Get('policies')
   @SecurityAdminOnly()
-  @ParlantSecurityPolicyRead('Retrieve security policies with comprehensive policy framework analysis')
+  @ParlantSecurityPolicyRead(
+    'Retrieve security policies with comprehensive policy framework analysis',
+  )
   @ApiOperation({
     summary: 'Get security policies',
-    description: 'Retrieve security policies with framework compliance information'
+    description:
+      'Retrieve security policies with framework compliance information',
   })
-  @ApiQuery({ name: 'type', required: false, enum: ['AUTHENTICATION', 'AUTHORIZATION', 'ENCRYPTION', 'AUDIT', 'NETWORK', 'DATA_PROTECTION', 'INCIDENT_RESPONSE'] })
-  @ApiQuery({ name: 'framework', required: false, enum: ['NIST', 'ISO_27001', 'SOC_2', 'GDPR', 'HIPAA', 'PCI_DSS', 'FedRAMP', 'CUSTOM'] })
+  @ApiQuery({
+    name: 'type',
+    required: false,
+    enum: [
+      'AUTHENTICATION',
+      'AUTHORIZATION',
+      'ENCRYPTION',
+      'AUDIT',
+      'NETWORK',
+      'DATA_PROTECTION',
+      'INCIDENT_RESPONSE',
+    ],
+  })
+  @ApiQuery({
+    name: 'framework',
+    required: false,
+    enum: [
+      'NIST',
+      'ISO_27001',
+      'SOC_2',
+      'GDPR',
+      'HIPAA',
+      'PCI_DSS',
+      'FedRAMP',
+      'CUSTOM',
+    ],
+  })
   async getSecurityPolicies(
     @Query('type') type?: string,
     @Query('framework') framework?: string,
@@ -847,7 +964,7 @@ export class SecurityConfigurationApiController {
       type,
       framework,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation - would retrieve from security policy store
@@ -867,28 +984,28 @@ export class SecurityConfigurationApiController {
               requireSpecialChars: true,
               prohibitCommonPasswords: true,
               passwordHistory: 12,
-              maxAge: 90
+              maxAge: 90,
             },
             mfaPolicy: {
               required: true,
               methods: ['TOTP', 'HARDWARE_TOKEN'],
               backupCodes: true,
-              gracePeriod: 24
+              gracePeriod: 24,
             },
             sessionPolicy: {
               maxDuration: 480, // 8 hours
               idleTimeout: 30,
               concurrentSessions: 3,
               ipBinding: true,
-              deviceBinding: true
+              deviceBinding: true,
             },
             lockoutPolicy: {
               maxAttempts: 3,
               lockoutDuration: 30,
               progressiveLockout: true,
-              notificationEnabled: true
-            }
-          }
+              notificationEnabled: true,
+            },
+          },
         },
         enforcement: {
           mode: 'ENFORCE',
@@ -896,7 +1013,7 @@ export class SecurityConfigurationApiController {
             users: [],
             roles: ['EMERGENCY_ACCESS'],
             resources: [],
-            timeWindows: []
+            timeWindows: [],
           },
           escalation: {
             levels: [
@@ -904,10 +1021,10 @@ export class SecurityConfigurationApiController {
                 level: 1,
                 actions: ['LOG', 'ALERT'],
                 approvers: ['security-team'],
-                timeout: 30
-              }
-            ]
-          }
+                timeout: 30,
+              },
+            ],
+          },
         },
         metadata: {
           version: '2.1.0',
@@ -917,11 +1034,13 @@ export class SecurityConfigurationApiController {
           lastReview: new Date(),
           nextReview: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days
           riskRating: 'HIGH',
-          businessJustification: 'Protect against credential-based attacks and unauthorized access',
-          regulatoryRequirements: ['SOX', 'GDPR', 'HIPAA']
+          businessJustification:
+            'Protect against credential-based attacks and unauthorized access',
+          regulatoryRequirements: ['SOX', 'GDPR', 'HIPAA'],
         },
-        justification: 'Enhanced authentication controls to meet enterprise security standards'
-      }
+        justification:
+          'Enhanced authentication controls to meet enterprise security standards',
+      },
     ];
 
     return {
@@ -931,14 +1050,14 @@ export class SecurityConfigurationApiController {
         policyCompliance: {
           compliant: 1,
           nonCompliant: 0,
-          underReview: 0
+          underReview: 0,
         },
         frameworkCoverage: {
-          'NIST': 95,
-          'ISO_27001': 88,
-          'SOC_2': 92
-        }
-      }
+          NIST: 95,
+          ISO_27001: 88,
+          SOC_2: 92,
+        },
+      },
     };
   }
 
@@ -947,10 +1066,13 @@ export class SecurityConfigurationApiController {
    */
   @Put('policies/:policyName')
   @SecurityAdminOnly()
-  @ParlantSecurityPolicyWrite('Update security policy with comprehensive risk assessment and compliance validation')
+  @ParlantSecurityPolicyWrite(
+    'Update security policy with comprehensive risk assessment and compliance validation',
+  )
   @ApiOperation({
     summary: 'Update security policy',
-    description: 'Update security policy with critical validation and impact assessment'
+    description:
+      'Update security policy with critical validation and impact assessment',
   })
   @ApiParam({ name: 'policyName', description: 'Security policy name' })
   async updateSecurityPolicy(
@@ -979,7 +1101,7 @@ export class SecurityConfigurationApiController {
       framework: policyDto.framework,
       enforcementMode: policyDto.enforcement.mode,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -987,10 +1109,16 @@ export class SecurityConfigurationApiController {
       this.validateSecurityPolicy(policyDto);
 
       // Perform risk assessment
-      const riskAssessment = await this.performSecurityPolicyRiskAssessment(policyName, policyDto);
+      const riskAssessment = await this.performSecurityPolicyRiskAssessment(
+        policyName,
+        policyDto,
+      );
 
       // Create change record
-      const changeId = await this.createSecurityPolicyChangeRecord(policyDto, user.id);
+      const changeId = await this.createSecurityPolicyChangeRecord(
+        policyDto,
+        user.id,
+      );
 
       // Apply security policy
       await this.applySecurityPolicy(policyName, policyDto, changeId);
@@ -1000,7 +1128,7 @@ export class SecurityConfigurationApiController {
         policyName,
         changeId,
         riskLevel: riskAssessment.riskLevel,
-        userId: user.id
+        userId: user.id,
       });
 
       return {
@@ -1008,20 +1136,19 @@ export class SecurityConfigurationApiController {
         policyName,
         changeId,
         riskAssessment,
-        effectiveDate: policyDto.metadata.effectiveDate
+        effectiveDate: policyDto.metadata.effectiveDate,
       };
-
     } catch (error) {
       this.logger.error(`[${operationId}] Security policy update failed`, {
         operationId,
         policyName,
         error: error instanceof Error ? error.message : String(error),
-        userId: user.id
+        userId: user.id,
       });
 
       throw new HttpException(
         `Security policy update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -1033,10 +1160,13 @@ export class SecurityConfigurationApiController {
    */
   @Put('encryption/:name')
   @SecurityAdminOnly()
-  @ParlantEncryptionConfiguration('Update encryption configuration with key management validation and compliance checking')
+  @ParlantEncryptionConfiguration(
+    'Update encryption configuration with key management validation and compliance checking',
+  )
   @ApiOperation({
     summary: 'Update encryption configuration',
-    description: 'Update encryption configuration with comprehensive key management validation'
+    description:
+      'Update encryption configuration with comprehensive key management validation',
   })
   @ApiParam({ name: 'name', description: 'Encryption configuration name' })
   async updateEncryptionConfiguration(
@@ -1064,7 +1194,7 @@ export class SecurityConfigurationApiController {
       symmetricAlgorithm: encryptionDto.algorithms.symmetric.algorithm,
       keyProvider: encryptionDto.keyManagement.provider,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -1075,41 +1205,52 @@ export class SecurityConfigurationApiController {
       const complianceStatus = this.assessEncryptionCompliance(encryptionDto);
 
       // Create change record
-      const changeId = await this.createEncryptionChangeRecord(encryptionDto, user.id);
+      const changeId = await this.createEncryptionChangeRecord(
+        encryptionDto,
+        user.id,
+      );
 
       // Apply encryption configuration
       await this.applyEncryptionConfiguration(name, encryptionDto, changeId);
 
       // Determine if key rotation is required
-      const keyRotationRequired = await this.assessKeyRotationRequirement(name, encryptionDto);
-
-      this.logger.log(`[${operationId}] Encryption configuration updated successfully`, {
-        operationId,
+      const keyRotationRequired = await this.assessKeyRotationRequirement(
         name,
-        changeId,
-        keyRotationRequired,
-        userId: user.id
-      });
+        encryptionDto,
+      );
+
+      this.logger.log(
+        `[${operationId}] Encryption configuration updated successfully`,
+        {
+          operationId,
+          name,
+          changeId,
+          keyRotationRequired,
+          userId: user.id,
+        },
+      );
 
       return {
         success: true,
         name,
         changeId,
         keyRotationRequired,
-        complianceStatus
+        complianceStatus,
       };
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Encryption configuration update failed`, {
-        operationId,
-        name,
-        error: error instanceof Error ? error.message : String(error),
-        userId: user.id
-      });
+      this.logger.error(
+        `[${operationId}] Encryption configuration update failed`,
+        {
+          operationId,
+          name,
+          error: error instanceof Error ? error.message : String(error),
+          userId: user.id,
+        },
+      );
 
       throw new HttpException(
         `Encryption configuration update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -1121,10 +1262,13 @@ export class SecurityConfigurationApiController {
    */
   @Put('access-control/:name')
   @SecurityAdminOnly()
-  @ParlantAccessControlConfiguration('Update access control configuration with privilege escalation detection and zero-trust validation')
+  @ParlantAccessControlConfiguration(
+    'Update access control configuration with privilege escalation detection and zero-trust validation',
+  )
   @ApiOperation({
     summary: 'Update access control configuration',
-    description: 'Update access control configuration with privilege and zero-trust validation'
+    description:
+      'Update access control configuration with privilege and zero-trust validation',
   })
   @ApiParam({ name: 'name', description: 'Access control configuration name' })
   async updateAccessControlConfiguration(
@@ -1156,7 +1300,7 @@ export class SecurityConfigurationApiController {
       pamEnabled: accessControlDto.pam.enabled,
       zeroTrustEnabled: accessControlDto.zeroTrust.enabled,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -1164,44 +1308,58 @@ export class SecurityConfigurationApiController {
       this.validateAccessControlConfiguration(accessControlDto);
 
       // Analyze privilege escalation risks
-      const privilegeAnalysis = await this.analyzePrivilegeEscalationRisks(accessControlDto);
+      const privilegeAnalysis =
+        await this.analyzePrivilegeEscalationRisks(accessControlDto);
 
       // Assess zero-trust compliance
-      const zeroTrustCompliance = this.assessZeroTrustCompliance(accessControlDto);
+      const zeroTrustCompliance =
+        this.assessZeroTrustCompliance(accessControlDto);
 
       // Create change record
-      const changeId = await this.createAccessControlChangeRecord(accessControlDto, user.id);
+      const changeId = await this.createAccessControlChangeRecord(
+        accessControlDto,
+        user.id,
+      );
 
       // Apply access control configuration
-      await this.applyAccessControlConfiguration(name, accessControlDto, changeId);
-
-      this.logger.log(`[${operationId}] Access control configuration updated successfully`, {
-        operationId,
+      await this.applyAccessControlConfiguration(
         name,
+        accessControlDto,
         changeId,
-        privilegeRisk: privilegeAnalysis.privilegeEscalationRisk,
-        userId: user.id
-      });
+      );
+
+      this.logger.log(
+        `[${operationId}] Access control configuration updated successfully`,
+        {
+          operationId,
+          name,
+          changeId,
+          privilegeRisk: privilegeAnalysis.privilegeEscalationRisk,
+          userId: user.id,
+        },
+      );
 
       return {
         success: true,
         name,
         changeId,
         privilegeAnalysis,
-        zeroTrustCompliance
+        zeroTrustCompliance,
       };
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Access control configuration update failed`, {
-        operationId,
-        name,
-        error: error instanceof Error ? error.message : String(error),
-        userId: user.id
-      });
+      this.logger.error(
+        `[${operationId}] Access control configuration update failed`,
+        {
+          operationId,
+          name,
+          error: error instanceof Error ? error.message : String(error),
+          userId: user.id,
+        },
+      );
 
       throw new HttpException(
         `Access control configuration update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -1212,66 +1370,86 @@ export class SecurityConfigurationApiController {
     if (!dto.justification || dto.justification.length < 50) {
       throw new HttpException(
         'Comprehensive justification required for security policy changes (minimum 50 characters)',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
-    if (dto.enforcement.mode === 'ENFORCE' && dto.metadata.riskRating === 'CRITICAL') {
-      if (!dto.metadata.regulatoryRequirements || dto.metadata.regulatoryRequirements.length === 0) {
+    if (
+      dto.enforcement.mode === 'ENFORCE' &&
+      dto.metadata.riskRating === 'CRITICAL'
+    ) {
+      if (
+        !dto.metadata.regulatoryRequirements ||
+        dto.metadata.regulatoryRequirements.length === 0
+      ) {
         throw new HttpException(
           'Regulatory requirements must be specified for critical enforcement policies',
-          HttpStatus.BAD_REQUEST
+          HttpStatus.BAD_REQUEST,
         );
       }
     }
   }
 
-  private validateEncryptionConfiguration(dto: EncryptionConfigurationDto): void {
+  private validateEncryptionConfiguration(
+    dto: EncryptionConfigurationDto,
+  ): void {
     if (!dto.justification || dto.justification.length < 30) {
       throw new HttpException(
         'Detailed justification required for encryption configuration changes',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
     if (dto.algorithms.symmetric.keySize < 256) {
       throw new HttpException(
         'Minimum 256-bit key size required for symmetric encryption',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
-    if (dto.compliance.fipsCompliant && !dto.compliance.certifications.includes('FIPS_140_2')) {
+    if (
+      dto.compliance.fipsCompliant &&
+      !dto.compliance.certifications.includes('FIPS_140_2')
+    ) {
       throw new HttpException(
         'FIPS 140-2 certification required when FIPS compliance is enabled',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
 
-  private validateAccessControlConfiguration(dto: AccessControlConfigurationDto): void {
+  private validateAccessControlConfiguration(
+    dto: AccessControlConfigurationDto,
+  ): void {
     if (!dto.justification || dto.justification.length < 25) {
       throw new HttpException(
         'Detailed justification required for access control configuration changes',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
     if (dto.pam.enabled && !dto.pam.privilegedSessions.recordingSessions) {
       throw new HttpException(
         'Session recording must be enabled when privileged access management is active',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
 
-  private async performSecurityPolicyRiskAssessment(policyName: string, dto: SecurityPolicyConfigurationDto) {
+  private async performSecurityPolicyRiskAssessment(
+    policyName: string,
+    dto: SecurityPolicyConfigurationDto,
+  ) {
     // Mock implementation - would perform actual risk assessment
     return {
       riskLevel: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
       impactedSystems: ['authentication-service', 'authorization-service'],
-      complianceImpact: ['SOX compliance maintained', 'GDPR compliance enhanced'],
-      rollbackPlan: 'Automated rollback to previous policy version within 5 minutes'
+      complianceImpact: [
+        'SOX compliance maintained',
+        'GDPR compliance enhanced',
+      ],
+      rollbackPlan:
+        'Automated rollback to previous policy version within 5 minutes',
     };
   }
 
@@ -1279,16 +1457,18 @@ export class SecurityConfigurationApiController {
     return {
       fipsCompliant: dto.compliance.fipsCompliant,
       certifications: dto.compliance.certifications,
-      quantumReady: dto.compliance.quantumResistant
+      quantumReady: dto.compliance.quantumResistant,
     };
   }
 
-  private async analyzePrivilegeEscalationRisks(dto: AccessControlConfigurationDto) {
+  private async analyzePrivilegeEscalationRisks(
+    dto: AccessControlConfigurationDto,
+  ) {
     // Mock implementation - would perform actual privilege analysis
     return {
       privilegeEscalationRisk: 'LOW' as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
       affectedUsers: 250,
-      impactedResources: ['database-servers', 'application-servers']
+      impactedResources: ['database-servers', 'application-servers'],
     };
   }
 
@@ -1309,43 +1489,72 @@ export class SecurityConfigurationApiController {
     return {
       compliant: gaps.length === 0,
       gaps,
-      recommendations
+      recommendations,
     };
   }
 
-  private async assessKeyRotationRequirement(name: string, dto: EncryptionConfigurationDto): Promise<boolean> {
+  private async assessKeyRotationRequirement(
+    name: string,
+    dto: EncryptionConfigurationDto,
+  ): Promise<boolean> {
     // Mock implementation - would check if key rotation is needed
-    return dto.keyManagement.keyRotation.enabled && dto.keyManagement.keyRotation.automatic;
+    return (
+      dto.keyManagement.keyRotation.enabled &&
+      dto.keyManagement.keyRotation.automatic
+    );
   }
 
-  private async createSecurityPolicyChangeRecord(dto: SecurityPolicyConfigurationDto, userId: string): Promise<string> {
+  private async createSecurityPolicyChangeRecord(
+    dto: SecurityPolicyConfigurationDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create security policy change record
     return `sec_policy_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async applySecurityPolicy(policyName: string, dto: SecurityPolicyConfigurationDto, changeId: string): Promise<void> {
+  private async applySecurityPolicy(
+    policyName: string,
+    dto: SecurityPolicyConfigurationDto,
+    changeId: string,
+  ): Promise<void> {
     // Mock implementation - would apply security policy
     this.logger.log(`Applying security policy: ${policyName} (${changeId})`);
   }
 
-  private async createEncryptionChangeRecord(dto: EncryptionConfigurationDto, userId: string): Promise<string> {
+  private async createEncryptionChangeRecord(
+    dto: EncryptionConfigurationDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create encryption change record
     return `encryption_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async applyEncryptionConfiguration(name: string, dto: EncryptionConfigurationDto, changeId: string): Promise<void> {
+  private async applyEncryptionConfiguration(
+    name: string,
+    dto: EncryptionConfigurationDto,
+    changeId: string,
+  ): Promise<void> {
     // Mock implementation - would apply encryption configuration
     this.logger.log(`Applying encryption configuration: ${name} (${changeId})`);
   }
 
-  private async createAccessControlChangeRecord(dto: AccessControlConfigurationDto, userId: string): Promise<string> {
+  private async createAccessControlChangeRecord(
+    dto: AccessControlConfigurationDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create access control change record
     return `access_control_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async applyAccessControlConfiguration(name: string, dto: AccessControlConfigurationDto, changeId: string): Promise<void> {
+  private async applyAccessControlConfiguration(
+    name: string,
+    dto: AccessControlConfigurationDto,
+    changeId: string,
+  ): Promise<void> {
     // Mock implementation - would apply access control configuration
-    this.logger.log(`Applying access control configuration: ${name} (${changeId})`);
+    this.logger.log(
+      `Applying access control configuration: ${name} (${changeId})`,
+    );
   }
 
   private generateOperationId(): string {

@@ -18,7 +18,10 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BrowserOperationType, BrowserSecurityLevel } from '../decorators/browser-security.decorator';
+import {
+  BrowserOperationType,
+  BrowserSecurityLevel,
+} from '../decorators/browser-security.decorator';
 
 /**
  * Audit event types
@@ -115,23 +118,56 @@ export class BrowserAuditLoggingService {
   private readonly auditEvents: AuditEvent[] = [];
   private readonly config: AuditConfig;
   private readonly alertConfig: AlertConfig;
-  private readonly alertCounters = new Map<string, { count: number; lastReset: number }>();
+  private readonly alertCounters = new Map<
+    string,
+    { count: number; lastReset: number }
+  >();
 
   constructor(private readonly configService: ConfigService) {
     this.config = {
-      enableAuditLogging: this.configService.get<boolean>('AUDIT_LOGGING_ENABLED', true),
-      logLevel: this.configService.get<AuditSeverity>('AUDIT_LOG_LEVEL', AuditSeverity.INFO),
+      enableAuditLogging: this.configService.get<boolean>(
+        'AUDIT_LOGGING_ENABLED',
+        true,
+      ),
+      logLevel: this.configService.get<AuditSeverity>(
+        'AUDIT_LOG_LEVEL',
+        AuditSeverity.INFO,
+      ),
       retentionDays: this.configService.get<number>('AUDIT_RETENTION_DAYS', 90),
-      enableRealTimeAlerts: this.configService.get<boolean>('AUDIT_REAL_TIME_ALERTS', true),
+      enableRealTimeAlerts: this.configService.get<boolean>(
+        'AUDIT_REAL_TIME_ALERTS',
+        true,
+      ),
       alertThresholds: {
-        criticalEventsPerMinute: this.configService.get<number>('AUDIT_CRITICAL_EVENTS_PER_MINUTE', 5),
-        securityViolationsPerHour: this.configService.get<number>('AUDIT_SECURITY_VIOLATIONS_PER_HOUR', 10),
-        failedAuthAttemptsPerMinute: this.configService.get<number>('AUDIT_FAILED_AUTH_PER_MINUTE', 10),
+        criticalEventsPerMinute: this.configService.get<number>(
+          'AUDIT_CRITICAL_EVENTS_PER_MINUTE',
+          5,
+        ),
+        securityViolationsPerHour: this.configService.get<number>(
+          'AUDIT_SECURITY_VIOLATIONS_PER_HOUR',
+          10,
+        ),
+        failedAuthAttemptsPerMinute: this.configService.get<number>(
+          'AUDIT_FAILED_AUTH_PER_MINUTE',
+          10,
+        ),
       },
-      enableScreenshotCapture: this.configService.get<boolean>('AUDIT_SCREENSHOT_CAPTURE', false),
-      enableRequestBodyLogging: this.configService.get<boolean>('AUDIT_REQUEST_BODY_LOGGING', false),
-      enableResponseBodyLogging: this.configService.get<boolean>('AUDIT_RESPONSE_BODY_LOGGING', false),
-      excludeHealthChecks: this.configService.get<boolean>('AUDIT_EXCLUDE_HEALTH_CHECKS', true),
+      enableScreenshotCapture: this.configService.get<boolean>(
+        'AUDIT_SCREENSHOT_CAPTURE',
+        false,
+      ),
+      enableRequestBodyLogging: this.configService.get<boolean>(
+        'AUDIT_REQUEST_BODY_LOGGING',
+        false,
+      ),
+      enableResponseBodyLogging: this.configService.get<boolean>(
+        'AUDIT_RESPONSE_BODY_LOGGING',
+        false,
+      ),
+      excludeHealthChecks: this.configService.get<boolean>(
+        'AUDIT_EXCLUDE_HEALTH_CHECKS',
+        true,
+      ),
     };
 
     this.alertConfig = {
@@ -139,7 +175,10 @@ export class BrowserAuditLoggingService {
       webhookUrl: this.configService.get<string>('AUDIT_WEBHOOK_URL'),
       emailRecipients: this.parseEmailRecipients(),
       slackChannel: this.configService.get<string>('AUDIT_SLACK_CHANNEL'),
-      minSeverity: this.configService.get<AuditSeverity>('AUDIT_ALERT_MIN_SEVERITY', AuditSeverity.ERROR),
+      minSeverity: this.configService.get<AuditSeverity>(
+        'AUDIT_ALERT_MIN_SEVERITY',
+        AuditSeverity.ERROR,
+      ),
     };
 
     this.logger.log('Browser Audit Logging Service initialized');
@@ -158,11 +197,12 @@ export class BrowserAuditLoggingService {
     action: string,
     result: 'success' | 'failure' | 'blocked',
     details: Record<string, any> = {},
-    context?: any
+    context?: any,
   ): Promise<void> {
     await this.logEvent({
       eventType: AuditEventType.AUTHENTICATION,
-      severity: result === 'failure' ? AuditSeverity.WARNING : AuditSeverity.INFO,
+      severity:
+        result === 'failure' ? AuditSeverity.WARNING : AuditSeverity.INFO,
       userId,
       action,
       resource: 'authentication',
@@ -186,11 +226,12 @@ export class BrowserAuditLoggingService {
     url: string,
     result: 'success' | 'failure' | 'blocked',
     details: Record<string, any> = {},
-    context?: any
+    context?: any,
   ): Promise<void> {
     await this.logEvent({
       eventType: AuditEventType.BROWSER_NAVIGATION,
-      severity: result === 'blocked' ? AuditSeverity.WARNING : AuditSeverity.INFO,
+      severity:
+        result === 'blocked' ? AuditSeverity.WARNING : AuditSeverity.INFO,
       userId,
       sessionId,
       operationType: BrowserOperationType.NAVIGATION,
@@ -223,11 +264,12 @@ export class BrowserAuditLoggingService {
     selector: string,
     result: 'success' | 'failure' | 'blocked',
     details: Record<string, any> = {},
-    context?: any
+    context?: any,
   ): Promise<void> {
     await this.logEvent({
       eventType: AuditEventType.BROWSER_INTERACTION,
-      severity: result === 'blocked' ? AuditSeverity.WARNING : AuditSeverity.INFO,
+      severity:
+        result === 'blocked' ? AuditSeverity.WARNING : AuditSeverity.INFO,
       userId,
       sessionId,
       operationType: BrowserOperationType.INTERACTION,
@@ -257,7 +299,7 @@ export class BrowserAuditLoggingService {
     dataSize: number,
     result: 'success' | 'failure' | 'blocked',
     details: Record<string, any> = {},
-    context?: any
+    context?: any,
   ): Promise<void> {
     await this.logEvent({
       eventType: AuditEventType.DATA_EXTRACTION,
@@ -288,7 +330,7 @@ export class BrowserAuditLoggingService {
     violationType: string,
     severity: AuditSeverity,
     details: Record<string, any> = {},
-    context?: any
+    context?: any,
   ): Promise<void> {
     await this.logEvent({
       eventType: AuditEventType.SECURITY_VIOLATION,
@@ -329,7 +371,7 @@ export class BrowserAuditLoggingService {
     currentCount: number,
     limit: number,
     details: Record<string, any> = {},
-    context?: any
+    context?: any,
   ): Promise<void> {
     await this.logEvent({
       eventType: AuditEventType.RATE_LIMIT_EXCEEDED,
@@ -362,11 +404,12 @@ export class BrowserAuditLoggingService {
     userId: string,
     result: 'success' | 'failure' | 'blocked',
     details: Record<string, any> = {},
-    context?: any
+    context?: any,
   ): Promise<void> {
     await this.logEvent({
       eventType: AuditEventType.SESSION_MANAGEMENT,
-      severity: result === 'failure' ? AuditSeverity.WARNING : AuditSeverity.INFO,
+      severity:
+        result === 'failure' ? AuditSeverity.WARNING : AuditSeverity.INFO,
       userId,
       sessionId,
       operationType: BrowserOperationType.SESSION_MANAGEMENT,
@@ -390,7 +433,7 @@ export class BrowserAuditLoggingService {
   async logSystemError(
     error: Error,
     context?: any,
-    details: Record<string, any> = {}
+    details: Record<string, any> = {},
   ): Promise<void> {
     await this.logEvent({
       eventType: AuditEventType.ERROR_OCCURRED,
@@ -415,40 +458,42 @@ export class BrowserAuditLoggingService {
   /**
    * Get audit events with filtering
    */
-  getAuditEvents(filters: {
-    eventType?: AuditEventType;
-    severity?: AuditSeverity;
-    userId?: string;
-    sessionId?: string;
-    startDate?: Date;
-    endDate?: Date;
-    limit?: number;
-  } = {}): AuditEvent[] {
+  getAuditEvents(
+    filters: {
+      eventType?: AuditEventType;
+      severity?: AuditSeverity;
+      userId?: string;
+      sessionId?: string;
+      startDate?: Date;
+      endDate?: Date;
+      limit?: number;
+    } = {},
+  ): AuditEvent[] {
     let events = [...this.auditEvents];
 
     // Apply filters
     if (filters.eventType) {
-      events = events.filter(event => event.eventType === filters.eventType);
+      events = events.filter((event) => event.eventType === filters.eventType);
     }
 
     if (filters.severity) {
-      events = events.filter(event => event.severity === filters.severity);
+      events = events.filter((event) => event.severity === filters.severity);
     }
 
     if (filters.userId) {
-      events = events.filter(event => event.userId === filters.userId);
+      events = events.filter((event) => event.userId === filters.userId);
     }
 
     if (filters.sessionId) {
-      events = events.filter(event => event.sessionId === filters.sessionId);
+      events = events.filter((event) => event.sessionId === filters.sessionId);
     }
 
     if (filters.startDate) {
-      events = events.filter(event => event.timestamp >= filters.startDate!);
+      events = events.filter((event) => event.timestamp >= filters.startDate!);
     }
 
     if (filters.endDate) {
-      events = events.filter(event => event.timestamp <= filters.endDate!);
+      events = events.filter((event) => event.timestamp <= filters.endDate!);
     }
 
     // Sort by timestamp descending
@@ -479,7 +524,9 @@ export class BrowserAuditLoggingService {
     const timeRangeMs = this.getTimeRangeMs(timeRange);
     const cutoffTime = new Date(now.getTime() - timeRangeMs);
 
-    const recentEvents = this.auditEvents.filter(event => event.timestamp >= cutoffTime);
+    const recentEvents = this.auditEvents.filter(
+      (event) => event.timestamp >= cutoffTime,
+    );
 
     const eventsByType = {} as Record<AuditEventType, number>;
     const eventsBySeverity = {} as Record<AuditSeverity, number>;
@@ -495,7 +542,8 @@ export class BrowserAuditLoggingService {
       eventsByType[event.eventType] = (eventsByType[event.eventType] || 0) + 1;
 
       // Count by severity
-      eventsBySeverity[event.severity] = (eventsBySeverity[event.severity] || 0) + 1;
+      eventsBySeverity[event.severity] =
+        (eventsBySeverity[event.severity] || 0) + 1;
 
       // Count security violations
       if (event.eventType === AuditEventType.SECURITY_VIOLATION) {
@@ -503,7 +551,10 @@ export class BrowserAuditLoggingService {
       }
 
       // Count authentication failures
-      if (event.eventType === AuditEventType.AUTHENTICATION && event.result === 'failure') {
+      if (
+        event.eventType === AuditEventType.AUTHENTICATION &&
+        event.result === 'failure'
+      ) {
         authenticationFailures++;
       }
 
@@ -518,7 +569,10 @@ export class BrowserAuditLoggingService {
       }
 
       // Count by resource
-      resourceCounts.set(event.resource, (resourceCounts.get(event.resource) || 0) + 1);
+      resourceCounts.set(
+        event.resource,
+        (resourceCounts.get(event.resource) || 0) + 1,
+      );
     }
 
     // Get top users
@@ -554,7 +608,10 @@ export class BrowserAuditLoggingService {
     }
 
     // Skip if below configured log level
-    if (this.getSeverityLevel(eventData.severity!) < this.getSeverityLevel(this.config.logLevel)) {
+    if (
+      this.getSeverityLevel(eventData.severity!) <
+      this.getSeverityLevel(this.config.logLevel)
+    ) {
       return;
     }
 
@@ -592,7 +649,7 @@ export class BrowserAuditLoggingService {
   private async sendSecurityAlert(
     violationType: string,
     details: Record<string, any>,
-    context?: any
+    context?: any,
   ): Promise<void> {
     if (!this.alertConfig.enabled) {
       return;
@@ -610,7 +667,7 @@ export class BrowserAuditLoggingService {
 
     this.logger.error(
       `SECURITY ALERT: ${violationType} - ${JSON.stringify(alertData)}`,
-      'BrowserAuditLoggingService'
+      'BrowserAuditLoggingService',
     );
 
     // In a real implementation, send to external alerting systems
@@ -632,7 +689,10 @@ export class BrowserAuditLoggingService {
     }
 
     // Check failed authentication attempts
-    if (event.eventType === AuditEventType.AUTHENTICATION && event.result === 'failure') {
+    if (
+      event.eventType === AuditEventType.AUTHENTICATION &&
+      event.result === 'failure'
+    ) {
       await this.checkThreshold('failed_auth_per_minute', 1, 60000);
     }
   }
@@ -643,10 +703,13 @@ export class BrowserAuditLoggingService {
   private async checkThreshold(
     counterKey: string,
     increment: number,
-    windowMs: number
+    windowMs: number,
   ): Promise<void> {
     const now = Date.now();
-    const counter = this.alertCounters.get(counterKey) || { count: 0, lastReset: now };
+    const counter = this.alertCounters.get(counterKey) || {
+      count: 0,
+      lastReset: now,
+    };
 
     // Reset counter if window expired
     if (now - counter.lastReset > windowMs) {
@@ -675,7 +738,7 @@ export class BrowserAuditLoggingService {
 
     if (counter.count >= threshold) {
       this.logger.warn(
-        `Alert threshold reached: ${counterKey} = ${counter.count} (threshold: ${threshold})`
+        `Alert threshold reached: ${counterKey} = ${counter.count} (threshold: ${threshold})`,
       );
       // Send alert (implementation specific)
     }
@@ -747,7 +810,9 @@ export class BrowserAuditLoggingService {
    * Enforce retention policy
    */
   private enforceRetentionPolicy(): void {
-    const cutoffTime = new Date(Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000));
+    const cutoffTime = new Date(
+      Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000,
+    );
     const originalLength = this.auditEvents.length;
 
     // Remove old events
@@ -759,7 +824,9 @@ export class BrowserAuditLoggingService {
 
     const removedCount = originalLength - this.auditEvents.length;
     if (removedCount > 0) {
-      this.logger.debug(`Removed ${removedCount} old audit events (retention: ${this.config.retentionDays} days)`);
+      this.logger.debug(
+        `Removed ${removedCount} old audit events (retention: ${this.config.retentionDays} days)`,
+      );
     }
   }
 
@@ -782,7 +849,7 @@ export class BrowserAuditLoggingService {
     try {
       return JSON.parse(emails);
     } catch {
-      return emails.split(',').map(email => email.trim());
+      return emails.split(',').map((email) => email.trim());
     }
   }
 
@@ -815,7 +882,10 @@ export class BrowserAuditLoggingService {
     // Remove potential sensitive information from selectors
     return selector
       .replace(/\b\d{4}-\d{4}-\d{4}-\d{4}\b/g, '[CARD-REDACTED]')
-      .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL-REDACTED]')
+      .replace(
+        /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+        '[EMAIL-REDACTED]',
+      )
       .replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN-REDACTED]');
   }
 }

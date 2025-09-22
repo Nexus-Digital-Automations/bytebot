@@ -27,11 +27,12 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ParlantIntegrationService,
+import {
+  ParlantIntegrationService,
   ParlantValidationRequest,
   ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError
+  ConversationalValidationError,
 } from '../parlant/parlant-integration.service';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -43,7 +44,8 @@ const execAsync = promisify(exec);
 /**
  * Application control validation context with system monitoring
  */
-export interface ApplicationControlValidationContext extends ParlantConversationContext {
+export interface ApplicationControlValidationContext
+  extends ParlantConversationContext {
   readonly systemResources: {
     cpuUsagePercent: number;
     memoryUsagePercent: number;
@@ -76,12 +78,29 @@ export interface ApplicationControlValidationContext extends ParlantConversation
  */
 export interface ApplicationRisk {
   readonly riskLevel: RiskLevel;
-  readonly applicationType: 'DOCUMENT_VIEWER' | 'MEDIA_PLAYER' | 'OFFICE_APP' | 'DEVELOPMENT_TOOL' |
-                           'SYSTEM_UTILITY' | 'ADMIN_TOOL' | 'SECURITY_TOOL' | 'NETWORK_APP' | 'UNKNOWN';
-  readonly securityScope: 'USER' | 'SYSTEM' | 'NETWORK' | 'ADMINISTRATIVE' | 'KERNEL';
+  readonly applicationType:
+    | 'DOCUMENT_VIEWER'
+    | 'MEDIA_PLAYER'
+    | 'OFFICE_APP'
+    | 'DEVELOPMENT_TOOL'
+    | 'SYSTEM_UTILITY'
+    | 'ADMIN_TOOL'
+    | 'SECURITY_TOOL'
+    | 'NETWORK_APP'
+    | 'UNKNOWN';
+  readonly securityScope:
+    | 'USER'
+    | 'SYSTEM'
+    | 'NETWORK'
+    | 'ADMINISTRATIVE'
+    | 'KERNEL';
   readonly systemImpact: 'MINIMAL' | 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
   readonly networkAccess: boolean;
-  readonly fileSystemAccess: 'READ_ONLY' | 'USER_FILES' | 'SYSTEM_FILES' | 'FULL_ACCESS';
+  readonly fileSystemAccess:
+    | 'READ_ONLY'
+    | 'USER_FILES'
+    | 'SYSTEM_FILES'
+    | 'FULL_ACCESS';
   readonly privilegesRequired: 'USER' | 'ELEVATED' | 'ADMIN' | 'SYSTEM';
   readonly reversible: boolean;
   readonly monitoringRequired: boolean;
@@ -132,24 +151,32 @@ export interface ApplicationLaunchValidation {
 
 @Injectable()
 export class EnhancedApplicationControlValidationService {
-  private readonly logger = new Logger(EnhancedApplicationControlValidationService.name);
+  private readonly logger = new Logger(
+    EnhancedApplicationControlValidationService.name,
+  );
 
   // Application validation cache
-  private readonly validationCache = new Map<string, {
-    result: boolean;
-    timestamp: Date;
-    expiryMs: number;
-    applicationName: string;
-  }>();
+  private readonly validationCache = new Map<
+    string,
+    {
+      result: boolean;
+      timestamp: Date;
+      expiryMs: number;
+      applicationName: string;
+    }
+  >();
 
   // Active process monitoring
-  private readonly monitoredProcesses = new Map<number, {
-    processId: number;
-    name: string;
-    startTime: Date;
-    monitoringConfig: any;
-    resourceHistory: any[];
-  }>();
+  private readonly monitoredProcesses = new Map<
+    number,
+    {
+      processId: number;
+      name: string;
+      startTime: Date;
+      monitoringConfig: any;
+      resourceHistory: any[];
+    }
+  >();
 
   // Performance metrics
   private readonly performanceMetrics = {
@@ -168,30 +195,67 @@ export class EnhancedApplicationControlValidationService {
   // Known application classifications
   private readonly applicationClassifications = {
     safe: [
-      'notepad', 'wordpad', 'calculator', 'paint', 'vlc', 'mediaplayer',
-      'firefox', 'chrome', 'safari', 'edge', 'acrobat', 'preview'
+      'notepad',
+      'wordpad',
+      'calculator',
+      'paint',
+      'vlc',
+      'mediaplayer',
+      'firefox',
+      'chrome',
+      'safari',
+      'edge',
+      'acrobat',
+      'preview',
     ],
     moderate: [
-      'word', 'excel', 'powerpoint', 'office', 'vscode', 'atom', 'sublime',
-      'photoshop', 'illustrator', 'gimp', 'inkscape', 'slack', 'teams'
+      'word',
+      'excel',
+      'powerpoint',
+      'office',
+      'vscode',
+      'atom',
+      'sublime',
+      'photoshop',
+      'illustrator',
+      'gimp',
+      'inkscape',
+      'slack',
+      'teams',
     ],
     high: [
-      'terminal', 'cmd', 'powershell', 'bash', 'task manager', 'activity monitor',
-      'system preferences', 'control panel', 'registry editor', 'services'
+      'terminal',
+      'cmd',
+      'powershell',
+      'bash',
+      'task manager',
+      'activity monitor',
+      'system preferences',
+      'control panel',
+      'registry editor',
+      'services',
     ],
     critical: [
-      'sudo', 'su', 'admin', 'root', 'group policy', 'security center',
-      'firewall', 'antivirus', 'disk utility', 'system configuration'
+      'sudo',
+      'su',
+      'admin',
+      'root',
+      'group policy',
+      'security center',
+      'firewall',
+      'antivirus',
+      'disk utility',
+      'system configuration',
     ],
-    blocked: [
-      'malware', 'virus', 'trojan', 'keylogger', 'backdoor', 'rootkit'
-    ],
+    blocked: ['malware', 'virus', 'trojan', 'keylogger', 'backdoor', 'rootkit'],
   };
 
   constructor(
-    private readonly parlantIntegrationService: ParlantIntegrationService
+    private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
-    this.logger.log('Enhanced Application Control Validation Service initialized');
+    this.logger.log(
+      'Enhanced Application Control Validation Service initialized',
+    );
 
     // Cache cleanup interval
     setInterval(() => this.cleanupValidationCache(), 300000); // Every 5 minutes
@@ -212,7 +276,7 @@ export class EnhancedApplicationControlValidationService {
     applicationName: string,
     executablePath: string,
     args: string[] = [],
-    context: ApplicationControlValidationContext
+    context: ApplicationControlValidationContext,
   ): Promise<boolean> {
     const operationId = `app_launch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -221,7 +285,11 @@ export class EnhancedApplicationControlValidationService {
       this.performanceMetrics.totalApplicationLaunches++;
 
       // Performance optimization: check cache first
-      const cacheKey = this.generateCacheKey('launch', applicationName, context.userId);
+      const cacheKey = this.generateCacheKey(
+        'launch',
+        applicationName,
+        context.userId,
+      );
       const cached = this.getCachedValidation(cacheKey);
       if (cached) {
         this.updatePerformanceMetrics(Date.now() - startTime, true);
@@ -229,36 +297,52 @@ export class EnhancedApplicationControlValidationService {
       }
 
       // Application risk assessment
-      const applicationRisk = await this.assessApplicationRisk(applicationName, executablePath, args, context);
+      const applicationRisk = await this.assessApplicationRisk(
+        applicationName,
+        executablePath,
+        args,
+        context,
+      );
 
       // Block dangerous applications immediately
-      if (applicationRisk.riskLevel === RiskLevel._CRITICAL &&
-          this.isBlockedApplication(applicationName)) {
+      if (
+        applicationRisk.riskLevel === RiskLevel._CRITICAL &&
+        this.isBlockedApplication(applicationName)
+      ) {
         this.performanceMetrics.blockedLaunches++;
         this.performanceMetrics.securityViolations++;
-        this.logger.warn(`[${operationId}] Application launch blocked: ${applicationName}`, {
-          operationId,
-          applicationName,
-          executablePath,
-          riskLevel: applicationRisk.riskLevel,
-          reason: 'blocked_application_detected',
-        });
+        this.logger.warn(
+          `[${operationId}] Application launch blocked: ${applicationName}`,
+          {
+            operationId,
+            applicationName,
+            executablePath,
+            riskLevel: applicationRisk.riskLevel,
+            reason: 'blocked_application_detected',
+          },
+        );
         return false;
       }
 
       // Check system resource constraints
       if (!this.checkResourceAvailability(context)) {
         this.performanceMetrics.blockedLaunches++;
-        this.logger.warn(`[${operationId}] Application launch blocked due to resource constraints`, {
-          operationId,
-          applicationName,
-          systemResources: context.systemResources,
-        });
+        this.logger.warn(
+          `[${operationId}] Application launch blocked due to resource constraints`,
+          {
+            operationId,
+            applicationName,
+            systemResources: context.systemResources,
+          },
+        );
         return false;
       }
 
       // Fast-path for safe applications
-      if (applicationRisk.riskLevel === RiskLevel._MINIMAL && this.isSafeApplication(applicationName)) {
+      if (
+        applicationRisk.riskLevel === RiskLevel._MINIMAL &&
+        this.isSafeApplication(applicationName)
+      ) {
         this.performanceMetrics.approvedLaunches++;
         this.setCachedValidation(cacheKey, true, 300000); // 5 minute cache for safe apps
         this.updatePerformanceMetrics(Date.now() - startTime, false);
@@ -278,17 +362,27 @@ export class EnhancedApplicationControlValidationService {
           networkAccess: applicationRisk.networkAccess,
           privilegesRequired: applicationRisk.privilegesRequired,
         },
-        actionDescription: this.generateLaunchDescription(applicationName, applicationRisk, args),
+        actionDescription: this.generateLaunchDescription(
+          applicationName,
+          applicationRisk,
+          args,
+        ),
         context: context,
         riskLevel: applicationRisk.riskLevel,
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 400),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            400,
+          ),
           requiresRealtime: context.performanceRequirements.requiresRealtime,
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       if (validationResponse.approved) {
         this.performanceMetrics.approvedLaunches++;
@@ -300,7 +394,11 @@ export class EnhancedApplicationControlValidationService {
 
         // Setup process monitoring if required
         if (applicationRisk.monitoringRequired) {
-          await this.setupProcessMonitoring(applicationName, applicationRisk, context);
+          await this.setupProcessMonitoring(
+            applicationName,
+            applicationRisk,
+            context,
+          );
         }
       } else {
         this.performanceMetrics.blockedLaunches++;
@@ -308,15 +406,17 @@ export class EnhancedApplicationControlValidationService {
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Application launch validation failed`, {
-        operationId,
-        applicationName,
-        executablePath,
-        error: error instanceof Error ? error.message : String(error),
-        duration: Date.now() - startTime,
-      });
+      this.logger.error(
+        `[${operationId}] Application launch validation failed`,
+        {
+          operationId,
+          applicationName,
+          executablePath,
+          error: error instanceof Error ? error.message : String(error),
+          duration: Date.now() - startTime,
+        },
+      );
       throw error;
     }
   }
@@ -330,7 +430,7 @@ export class EnhancedApplicationControlValidationService {
     processId: number,
     applicationName: string,
     forceKill: boolean,
-    context: ApplicationControlValidationContext
+    context: ApplicationControlValidationContext,
   ): Promise<boolean> {
     const operationId = `app_terminate_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -340,7 +440,12 @@ export class EnhancedApplicationControlValidationService {
       const monitoredProcess = this.monitoredProcesses.get(processId);
 
       // Assess termination risk
-      const terminationRisk = await this.assessTerminationRisk(processId, applicationName, forceKill, context);
+      const terminationRisk = await this.assessTerminationRisk(
+        processId,
+        applicationName,
+        forceKill,
+        context,
+      );
 
       // Allow termination of user applications without validation
       if (terminationRisk.riskLevel === RiskLevel._MINIMAL) {
@@ -359,17 +464,27 @@ export class EnhancedApplicationControlValidationService {
           dataLossRisk: terminationRisk.reversible ? 'LOW' : 'HIGH',
           monitoredProcess: !!monitoredProcess,
         },
-        actionDescription: this.generateTerminationDescription(applicationName, terminationRisk, forceKill),
+        actionDescription: this.generateTerminationDescription(
+          applicationName,
+          terminationRisk,
+          forceKill,
+        ),
         context: context,
         riskLevel: terminationRisk.riskLevel,
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 300),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            300,
+          ),
           requiresRealtime: context.performanceRequirements.requiresRealtime,
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       // Clean up monitoring if process is terminated
       if (validationResponse.approved && monitoredProcess) {
@@ -378,15 +493,17 @@ export class EnhancedApplicationControlValidationService {
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Application termination validation failed`, {
-        operationId,
-        processId,
-        applicationName,
-        error: error instanceof Error ? error.message : String(error),
-        duration: Date.now() - startTime,
-      });
+      this.logger.error(
+        `[${operationId}] Application termination validation failed`,
+        {
+          operationId,
+          processId,
+          applicationName,
+          error: error instanceof Error ? error.message : String(error),
+          duration: Date.now() - startTime,
+        },
+      );
       throw error;
     }
   }
@@ -400,17 +517,24 @@ export class EnhancedApplicationControlValidationService {
     processId: number,
     applicationName: string,
     newState: 'suspend' | 'resume' | 'restart',
-    context: ApplicationControlValidationContext
+    context: ApplicationControlValidationContext,
   ): Promise<boolean> {
     const operationId = `app_state_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     try {
       // Assess state change risk
-      const stateChangeRisk = this.assessStateChangeRisk(newState, applicationName, context);
+      const stateChangeRisk = this.assessStateChangeRisk(
+        newState,
+        applicationName,
+        context,
+      );
 
       // Simple state changes (suspend/resume) are generally low risk
-      if (stateChangeRisk.riskLevel === RiskLevel._LOW && newState !== 'restart') {
+      if (
+        stateChangeRisk.riskLevel === RiskLevel._LOW &&
+        newState !== 'restart'
+      ) {
         this.updatePerformanceMetrics(Date.now() - startTime, false);
         return true;
       }
@@ -425,30 +549,42 @@ export class EnhancedApplicationControlValidationService {
           currentState: this.getCurrentProcessState(processId),
           systemImpact: stateChangeRisk.systemImpact,
         },
-        actionDescription: this.generateStateChangeDescription(applicationName, newState, stateChangeRisk),
+        actionDescription: this.generateStateChangeDescription(
+          applicationName,
+          newState,
+          stateChangeRisk,
+        ),
         context: context,
         riskLevel: stateChangeRisk.riskLevel,
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 200),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            200,
+          ),
           requiresRealtime: context.performanceRequirements.requiresRealtime,
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Application state change validation failed`, {
-        operationId,
-        processId,
-        applicationName,
-        newState,
-        error: error instanceof Error ? error.message : String(error),
-        duration: Date.now() - startTime,
-      });
+      this.logger.error(
+        `[${operationId}] Application state change validation failed`,
+        {
+          operationId,
+          processId,
+          applicationName,
+          newState,
+          error: error instanceof Error ? error.message : String(error),
+          duration: Date.now() - startTime,
+        },
+      );
       throw error;
     }
   }
@@ -462,7 +598,7 @@ export class EnhancedApplicationControlValidationService {
     applicationName: string,
     executablePath: string,
     args: string[],
-    context: ApplicationControlValidationContext
+    context: ApplicationControlValidationContext,
   ): Promise<ApplicationRisk> {
     const normalizedName = applicationName.toLowerCase();
 
@@ -506,9 +642,16 @@ export class EnhancedApplicationControlValidationService {
   /**
    * Classify application based on known patterns
    */
-  private classifyApplication(applicationName: string, risk: ApplicationRisk): void {
+  private classifyApplication(
+    applicationName: string,
+    risk: ApplicationRisk,
+  ): void {
     // Check against known safe applications
-    if (this.applicationClassifications.safe.some(safe => applicationName.includes(safe))) {
+    if (
+      this.applicationClassifications.safe.some((safe) =>
+        applicationName.includes(safe),
+      )
+    ) {
       risk.riskLevel = RiskLevel._MINIMAL;
       risk.applicationType = this.inferApplicationType(applicationName);
       risk.systemImpact = 'MINIMAL';
@@ -516,7 +659,11 @@ export class EnhancedApplicationControlValidationService {
     }
 
     // Check against known moderate risk applications
-    if (this.applicationClassifications.moderate.some(mod => applicationName.includes(mod))) {
+    if (
+      this.applicationClassifications.moderate.some((mod) =>
+        applicationName.includes(mod),
+      )
+    ) {
       risk.riskLevel = RiskLevel._MODERATE;
       risk.applicationType = 'OFFICE_APP';
       risk.systemImpact = 'LOW';
@@ -525,7 +672,11 @@ export class EnhancedApplicationControlValidationService {
     }
 
     // Check against known high risk applications
-    if (this.applicationClassifications.high.some(high => applicationName.includes(high))) {
+    if (
+      this.applicationClassifications.high.some((high) =>
+        applicationName.includes(high),
+      )
+    ) {
       risk.riskLevel = RiskLevel._HIGH;
       risk.applicationType = 'SYSTEM_UTILITY';
       risk.systemImpact = 'HIGH';
@@ -536,7 +687,11 @@ export class EnhancedApplicationControlValidationService {
     }
 
     // Check against known critical applications
-    if (this.applicationClassifications.critical.some(crit => applicationName.includes(crit))) {
+    if (
+      this.applicationClassifications.critical.some((crit) =>
+        applicationName.includes(crit),
+      )
+    ) {
       risk.riskLevel = RiskLevel._CRITICAL;
       risk.applicationType = 'SECURITY_TOOL';
       risk.systemImpact = 'CRITICAL';
@@ -555,14 +710,28 @@ export class EnhancedApplicationControlValidationService {
   /**
    * Infer application type from name
    */
-  private inferApplicationType(applicationName: string): ApplicationRisk['applicationType'] {
-    if (['notepad', 'wordpad', 'acrobat', 'preview'].some(app => applicationName.includes(app))) {
+  private inferApplicationType(
+    applicationName: string,
+  ): ApplicationRisk['applicationType'] {
+    if (
+      ['notepad', 'wordpad', 'acrobat', 'preview'].some((app) =>
+        applicationName.includes(app),
+      )
+    ) {
       return 'DOCUMENT_VIEWER';
     }
-    if (['vlc', 'mediaplayer', 'itunes', 'spotify'].some(app => applicationName.includes(app))) {
+    if (
+      ['vlc', 'mediaplayer', 'itunes', 'spotify'].some((app) =>
+        applicationName.includes(app),
+      )
+    ) {
       return 'MEDIA_PLAYER';
     }
-    if (['vscode', 'atom', 'sublime', 'intellij'].some(app => applicationName.includes(app))) {
+    if (
+      ['vscode', 'atom', 'sublime', 'intellij'].some((app) =>
+        applicationName.includes(app),
+      )
+    ) {
       return 'DEVELOPMENT_TOOL';
     }
     return 'UNKNOWN';
@@ -571,11 +740,18 @@ export class EnhancedApplicationControlValidationService {
   /**
    * Analyze executable path for risk indicators
    */
-  private analyzeExecutablePath(executablePath: string, risk: ApplicationRisk): void {
+  private analyzeExecutablePath(
+    executablePath: string,
+    risk: ApplicationRisk,
+  ): void {
     const pathLower = executablePath.toLowerCase();
 
     // System directories indicate higher risk
-    if (pathLower.includes('/system32/') || pathLower.includes('/sbin/') || pathLower.includes('/usr/bin/')) {
+    if (
+      pathLower.includes('/system32/') ||
+      pathLower.includes('/sbin/') ||
+      pathLower.includes('/usr/bin/')
+    ) {
       risk.riskLevel = this.escalateRiskLevel(risk.riskLevel);
       risk.securityScope = 'SYSTEM';
       risk.systemImpact = 'HIGH';
@@ -583,7 +759,11 @@ export class EnhancedApplicationControlValidationService {
     }
 
     // Temporary directories are suspicious
-    if (pathLower.includes('/tmp/') || pathLower.includes('\\temp\\') || pathLower.includes('/downloads/')) {
+    if (
+      pathLower.includes('/tmp/') ||
+      pathLower.includes('\\temp\\') ||
+      pathLower.includes('/downloads/')
+    ) {
       risk.riskLevel = this.escalateRiskLevel(risk.riskLevel);
       risk.securityImplications.push('temporary_directory_execution');
       risk.recommendedSafeguards.push('malware_scan_required');
@@ -607,7 +787,7 @@ export class EnhancedApplicationControlValidationService {
 
     // Check for privilege escalation arguments
     const privilegeArgs = ['sudo', 'runas', '/admin', '-admin', '--privileged'];
-    if (privilegeArgs.some(arg => argsString.includes(arg))) {
+    if (privilegeArgs.some((arg) => argsString.includes(arg))) {
       risk.riskLevel = RiskLevel._CRITICAL;
       risk.privilegesRequired = 'ADMIN';
       risk.securityImplications.push('privilege_escalation_request');
@@ -615,21 +795,21 @@ export class EnhancedApplicationControlValidationService {
 
     // Check for network-related arguments
     const networkArgs = ['--port', '--host', '--connect', '--bind', '--listen'];
-    if (networkArgs.some(arg => argsString.includes(arg))) {
+    if (networkArgs.some((arg) => argsString.includes(arg))) {
       risk.networkAccess = true;
       risk.securityImplications.push('network_access_requested');
     }
 
     // Check for file system arguments
     const fileArgs = ['--config', '--write', '--delete', '--overwrite'];
-    if (fileArgs.some(arg => argsString.includes(arg))) {
+    if (fileArgs.some((arg) => argsString.includes(arg))) {
       risk.fileSystemAccess = 'SYSTEM_FILES';
       risk.securityImplications.push('file_system_modification_requested');
     }
 
     // Check for suspicious patterns
     const suspiciousPatterns = ['powershell -e', 'cmd /c', 'bash -c', 'eval'];
-    if (suspiciousPatterns.some(pattern => argsString.includes(pattern))) {
+    if (suspiciousPatterns.some((pattern) => argsString.includes(pattern))) {
       risk.riskLevel = RiskLevel._CRITICAL;
       risk.securityImplications.push('suspicious_command_execution');
       risk.recommendedSafeguards.push('command_inspection_required');
@@ -639,10 +819,23 @@ export class EnhancedApplicationControlValidationService {
   /**
    * Assess network access requirements
    */
-  private assessNetworkAccess(applicationName: string, risk: ApplicationRisk): void {
-    const networkApps = ['browser', 'firefox', 'chrome', 'edge', 'safari', 'slack', 'teams', 'skype', 'zoom'];
+  private assessNetworkAccess(
+    applicationName: string,
+    risk: ApplicationRisk,
+  ): void {
+    const networkApps = [
+      'browser',
+      'firefox',
+      'chrome',
+      'edge',
+      'safari',
+      'slack',
+      'teams',
+      'skype',
+      'zoom',
+    ];
 
-    if (networkApps.some(app => applicationName.includes(app))) {
+    if (networkApps.some((app) => applicationName.includes(app))) {
       risk.networkAccess = true;
       risk.applicationType = 'NETWORK_APP';
 
@@ -660,16 +853,33 @@ export class EnhancedApplicationControlValidationService {
   private setApplicationSecurityImplications(risk: ApplicationRisk): void {
     switch (risk.riskLevel) {
       case RiskLevel._CRITICAL:
-        risk.securityImplications.push('system_integrity_risk', 'security_compromise_potential');
-        risk.recommendedSafeguards.push('comprehensive_monitoring', 'admin_approval', 'sandboxing');
+        risk.securityImplications.push(
+          'system_integrity_risk',
+          'security_compromise_potential',
+        );
+        risk.recommendedSafeguards.push(
+          'comprehensive_monitoring',
+          'admin_approval',
+          'sandboxing',
+        );
         break;
       case RiskLevel._HIGH:
-        risk.securityImplications.push('system_modification_potential', 'data_access_risk');
-        risk.recommendedSafeguards.push('process_monitoring', 'resource_limits', 'approval_required');
+        risk.securityImplications.push(
+          'system_modification_potential',
+          'data_access_risk',
+        );
+        risk.recommendedSafeguards.push(
+          'process_monitoring',
+          'resource_limits',
+          'approval_required',
+        );
         break;
       case RiskLevel._MODERATE:
         risk.securityImplications.push('user_data_access');
-        risk.recommendedSafeguards.push('basic_monitoring', 'user_notification');
+        risk.recommendedSafeguards.push(
+          'basic_monitoring',
+          'user_notification',
+        );
         break;
       default:
         risk.recommendedSafeguards.push('standard_logging');
@@ -692,7 +902,7 @@ export class EnhancedApplicationControlValidationService {
     processId: number,
     applicationName: string,
     forceKill: boolean,
-    context: ApplicationControlValidationContext
+    context: ApplicationControlValidationContext,
   ): Promise<ApplicationRisk> {
     const risk: ApplicationRisk = {
       riskLevel: RiskLevel._LOW,
@@ -735,7 +945,7 @@ export class EnhancedApplicationControlValidationService {
   private assessStateChangeRisk(
     newState: string,
     applicationName: string,
-    context: ApplicationControlValidationContext
+    context: ApplicationControlValidationContext,
   ): ApplicationRisk {
     const risk: ApplicationRisk = {
       riskLevel: RiskLevel._LOW,
@@ -776,7 +986,7 @@ export class EnhancedApplicationControlValidationService {
   private async setupProcessMonitoring(
     applicationName: string,
     risk: ApplicationRisk,
-    context: ApplicationControlValidationContext
+    context: ApplicationControlValidationContext,
   ): Promise<void> {
     // This would be implemented with actual process monitoring
     // For now, we'll just log the setup
@@ -820,7 +1030,6 @@ export class EnhancedApplicationControlValidationService {
         if (processInfo.resourceHistory.length > 100) {
           processInfo.resourceHistory.shift();
         }
-
       } catch (error) {
         this.logger.error(`Process monitoring failed for PID ${processId}`, {
           processId,
@@ -847,7 +1056,9 @@ export class EnhancedApplicationControlValidationService {
 
   // ===== HELPER METHODS =====
 
-  private checkResourceAvailability(context: ApplicationControlValidationContext): boolean {
+  private checkResourceAvailability(
+    context: ApplicationControlValidationContext,
+  ): boolean {
     const { systemResources, securitySettings } = context;
 
     // Check CPU usage
@@ -861,7 +1072,9 @@ export class EnhancedApplicationControlValidationService {
     }
 
     // Check concurrent application limit
-    if (context.currentApplications.length >= securitySettings.maxConcurrentApps) {
+    if (
+      context.currentApplications.length >= securitySettings.maxConcurrentApps
+    ) {
       return false;
     }
 
@@ -870,47 +1083,79 @@ export class EnhancedApplicationControlValidationService {
 
   private isSafeApplication(applicationName: string): boolean {
     const normalizedName = applicationName.toLowerCase();
-    return this.applicationClassifications.safe.some(safe => normalizedName.includes(safe));
+    return this.applicationClassifications.safe.some((safe) =>
+      normalizedName.includes(safe),
+    );
   }
 
   private isBlockedApplication(applicationName: string): boolean {
     const normalizedName = applicationName.toLowerCase();
-    return this.applicationClassifications.blocked.some(blocked => normalizedName.includes(blocked));
+    return this.applicationClassifications.blocked.some((blocked) =>
+      normalizedName.includes(blocked),
+    );
   }
 
   private isSystemCriticalProcess(applicationName: string): boolean {
-    const criticalProcesses = ['explorer', 'winlogon', 'csrss', 'smss', 'kernel', 'init'];
+    const criticalProcesses = [
+      'explorer',
+      'winlogon',
+      'csrss',
+      'smss',
+      'kernel',
+      'init',
+    ];
     const normalizedName = applicationName.toLowerCase();
-    return criticalProcesses.some(critical => normalizedName.includes(critical));
+    return criticalProcesses.some((critical) =>
+      normalizedName.includes(critical),
+    );
   }
 
   private isSystemApplication(applicationName: string): boolean {
     const normalizedName = applicationName.toLowerCase();
-    return this.applicationClassifications.high.some(high => normalizedName.includes(high)) ||
-           this.applicationClassifications.critical.some(crit => normalizedName.includes(crit));
+    return (
+      this.applicationClassifications.high.some((high) =>
+        normalizedName.includes(high),
+      ) ||
+      this.applicationClassifications.critical.some((crit) =>
+        normalizedName.includes(crit),
+      )
+    );
   }
 
   private hasUnsavedData(applicationName: string): boolean {
     // Heuristic check for applications that typically have unsaved data
-    const dataApps = ['word', 'excel', 'powerpoint', 'notepad', 'editor', 'ide'];
+    const dataApps = [
+      'word',
+      'excel',
+      'powerpoint',
+      'notepad',
+      'editor',
+      'ide',
+    ];
     const normalizedName = applicationName.toLowerCase();
-    return dataApps.some(app => normalizedName.includes(app));
+    return dataApps.some((app) => normalizedName.includes(app));
   }
 
   private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
     switch (currentLevel) {
-      case RiskLevel._MINIMAL: return RiskLevel._LOW;
-      case RiskLevel._LOW: return RiskLevel._MODERATE;
-      case RiskLevel._MODERATE: return RiskLevel._HIGH;
-      case RiskLevel._HIGH: return RiskLevel._CRITICAL;
-      case RiskLevel._CRITICAL: return RiskLevel._CRITICAL;
-      default: return RiskLevel._MODERATE;
+      case RiskLevel._MINIMAL:
+        return RiskLevel._LOW;
+      case RiskLevel._LOW:
+        return RiskLevel._MODERATE;
+      case RiskLevel._MODERATE:
+        return RiskLevel._HIGH;
+      case RiskLevel._HIGH:
+        return RiskLevel._CRITICAL;
+      case RiskLevel._CRITICAL:
+        return RiskLevel._CRITICAL;
+      default:
+        return RiskLevel._MODERATE;
     }
   }
 
   private sanitizeArguments(args: string[]): string[] {
     // Remove potentially sensitive arguments
-    return args.map(arg => {
+    return args.map((arg) => {
       // Mask passwords
       if (arg.toLowerCase().includes('password')) {
         return '[PASSWORD_MASKED]';
@@ -942,8 +1187,16 @@ export class EnhancedApplicationControlValidationService {
     // Simple anomaly detection based on historical data
     if (processInfo.resourceHistory.length < 10) return false;
 
-    const avgCpu = processInfo.resourceHistory.reduce((sum: number, entry: any) => sum + entry.cpuPercent, 0) / processInfo.resourceHistory.length;
-    const avgMemory = processInfo.resourceHistory.reduce((sum: number, entry: any) => sum + entry.memoryMB, 0) / processInfo.resourceHistory.length;
+    const avgCpu =
+      processInfo.resourceHistory.reduce(
+        (sum: number, entry: any) => sum + entry.cpuPercent,
+        0,
+      ) / processInfo.resourceHistory.length;
+    const avgMemory =
+      processInfo.resourceHistory.reduce(
+        (sum: number, entry: any) => sum + entry.memoryMB,
+        0,
+      ) / processInfo.resourceHistory.length;
 
     // Check for significant spikes
     return stats.cpuPercent > avgCpu * 3 || stats.memoryMB > avgMemory * 2;
@@ -951,24 +1204,40 @@ export class EnhancedApplicationControlValidationService {
 
   // ===== DESCRIPTION GENERATORS =====
 
-  private generateLaunchDescription(applicationName: string, risk: ApplicationRisk, args: string[]): string {
+  private generateLaunchDescription(
+    applicationName: string,
+    risk: ApplicationRisk,
+    args: string[],
+  ): string {
     const argsStr = args.length > 0 ? ` with arguments: ${args.join(' ')}` : '';
     return `Launch ${risk.applicationType.toLowerCase().replace('_', ' ')} application: ${applicationName}${argsStr} - Risk: ${risk.riskLevel}, Impact: ${risk.systemImpact}`;
   }
 
-  private generateTerminationDescription(applicationName: string, risk: ApplicationRisk, forceKill: boolean): string {
+  private generateTerminationDescription(
+    applicationName: string,
+    risk: ApplicationRisk,
+    forceKill: boolean,
+  ): string {
     const methodStr = forceKill ? 'force kill' : 'graceful termination';
     const reversibleStr = risk.reversible ? 'reversible' : 'irreversible';
     return `${methodStr} of application: ${applicationName} - ${reversibleStr} operation with ${risk.systemImpact.toLowerCase()} system impact`;
   }
 
-  private generateStateChangeDescription(applicationName: string, newState: string, risk: ApplicationRisk): string {
+  private generateStateChangeDescription(
+    applicationName: string,
+    newState: string,
+    risk: ApplicationRisk,
+  ): string {
     return `Change application state: ${applicationName} to ${newState} - Impact: ${risk.systemImpact}, Risk: ${risk.riskLevel}`;
   }
 
   // ===== CACHE MANAGEMENT =====
 
-  private generateCacheKey(operation: string, applicationName: string, userId: string): string {
+  private generateCacheKey(
+    operation: string,
+    applicationName: string,
+    userId: string,
+  ): string {
     return `${operation}_${userId}_${applicationName.toLowerCase()}`;
   }
 
@@ -984,7 +1253,11 @@ export class EnhancedApplicationControlValidationService {
     return cached.result;
   }
 
-  private setCachedValidation(key: string, result: boolean, expiryMs: number): void {
+  private setCachedValidation(
+    key: string,
+    result: boolean,
+    expiryMs: number,
+  ): void {
     this.validationCache.set(key, {
       result,
       timestamp: new Date(),
@@ -1004,14 +1277,21 @@ export class EnhancedApplicationControlValidationService {
 
   // ===== PERFORMANCE TRACKING =====
 
-  private updatePerformanceMetrics(durationMs: number, fromCache: boolean): void {
+  private updatePerformanceMetrics(
+    durationMs: number,
+    fromCache: boolean,
+  ): void {
     if (fromCache) {
       this.performanceMetrics.cacheHitRate =
-        (this.performanceMetrics.cacheHitRate * (this.performanceMetrics.totalApplicationLaunches - 1) + 1) /
+        (this.performanceMetrics.cacheHitRate *
+          (this.performanceMetrics.totalApplicationLaunches - 1) +
+          1) /
         this.performanceMetrics.totalApplicationLaunches;
     } else {
       this.performanceMetrics.averageValidationTime =
-        (this.performanceMetrics.averageValidationTime * (this.performanceMetrics.totalApplicationLaunches - 1) + durationMs) /
+        (this.performanceMetrics.averageValidationTime *
+          (this.performanceMetrics.totalApplicationLaunches - 1) +
+          durationMs) /
         this.performanceMetrics.totalApplicationLaunches;
 
       if (durationMs < 200) this.performanceMetrics.sub200msOperations++;
@@ -1023,21 +1303,24 @@ export class EnhancedApplicationControlValidationService {
   private logPerformanceMetrics(): void {
     const { totalApplicationLaunches } = this.performanceMetrics;
 
-    this.logger.log('Enhanced Application Control Validation Performance Metrics', {
-      totalApplicationLaunches,
-      approvedLaunches: this.performanceMetrics.approvedLaunches,
-      blockedLaunches: this.performanceMetrics.blockedLaunches,
-      approvalRate: `${((this.performanceMetrics.approvedLaunches / totalApplicationLaunches) * 100).toFixed(1)}%`,
-      processesMonitored: this.performanceMetrics.processesMonitored,
-      securityViolations: this.performanceMetrics.securityViolations,
-      averageValidationTime: `${this.performanceMetrics.averageValidationTime.toFixed(2)}ms`,
-      cacheHitRate: `${(this.performanceMetrics.cacheHitRate * 100).toFixed(1)}%`,
-      sub200msRate: `${((this.performanceMetrics.sub200msOperations / totalApplicationLaunches) * 100).toFixed(1)}%`,
-      sub300msRate: `${((this.performanceMetrics.sub300msOperations / totalApplicationLaunches) * 100).toFixed(1)}%`,
-      sub400msRate: `${((this.performanceMetrics.sub400msOperations / totalApplicationLaunches) * 100).toFixed(1)}%`,
-      cacheSize: this.validationCache.size,
-      activeMonitoredProcesses: this.monitoredProcesses.size,
-    });
+    this.logger.log(
+      'Enhanced Application Control Validation Performance Metrics',
+      {
+        totalApplicationLaunches,
+        approvedLaunches: this.performanceMetrics.approvedLaunches,
+        blockedLaunches: this.performanceMetrics.blockedLaunches,
+        approvalRate: `${((this.performanceMetrics.approvedLaunches / totalApplicationLaunches) * 100).toFixed(1)}%`,
+        processesMonitored: this.performanceMetrics.processesMonitored,
+        securityViolations: this.performanceMetrics.securityViolations,
+        averageValidationTime: `${this.performanceMetrics.averageValidationTime.toFixed(2)}ms`,
+        cacheHitRate: `${(this.performanceMetrics.cacheHitRate * 100).toFixed(1)}%`,
+        sub200msRate: `${((this.performanceMetrics.sub200msOperations / totalApplicationLaunches) * 100).toFixed(1)}%`,
+        sub300msRate: `${((this.performanceMetrics.sub300msOperations / totalApplicationLaunches) * 100).toFixed(1)}%`,
+        sub400msRate: `${((this.performanceMetrics.sub400msOperations / totalApplicationLaunches) * 100).toFixed(1)}%`,
+        cacheSize: this.validationCache.size,
+        activeMonitoredProcesses: this.monitoredProcesses.size,
+      },
+    );
   }
 
   /**

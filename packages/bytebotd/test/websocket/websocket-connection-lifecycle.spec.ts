@@ -141,7 +141,8 @@ class ConnectionLifecycleTestClient extends EventEmitter {
   private ws: WebSocket.WebSocket | null = null;
   private state: ConnectionState = ConnectionState.DISCONNECTED;
   private metrics: ConnectionLifecycleMetrics;
-  private stateHistory: Array<{ state: ConnectionState; timestamp: number }> = [];
+  private stateHistory: Array<{ state: ConnectionState; timestamp: number }> =
+    [];
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private heartbeatTimeoutHandle: NodeJS.Timeout | null = null;
   private reconnectionTimeoutHandle: NodeJS.Timeout | null = null;
@@ -157,7 +158,7 @@ class ConnectionLifecycleTestClient extends EventEmitter {
   constructor(
     private url: string,
     private clientId: string,
-    private options: ConnectionLifecycleOptions = {}
+    private options: ConnectionLifecycleOptions = {},
   ) {
     super();
     this.sessionId = `lifecycle_test_${Date.now()}_${clientId}`;
@@ -198,7 +199,10 @@ class ConnectionLifecycleTestClient extends EventEmitter {
   private startResourceMonitoring(): void {
     this.resourceMonitorInterval = setInterval(() => {
       const currentMemory = process.memoryUsage().heapUsed;
-      this.metrics.memoryUsage.peak = Math.max(this.metrics.memoryUsage.peak, currentMemory);
+      this.metrics.memoryUsage.peak = Math.max(
+        this.metrics.memoryUsage.peak,
+        currentMemory,
+      );
     }, 1000);
   }
 
@@ -208,7 +212,9 @@ class ConnectionLifecycleTestClient extends EventEmitter {
 
     if (previousState !== newState) {
       const previousStateInfo = this.stateHistory[this.stateHistory.length - 1];
-      const duration = previousStateInfo ? timestamp - previousStateInfo.timestamp : 0;
+      const duration = previousStateInfo
+        ? timestamp - previousStateInfo.timestamp
+        : 0;
 
       this.metrics.stateTransitions.push({
         from: previousState,
@@ -274,7 +280,8 @@ class ConnectionLifecycleTestClient extends EventEmitter {
         this.ws = new WebSocket.WebSocket(this.url, wsOptions);
 
         this.ws.on('open', async () => {
-          this.metrics.connectionEstablishmentTime = performance.now() - this.connectionStartTime;
+          this.metrics.connectionEstablishmentTime =
+            performance.now() - this.connectionStartTime;
           this.setState(ConnectionState.AUTHENTICATING);
 
           this.emit(ConnectionLifecycleEvent.CONNECT_SUCCESS, {
@@ -335,7 +342,6 @@ class ConnectionLifecycleTestClient extends EventEmitter {
             latency: this.lastHeartbeatReceived - this.lastHeartbeatSent,
           });
         });
-
       } catch (error) {
         this.recordError('connection_setup_error', (error as Error).message);
         reject(error);
@@ -379,7 +385,8 @@ class ConnectionLifecycleTestClient extends EventEmitter {
       // Wait for authentication response
       await this.waitForAuthenticationResponse();
 
-      this.metrics.authenticationTime = performance.now() - this.authenticationStartTime;
+      this.metrics.authenticationTime =
+        performance.now() - this.authenticationStartTime;
       this.metrics.authenticationSuccesses++;
       this.setState(ConnectionState.CONNECTED);
       this.startHeartbeat();
@@ -388,7 +395,6 @@ class ConnectionLifecycleTestClient extends EventEmitter {
         clientId: this.clientId,
         authenticationTime: this.metrics.authenticationTime,
       });
-
     } catch (error) {
       this.recordError('authentication_error', (error as Error).message);
       this.setState(ConnectionState.ERROR);
@@ -489,7 +495,6 @@ class ConnectionLifecycleTestClient extends EventEmitter {
       if (message.type === ConversationalMessageType.SESSION_READY) {
         this.setState(ConnectionState.CONNECTED);
       }
-
     } catch (error) {
       this.recordError('message_parsing_error', (error as Error).message);
     }
@@ -527,7 +532,11 @@ class ConnectionLifecycleTestClient extends EventEmitter {
   private shouldAttemptReconnection(code: number, reason: string): boolean {
     if (!this.options.autoReconnect) return false;
     if (code === 1000 || code === 1001) return false; // Normal closure
-    if (this.metrics.reconnectionAttempts >= (this.options.maxReconnectionAttempts || 5)) return false;
+    if (
+      this.metrics.reconnectionAttempts >=
+      (this.options.maxReconnectionAttempts || 5)
+    )
+      return false;
 
     return true;
   }
@@ -554,14 +563,14 @@ class ConnectionLifecycleTestClient extends EventEmitter {
         await this.connect();
 
         this.metrics.reconnectionSuccesses++;
-        this.metrics.totalReconnectionTime += performance.now() - reconnectionStartTime;
+        this.metrics.totalReconnectionTime +=
+          performance.now() - reconnectionStartTime;
 
         this.emit(ConnectionLifecycleEvent.RECONNECT_SUCCESS, {
           clientId: this.clientId,
           attempt: this.metrics.reconnectionAttempts,
           totalTime: performance.now() - reconnectionStartTime,
         });
-
       } catch (error) {
         this.metrics.reconnectionFailures++;
 
@@ -572,7 +581,10 @@ class ConnectionLifecycleTestClient extends EventEmitter {
         });
 
         // Try again if we haven't exceeded max attempts
-        if (this.metrics.reconnectionAttempts < (this.options.maxReconnectionAttempts || 5)) {
+        if (
+          this.metrics.reconnectionAttempts <
+          (this.options.maxReconnectionAttempts || 5)
+        ) {
           this.initiateReconnection('retry_after_failure');
         }
       }
@@ -584,7 +596,10 @@ class ConnectionLifecycleTestClient extends EventEmitter {
     const maxDelay = this.options.reconnectionMaxDelay || 30000;
     const multiplier = this.options.reconnectionMultiplier || 2;
 
-    const delay = Math.min(baseDelay * Math.pow(multiplier, this.metrics.reconnectionAttempts - 1), maxDelay);
+    const delay = Math.min(
+      baseDelay * Math.pow(multiplier, this.metrics.reconnectionAttempts - 1),
+      maxDelay,
+    );
 
     // Add jitter to prevent thundering herd
     const jitter = delay * 0.1 * Math.random();
@@ -638,7 +653,11 @@ class ConnectionLifecycleTestClient extends EventEmitter {
   }
 
   async disconnect(): Promise<void> {
-    if (!this.ws || this.state === ConnectionState.DISCONNECTED || this.state === ConnectionState.CLOSED) {
+    if (
+      !this.ws ||
+      this.state === ConnectionState.DISCONNECTED ||
+      this.state === ConnectionState.CLOSED
+    ) {
       return;
     }
 
@@ -655,7 +674,8 @@ class ConnectionLifecycleTestClient extends EventEmitter {
 
       this.ws!.on('close', () => {
         clearTimeout(timeout);
-        this.metrics.disconnectionTime = performance.now() - disconnectionStartTime;
+        this.metrics.disconnectionTime =
+          performance.now() - disconnectionStartTime;
         this.setState(ConnectionState.CLOSED);
         resolve();
       });
@@ -676,7 +696,10 @@ class ConnectionLifecycleTestClient extends EventEmitter {
     }
 
     this.metrics.memoryUsage.final = process.memoryUsage().heapUsed;
-    this.metrics.memoryUsage.leaked = Math.max(0, this.metrics.memoryUsage.final - this.metrics.memoryUsage.initial);
+    this.metrics.memoryUsage.leaked = Math.max(
+      0,
+      this.metrics.memoryUsage.final - this.metrics.memoryUsage.initial,
+    );
 
     return { ...this.metrics };
   }
@@ -739,7 +762,7 @@ class ConnectionPoolManager extends EventEmitter {
   constructor(
     private baseUrl: string,
     poolSize: number,
-    private poolOptions: ConnectionLifecycleOptions = {}
+    private poolOptions: ConnectionLifecycleOptions = {},
   ) {
     super();
     this.poolSize = poolSize;
@@ -768,26 +791,22 @@ class ConnectionPoolManager extends EventEmitter {
 
     for (let i = 0; i < this.poolSize; i++) {
       const clientId = `pool_client_${i.toString().padStart(4, '0')}`;
-      const client = new ConnectionLifecycleTestClient(
-        this.baseUrl,
-        clientId,
-        {
-          ...this.poolOptions,
-          authentication: {
-            ...this.poolOptions.authentication,
-            userId: `pool_user_${i}`,
-          },
-        }
-      );
+      const client = new ConnectionLifecycleTestClient(this.baseUrl, clientId, {
+        ...this.poolOptions,
+        authentication: {
+          ...this.poolOptions.authentication,
+          userId: `pool_user_${i}`,
+        },
+      });
 
       this.connections.set(clientId, client);
       this.setupClientEventHandlers(client);
 
       connectionPromises.push(
-        client.connect().catch(error => {
+        client.connect().catch((error) => {
           this.poolMetrics.failedConnections++;
           this.emit('connectionFailed', { clientId, error });
-        })
+        }),
       );
     }
 
@@ -805,7 +824,9 @@ class ConnectionPoolManager extends EventEmitter {
     });
   }
 
-  private setupClientEventHandlers(client: ConnectionLifecycleTestClient): void {
+  private setupClientEventHandlers(
+    client: ConnectionLifecycleTestClient,
+  ): void {
     client.on(ConnectionLifecycleEvent.STATE_TRANSITION, (data) => {
       this.poolMetrics.totalStateTransitions++;
       this.emit('clientStateTransition', data);
@@ -850,8 +871,13 @@ class ConnectionPoolManager extends EventEmitter {
     };
 
     // Test forced disconnections and reconnections
-    const activeClients = Array.from(this.connections.values()).filter(client => client.isConnected());
-    const testClients = activeClients.slice(0, Math.min(10, activeClients.length));
+    const activeClients = Array.from(this.connections.values()).filter(
+      (client) => client.isConnected(),
+    );
+    const testClients = activeClients.slice(
+      0,
+      Math.min(10, activeClients.length),
+    );
 
     for (const client of testClients) {
       try {
@@ -860,7 +886,7 @@ class ConnectionPoolManager extends EventEmitter {
         resilienceResult.disconnectionTests++;
 
         // Wait a moment, then test reconnection
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         const reconnectionStartTime = performance.now();
         await client.connect();
@@ -869,14 +895,14 @@ class ConnectionPoolManager extends EventEmitter {
         resilienceResult.reconnectionTests++;
         resilienceResult.reconnectionSuccesses++;
         resilienceResult.averageReconnectionTime += reconnectionTime;
-
       } catch (error) {
         resilienceResult.reconnectionFailures++;
       }
     }
 
     if (resilienceResult.reconnectionSuccesses > 0) {
-      resilienceResult.averageReconnectionTime /= resilienceResult.reconnectionSuccesses;
+      resilienceResult.averageReconnectionTime /=
+        resilienceResult.reconnectionSuccesses;
     }
 
     // Analyze connection metrics for resource leaks and security compliance
@@ -884,14 +910,17 @@ class ConnectionPoolManager extends EventEmitter {
       const metrics = client.getMetrics();
 
       // Resource leak detection
-      if (metrics.memoryUsage.leaked > 1024 * 1024) { // >1MB leak
+      if (metrics.memoryUsage.leaked > 1024 * 1024) {
+        // >1MB leak
         resilienceResult.resourceLeakDetection.memoryLeaks++;
       }
 
       // State transition validation
-      resilienceResult.stateTransitionValidation.totalTransitions += metrics.stateTransitions.length;
+      resilienceResult.stateTransitionValidation.totalTransitions +=
+        metrics.stateTransitions.length;
       resilienceResult.stateTransitionValidation.averageTransitionTime +=
-        metrics.stateTransitions.reduce((sum, t) => sum + t.duration, 0) / metrics.stateTransitions.length || 0;
+        metrics.stateTransitions.reduce((sum, t) => sum + t.duration, 0) /
+          metrics.stateTransitions.length || 0;
 
       // Security validation
       if (metrics.encryptionEnabled) {
@@ -903,7 +932,8 @@ class ConnectionPoolManager extends EventEmitter {
     }
 
     if (this.connections.size > 0) {
-      resilienceResult.stateTransitionValidation.averageTransitionTime /= this.connections.size;
+      resilienceResult.stateTransitionValidation.averageTransitionTime /=
+        this.connections.size;
     }
 
     resilienceResult.testDuration = performance.now() - testStartTime;
@@ -912,7 +942,9 @@ class ConnectionPoolManager extends EventEmitter {
   }
 
   getActiveConnectionCount(): number {
-    return Array.from(this.connections.values()).filter(client => client.isConnected()).length;
+    return Array.from(this.connections.values()).filter((client) =>
+      client.isConnected(),
+    ).length;
   }
 
   getPoolMetrics(): ConnectionPoolMetrics {
@@ -920,27 +952,32 @@ class ConnectionPoolManager extends EventEmitter {
     this.poolMetrics.activeConnections = this.getActiveConnectionCount();
 
     // Calculate efficiency metrics
-    const totalMemoryUsage = Array.from(this.connections.values())
-      .reduce((sum, client) => sum + client.getMetrics().memoryUsage.peak, 0);
+    const totalMemoryUsage = Array.from(this.connections.values()).reduce(
+      (sum, client) => sum + client.getMetrics().memoryUsage.peak,
+      0,
+    );
 
-    this.poolMetrics.memoryEfficiency = this.poolMetrics.actualPoolSize > 0
-      ? totalMemoryUsage / this.poolMetrics.actualPoolSize
-      : 0;
+    this.poolMetrics.memoryEfficiency =
+      this.poolMetrics.actualPoolSize > 0
+        ? totalMemoryUsage / this.poolMetrics.actualPoolSize
+        : 0;
 
-    this.poolMetrics.resourceLeaks = Array.from(this.connections.values())
-      .filter(client => client.getMetrics().memoryUsage.leaked > 0).length;
+    this.poolMetrics.resourceLeaks = Array.from(
+      this.connections.values(),
+    ).filter((client) => client.getMetrics().memoryUsage.leaked > 0).length;
 
     return { ...this.poolMetrics };
   }
 
   async disconnectAll(): Promise<void> {
-    const disconnectionPromises = Array.from(this.connections.values())
-      .map(client => client.disconnect());
+    const disconnectionPromises = Array.from(this.connections.values()).map(
+      (client) => client.disconnect(),
+    );
 
     await Promise.allSettled(disconnectionPromises);
 
     // Finalize all metrics
-    this.connections.forEach(client => client.finalizeMetrics());
+    this.connections.forEach((client) => client.finalizeMetrics());
     this.connections.clear();
   }
 }
@@ -994,15 +1031,15 @@ interface ConnectionLifecycleResilienceResult {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
-      'WEBSOCKET_CONNECTION_TIMEOUT': 10000,
-      'WEBSOCKET_HEARTBEAT_INTERVAL': 30000,
-      'WEBSOCKET_MAX_RECONNECTION_ATTEMPTS': 5,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
+      WEBSOCKET_CONNECTION_TIMEOUT: 10000,
+      WEBSOCKET_HEARTBEAT_INTERVAL: 30000,
+      WEBSOCKET_MAX_RECONNECTION_ATTEMPTS: 5,
     };
     return config[key] ?? defaultValue;
   }),
@@ -1037,15 +1074,21 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
-    parlantService = module.get<ParlantWebSocketBridgeService>(ParlantWebSocketBridgeService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
+    parlantService = module.get<ParlantWebSocketBridgeService>(
+      ParlantWebSocketBridgeService,
+    );
 
     // Initialize services
     await integrationService.onModuleInit();
 
     // Allow services to start
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // Initialize connection pool
     connectionPool = new ConnectionPoolManager(TEST_URL, POOL_SIZE, {
@@ -1077,9 +1120,13 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
   describe('Connection Establishment and Handshake Validation', () => {
     it('should establish WebSocket connection with proper handshake within 200ms', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'handshake_test_client', {
-        connectionTimeout: 5000,
-      });
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'handshake_test_client',
+        {
+          connectionTimeout: 5000,
+        },
+      );
 
       const startTime = performance.now();
       await client.connect();
@@ -1098,9 +1145,13 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
     it('should handle connection timeout gracefully', async () => {
       // Use invalid URL to trigger timeout
-      const client = new ConnectionLifecycleTestClient('ws://invalid-host:9999', 'timeout_test_client', {
-        connectionTimeout: 1000,
-      });
+      const client = new ConnectionLifecycleTestClient(
+        'ws://invalid-host:9999',
+        'timeout_test_client',
+        {
+          connectionTimeout: 1000,
+        },
+      );
 
       let connectionError: Error | null = null;
       try {
@@ -1119,17 +1170,21 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
     });
 
     it('should validate WebSocket protocol headers and security', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'security_test_client', {
-        customHeaders: {
-          'X-Security-Level': 'high',
-          'X-Compliance': 'enterprise',
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'security_test_client',
+        {
+          customHeaders: {
+            'X-Security-Level': 'high',
+            'X-Compliance': 'enterprise',
+          },
+          authentication: {
+            method: 'jwt',
+            token: 'test-security-token',
+            userId: 'security-test-user',
+          },
         },
-        authentication: {
-          method: 'jwt',
-          token: 'test-security-token',
-          userId: 'security-test-user',
-        },
-      });
+      );
 
       await client.connect();
 
@@ -1147,14 +1202,21 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
   describe('Connection State Management and Transitions', () => {
     it('should properly manage connection state transitions', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'state_transition_client', {
-        authentication: {
-          method: 'jwt',
-          token: 'state-test-token',
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'state_transition_client',
+        {
+          authentication: {
+            method: 'jwt',
+            token: 'state-test-token',
+          },
         },
-      });
+      );
 
-      const stateTransitions: Array<{ from: ConnectionState; to: ConnectionState }> = [];
+      const stateTransitions: Array<{
+        from: ConnectionState;
+        to: ConnectionState;
+      }> = [];
 
       client.on(ConnectionLifecycleEvent.STATE_TRANSITION, (data) => {
         stateTransitions.push({ from: data.from, to: data.to });
@@ -1166,22 +1228,24 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       expect(stateTransitions.length).toBeGreaterThanOrEqual(3);
       expect(stateTransitions[0]).toEqual({
         from: ConnectionState.DISCONNECTED,
-        to: ConnectionState.CONNECTING
+        to: ConnectionState.CONNECTING,
       });
       expect(stateTransitions[1]).toEqual({
         from: ConnectionState.CONNECTING,
-        to: ConnectionState.AUTHENTICATING
+        to: ConnectionState.AUTHENTICATING,
       });
       expect(stateTransitions[2]).toEqual({
         from: ConnectionState.AUTHENTICATING,
-        to: ConnectionState.CONNECTED
+        to: ConnectionState.CONNECTED,
       });
 
       await client.disconnect();
 
       // Verify disconnection transitions
-      const disconnectionTransitions = stateTransitions.filter(t =>
-        t.from === ConnectionState.CONNECTED || t.to === ConnectionState.CLOSED
+      const disconnectionTransitions = stateTransitions.filter(
+        (t) =>
+          t.from === ConnectionState.CONNECTED ||
+          t.to === ConnectionState.CLOSED,
       );
       expect(disconnectionTransitions.length).toBeGreaterThan(0);
 
@@ -1189,7 +1253,10 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
     });
 
     it('should handle invalid state transitions gracefully', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'invalid_state_client');
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'invalid_state_client',
+      );
 
       await client.connect();
       expect(client.getState()).toBe(ConnectionState.CONNECTED);
@@ -1214,7 +1281,10 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
   describe('Graceful Disconnection and Cleanup', () => {
     it('should perform graceful disconnection with complete resource cleanup', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'graceful_disconnect_client');
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'graceful_disconnect_client',
+      );
 
       await client.connect();
       expect(client.isConnected()).toBe(true);
@@ -1235,7 +1305,10 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
     });
 
     it('should handle forced disconnection and cleanup', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'forced_disconnect_client');
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'forced_disconnect_client',
+      );
 
       await client.connect();
       expect(client.isConnected()).toBe(true);
@@ -1254,10 +1327,14 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
   describe('Heartbeat and Keepalive Mechanisms', () => {
     it('should maintain connection health with heartbeat monitoring', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'heartbeat_client', {
-        heartbeatInterval: 2000, // 2 seconds for testing
-        heartbeatTimeout: 5000,
-      });
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'heartbeat_client',
+        {
+          heartbeatInterval: 2000, // 2 seconds for testing
+          heartbeatTimeout: 5000,
+        },
+      );
 
       let heartbeatsSent = 0;
       let heartbeatsReceived = 0;
@@ -1273,7 +1350,7 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       await client.connect();
 
       // Wait for multiple heartbeats
-      await new Promise(resolve => setTimeout(resolve, 8000));
+      await new Promise((resolve) => setTimeout(resolve, 8000));
 
       expect(heartbeatsSent).toBeGreaterThanOrEqual(3);
       expect(heartbeatsReceived).toBeGreaterThanOrEqual(2);
@@ -1284,7 +1361,9 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       expect(metrics.heartbeatLatencies.length).toBeGreaterThan(0);
 
       // Verify heartbeat latencies are reasonable
-      const averageLatency = metrics.heartbeatLatencies.reduce((sum, lat) => sum + lat, 0) / metrics.heartbeatLatencies.length;
+      const averageLatency =
+        metrics.heartbeatLatencies.reduce((sum, lat) => sum + lat, 0) /
+        metrics.heartbeatLatencies.length;
       expect(averageLatency).toBeLessThan(100); // <100ms heartbeat latency
 
       await client.disconnect();
@@ -1292,11 +1371,15 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
     });
 
     it('should detect heartbeat timeouts and trigger recovery', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'heartbeat_timeout_client', {
-        heartbeatInterval: 1000,
-        heartbeatTimeout: 3000,
-        autoReconnectOnHeartbeatTimeout: true,
-      });
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'heartbeat_timeout_client',
+        {
+          heartbeatInterval: 1000,
+          heartbeatTimeout: 3000,
+          autoReconnectOnHeartbeatTimeout: true,
+        },
+      );
 
       let heartbeatTimeouts = 0;
       let reconnectionAttempts = 0;
@@ -1315,7 +1398,7 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       // This test may not trigger actual timeout in test environment
       // but validates the timeout detection mechanism exists
 
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       const metrics = client.getMetrics();
       expect(metrics.heartbeatTimeouts).toBeGreaterThanOrEqual(0);
@@ -1329,13 +1412,17 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
   describe('Reconnection Strategies and Automatic Recovery', () => {
     it('should automatically reconnect with exponential backoff', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'reconnection_client', {
-        autoReconnect: true,
-        maxReconnectionAttempts: 3,
-        reconnectionBaseDelay: 500,
-        reconnectionMaxDelay: 5000,
-        reconnectionMultiplier: 2,
-      });
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'reconnection_client',
+        {
+          autoReconnect: true,
+          maxReconnectionAttempts: 3,
+          reconnectionBaseDelay: 500,
+          reconnectionMaxDelay: 5000,
+          reconnectionMultiplier: 2,
+        },
+      );
 
       let reconnectionAttempts = 0;
       let reconnectionSuccesses = 0;
@@ -1356,7 +1443,7 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       expect(client.getState()).toBe(ConnectionState.CLOSED);
 
       // Wait for reconnection
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise((resolve) => setTimeout(resolve, 10000));
 
       expect(reconnectionAttempts).toBeGreaterThanOrEqual(1);
       expect(reconnectionSuccesses).toBeGreaterThanOrEqual(1);
@@ -1373,11 +1460,15 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
     });
 
     it('should respect maximum reconnection attempts', async () => {
-      const client = new ConnectionLifecycleTestClient('ws://invalid-host:9999', 'max_reconnect_client', {
-        autoReconnect: true,
-        maxReconnectionAttempts: 2,
-        reconnectionBaseDelay: 100,
-      });
+      const client = new ConnectionLifecycleTestClient(
+        'ws://invalid-host:9999',
+        'max_reconnect_client',
+        {
+          autoReconnect: true,
+          maxReconnectionAttempts: 2,
+          reconnectionBaseDelay: 100,
+        },
+      );
 
       let reconnectionFailures = 0;
 
@@ -1393,7 +1484,7 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       }
 
       // Wait for reconnection attempts
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       const metrics = client.getMetrics();
       expect(metrics.reconnectionAttempts).toBeLessThanOrEqual(2);
@@ -1412,7 +1503,9 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       const poolMetrics = connectionPool.getPoolMetrics();
 
       expect(poolMetrics.actualPoolSize).toBe(POOL_SIZE);
-      expect(poolMetrics.activeConnections).toBeGreaterThanOrEqual(POOL_SIZE * 0.95); // 95% success rate
+      expect(poolMetrics.activeConnections).toBeGreaterThanOrEqual(
+        POOL_SIZE * 0.95,
+      ); // 95% success rate
       expect(poolMetrics.totalConnectionTime).toBeLessThan(30000); // <30s for 100 connections
       expect(poolMetrics.memoryEfficiency).toBeLessThan(50 * 1024 * 1024); // <50MB per connection
 
@@ -1432,31 +1525,39 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
         await connectionPool.establishConnectionPool();
       }
 
-      const resilienceResult = await connectionPool.testConnectionLifecycleResilience();
+      const resilienceResult =
+        await connectionPool.testConnectionLifecycleResilience();
 
       expect(resilienceResult.totalConnections).toBeGreaterThan(0);
       expect(resilienceResult.disconnectionTests).toBeGreaterThan(0);
       expect(resilienceResult.reconnectionTests).toBeGreaterThan(0);
 
       // At least 80% reconnection success rate
-      const reconnectionSuccessRate = resilienceResult.reconnectionSuccesses / resilienceResult.reconnectionTests;
+      const reconnectionSuccessRate =
+        resilienceResult.reconnectionSuccesses /
+        resilienceResult.reconnectionTests;
       expect(reconnectionSuccessRate).toBeGreaterThanOrEqual(0.8);
 
       // Average reconnection time should be reasonable
       expect(resilienceResult.averageReconnectionTime).toBeLessThan(10000); // <10s
 
       // Minimal resource leaks
-      expect(resilienceResult.resourceLeakDetection.memoryLeaks).toBeLessThan(5);
+      expect(resilienceResult.resourceLeakDetection.memoryLeaks).toBeLessThan(
+        5,
+      );
 
       // Security compliance
-      expect(resilienceResult.securityValidation.authenticatedConnections).toBeGreaterThan(0);
+      expect(
+        resilienceResult.securityValidation.authenticatedConnections,
+      ).toBeGreaterThan(0);
 
       console.log('Connection Lifecycle Resilience Results:', {
         totalConnections: resilienceResult.totalConnections,
         reconnectionSuccessRate: `${(reconnectionSuccessRate * 100).toFixed(1)}%`,
         averageReconnectionTime: `${resilienceResult.averageReconnectionTime.toFixed(0)}ms`,
         memoryLeaks: resilienceResult.resourceLeakDetection.memoryLeaks,
-        authenticatedConnections: resilienceResult.securityValidation.authenticatedConnections,
+        authenticatedConnections:
+          resilienceResult.securityValidation.authenticatedConnections,
         testDuration: `${resilienceResult.testDuration.toFixed(0)}ms`,
       });
     });
@@ -1466,13 +1567,17 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
   describe('Security Validation for WebSocket Connections', () => {
     it('should enforce authentication for all connections', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'auth_validation_client', {
-        authentication: {
-          method: 'jwt',
-          token: 'valid-auth-token',
-          userId: 'authenticated-user',
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'auth_validation_client',
+        {
+          authentication: {
+            method: 'jwt',
+            token: 'valid-auth-token',
+            userId: 'authenticated-user',
+          },
         },
-      });
+      );
 
       await client.connect();
 
@@ -1486,14 +1591,18 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
     });
 
     it('should reject connections with invalid authentication', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'invalid_auth_client', {
-        authentication: {
-          method: 'jwt',
-          token: 'invalid-token',
-          userId: 'unauthorized-user',
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'invalid_auth_client',
+        {
+          authentication: {
+            method: 'jwt',
+            token: 'invalid-token',
+            userId: 'unauthorized-user',
+          },
+          authenticationTimeout: 3000,
         },
-        authenticationTimeout: 3000,
-      });
+      );
 
       let authenticationFailed = false;
       client.on(ConnectionLifecycleEvent.AUTHENTICATION_FAILURE, () => {
@@ -1521,9 +1630,13 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       // Note: This test requires SSL/TLS setup which may not be available in test environment
       // The test validates the encryption validation logic exists
 
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'wss_validation_client', {
-        requireWss: false, // Set to false for testing without SSL
-      });
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'wss_validation_client',
+        {
+          requireWss: false, // Set to false for testing without SSL
+        },
+      );
 
       await client.connect();
 
@@ -1548,7 +1661,10 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       const clients: ConnectionLifecycleTestClient[] = [];
 
       for (let i = 0; i < 20; i++) {
-        const client = new ConnectionLifecycleTestClient(TEST_URL, `leak_test_client_${i}`);
+        const client = new ConnectionLifecycleTestClient(
+          TEST_URL,
+          `leak_test_client_${i}`,
+        );
         clients.push(client);
         await client.connect();
       }
@@ -1565,7 +1681,7 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       }
 
       // Wait for cleanup
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryGrowth = finalMemory - initialMemory;
@@ -1582,14 +1698,18 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
     });
 
     it('should clean up all resources on disconnection', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'resource_cleanup_client', {
-        heartbeatInterval: 1000,
-      });
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'resource_cleanup_client',
+        {
+          heartbeatInterval: 1000,
+        },
+      );
 
       await client.connect();
 
       // Let it run for a bit to create some activity
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       await client.disconnect();
       const metrics = client.finalizeMetrics();
@@ -1604,15 +1724,19 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
   describe('Performance Monitoring and Metrics', () => {
     it('should provide comprehensive connection performance metrics', async () => {
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'performance_metrics_client', {
-        heartbeatInterval: 2000,
-      });
+      const client = new ConnectionLifecycleTestClient(
+        TEST_URL,
+        'performance_metrics_client',
+        {
+          heartbeatInterval: 2000,
+        },
+      );
 
       const startTime = performance.now();
       await client.connect();
 
       // Let it run for performance measurement
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       await client.disconnect();
       const metrics = client.finalizeMetrics();
@@ -1622,7 +1746,9 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       expect(metrics.connectionEstablishmentTime).toBeGreaterThan(0);
       expect(metrics.stateTransitions.length).toBeGreaterThan(0);
       expect(metrics.memoryUsage.initial).toBeGreaterThan(0);
-      expect(metrics.memoryUsage.peak).toBeGreaterThanOrEqual(metrics.memoryUsage.initial);
+      expect(metrics.memoryUsage.peak).toBeGreaterThanOrEqual(
+        metrics.memoryUsage.initial,
+      );
       expect(metrics.memoryUsage.final).toBeGreaterThan(0);
 
       // Performance thresholds
@@ -1630,7 +1756,9 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
       expect(metrics.disconnectionTime).toBeLessThan(500); // <500ms disconnection
 
       if (metrics.heartbeatLatencies.length > 0) {
-        const avgHeartbeatLatency = metrics.heartbeatLatencies.reduce((sum, lat) => sum + lat, 0) / metrics.heartbeatLatencies.length;
+        const avgHeartbeatLatency =
+          metrics.heartbeatLatencies.reduce((sum, lat) => sum + lat, 0) /
+          metrics.heartbeatLatencies.length;
         expect(avgHeartbeatLatency).toBeLessThan(100); // <100ms heartbeat latency
       }
 

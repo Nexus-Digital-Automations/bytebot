@@ -25,7 +25,7 @@ import {
   ParlantValidated,
   ParlantCritical,
   ParlantSecure,
-  SecurityLevel
+  SecurityLevel,
 } from '@bytebot/shared/src/decorators/parlant-validation.decorator';
 import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
 
@@ -33,7 +33,13 @@ import { ConversationContextParameter } from '@bytebot/shared/src/types/conversa
 interface ConfigurationChangeRequest {
   key: string;
   value: unknown;
-  category: 'SYSTEM' | 'SECURITY' | 'PERFORMANCE' | 'INTEGRATION' | 'UI' | 'API';
+  category:
+    | 'SYSTEM'
+    | 'SECURITY'
+    | 'PERFORMANCE'
+    | 'INTEGRATION'
+    | 'UI'
+    | 'API';
   sensitivity: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET';
   environment: 'development' | 'staging' | 'production' | 'all';
   justification: string;
@@ -99,7 +105,12 @@ interface ConfigurationDependency {
 }
 
 interface ConfigurationSecurityAnalysis {
-  classification: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET' | 'TOP_SECRET';
+  classification:
+    | 'PUBLIC'
+    | 'INTERNAL'
+    | 'CONFIDENTIAL'
+    | 'SECRET'
+    | 'TOP_SECRET';
   threats: SecurityThreat[];
   vulnerabilities: SecurityVulnerability[];
   encryptionRequired: boolean;
@@ -226,7 +237,11 @@ interface RollbackStep {
 }
 
 interface RollbackRisk {
-  type: 'DATA_LOSS' | 'SERVICE_DISRUPTION' | 'CONFIGURATION_DRIFT' | 'DEPENDENCY_BREAK';
+  type:
+    | 'DATA_LOSS'
+    | 'SERVICE_DISRUPTION'
+    | 'CONFIGURATION_DRIFT'
+    | 'DEPENDENCY_BREAK';
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   description: string;
   mitigation: string;
@@ -235,10 +250,14 @@ interface RollbackRisk {
 
 @Injectable()
 export class EnhancedConfigurationValidationService {
-  private readonly logger = new Logger(EnhancedConfigurationValidationService.name);
+  private readonly logger = new Logger(
+    EnhancedConfigurationValidationService.name,
+  );
 
   constructor() {
-    this.logger.log('Enhanced Configuration Validation Service initialized with comprehensive PARLANT integration');
+    this.logger.log(
+      'Enhanced Configuration Validation Service initialized with comprehensive PARLANT integration',
+    );
   }
 
   // ===== COMPREHENSIVE CONFIGURATION VALIDATION =====
@@ -247,22 +266,27 @@ export class EnhancedConfigurationValidationService {
    * Validate configuration change with comprehensive analysis
    * Uses AI-powered risk assessment and PARLANT conversational validation
    */
-  @ParlantCritical('Perform comprehensive configuration change validation with AI-powered risk assessment')
+  @ParlantCritical(
+    'Perform comprehensive configuration change validation with AI-powered risk assessment',
+  )
   async validateConfigurationChange(
     request: ConfigurationChangeRequest,
-    conversationContext?: ConversationContextParameter
+    conversationContext?: ConversationContextParameter,
   ): Promise<ConfigurationValidationResult> {
     const validationId = this.generateValidationId();
     const startTime = Date.now();
 
-    this.logger.log(`[${validationId}] Starting comprehensive configuration validation`, {
-      validationId,
-      key: request.key,
-      category: request.category,
-      sensitivity: request.sensitivity,
-      environment: request.environment,
-      conversationId: conversationContext?.conversationId
-    });
+    this.logger.log(
+      `[${validationId}] Starting comprehensive configuration validation`,
+      {
+        validationId,
+        key: request.key,
+        category: request.category,
+        sensitivity: request.sensitivity,
+        environment: request.environment,
+        conversationId: conversationContext?.conversationId,
+      },
+    );
 
     try {
       // Parallel analysis for optimal performance
@@ -272,14 +296,14 @@ export class EnhancedConfigurationValidationService {
         securityAnalysis,
         complianceValidation,
         performanceImpact,
-        rollbackAnalysis
+        rollbackAnalysis,
       ] = await Promise.all([
         this.performImpactAssessment(request),
         this.analyzeDependencies(request),
         this.performSecurityAnalysis(request),
         this.validateCompliance(request),
         this.assessPerformanceImpact(request),
-        this.analyzeRollbackFeasibility(request)
+        this.analyzeRollbackFeasibility(request),
       ]);
 
       // Calculate overall risk level
@@ -287,11 +311,14 @@ export class EnhancedConfigurationValidationService {
         impactAssessment,
         securityAnalysis,
         complianceValidation,
-        performanceImpact
+        performanceImpact,
       );
 
       // Determine if conversational approval is required
-      const requiresApproval = this.requiresConversationalApproval(riskLevel, request);
+      const requiresApproval = this.requiresConversationalApproval(
+        riskLevel,
+        request,
+      );
 
       const validationTime = Date.now() - startTime;
 
@@ -308,11 +335,14 @@ export class EnhancedConfigurationValidationService {
           approvalReasoning: requiresApproval
             ? 'Requires conversational approval due to risk level'
             : 'Auto-approved - low risk configuration change',
-          alternativeRecommendations: this.generateAlternativeRecommendations(request, riskLevel)
+          alternativeRecommendations: this.generateAlternativeRecommendations(
+            request,
+            riskLevel,
+          ),
         },
         complianceValidation,
         performanceImpact,
-        rollbackAnalysis
+        rollbackAnalysis,
       };
 
       this.logger.log(`[${validationId}] Configuration validation completed`, {
@@ -320,22 +350,21 @@ export class EnhancedConfigurationValidationService {
         approved: result.approved,
         riskLevel: result.riskLevel,
         validationTime,
-        requiresApproval
+        requiresApproval,
       });
 
       return result;
-
     } catch (error) {
       const validationTime = Date.now() - startTime;
       this.logger.error(`[${validationId}] Configuration validation failed`, {
         validationId,
         error: error instanceof Error ? error.message : String(error),
-        validationTime
+        validationTime,
       });
 
       throw new HttpException(
         `Configuration validation failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -344,19 +373,22 @@ export class EnhancedConfigurationValidationService {
    * Analyze configuration dependencies with AI-powered detection
    */
   @ParlantValidated({
-    description: 'Analyze configuration dependencies with intelligent conflict detection',
+    description:
+      'Analyze configuration dependencies with intelligent conflict detection',
     securityLevel: SecurityLevel._MEDIUM,
     cacheable: true,
     cacheTtl: 300000, // 5 minutes
-    timeout: 10000
+    timeout: 10000,
   })
-  async analyzeDependencies(request: ConfigurationChangeRequest): Promise<ConfigurationDependencyAnalysis> {
+  async analyzeDependencies(
+    request: ConfigurationChangeRequest,
+  ): Promise<ConfigurationDependencyAnalysis> {
     const analysisId = this.generateAnalysisId();
 
     this.logger.log(`[${analysisId}] Analyzing configuration dependencies`, {
       analysisId,
       key: request.key,
-      category: request.category
+      category: request.category,
     });
 
     // Mock implementation - would integrate with actual configuration dependency engine
@@ -366,8 +398,8 @@ export class EnhancedConfigurationValidationService {
         relationship: 'REQUIRES',
         severity: 'WARNING',
         description: 'This setting requires related.setting.1 to be enabled',
-        resolution: 'Enable related.setting.1 or disable this feature'
-      }
+        resolution: 'Enable related.setting.1 or disable this feature',
+      },
     ];
 
     const dependencyHealth = this.assessDependencyHealth(directDependencies);
@@ -377,22 +409,26 @@ export class EnhancedConfigurationValidationService {
       transitiveDependencies: [],
       cyclicDependencies: [],
       criticalPath: [request.key],
-      dependencyHealth
+      dependencyHealth,
     };
   }
 
   /**
    * Perform security analysis with threat modeling
    */
-  @ParlantSecure('Perform comprehensive security analysis with AI-powered threat detection')
-  async performSecurityAnalysis(request: ConfigurationChangeRequest): Promise<ConfigurationSecurityAnalysis> {
+  @ParlantSecure(
+    'Perform comprehensive security analysis with AI-powered threat detection',
+  )
+  async performSecurityAnalysis(
+    request: ConfigurationChangeRequest,
+  ): Promise<ConfigurationSecurityAnalysis> {
     const analysisId = this.generateAnalysisId();
 
     this.logger.log(`[${analysisId}] Performing security analysis`, {
       analysisId,
       key: request.key,
       sensitivity: request.sensitivity,
-      category: request.category
+      category: request.category,
     });
 
     // Security threat analysis based on configuration type and sensitivity
@@ -401,13 +437,17 @@ export class EnhancedConfigurationValidationService {
     const auditRequirements = this.determineAuditRequirements(request);
 
     return {
-      classification: request.sensitivity as 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'SECRET',
+      classification: request.sensitivity as
+        | 'PUBLIC'
+        | 'INTERNAL'
+        | 'CONFIDENTIAL'
+        | 'SECRET',
       threats,
       vulnerabilities,
       encryptionRequired: request.sensitivity in ['CONFIDENTIAL', 'SECRET'],
       accessControlList: this.generateAccessControlList(request),
       auditRequirements,
-      complianceImpact: this.assessComplianceImpact(request)
+      complianceImpact: this.assessComplianceImpact(request),
     };
   }
 
@@ -415,20 +455,23 @@ export class EnhancedConfigurationValidationService {
    * Validate compliance requirements
    */
   @ParlantValidated({
-    description: 'Validate configuration compliance against enterprise frameworks',
+    description:
+      'Validate configuration compliance against enterprise frameworks',
     securityLevel: SecurityLevel._HIGH,
     cacheable: true,
     cacheTtl: 600000, // 10 minutes
-    timeout: 15000
+    timeout: 15000,
   })
-  async validateCompliance(request: ConfigurationChangeRequest): Promise<ConfigurationComplianceValidation> {
+  async validateCompliance(
+    request: ConfigurationChangeRequest,
+  ): Promise<ConfigurationComplianceValidation> {
     const validationId = this.generateValidationId();
 
     this.logger.log(`[${validationId}] Validating compliance requirements`, {
       validationId,
       key: request.key,
       category: request.category,
-      sensitivity: request.sensitivity
+      sensitivity: request.sensitivity,
     });
 
     const frameworks = this.getApplicableFrameworks(request);
@@ -436,20 +479,25 @@ export class EnhancedConfigurationValidationService {
     const requirements = this.assessComplianceRequirements(request, frameworks);
     const certifications = this.checkCertificationRequirements(request);
 
-    const overallStatus = this.determineOverallComplianceStatus(violations, requirements);
+    const overallStatus = this.determineOverallComplianceStatus(
+      violations,
+      requirements,
+    );
 
     return {
       frameworks,
       violations,
       requirements,
       certifications,
-      overallStatus
+      overallStatus,
     };
   }
 
   // ===== PRIVATE HELPER METHODS =====
 
-  private async performImpactAssessment(request: ConfigurationChangeRequest): Promise<ConfigurationImpactAssessment> {
+  private async performImpactAssessment(
+    request: ConfigurationChangeRequest,
+  ): Promise<ConfigurationImpactAssessment> {
     // Mock implementation - would integrate with actual impact assessment engine
     return {
       scope: 'SERVICE',
@@ -457,50 +505,54 @@ export class EnhancedConfigurationValidationService {
       downtime: {
         required: request.requiresRestart || false,
         estimatedDuration: request.requiresRestart ? 30000 : 0, // 30 seconds
-        maintenanceWindow: request.environment === 'production'
+        maintenanceWindow: request.environment === 'production',
       },
       businessImpact: {
         level: 'LOW',
         affectedUsers: 0,
         affectedServices: [],
-        revenueImpact: 0
+        revenueImpact: 0,
       },
       technicalImpact: {
         performanceChange: 0,
         securityImplications: [],
         compatibilityIssues: [],
-        migrationComplexity: 'SIMPLE'
-      }
+        migrationComplexity: 'SIMPLE',
+      },
     };
   }
 
-  private async assessPerformanceImpact(request: ConfigurationChangeRequest): Promise<ConfigurationPerformanceImpact> {
+  private async assessPerformanceImpact(
+    request: ConfigurationChangeRequest,
+  ): Promise<ConfigurationPerformanceImpact> {
     // Mock implementation - would integrate with performance modeling system
     return {
       loadImpact: {
         cpu: 0,
         memory: 0,
         disk: 0,
-        network: 0
+        network: 0,
       },
       responseTimeImpact: {
         average: 0,
         p95: 0,
-        p99: 0
+        p99: 0,
       },
       throughputImpact: {
         requestsPerSecond: 0,
-        transactionsPerMinute: 0
+        transactionsPerMinute: 0,
       },
       scalabilityImpact: {
         maxConcurrentUsers: 0,
         maxThroughput: 0,
-        resourceUtilization: 0
-      }
+        resourceUtilization: 0,
+      },
     };
   }
 
-  private async analyzeRollbackFeasibility(request: ConfigurationChangeRequest): Promise<ConfigurationRollbackAnalysis> {
+  private async analyzeRollbackFeasibility(
+    request: ConfigurationChangeRequest,
+  ): Promise<ConfigurationRollbackAnalysis> {
     // Mock implementation - would integrate with rollback analysis system
     const rollbackPlan: RollbackStep[] = [
       {
@@ -509,8 +561,8 @@ export class EnhancedConfigurationValidationService {
         estimatedTime: 5000, // 5 seconds
         reversible: true,
         dependencies: [],
-        validationRequired: true
-      }
+        validationRequired: true,
+      },
     ];
 
     return {
@@ -519,16 +571,16 @@ export class EnhancedConfigurationValidationService {
       dataConsistency: {
         backupRequired: false,
         migrationNeeded: false,
-        dataLossRisk: 'NONE'
+        dataLossRisk: 'NONE',
       },
       serviceAvailability: {
         downtimeRequired: false,
         estimatedDowntime: 0,
-        affectedServices: []
+        affectedServices: [],
       },
       rollbackRisks: [],
       automatedRollback: true,
-      rollbackWindow: 300000 // 5 minutes
+      rollbackWindow: 300000, // 5 minutes
     };
   }
 
@@ -536,33 +588,52 @@ export class EnhancedConfigurationValidationService {
     impact: ConfigurationImpactAssessment,
     security: ConfigurationSecurityAnalysis,
     compliance: ConfigurationComplianceValidation,
-    performance: ConfigurationPerformanceImpact
+    performance: ConfigurationPerformanceImpact,
   ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     // Risk calculation algorithm
     let riskScore = 0;
 
     // Impact assessment contribution
     switch (impact.businessImpact.level) {
-      case 'CRITICAL': riskScore += 40; break;
-      case 'HIGH': riskScore += 30; break;
-      case 'MEDIUM': riskScore += 20; break;
-      case 'LOW': riskScore += 10; break;
-      case 'MINIMAL': riskScore += 5; break;
+      case 'CRITICAL':
+        riskScore += 40;
+        break;
+      case 'HIGH':
+        riskScore += 30;
+        break;
+      case 'MEDIUM':
+        riskScore += 20;
+        break;
+      case 'LOW':
+        riskScore += 10;
+        break;
+      case 'MINIMAL':
+        riskScore += 5;
+        break;
     }
 
     // Security threats contribution
-    const criticalThreats = security.threats.filter(t => t.severity === 'CRITICAL').length;
-    const highThreats = security.threats.filter(t => t.severity === 'HIGH').length;
+    const criticalThreats = security.threats.filter(
+      (t) => t.severity === 'CRITICAL',
+    ).length;
+    const highThreats = security.threats.filter(
+      (t) => t.severity === 'HIGH',
+    ).length;
     riskScore += criticalThreats * 20 + highThreats * 10;
 
     // Compliance violations contribution
-    const criticalViolations = compliance.violations.filter(v => v.severity === 'CRITICAL').length;
-    const majorViolations = compliance.violations.filter(v => v.severity === 'MAJOR').length;
+    const criticalViolations = compliance.violations.filter(
+      (v) => v.severity === 'CRITICAL',
+    ).length;
+    const majorViolations = compliance.violations.filter(
+      (v) => v.severity === 'MAJOR',
+    ).length;
     riskScore += criticalViolations * 25 + majorViolations * 15;
 
     // Performance impact contribution
     if (Math.abs(performance.responseTimeImpact.p95) > 20) riskScore += 15;
-    if (Math.abs(performance.throughputImpact.requestsPerSecond) > 10) riskScore += 10;
+    if (Math.abs(performance.throughputImpact.requestsPerSecond) > 10)
+      riskScore += 10;
 
     // Determine risk level
     if (riskScore >= 70) return 'CRITICAL';
@@ -571,7 +642,10 @@ export class EnhancedConfigurationValidationService {
     return 'LOW';
   }
 
-  private requiresConversationalApproval(riskLevel: string, request: ConfigurationChangeRequest): boolean {
+  private requiresConversationalApproval(
+    riskLevel: string,
+    request: ConfigurationChangeRequest,
+  ): boolean {
     // Always require approval for critical risk or production environment
     if (riskLevel === 'CRITICAL' || request.environment === 'production') {
       return true;
@@ -590,7 +664,10 @@ export class EnhancedConfigurationValidationService {
     return false;
   }
 
-  private generateAlternativeRecommendations(request: ConfigurationChangeRequest, riskLevel: string): string[] {
+  private generateAlternativeRecommendations(
+    request: ConfigurationChangeRequest,
+    riskLevel: string,
+  ): string[] {
     const recommendations: string[] = [];
 
     if (riskLevel === 'HIGH' || riskLevel === 'CRITICAL') {
@@ -612,26 +689,33 @@ export class EnhancedConfigurationValidationService {
     return recommendations;
   }
 
-  private assessDependencyHealth(dependencies: ConfigurationDependency[]): 'HEALTHY' | 'WARNING' | 'CRITICAL' {
-    const criticalDeps = dependencies.filter(d => d.severity === 'CRITICAL').length;
-    const errorDeps = dependencies.filter(d => d.severity === 'ERROR').length;
+  private assessDependencyHealth(
+    dependencies: ConfigurationDependency[],
+  ): 'HEALTHY' | 'WARNING' | 'CRITICAL' {
+    const criticalDeps = dependencies.filter(
+      (d) => d.severity === 'CRITICAL',
+    ).length;
+    const errorDeps = dependencies.filter((d) => d.severity === 'ERROR').length;
 
     if (criticalDeps > 0) return 'CRITICAL';
     if (errorDeps > 0) return 'WARNING';
     return 'HEALTHY';
   }
 
-  private identifySecurityThreats(request: ConfigurationChangeRequest): SecurityThreat[] {
+  private identifySecurityThreats(
+    request: ConfigurationChangeRequest,
+  ): SecurityThreat[] {
     const threats: SecurityThreat[] = [];
 
     if (request.category === 'SECURITY') {
       threats.push({
         id: 'SEC-001',
         severity: 'HIGH',
-        description: 'Security configuration change may impact system security posture',
+        description:
+          'Security configuration change may impact system security posture',
         mitigation: 'Comprehensive security review and testing required',
         probability: 0.3,
-        impact: 0.8
+        impact: 0.8,
       });
     }
 
@@ -642,35 +726,44 @@ export class EnhancedConfigurationValidationService {
         description: 'Configuration contains sensitive information',
         mitigation: 'Ensure encryption at rest and in transit',
         probability: 0.2,
-        impact: 0.9
+        impact: 0.9,
       });
     }
 
     return threats;
   }
 
-  private assessSecurityVulnerabilities(request: ConfigurationChangeRequest): SecurityVulnerability[] {
+  private assessSecurityVulnerabilities(
+    request: ConfigurationChangeRequest,
+  ): SecurityVulnerability[] {
     // Mock implementation - would integrate with vulnerability scanner
     return [];
   }
 
-  private determineAuditRequirements(request: ConfigurationChangeRequest): AuditRequirement[] {
+  private determineAuditRequirements(
+    request: ConfigurationChangeRequest,
+  ): AuditRequirement[] {
     const requirements: AuditRequirement[] = [];
 
-    if (request.category === 'SECURITY' || request.sensitivity in ['CONFIDENTIAL', 'SECRET']) {
+    if (
+      request.category === 'SECURITY' ||
+      request.sensitivity in ['CONFIDENTIAL', 'SECRET']
+    ) {
       requirements.push({
         type: 'SOX',
         retention: 2555, // 7 years
         encryption: true,
         accessLog: true,
-        changeTracking: true
+        changeTracking: true,
       });
     }
 
     return requirements;
   }
 
-  private generateAccessControlList(request: ConfigurationChangeRequest): string[] {
+  private generateAccessControlList(
+    request: ConfigurationChangeRequest,
+  ): string[] {
     const acl = ['ADMIN'];
 
     if (request.category !== 'SECURITY') {
@@ -684,7 +777,9 @@ export class EnhancedConfigurationValidationService {
     return acl;
   }
 
-  private assessComplianceImpact(request: ConfigurationChangeRequest): string[] {
+  private assessComplianceImpact(
+    request: ConfigurationChangeRequest,
+  ): string[] {
     const impacts: string[] = [];
 
     if (request.category === 'SECURITY') {
@@ -698,7 +793,9 @@ export class EnhancedConfigurationValidationService {
     return impacts;
   }
 
-  private getApplicableFrameworks(request: ConfigurationChangeRequest): ComplianceFramework[] {
+  private getApplicableFrameworks(
+    request: ConfigurationChangeRequest,
+  ): ComplianceFramework[] {
     // Mock implementation - would integrate with compliance management system
     return [
       {
@@ -706,29 +803,44 @@ export class EnhancedConfigurationValidationService {
         version: '2.0',
         applicability: 'FULL',
         lastAssessment: new Date(),
-        nextReview: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year
-      }
+        nextReview: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+      },
     ];
   }
 
-  private identifyComplianceViolations(request: ConfigurationChangeRequest, frameworks: ComplianceFramework[]): ComplianceViolation[] {
+  private identifyComplianceViolations(
+    request: ConfigurationChangeRequest,
+    frameworks: ComplianceFramework[],
+  ): ComplianceViolation[] {
     // Mock implementation - would run compliance rule engine
     return [];
   }
 
-  private assessComplianceRequirements(request: ConfigurationChangeRequest, frameworks: ComplianceFramework[]): ComplianceRequirement[] {
+  private assessComplianceRequirements(
+    request: ConfigurationChangeRequest,
+    frameworks: ComplianceFramework[],
+  ): ComplianceRequirement[] {
     // Mock implementation - would check compliance requirements database
     return [];
   }
 
-  private checkCertificationRequirements(request: ConfigurationChangeRequest): CertificationRequirement[] {
+  private checkCertificationRequirements(
+    request: ConfigurationChangeRequest,
+  ): CertificationRequirement[] {
     // Mock implementation - would check certification management system
     return [];
   }
 
-  private determineOverallComplianceStatus(violations: ComplianceViolation[], requirements: ComplianceRequirement[]): 'COMPLIANT' | 'WARNING' | 'VIOLATION' | 'CRITICAL' {
-    const criticalViolations = violations.filter(v => v.severity === 'CRITICAL').length;
-    const majorViolations = violations.filter(v => v.severity === 'MAJOR').length;
+  private determineOverallComplianceStatus(
+    violations: ComplianceViolation[],
+    requirements: ComplianceRequirement[],
+  ): 'COMPLIANT' | 'WARNING' | 'VIOLATION' | 'CRITICAL' {
+    const criticalViolations = violations.filter(
+      (v) => v.severity === 'CRITICAL',
+    ).length;
+    const majorViolations = violations.filter(
+      (v) => v.severity === 'MAJOR',
+    ).length;
 
     if (criticalViolations > 0) return 'CRITICAL';
     if (majorViolations > 0) return 'VIOLATION';

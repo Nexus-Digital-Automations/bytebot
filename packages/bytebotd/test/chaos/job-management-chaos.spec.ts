@@ -79,8 +79,14 @@ function isServiceWithMethods(obj: unknown): obj is ServiceWithMethods {
 }
 
 // Helper function for safe method access
-function safeMethodAccess(service: unknown, methodName: string): ((...args: unknown[]) => unknown) | undefined {
-  if (isServiceWithMethods(service) && typeof service[methodName] === 'function') {
+function safeMethodAccess(
+  service: unknown,
+  methodName: string,
+): ((...args: unknown[]) => unknown) | undefined {
+  if (
+    isServiceWithMethods(service) &&
+    typeof service[methodName] === 'function'
+  ) {
     return service[methodName] as (...args: unknown[]) => unknown;
   }
   return undefined;
@@ -194,39 +200,59 @@ class ChaosInjector {
   /**
    * Inject network latency
    */
-  injectNetworkLatency(service: unknown, methodName: string, latency: number): void {
+  injectNetworkLatency(
+    service: unknown,
+    methodName: string,
+    latency: number,
+  ): void {
     const originalMethod = safeMethodAccess(service, methodName);
     if (!originalMethod || !isServiceWithMethods(service)) {
       throw new Error(`Method ${methodName} not found on service`);
     }
 
     const boundMethod = originalMethod.bind(service);
-    this.originalMethods.set(`${safeGetConstructorName(service)}.${methodName}`, boundMethod);
+    this.originalMethods.set(
+      `${safeGetConstructorName(service)}.${methodName}`,
+      boundMethod,
+    );
 
-    (service as ServiceWithMethods)[methodName] = jest.fn().mockImplementation(async (...args: unknown[]) => {
-      await new Promise(resolve => setTimeout(resolve, latency));
-      return boundMethod(...args);
-    });
+    (service as ServiceWithMethods)[methodName] = jest
+      .fn()
+      .mockImplementation(async (...args: unknown[]) => {
+        await new Promise((resolve) => setTimeout(resolve, latency));
+        return boundMethod(...args);
+      });
   }
 
   /**
    * Inject random service failures
    */
-  injectServiceFailures(service: unknown, methodName: string, failureRate: number): void {
+  injectServiceFailures(
+    service: unknown,
+    methodName: string,
+    failureRate: number,
+  ): void {
     const originalMethod = safeMethodAccess(service, methodName);
     if (!originalMethod || !isServiceWithMethods(service)) {
       throw new Error(`Method ${methodName} not found on service`);
     }
 
     const boundMethod = originalMethod.bind(service);
-    this.originalMethods.set(`${safeGetConstructorName(service)}.${methodName}`, boundMethod);
+    this.originalMethods.set(
+      `${safeGetConstructorName(service)}.${methodName}`,
+      boundMethod,
+    );
 
-    (service as ServiceWithMethods)[methodName] = jest.fn().mockImplementation((...args: unknown[]) => {
-      if (Math.random() < failureRate) {
-        return Promise.reject(new Error(`CHAOS: ${methodName} service failure`));
-      }
-      return boundMethod(...args);
-    });
+    (service as ServiceWithMethods)[methodName] = jest
+      .fn()
+      .mockImplementation((...args: unknown[]) => {
+        if (Math.random() < failureRate) {
+          return Promise.reject(
+            new Error(`CHAOS: ${methodName} service failure`),
+          );
+        }
+        return boundMethod(...args);
+      });
   }
 
   /**
@@ -248,7 +274,7 @@ class ChaosInjector {
    * Inject CPU intensive task
    */
   injectCpuLoad(duration: number): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const startTime = Date.now();
 
       const cpuTask = () => {
@@ -276,7 +302,7 @@ class ChaosInjector {
     try {
       await worker.stop();
       // Simulate crash recovery delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await worker.start();
     } catch (error) {
       console.error('Worker crash simulation failed:', error);
@@ -337,10 +363,12 @@ describe('Job Management Service - Chaos Engineering Tests', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    jobManagementService = moduleFixture.get<JobManagementService>(JobManagementService);
+    jobManagementService =
+      moduleFixture.get<JobManagementService>(JobManagementService);
     jobStorage = moduleFixture.get<JobStorage>(JobStorage);
     backgroundWorker = moduleFixture.get<BackgroundWorker>(BackgroundWorker);
-    computerUseService = moduleFixture.get<ComputerUseService>(ComputerUseService);
+    computerUseService =
+      moduleFixture.get<ComputerUseService>(ComputerUseService);
     configService = moduleFixture.get<ConfigService>(ConfigService);
 
     // Initialize Redis client for chaos testing
@@ -375,7 +403,7 @@ describe('Job Management Service - Chaos Engineering Tests', () => {
     chaosInjector.restore();
 
     // Stabilization time
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   afterEach(async () => {
@@ -383,622 +411,749 @@ describe('Job Management Service - Chaos Engineering Tests', () => {
     chaosInjector.restore();
 
     // Allow time for recovery
-    await new Promise(resolve => setTimeout(resolve, CHAOS_CONFIG.test.stabilizationTime));
+    await new Promise((resolve) =>
+      setTimeout(resolve, CHAOS_CONFIG.test.stabilizationTime),
+    );
   });
 
   describe('Redis Failure Scenarios', () => {
-    it('should handle Redis connection failures gracefully', async () => {
-      // Inject Redis failures
-      chaosInjector.injectRedisFailures(redisClient, 0.5);
+    it(
+      'should handle Redis connection failures gracefully',
+      async () => {
+        // Inject Redis failures
+        chaosInjector.injectRedisFailures(redisClient, 0.5);
 
-      const jobPromises: Promise<string>[] = [];
-      const successfulJobs: string[] = [];
-      const failedJobs: Error[] = [];
+        const jobPromises: Promise<string>[] = [];
+        const successfulJobs: string[] = [];
+        const failedJobs: Error[] = [];
 
-      // Submit jobs during Redis failures
-      for (let i = 0; i < CHAOS_CONFIG.test.batchSize; i++) {
-        const jobPromise = jobManagementService.createJob(CHAOS_ACTIONS.reliable)
-          .then(jobId => {
-            successfulJobs.push(jobId);
-            return jobId;
-          })
-          .catch(error => {
-            failedJobs.push(error);
-            throw error;
-          });
+        // Submit jobs during Redis failures
+        for (let i = 0; i < CHAOS_CONFIG.test.batchSize; i++) {
+          const jobPromise = jobManagementService
+            .createJob(CHAOS_ACTIONS.reliable)
+            .then((jobId) => {
+              successfulJobs.push(jobId);
+              return jobId;
+            })
+            .catch((error) => {
+              failedJobs.push(error);
+              throw error;
+            });
 
-        jobPromises.push(jobPromise);
-      }
+          jobPromises.push(jobPromise);
+        }
 
-      // Wait for all attempts to complete
-      const results = await Promise.allSettled(jobPromises);
+        // Wait for all attempts to complete
+        const results = await Promise.allSettled(jobPromises);
 
-      const successful = results.filter(r => r.status === 'fulfilled').length;
-      const failed = results.filter(r => r.status === 'rejected').length;
+        const successful = results.filter(
+          (r) => r.status === 'fulfilled',
+        ).length;
+        const failed = results.filter((r) => r.status === 'rejected').length;
 
-      console.log(`Redis failure resilience test:
+        console.log(`Redis failure resilience test:
         - Jobs attempted: ${CHAOS_CONFIG.test.batchSize}
         - Successful: ${successful}
         - Failed: ${failed}
-        - Success rate: ${(successful / CHAOS_CONFIG.test.batchSize * 100).toFixed(1)}%`);
+        - Success rate: ${((successful / CHAOS_CONFIG.test.batchSize) * 100).toFixed(1)}%`);
 
-      // System should handle failures gracefully
-      expect(successful + failed).toBe(CHAOS_CONFIG.test.batchSize);
+        // System should handle failures gracefully
+        expect(successful + failed).toBe(CHAOS_CONFIG.test.batchSize);
 
-      // Should have some successful jobs even with failures
-      if (successful > 0) {
-        // Verify successful jobs are properly stored
-        const firstSuccessfulJob = successfulJobs[0];
-        if (firstSuccessfulJob) {
-          try {
-            const status = await jobManagementService.getJobStatus(firstSuccessfulJob);
-            expect(status).toBeDefined();
-          } catch (error) {
-            // May fail due to ongoing chaos, which is expected
-            console.log('Job status check failed during chaos (expected):', error.message);
+        // Should have some successful jobs even with failures
+        if (successful > 0) {
+          // Verify successful jobs are properly stored
+          const firstSuccessfulJob = successfulJobs[0];
+          if (firstSuccessfulJob) {
+            try {
+              const status =
+                await jobManagementService.getJobStatus(firstSuccessfulJob);
+              expect(status).toBeDefined();
+            } catch (error) {
+              // May fail due to ongoing chaos, which is expected
+              console.log(
+                'Job status check failed during chaos (expected):',
+                error.message,
+              );
+            }
           }
         }
-      }
-    }, CHAOS_CONFIG.test.timeout);
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
 
-    it('should recover from Redis cluster failover', async () => {
-      // Create jobs before failure
-      const preFailureJobs: string[] = [];
-      for (let i = 0; i < 10; i++) {
-        const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-        preFailureJobs.push(jobId);
-      }
-
-      console.log(`Created ${preFailureJobs.length} jobs before Redis failure`);
-
-      // Simulate Redis cluster failover
-      await redisClient.disconnect();
-      console.log('Simulated Redis disconnect');
-
-      // Wait for failure detection
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Reconnect Redis
-      await redisClient.connect();
-      console.log('Redis reconnected');
-
-      // Wait for recovery stabilization
-      await new Promise(resolve => setTimeout(resolve, CHAOS_CONFIG.chaos.recoveryTime));
-
-      // Verify system recovery by creating new jobs
-      const postFailureJobs: string[] = [];
-      let recoveryAttempts = 0;
-      const maxRecoveryAttempts = 5;
-
-      while (postFailureJobs.length < 5 && recoveryAttempts < maxRecoveryAttempts) {
-        try {
-          const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-          postFailureJobs.push(jobId);
-        } catch (error) {
-          console.log(`Recovery attempt ${recoveryAttempts + 1} failed:`, error.message);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+    it(
+      'should recover from Redis cluster failover',
+      async () => {
+        // Create jobs before failure
+        const preFailureJobs: string[] = [];
+        for (let i = 0; i < 10; i++) {
+          const jobId = await jobManagementService.createJob(
+            CHAOS_ACTIONS.reliable,
+          );
+          preFailureJobs.push(jobId);
         }
-        recoveryAttempts++;
-      }
 
-      console.log(`Recovery test results:
+        console.log(
+          `Created ${preFailureJobs.length} jobs before Redis failure`,
+        );
+
+        // Simulate Redis cluster failover
+        await redisClient.disconnect();
+        console.log('Simulated Redis disconnect');
+
+        // Wait for failure detection
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Reconnect Redis
+        await redisClient.connect();
+        console.log('Redis reconnected');
+
+        // Wait for recovery stabilization
+        await new Promise((resolve) =>
+          setTimeout(resolve, CHAOS_CONFIG.chaos.recoveryTime),
+        );
+
+        // Verify system recovery by creating new jobs
+        const postFailureJobs: string[] = [];
+        let recoveryAttempts = 0;
+        const maxRecoveryAttempts = 5;
+
+        while (
+          postFailureJobs.length < 5 &&
+          recoveryAttempts < maxRecoveryAttempts
+        ) {
+          try {
+            const jobId = await jobManagementService.createJob(
+              CHAOS_ACTIONS.reliable,
+            );
+            postFailureJobs.push(jobId);
+          } catch (error) {
+            console.log(
+              `Recovery attempt ${recoveryAttempts + 1} failed:`,
+              error.message,
+            );
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+          recoveryAttempts++;
+        }
+
+        console.log(`Recovery test results:
         - Pre-failure jobs: ${preFailureJobs.length}
         - Post-failure jobs: ${postFailureJobs.length}
         - Recovery attempts: ${recoveryAttempts}`);
 
-      expect(postFailureJobs.length).toBeGreaterThan(0);
-    }, CHAOS_CONFIG.test.timeout);
+        expect(postFailureJobs.length).toBeGreaterThan(0);
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
   });
 
   describe('Network Partition Scenarios', () => {
-    it('should handle network latency gracefully', async () => {
-      // Inject network latency
-      chaosInjector.injectNetworkLatency(
-        computerUseService,
-        'action',
-        CHAOS_CONFIG.chaos.networkLatency
-      );
+    it(
+      'should handle network latency gracefully',
+      async () => {
+        // Inject network latency
+        chaosInjector.injectNetworkLatency(
+          computerUseService,
+          'action',
+          CHAOS_CONFIG.chaos.networkLatency,
+        );
 
-      const startTime = Date.now();
-      const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable, {
-        timeout: 15000, // Increased timeout for latency
-      });
+        const startTime = Date.now();
+        const jobId = await jobManagementService.createJob(
+          CHAOS_ACTIONS.reliable,
+          {
+            timeout: 15000, // Increased timeout for latency
+          },
+        );
 
-      // Wait for job completion
-      let finalStatus: JobResult | null = null;
-      let attempts = 0;
-      const maxAttempts = 30;
+        // Wait for job completion
+        let finalStatus: JobResult | null = null;
+        let attempts = 0;
+        const maxAttempts = 30;
 
-      while (attempts < maxAttempts) {
-        try {
-          finalStatus = await jobManagementService.getJobStatus(jobId);
-          if (finalStatus.status === JobStatus.COMPLETED ||
+        while (attempts < maxAttempts) {
+          try {
+            finalStatus = await jobManagementService.getJobStatus(jobId);
+            if (
+              finalStatus.status === JobStatus.COMPLETED ||
               finalStatus.status === JobStatus.FAILED ||
-              finalStatus.status === JobStatus.TIMEOUT) {
-            break;
+              finalStatus.status === JobStatus.TIMEOUT
+            ) {
+              break;
+            }
+          } catch (error) {
+            // Status check may fail due to network issues
           }
-        } catch (error) {
-          // Status check may fail due to network issues
+
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          attempts++;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        attempts++;
-      }
+        const totalTime = Date.now() - startTime;
 
-      const totalTime = Date.now() - startTime;
-
-      console.log(`Network latency test results:
+        console.log(`Network latency test results:
         - Total time: ${totalTime}ms
         - Network latency: ${CHAOS_CONFIG.chaos.networkLatency}ms
         - Final status: ${finalStatus?.status || 'unknown'}
         - Attempts: ${attempts}`);
 
-      expect(finalStatus).toBeDefined();
-      expect(totalTime).toBeGreaterThan(CHAOS_CONFIG.chaos.networkLatency);
-    }, CHAOS_CONFIG.test.timeout);
+        expect(finalStatus).toBeDefined();
+        expect(totalTime).toBeGreaterThan(CHAOS_CONFIG.chaos.networkLatency);
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
 
-    it('should handle intermittent network failures', async () => {
-      // Inject intermittent service failures
-      chaosInjector.injectServiceFailures(computerUseService, 'action', 0.4);
+    it(
+      'should handle intermittent network failures',
+      async () => {
+        // Inject intermittent service failures
+        chaosInjector.injectServiceFailures(computerUseService, 'action', 0.4);
 
-      const jobIds: string[] = [];
-      const results: { success: number; failed: number; retried: number } = {
-        success: 0,
-        failed: 0,
-        retried: 0,
-      };
+        const jobIds: string[] = [];
+        const results: { success: number; failed: number; retried: number } = {
+          success: 0,
+          failed: 0,
+          retried: 0,
+        };
 
-      // Submit jobs with intermittent failures
-      for (let i = 0; i < 20; i++) {
-        try {
-          const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable, {
-            maxRetries: 3,
-          });
-          jobIds.push(jobId);
-        } catch (error) {
-          console.log(`Job creation failed: ${error.message}`);
-        }
-      }
-
-      // Wait for processing with retries
-      for (const jobId of jobIds) {
-        let attempts = 0;
-        const maxAttempts = 20;
-
-        while (attempts < maxAttempts) {
+        // Submit jobs with intermittent failures
+        for (let i = 0; i < 20; i++) {
           try {
-            const status = await jobManagementService.getJobStatus(jobId);
-
-            if (status.status === JobStatus.COMPLETED) {
-              results.success++;
-              if (status.retryCount > 0) {
-                results.retried++;
-              }
-              break;
-            } else if (status.status === JobStatus.FAILED) {
-              results.failed++;
-              break;
-            }
+            const jobId = await jobManagementService.createJob(
+              CHAOS_ACTIONS.reliable,
+              {
+                maxRetries: 3,
+              },
+            );
+            jobIds.push(jobId);
           } catch (error) {
-            // Status check may fail
+            console.log(`Job creation failed: ${error.message}`);
           }
-
-          await new Promise(resolve => setTimeout(resolve, 500));
-          attempts++;
         }
-      }
 
-      console.log(`Intermittent failure test results:
+        // Wait for processing with retries
+        for (const jobId of jobIds) {
+          let attempts = 0;
+          const maxAttempts = 20;
+
+          while (attempts < maxAttempts) {
+            try {
+              const status = await jobManagementService.getJobStatus(jobId);
+
+              if (status.status === JobStatus.COMPLETED) {
+                results.success++;
+                if (status.retryCount > 0) {
+                  results.retried++;
+                }
+                break;
+              } else if (status.status === JobStatus.FAILED) {
+                results.failed++;
+                break;
+              }
+            } catch (error) {
+              // Status check may fail
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            attempts++;
+          }
+        }
+
+        console.log(`Intermittent failure test results:
         - Jobs created: ${jobIds.length}
         - Successful: ${results.success}
         - Failed: ${results.failed}
         - With retries: ${results.retried}
-        - Success rate: ${(results.success / jobIds.length * 100).toFixed(1)}%`);
+        - Success rate: ${((results.success / jobIds.length) * 100).toFixed(1)}%`);
 
-      expect(results.success).toBeGreaterThan(0);
-      expect(results.retried).toBeGreaterThan(0); // Should have some retries
-    }, CHAOS_CONFIG.test.timeout);
+        expect(results.success).toBeGreaterThan(0);
+        expect(results.retried).toBeGreaterThan(0); // Should have some retries
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
   });
 
   describe('Resource Exhaustion Scenarios', () => {
-    it('should handle memory pressure gracefully', async () => {
-      const initialMemory = process.memoryUsage();
+    it(
+      'should handle memory pressure gracefully',
+      async () => {
+        const initialMemory = process.memoryUsage();
 
-      // Allocate large amount of memory
-      const memoryBuffers = chaosInjector.injectMemoryPressure(
-        CHAOS_CONFIG.chaos.memoryPressure
-      );
+        // Allocate large amount of memory
+        const memoryBuffers = chaosInjector.injectMemoryPressure(
+          CHAOS_CONFIG.chaos.memoryPressure,
+        );
 
-      console.log(`Injected memory pressure: ${CHAOS_CONFIG.chaos.memoryPressure / 1024 / 1024}MB`);
+        console.log(
+          `Injected memory pressure: ${CHAOS_CONFIG.chaos.memoryPressure / 1024 / 1024}MB`,
+        );
 
-      const memoryAfterPressure = process.memoryUsage();
-      const memoryIncrease = memoryAfterPressure.heapUsed - initialMemory.heapUsed;
+        const memoryAfterPressure = process.memoryUsage();
+        const memoryIncrease =
+          memoryAfterPressure.heapUsed - initialMemory.heapUsed;
 
-      // Try to create jobs under memory pressure
-      const jobIds: string[] = [];
-      let successfulJobs = 0;
+        // Try to create jobs under memory pressure
+        const jobIds: string[] = [];
+        let successfulJobs = 0;
 
-      for (let i = 0; i < 10; i++) {
-        try {
-          const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-          jobIds.push(jobId);
-          successfulJobs++;
-        } catch (error) {
-          console.log(`Job creation failed under memory pressure: ${error.message}`);
+        for (let i = 0; i < 10; i++) {
+          try {
+            const jobId = await jobManagementService.createJob(
+              CHAOS_ACTIONS.reliable,
+            );
+            jobIds.push(jobId);
+            successfulJobs++;
+          } catch (error) {
+            console.log(
+              `Job creation failed under memory pressure: ${error.message}`,
+            );
+          }
         }
-      }
 
-      // Release memory pressure
-      memoryBuffers.length = 0;
+        // Release memory pressure
+        memoryBuffers.length = 0;
 
-      // Force garbage collection if available
-      if (global.gc) {
-        global.gc();
-      }
+        // Force garbage collection if available
+        if (global.gc) {
+          global.gc();
+        }
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const finalMemory = process.memoryUsage();
+        const finalMemory = process.memoryUsage();
 
-      console.log(`Memory pressure test results:
+        console.log(`Memory pressure test results:
         - Initial memory: ${(initialMemory.heapUsed / 1024 / 1024).toFixed(2)}MB
         - Peak memory: ${(memoryAfterPressure.heapUsed / 1024 / 1024).toFixed(2)}MB
         - Final memory: ${(finalMemory.heapUsed / 1024 / 1024).toFixed(2)}MB
         - Memory increase: ${(memoryIncrease / 1024 / 1024).toFixed(2)}MB
         - Successful jobs: ${successfulJobs}/10`);
 
-      expect(successfulJobs).toBeGreaterThan(0);
-    }, CHAOS_CONFIG.test.timeout);
+        expect(successfulJobs).toBeGreaterThan(0);
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
 
-    it('should handle CPU load stress', async () => {
-      // Start CPU intensive task
-      const cpuLoadPromise = chaosInjector.injectCpuLoad(CHAOS_CONFIG.chaos.cpuLoadDuration);
+    it(
+      'should handle CPU load stress',
+      async () => {
+        // Start CPU intensive task
+        const cpuLoadPromise = chaosInjector.injectCpuLoad(
+          CHAOS_CONFIG.chaos.cpuLoadDuration,
+        );
 
-      console.log(`Starting CPU load for ${CHAOS_CONFIG.chaos.cpuLoadDuration}ms`);
+        console.log(
+          `Starting CPU load for ${CHAOS_CONFIG.chaos.cpuLoadDuration}ms`,
+        );
 
-      // Try to process jobs during CPU stress
-      const jobIds: string[] = [];
-      const startTime = Date.now();
+        // Try to process jobs during CPU stress
+        const jobIds: string[] = [];
+        const startTime = Date.now();
 
-      for (let i = 0; i < 5; i++) {
-        try {
-          const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-          jobIds.push(jobId);
-        } catch (error) {
-          console.log(`Job creation failed under CPU load: ${error.message}`);
-        }
-      }
-
-      // Wait for CPU load to complete
-      await cpuLoadPromise;
-
-      const cpuLoadTime = Date.now() - startTime;
-
-      // Wait for job processing after CPU load
-      let completedJobs = 0;
-      for (const jobId of jobIds) {
-        try {
-          let attempts = 0;
-          while (attempts < 10) {
-            const status = await jobManagementService.getJobStatus(jobId);
-            if (status.status === JobStatus.COMPLETED || status.status === JobStatus.FAILED) {
-              if (status.status === JobStatus.COMPLETED) {
-                completedJobs++;
-              }
-              break;
-            }
-            await new Promise(resolve => setTimeout(resolve, 500));
-            attempts++;
+        for (let i = 0; i < 5; i++) {
+          try {
+            const jobId = await jobManagementService.createJob(
+              CHAOS_ACTIONS.reliable,
+            );
+            jobIds.push(jobId);
+          } catch (error) {
+            console.log(`Job creation failed under CPU load: ${error.message}`);
           }
-        } catch (error) {
-          console.log(`Status check failed: ${error.message}`);
         }
-      }
 
-      console.log(`CPU load test results:
+        // Wait for CPU load to complete
+        await cpuLoadPromise;
+
+        const cpuLoadTime = Date.now() - startTime;
+
+        // Wait for job processing after CPU load
+        let completedJobs = 0;
+        for (const jobId of jobIds) {
+          try {
+            let attempts = 0;
+            while (attempts < 10) {
+              const status = await jobManagementService.getJobStatus(jobId);
+              if (
+                status.status === JobStatus.COMPLETED ||
+                status.status === JobStatus.FAILED
+              ) {
+                if (status.status === JobStatus.COMPLETED) {
+                  completedJobs++;
+                }
+                break;
+              }
+              await new Promise((resolve) => setTimeout(resolve, 500));
+              attempts++;
+            }
+          } catch (error) {
+            console.log(`Status check failed: ${error.message}`);
+          }
+        }
+
+        console.log(`CPU load test results:
         - CPU load duration: ${cpuLoadTime}ms
         - Jobs submitted: ${jobIds.length}
         - Jobs completed: ${completedJobs}
-        - Success rate: ${(completedJobs / jobIds.length * 100).toFixed(1)}%`);
+        - Success rate: ${((completedJobs / jobIds.length) * 100).toFixed(1)}%`);
 
-      expect(jobIds.length).toBeGreaterThan(0);
-      expect(cpuLoadTime).toBeGreaterThan(CHAOS_CONFIG.chaos.cpuLoadDuration * 0.8);
-    }, CHAOS_CONFIG.test.timeout);
+        expect(jobIds.length).toBeGreaterThan(0);
+        expect(cpuLoadTime).toBeGreaterThan(
+          CHAOS_CONFIG.chaos.cpuLoadDuration * 0.8,
+        );
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
   });
 
   describe('Worker Crash Scenarios', () => {
-    it('should recover from worker crashes', async () => {
-      // Create jobs before worker crash
-      const preJobIds: string[] = [];
-      for (let i = 0; i < 5; i++) {
-        const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-        preJobIds.push(jobId);
-      }
-
-      console.log(`Created ${preJobIds.length} jobs before worker crash`);
-
-      // Simulate worker crash and recovery
-      await chaosInjector.simulateWorkerCrash(backgroundWorker);
-      console.log('Simulated worker crash and recovery');
-
-      // Create jobs after worker recovery
-      const postJobIds: string[] = [];
-      let recoveryAttempts = 0;
-      const maxRecoveryAttempts = 5;
-
-      while (postJobIds.length < 3 && recoveryAttempts < maxRecoveryAttempts) {
-        try {
-          const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-          postJobIds.push(jobId);
-        } catch (error) {
-          console.log(`Post-crash job creation attempt ${recoveryAttempts + 1} failed: ${error.message}`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+    it(
+      'should recover from worker crashes',
+      async () => {
+        // Create jobs before worker crash
+        const preJobIds: string[] = [];
+        for (let i = 0; i < 5; i++) {
+          const jobId = await jobManagementService.createJob(
+            CHAOS_ACTIONS.reliable,
+          );
+          preJobIds.push(jobId);
         }
-        recoveryAttempts++;
-      }
 
-      // Verify worker stats after recovery
-      const workerStats = await jobManagementService.getWorkerStats();
+        console.log(`Created ${preJobIds.length} jobs before worker crash`);
 
-      console.log(`Worker crash recovery test:
+        // Simulate worker crash and recovery
+        await chaosInjector.simulateWorkerCrash(backgroundWorker);
+        console.log('Simulated worker crash and recovery');
+
+        // Create jobs after worker recovery
+        const postJobIds: string[] = [];
+        let recoveryAttempts = 0;
+        const maxRecoveryAttempts = 5;
+
+        while (
+          postJobIds.length < 3 &&
+          recoveryAttempts < maxRecoveryAttempts
+        ) {
+          try {
+            const jobId = await jobManagementService.createJob(
+              CHAOS_ACTIONS.reliable,
+            );
+            postJobIds.push(jobId);
+          } catch (error) {
+            console.log(
+              `Post-crash job creation attempt ${recoveryAttempts + 1} failed: ${error.message}`,
+            );
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+          recoveryAttempts++;
+        }
+
+        // Verify worker stats after recovery
+        const workerStats = await jobManagementService.getWorkerStats();
+
+        console.log(`Worker crash recovery test:
         - Pre-crash jobs: ${preJobIds.length}
         - Post-crash jobs: ${postJobIds.length}
         - Worker running: ${workerStats.isRunning}
         - Recovery attempts: ${recoveryAttempts}`);
 
-      expect(postJobIds.length).toBeGreaterThan(0);
-      expect(workerStats.isRunning).toBe(true);
-    }, CHAOS_CONFIG.test.timeout);
+        expect(postJobIds.length).toBeGreaterThan(0);
+        expect(workerStats.isRunning).toBe(true);
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
 
-    it('should handle concurrent worker crashes', async () => {
-      // Create multiple background scenarios
-      const crashPromises: Promise<void>[] = [];
+    it(
+      'should handle concurrent worker crashes',
+      async () => {
+        // Create multiple background scenarios
+        const crashPromises: Promise<void>[] = [];
 
-      // Simulate multiple crash scenarios concurrently
-      for (let i = 0; i < 3; i++) {
-        crashPromises.push(
-          (async () => {
-            await new Promise(resolve => setTimeout(resolve, i * 1000));
-            await chaosInjector.simulateWorkerCrash(backgroundWorker);
-          })()
+        // Simulate multiple crash scenarios concurrently
+        for (let i = 0; i < 3; i++) {
+          crashPromises.push(
+            (async () => {
+              await new Promise((resolve) => setTimeout(resolve, i * 1000));
+              await chaosInjector.simulateWorkerCrash(backgroundWorker);
+            })(),
+          );
+        }
+
+        // Submit jobs during concurrent crashes
+        const jobIds: string[] = [];
+        const jobPromises: Promise<string>[] = [];
+
+        for (let i = 0; i < 10; i++) {
+          jobPromises.push(
+            jobManagementService
+              .createJob(CHAOS_ACTIONS.reliable)
+              .catch((error) => {
+                console.log(
+                  `Job creation failed during concurrent crashes: ${error.message}`,
+                );
+                return null;
+              })
+              .then((jobId) => {
+                if (jobId) {
+                  jobIds.push(jobId);
+                }
+                return jobId;
+              }),
+          );
+        }
+
+        // Wait for all operations to complete
+        await Promise.allSettled([...crashPromises, ...jobPromises]);
+
+        // Wait for system stabilization
+        await new Promise((resolve) =>
+          setTimeout(resolve, CHAOS_CONFIG.test.stabilizationTime),
         );
-      }
 
-      // Submit jobs during concurrent crashes
-      const jobIds: string[] = [];
-      const jobPromises: Promise<string>[] = [];
+        const finalWorkerStats = await jobManagementService.getWorkerStats();
 
-      for (let i = 0; i < 10; i++) {
-        jobPromises.push(
-          jobManagementService.createJob(CHAOS_ACTIONS.reliable)
-            .catch(error => {
-              console.log(`Job creation failed during concurrent crashes: ${error.message}`);
-              return null;
-            })
-            .then(jobId => {
-              if (jobId) {
-                jobIds.push(jobId);
-              }
-              return jobId;
-            })
-        );
-      }
-
-      // Wait for all operations to complete
-      await Promise.allSettled([...crashPromises, ...jobPromises]);
-
-      // Wait for system stabilization
-      await new Promise(resolve => setTimeout(resolve, CHAOS_CONFIG.test.stabilizationTime));
-
-      const finalWorkerStats = await jobManagementService.getWorkerStats();
-
-      console.log(`Concurrent crash test results:
+        console.log(`Concurrent crash test results:
         - Jobs attempted: 10
         - Jobs created: ${jobIds.length}
         - Final worker status: ${finalWorkerStats.isRunning ? 'running' : 'stopped'}`);
 
-      expect(finalWorkerStats.isRunning).toBe(true);
-    }, CHAOS_CONFIG.test.timeout);
+        expect(finalWorkerStats.isRunning).toBe(true);
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
   });
 
   describe('Combined Failure Scenarios', () => {
-    it('should handle multiple simultaneous failures', async () => {
-      console.log('Starting combined failure scenario test');
+    it(
+      'should handle multiple simultaneous failures',
+      async () => {
+        console.log('Starting combined failure scenario test');
 
-      // Inject multiple types of failures simultaneously
-      chaosInjector.injectRedisFailures(redisClient, 0.3);
-      chaosInjector.injectServiceFailures(computerUseService, 'action', 0.3);
-      chaosInjector.injectNetworkLatency(computerUseService, 'action', 500);
+        // Inject multiple types of failures simultaneously
+        chaosInjector.injectRedisFailures(redisClient, 0.3);
+        chaosInjector.injectServiceFailures(computerUseService, 'action', 0.3);
+        chaosInjector.injectNetworkLatency(computerUseService, 'action', 500);
 
-      // Inject memory pressure
-      const memoryBuffers = chaosInjector.injectMemoryPressure(200 * 1024 * 1024); // 200MB
+        // Inject memory pressure
+        const memoryBuffers = chaosInjector.injectMemoryPressure(
+          200 * 1024 * 1024,
+        ); // 200MB
 
-      const results = {
-        jobsSubmitted: 0,
-        jobsCompleted: 0,
-        jobsFailed: 0,
-        errors: [] as string[],
-      };
+        const results = {
+          jobsSubmitted: 0,
+          jobsCompleted: 0,
+          jobsFailed: 0,
+          errors: [] as string[],
+        };
 
-      // Submit jobs under multiple failure conditions
-      for (let i = 0; i < 15; i++) {
-        try {
-          const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable, {
-            timeout: 20000,
-            maxRetries: 2,
-          });
+        // Submit jobs under multiple failure conditions
+        for (let i = 0; i < 15; i++) {
+          try {
+            const jobId = await jobManagementService.createJob(
+              CHAOS_ACTIONS.reliable,
+              {
+                timeout: 20000,
+                maxRetries: 2,
+              },
+            );
 
-          results.jobsSubmitted++;
+            results.jobsSubmitted++;
 
-          // Check job status after submission
-          setTimeout(async () => {
-            try {
-              const status = await jobManagementService.getJobStatus(jobId);
-              if (status.status === JobStatus.COMPLETED) {
-                results.jobsCompleted++;
-              } else if (status.status === JobStatus.FAILED) {
-                results.jobsFailed++;
-              }
-            } catch (error) {
-              results.errors.push(error.message);
-            }
-          }, 5000 + i * 1000);
-
-        } catch (error) {
-          results.errors.push(error.message);
+            // Check job status after submission
+            setTimeout(
+              async () => {
+                try {
+                  const status = await jobManagementService.getJobStatus(jobId);
+                  if (status.status === JobStatus.COMPLETED) {
+                    results.jobsCompleted++;
+                  } else if (status.status === JobStatus.FAILED) {
+                    results.jobsFailed++;
+                  }
+                } catch (error) {
+                  results.errors.push(error.message);
+                }
+              },
+              5000 + i * 1000,
+            );
+          } catch (error) {
+            results.errors.push(error.message);
+          }
         }
-      }
 
-      // Wait for processing
-      await new Promise(resolve => setTimeout(resolve, 30000));
+        // Wait for processing
+        await new Promise((resolve) => setTimeout(resolve, 30000));
 
-      // Release memory pressure
-      memoryBuffers.length = 0;
+        // Release memory pressure
+        memoryBuffers.length = 0;
 
-      console.log(`Combined failure test results:
+        console.log(`Combined failure test results:
         - Jobs submitted: ${results.jobsSubmitted}
         - Jobs completed: ${results.jobsCompleted}
         - Jobs failed: ${results.jobsFailed}
         - Errors encountered: ${results.errors.length}
-        - System survival rate: ${(results.jobsSubmitted / 15 * 100).toFixed(1)}%`);
+        - System survival rate: ${((results.jobsSubmitted / 15) * 100).toFixed(1)}%`);
 
-      // System should survive combined failures
-      expect(results.jobsSubmitted).toBeGreaterThan(0);
+        // System should survive combined failures
+        expect(results.jobsSubmitted).toBeGreaterThan(0);
 
-      // Should have some resilience metrics
-      const totalProcessed = results.jobsCompleted + results.jobsFailed;
-      if (totalProcessed > 0) {
-        const successRate = results.jobsCompleted / totalProcessed;
-        console.log(`Success rate of processed jobs: ${(successRate * 100).toFixed(1)}%`);
-      }
-    }, CHAOS_CONFIG.test.timeout);
-
-    it('should maintain data consistency during chaos', async () => {
-      // Inject various failures
-      chaosInjector.injectRedisFailures(redisClient, 0.2);
-
-      const jobIds: string[] = [];
-      let consistencyErrors = 0;
-
-      // Create jobs with data consistency tracking
-      for (let i = 0; i < 10; i++) {
-        try {
-          const jobId = await jobManagementService.createJob(CHAOS_ACTIONS.reliable, {
-            metadata: {
-              testId: `chaos-consistency-${i}`,
-              timestamp: Date.now(),
-            },
-          });
-          jobIds.push(jobId);
-        } catch (error) {
-          console.log(`Job creation failed: ${error.message}`);
+        // Should have some resilience metrics
+        const totalProcessed = results.jobsCompleted + results.jobsFailed;
+        if (totalProcessed > 0) {
+          const successRate = results.jobsCompleted / totalProcessed;
+          console.log(
+            `Success rate of processed jobs: ${(successRate * 100).toFixed(1)}%`,
+          );
         }
-      }
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
 
-      // Verify data consistency after chaos
-      await new Promise(resolve => setTimeout(resolve, 5000));
+    it(
+      'should maintain data consistency during chaos',
+      async () => {
+        // Inject various failures
+        chaosInjector.injectRedisFailures(redisClient, 0.2);
 
-      for (const jobId of jobIds) {
-        try {
-          const status = await jobManagementService.getJobStatus(jobId);
+        const jobIds: string[] = [];
+        let consistencyErrors = 0;
 
-          // Verify job data integrity
-          if (!status.jobId || status.jobId !== jobId) {
-            consistencyErrors++;
-            console.log(`Consistency error: Job ID mismatch for ${jobId}`);
+        // Create jobs with data consistency tracking
+        for (let i = 0; i < 10; i++) {
+          try {
+            const jobId = await jobManagementService.createJob(
+              CHAOS_ACTIONS.reliable,
+              {
+                metadata: {
+                  testId: `chaos-consistency-${i}`,
+                  timestamp: Date.now(),
+                },
+              },
+            );
+            jobIds.push(jobId);
+          } catch (error) {
+            console.log(`Job creation failed: ${error.message}`);
           }
-
-          if (!status.createdAt || isNaN(new Date(status.createdAt).getTime())) {
-            consistencyErrors++;
-            console.log(`Consistency error: Invalid createdAt for ${jobId}`);
-          }
-
-        } catch (error) {
-          // May fail due to ongoing chaos
-          console.log(`Status check failed during consistency validation: ${error.message}`);
         }
-      }
 
-      console.log(`Data consistency test results:
+        // Verify data consistency after chaos
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        for (const jobId of jobIds) {
+          try {
+            const status = await jobManagementService.getJobStatus(jobId);
+
+            // Verify job data integrity
+            if (!status.jobId || status.jobId !== jobId) {
+              consistencyErrors++;
+              console.log(`Consistency error: Job ID mismatch for ${jobId}`);
+            }
+
+            if (
+              !status.createdAt ||
+              isNaN(new Date(status.createdAt).getTime())
+            ) {
+              consistencyErrors++;
+              console.log(`Consistency error: Invalid createdAt for ${jobId}`);
+            }
+          } catch (error) {
+            // May fail due to ongoing chaos
+            console.log(
+              `Status check failed during consistency validation: ${error.message}`,
+            );
+          }
+        }
+
+        console.log(`Data consistency test results:
         - Jobs created: ${jobIds.length}
         - Consistency errors: ${consistencyErrors}
         - Data integrity: ${consistencyErrors === 0 ? 'PASS' : 'ISSUES DETECTED'}`);
 
-      expect(consistencyErrors).toBe(0);
-    }, CHAOS_CONFIG.test.timeout);
+        expect(consistencyErrors).toBe(0);
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
   });
 
   describe('Recovery and Self-Healing', () => {
-    it('should demonstrate automatic recovery capabilities', async () => {
-      const recoveryMetrics = {
-        initialJobs: 0,
-        duringFailureJobs: 0,
-        postRecoveryJobs: 0,
-        recoveryTime: 0,
-      };
+    it(
+      'should demonstrate automatic recovery capabilities',
+      async () => {
+        const recoveryMetrics = {
+          initialJobs: 0,
+          duringFailureJobs: 0,
+          postRecoveryJobs: 0,
+          recoveryTime: 0,
+        };
 
-      // Phase 1: Normal operation
-      console.log('Phase 1: Normal operation baseline');
-      for (let i = 0; i < 5; i++) {
-        try {
-          await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-          recoveryMetrics.initialJobs++;
-        } catch (error) {
-          console.log(`Baseline job creation failed: ${error.message}`);
-        }
-      }
-
-      // Phase 2: Inject failures
-      console.log('Phase 2: Injecting failures');
-      chaosInjector.injectRedisFailures(redisClient, 0.8); // High failure rate
-
-      const failureStartTime = Date.now();
-
-      for (let i = 0; i < 5; i++) {
-        try {
-          await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-          recoveryMetrics.duringFailureJobs++;
-        } catch (error) {
-          console.log(`Job creation failed during chaos: ${error.message}`);
-        }
-      }
-
-      // Phase 3: Recovery
-      console.log('Phase 3: System recovery');
-      chaosInjector.restore();
-
-      const recoveryStartTime = Date.now();
-
-      // Wait for system to stabilize
-      await new Promise(resolve => setTimeout(resolve, CHAOS_CONFIG.test.stabilizationTime));
-
-      // Test recovery
-      let recoveryAttempts = 0;
-      while (recoveryMetrics.postRecoveryJobs < 3 && recoveryAttempts < 10) {
-        try {
-          await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
-          recoveryMetrics.postRecoveryJobs++;
-
-          if (recoveryMetrics.postRecoveryJobs === 1) {
-            recoveryMetrics.recoveryTime = Date.now() - recoveryStartTime;
+        // Phase 1: Normal operation
+        console.log('Phase 1: Normal operation baseline');
+        for (let i = 0; i < 5; i++) {
+          try {
+            await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
+            recoveryMetrics.initialJobs++;
+          } catch (error) {
+            console.log(`Baseline job creation failed: ${error.message}`);
           }
-        } catch (error) {
-          console.log(`Recovery attempt ${recoveryAttempts + 1} failed: ${error.message}`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
         }
-        recoveryAttempts++;
-      }
 
-      console.log(`Automatic recovery test results:
+        // Phase 2: Inject failures
+        console.log('Phase 2: Injecting failures');
+        chaosInjector.injectRedisFailures(redisClient, 0.8); // High failure rate
+
+        const failureStartTime = Date.now();
+
+        for (let i = 0; i < 5; i++) {
+          try {
+            await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
+            recoveryMetrics.duringFailureJobs++;
+          } catch (error) {
+            console.log(`Job creation failed during chaos: ${error.message}`);
+          }
+        }
+
+        // Phase 3: Recovery
+        console.log('Phase 3: System recovery');
+        chaosInjector.restore();
+
+        const recoveryStartTime = Date.now();
+
+        // Wait for system to stabilize
+        await new Promise((resolve) =>
+          setTimeout(resolve, CHAOS_CONFIG.test.stabilizationTime),
+        );
+
+        // Test recovery
+        let recoveryAttempts = 0;
+        while (recoveryMetrics.postRecoveryJobs < 3 && recoveryAttempts < 10) {
+          try {
+            await jobManagementService.createJob(CHAOS_ACTIONS.reliable);
+            recoveryMetrics.postRecoveryJobs++;
+
+            if (recoveryMetrics.postRecoveryJobs === 1) {
+              recoveryMetrics.recoveryTime = Date.now() - recoveryStartTime;
+            }
+          } catch (error) {
+            console.log(
+              `Recovery attempt ${recoveryAttempts + 1} failed: ${error.message}`,
+            );
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+          recoveryAttempts++;
+        }
+
+        console.log(`Automatic recovery test results:
         - Initial jobs (baseline): ${recoveryMetrics.initialJobs}
         - During failure jobs: ${recoveryMetrics.duringFailureJobs}
         - Post-recovery jobs: ${recoveryMetrics.postRecoveryJobs}
         - Recovery time: ${recoveryMetrics.recoveryTime}ms
         - Recovery attempts: ${recoveryAttempts}`);
 
-      expect(recoveryMetrics.initialJobs).toBeGreaterThan(0);
-      expect(recoveryMetrics.postRecoveryJobs).toBeGreaterThan(0);
-      expect(recoveryMetrics.recoveryTime).toBeLessThan(30000); // Should recover within 30 seconds
-    }, CHAOS_CONFIG.test.timeout);
+        expect(recoveryMetrics.initialJobs).toBeGreaterThan(0);
+        expect(recoveryMetrics.postRecoveryJobs).toBeGreaterThan(0);
+        expect(recoveryMetrics.recoveryTime).toBeLessThan(30000); // Should recover within 30 seconds
+      },
+      CHAOS_CONFIG.test.timeout,
+    );
   });
 });

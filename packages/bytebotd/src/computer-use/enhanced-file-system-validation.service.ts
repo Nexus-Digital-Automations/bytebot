@@ -27,11 +27,12 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ParlantIntegrationService,
+import {
+  ParlantIntegrationService,
   ParlantValidationRequest,
   ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError
+  ConversationalValidationError,
 } from '../parlant/parlant-integration.service';
 import * as path from 'path';
 import * as fs from 'fs/promises';
@@ -41,7 +42,8 @@ import * as fs from 'fs/promises';
 /**
  * File system validation context with security controls
  */
-export interface FileSystemValidationContext extends ParlantConversationContext {
+export interface FileSystemValidationContext
+  extends ParlantConversationContext {
   readonly userHomeDirectory: string;
   readonly workingDirectory: string;
   readonly allowedPaths: string[];
@@ -65,8 +67,20 @@ export interface FileSystemValidationContext extends ParlantConversationContext 
  */
 export interface FileOperationRisk {
   readonly riskLevel: RiskLevel;
-  readonly pathRisk: 'SAFE' | 'USER_AREA' | 'SYSTEM_AREA' | 'CRITICAL_SYSTEM' | 'BLOCKED';
-  readonly fileType: 'DOCUMENT' | 'IMAGE' | 'DATA' | 'EXECUTABLE' | 'CONFIG' | 'SYSTEM' | 'UNKNOWN';
+  readonly pathRisk:
+    | 'SAFE'
+    | 'USER_AREA'
+    | 'SYSTEM_AREA'
+    | 'CRITICAL_SYSTEM'
+    | 'BLOCKED';
+  readonly fileType:
+    | 'DOCUMENT'
+    | 'IMAGE'
+    | 'DATA'
+    | 'EXECUTABLE'
+    | 'CONFIG'
+    | 'SYSTEM'
+    | 'UNKNOWN';
   readonly operationType: 'READ' | 'write' | 'delete' | 'modify' | 'create';
   readonly destructive: boolean;
   readonly reversible: boolean;
@@ -97,7 +111,13 @@ export interface FileContentAnalysis {
 export interface PathValidationResult {
   readonly isValid: boolean;
   readonly isAllowed: boolean;
-  readonly pathType: 'USER_FILE' | 'USER_DIR' | 'SYSTEM_FILE' | 'SYSTEM_DIR' | 'RESTRICTED' | 'INVALID';
+  readonly pathType:
+    | 'USER_FILE'
+    | 'USER_DIR'
+    | 'SYSTEM_FILE'
+    | 'SYSTEM_DIR'
+    | 'RESTRICTED'
+    | 'INVALID';
   readonly normalizedPath: string;
   readonly parentDirectory: string;
   readonly filename: string;
@@ -110,15 +130,20 @@ export interface PathValidationResult {
 
 @Injectable()
 export class EnhancedFileSystemValidationService {
-  private readonly logger = new Logger(EnhancedFileSystemValidationService.name);
+  private readonly logger = new Logger(
+    EnhancedFileSystemValidationService.name,
+  );
 
   // File operation cache for performance
-  private readonly operationCache = new Map<string, {
-    result: boolean;
-    timestamp: Date;
-    expiryMs: number;
-    operationType: string;
-  }>();
+  private readonly operationCache = new Map<
+    string,
+    {
+      result: boolean;
+      timestamp: Date;
+      expiryMs: number;
+      operationType: string;
+    }
+  >();
 
   // Performance metrics
   private readonly performanceMetrics = {
@@ -167,7 +192,7 @@ export class EnhancedFileSystemValidationService {
   };
 
   constructor(
-    private readonly parlantIntegrationService: ParlantIntegrationService
+    private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enhanced File System Validation Service initialized');
 
@@ -185,7 +210,7 @@ export class EnhancedFileSystemValidationService {
    */
   async validateFileRead(
     filePath: string,
-    context: FileSystemValidationContext
+    context: FileSystemValidationContext,
   ): Promise<boolean> {
     const operationId = `file_read_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -206,19 +231,29 @@ export class EnhancedFileSystemValidationService {
       const pathValidation = await this.validatePath(filePath, context);
       if (!pathValidation.isValid || !pathValidation.isAllowed) {
         this.performanceMetrics.securityViolations++;
-        this.logger.warn(`[${operationId}] File read blocked due to path validation`, {
-          operationId,
-          filePath,
-          pathType: pathValidation.pathType,
-          violations: pathValidation.securityViolations,
-        });
+        this.logger.warn(
+          `[${operationId}] File read blocked due to path validation`,
+          {
+            operationId,
+            filePath,
+            pathType: pathValidation.pathType,
+            violations: pathValidation.securityViolations,
+          },
+        );
         return false;
       }
 
-      const operationRisk = await this.assessFileOperationRisk(filePath, 'read', context);
+      const operationRisk = await this.assessFileOperationRisk(
+        filePath,
+        'read',
+        context,
+      );
 
       // Fast-path for safe read operations
-      if (operationRisk.riskLevel === RiskLevel._MINIMAL && operationRisk.pathRisk === 'SAFE') {
+      if (
+        operationRisk.riskLevel === RiskLevel._MINIMAL &&
+        operationRisk.pathRisk === 'SAFE'
+      ) {
         this.setCachedOperation(cacheKey, true, 60000); // 1 minute cache
         this.updatePerformanceMetrics(Date.now() - startTime, false);
         return true;
@@ -233,26 +268,38 @@ export class EnhancedFileSystemValidationService {
           pathRisk: operationRisk.pathRisk,
           impactScope: operationRisk.impactScope,
         },
-        actionDescription: this.generateReadDescription(filePath, operationRisk, pathValidation),
+        actionDescription: this.generateReadDescription(
+          filePath,
+          operationRisk,
+          pathValidation,
+        ),
         context: context,
         riskLevel: operationRisk.riskLevel,
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 200),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            200,
+          ),
           requiresRealtime: context.performanceRequirements.requiresRealtime,
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       // Cache approved safe operations
-      if (validationResponse.approved && operationRisk.riskLevel <= RiskLevel._LOW) {
+      if (
+        validationResponse.approved &&
+        operationRisk.riskLevel <= RiskLevel._LOW
+      ) {
         this.setCachedOperation(cacheKey, true, 30000); // 30 second cache
       }
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
       this.logger.error(`[${operationId}] File read validation failed`, {
         operationId,
@@ -272,7 +319,7 @@ export class EnhancedFileSystemValidationService {
   async validateFileWrite(
     filePath: string,
     content: string | Buffer,
-    context: FileSystemValidationContext
+    context: FileSystemValidationContext,
   ): Promise<boolean> {
     const operationId = `file_write_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -290,27 +337,43 @@ export class EnhancedFileSystemValidationService {
       }
 
       // Risk assessment for write operation
-      const operationRisk = await this.assessFileOperationRisk(filePath, 'write', context);
+      const operationRisk = await this.assessFileOperationRisk(
+        filePath,
+        'write',
+        context,
+      );
 
       // Content analysis for sensitive data
-      const contentAnalysis = await this.analyzeFileContent(content, pathValidation.extension);
+      const contentAnalysis = await this.analyzeFileContent(
+        content,
+        pathValidation.extension,
+      );
 
       // Block operations that are too risky
-      if (operationRisk.pathRisk === 'BLOCKED' || contentAnalysis.malwareRisk === 'BLOCKED') {
+      if (
+        operationRisk.pathRisk === 'BLOCKED' ||
+        contentAnalysis.malwareRisk === 'BLOCKED'
+      ) {
         this.performanceMetrics.securityViolations++;
         this.performanceMetrics.blockedOperations++;
-        this.logger.warn(`[${operationId}] File write blocked due to security risk`, {
-          operationId,
-          filePath,
-          pathRisk: operationRisk.pathRisk,
-          malwareRisk: contentAnalysis.malwareRisk,
-        });
+        this.logger.warn(
+          `[${operationId}] File write blocked due to security risk`,
+          {
+            operationId,
+            filePath,
+            pathRisk: operationRisk.pathRisk,
+            malwareRisk: contentAnalysis.malwareRisk,
+          },
+        );
         return false;
       }
 
       // Create backup if required
       let backupCreated = false;
-      if (operationRisk.requiresBackup && context.securitySettings.requireBackupForDestrictiveOps) {
+      if (
+        operationRisk.requiresBackup &&
+        context.securitySettings.requireBackupForDestrictiveOps
+      ) {
         backupCreated = await this.createFileBackup(filePath, operationId);
         if (backupCreated) {
           this.performanceMetrics.backupsCreated++;
@@ -324,31 +387,46 @@ export class EnhancedFileSystemValidationService {
           path: pathValidation.normalizedPath,
           fileType: operationRisk.fileType,
           pathRisk: operationRisk.pathRisk,
-          contentSize: typeof content === 'string' ? content.length : content.length,
+          contentSize:
+            typeof content === 'string' ? content.length : content.length,
           sensitiveData: contentAnalysis.sensitiveDataDetected,
           destructive: operationRisk.destructive,
           backupCreated,
         },
-        actionDescription: this.generateWriteDescription(filePath, operationRisk, contentAnalysis, backupCreated),
+        actionDescription: this.generateWriteDescription(
+          filePath,
+          operationRisk,
+          contentAnalysis,
+          backupCreated,
+        ),
         context: context,
-        riskLevel: this.escalateRiskForWrite(operationRisk.riskLevel, contentAnalysis),
+        riskLevel: this.escalateRiskForWrite(
+          operationRisk.riskLevel,
+          contentAnalysis,
+        ),
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 300),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            300,
+          ),
           requiresRealtime: false, // Write operations can tolerate higher latency
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
       this.logger.error(`[${operationId}] File write validation failed`, {
         operationId,
         filePath,
-        contentSize: typeof content === 'string' ? content.length : content.length,
+        contentSize:
+          typeof content === 'string' ? content.length : content.length,
         error: error instanceof Error ? error.message : String(error),
         duration: Date.now() - startTime,
       });
@@ -363,7 +441,7 @@ export class EnhancedFileSystemValidationService {
    */
   async validateFileDelete(
     filePath: string,
-    context: FileSystemValidationContext
+    context: FileSystemValidationContext,
   ): Promise<boolean> {
     const operationId = `file_delete_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -380,17 +458,27 @@ export class EnhancedFileSystemValidationService {
       }
 
       // Risk assessment for delete operation
-      const operationRisk = await this.assessFileOperationRisk(filePath, 'delete', context);
+      const operationRisk = await this.assessFileOperationRisk(
+        filePath,
+        'delete',
+        context,
+      );
 
       // Delete operations are inherently destructive and require validation
-      if (operationRisk.pathRisk === 'BLOCKED' || operationRisk.pathRisk === 'CRITICAL_SYSTEM') {
+      if (
+        operationRisk.pathRisk === 'BLOCKED' ||
+        operationRisk.pathRisk === 'CRITICAL_SYSTEM'
+      ) {
         this.performanceMetrics.securityViolations++;
         this.performanceMetrics.blockedOperations++;
-        this.logger.warn(`[${operationId}] File delete blocked due to critical system file`, {
-          operationId,
-          filePath,
-          pathRisk: operationRisk.pathRisk,
-        });
+        this.logger.warn(
+          `[${operationId}] File delete blocked due to critical system file`,
+          {
+            operationId,
+            filePath,
+            pathRisk: operationRisk.pathRisk,
+          },
+        );
         return false;
       }
 
@@ -411,21 +499,30 @@ export class EnhancedFileSystemValidationService {
           reversible: backupCreated,
           backupCreated,
         },
-        actionDescription: this.generateDeleteDescription(filePath, operationRisk, backupCreated),
+        actionDescription: this.generateDeleteDescription(
+          filePath,
+          operationRisk,
+          backupCreated,
+        ),
         context: context,
         riskLevel: RiskLevel._HIGH, // All delete operations are high risk
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 500),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            500,
+          ),
           requiresRealtime: false,
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
       this.logger.error(`[${operationId}] File delete validation failed`, {
         operationId,
@@ -442,7 +539,10 @@ export class EnhancedFileSystemValidationService {
   /**
    * Validate file path against security policies
    */
-  private async validatePath(filePath: string, context: FileSystemValidationContext): Promise<PathValidationResult> {
+  private async validatePath(
+    filePath: string,
+    context: FileSystemValidationContext,
+  ): Promise<PathValidationResult> {
     const normalizedPath = path.resolve(filePath);
     const parentDirectory = path.dirname(normalizedPath);
     const filename = path.basename(normalizedPath);
@@ -472,7 +572,9 @@ export class EnhancedFileSystemValidationService {
       if (normalizedPath.startsWith(restrictedPath)) {
         result.isAllowed = false;
         result.pathType = 'RESTRICTED';
-        result.securityViolations.push(`restricted_path_access: ${restrictedPath}`);
+        result.securityViolations.push(
+          `restricted_path_access: ${restrictedPath}`,
+        );
         result.recommendations.push('access_allowed_paths_only');
       }
     }
@@ -481,16 +583,29 @@ export class EnhancedFileSystemValidationService {
     result.pathType = this.classifyPath(normalizedPath);
 
     // Check system path access permissions
-    if ((result.pathType === 'SYSTEM_FILE' || result.pathType === 'SYSTEM_DIR') &&
-        !context.securitySettings.allowSystemFileAccess) {
+    if (
+      (result.pathType === 'SYSTEM_FILE' || result.pathType === 'SYSTEM_DIR') &&
+      !context.securitySettings.allowSystemFileAccess
+    ) {
       result.isAllowed = false;
       result.securityViolations.push('system_file_access_not_allowed');
       result.recommendations.push('enable_system_file_access_in_settings');
     }
 
     // Check executable file access
-    const executableExtensions = ['.exe', '.bat', '.sh', '.cmd', '.com', '.scr', '.msi'];
-    if (executableExtensions.includes(extension) && !context.securitySettings.allowExecutableFileAccess) {
+    const executableExtensions = [
+      '.exe',
+      '.bat',
+      '.sh',
+      '.cmd',
+      '.com',
+      '.scr',
+      '.msi',
+    ];
+    if (
+      executableExtensions.includes(extension) &&
+      !context.securitySettings.allowExecutableFileAccess
+    ) {
       result.isAllowed = false;
       result.securityViolations.push('executable_file_access_not_allowed');
       result.recommendations.push('enable_executable_file_access_in_settings');
@@ -505,7 +620,7 @@ export class EnhancedFileSystemValidationService {
   private async assessFileOperationRisk(
     filePath: string,
     operation: 'read' | 'write' | 'delete',
-    context: FileSystemValidationContext
+    context: FileSystemValidationContext,
   ): Promise<FileOperationRisk> {
     const normalizedPath = path.resolve(filePath);
     const extension = path.extname(normalizedPath).toLowerCase();
@@ -596,7 +711,11 @@ export class EnhancedFileSystemValidationService {
     }
 
     // Check if in user area
-    if (filePath.includes('/home/') || filePath.includes('/Users/') || filePath.includes('C:\\Users\\')) {
+    if (
+      filePath.includes('/home/') ||
+      filePath.includes('/Users/') ||
+      filePath.includes('C:\\Users\\')
+    ) {
       return 'USER_AREA';
     }
 
@@ -658,9 +777,16 @@ export class EnhancedFileSystemValidationService {
   /**
    * Analyze file content for security risks
    */
-  private async analyzeFileContent(content: string | Buffer, extension: string): Promise<FileContentAnalysis> {
-    const contentStr = typeof content === 'string' ? content : content.toString('utf8', 0, Math.min(content.length, 1024));
-    const contentSize = typeof content === 'string' ? content.length : content.length;
+  private async analyzeFileContent(
+    content: string | Buffer,
+    extension: string,
+  ): Promise<FileContentAnalysis> {
+    const contentStr =
+      typeof content === 'string'
+        ? content
+        : content.toString('utf8', 0, Math.min(content.length, 1024));
+    const contentSize =
+      typeof content === 'string' ? content.length : content.length;
 
     const analysis: FileContentAnalysis = {
       sensitiveDataDetected: false,
@@ -690,7 +816,10 @@ export class EnhancedFileSystemValidationService {
     return analysis;
   }
 
-  private checkForCredentials(content: string, analysis: FileContentAnalysis): void {
+  private checkForCredentials(
+    content: string,
+    analysis: FileContentAnalysis,
+  ): void {
     const credentialPatterns = [
       /password\s*[:=]\s*[^\s\n]+/i,
       /api[_-]?key\s*[:=]\s*[^\s\n]+/i,
@@ -708,7 +837,10 @@ export class EnhancedFileSystemValidationService {
     }
   }
 
-  private checkForPersonalInfo(content: string, analysis: FileContentAnalysis): void {
+  private checkForPersonalInfo(
+    content: string,
+    analysis: FileContentAnalysis,
+  ): void {
     const personalInfoPatterns = [
       /\d{3}-\d{2}-\d{4}/, // SSN
       /\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}/, // Credit card
@@ -725,7 +857,10 @@ export class EnhancedFileSystemValidationService {
     }
   }
 
-  private checkForSystemConfig(content: string, analysis: FileContentAnalysis): void {
+  private checkForSystemConfig(
+    content: string,
+    analysis: FileContentAnalysis,
+  ): void {
     const systemConfigPatterns = [
       /sudoers/i,
       /iptables/i,
@@ -744,7 +879,10 @@ export class EnhancedFileSystemValidationService {
     }
   }
 
-  private checkMalwareRisk(content: string, analysis: FileContentAnalysis): void {
+  private checkMalwareRisk(
+    content: string,
+    analysis: FileContentAnalysis,
+  ): void {
     const suspiciousPatterns = [
       /eval\s*\(/i,
       /exec\s*\(/i,
@@ -790,7 +928,10 @@ export class EnhancedFileSystemValidationService {
   /**
    * Create backup of file before destructive operations
    */
-  private async createFileBackup(filePath: string, operationId: string): Promise<boolean> {
+  private async createFileBackup(
+    filePath: string,
+    operationId: string,
+  ): Promise<boolean> {
     try {
       const backupPath = `${filePath}.backup.${operationId}.${Date.now()}`;
       await fs.copyFile(filePath, backupPath);
@@ -814,7 +955,10 @@ export class EnhancedFileSystemValidationService {
 
   // ===== HELPER METHODS =====
 
-  private assessOperationRisk(risk: FileOperationRisk, operation: string): void {
+  private assessOperationRisk(
+    risk: FileOperationRisk,
+    operation: string,
+  ): void {
     switch (operation) {
       case 'read':
         risk.destructive = false;
@@ -833,7 +977,10 @@ export class EnhancedFileSystemValidationService {
     }
   }
 
-  private determineImpactScope(risk: FileOperationRisk, filePath: string): void {
+  private determineImpactScope(
+    risk: FileOperationRisk,
+    filePath: string,
+  ): void {
     if (risk.pathRisk === 'CRITICAL_SYSTEM' || risk.fileType === 'SYSTEM') {
       risk.impactScope = 'CRITICAL';
       risk.riskLevel = RiskLevel._CRITICAL;
@@ -852,12 +999,26 @@ export class EnhancedFileSystemValidationService {
   private setSecurityImplications(risk: FileOperationRisk): void {
     switch (risk.riskLevel) {
       case RiskLevel._CRITICAL:
-        risk.securityImplications.push('system_stability_risk', 'security_compromise_risk');
-        risk.recommendedSafeguards.push('system_backup', 'multi_step_approval', 'rollback_plan');
+        risk.securityImplications.push(
+          'system_stability_risk',
+          'security_compromise_risk',
+        );
+        risk.recommendedSafeguards.push(
+          'system_backup',
+          'multi_step_approval',
+          'rollback_plan',
+        );
         break;
       case RiskLevel._HIGH:
-        risk.securityImplications.push('application_impact', 'configuration_change');
-        risk.recommendedSafeguards.push('backup_creation', 'approval_required', 'monitoring');
+        risk.securityImplications.push(
+          'application_impact',
+          'configuration_change',
+        );
+        risk.recommendedSafeguards.push(
+          'backup_creation',
+          'approval_required',
+          'monitoring',
+        );
         break;
       case RiskLevel._MODERATE:
         risk.securityImplications.push('user_data_impact');
@@ -868,39 +1029,64 @@ export class EnhancedFileSystemValidationService {
     }
   }
 
-  private escalateRiskForWrite(riskLevel: RiskLevel, contentAnalysis: FileContentAnalysis): RiskLevel {
+  private escalateRiskForWrite(
+    riskLevel: RiskLevel,
+    contentAnalysis: FileContentAnalysis,
+  ): RiskLevel {
     if (contentAnalysis.malwareRisk === 'BLOCKED') {
       return RiskLevel._CRITICAL;
     }
     if (contentAnalysis.sensitiveDataDetected) {
-      return riskLevel === RiskLevel._LOW ? RiskLevel._MODERATE :
-             riskLevel === RiskLevel._MODERATE ? RiskLevel._HIGH : riskLevel;
+      return riskLevel === RiskLevel._LOW
+        ? RiskLevel._MODERATE
+        : riskLevel === RiskLevel._MODERATE
+          ? RiskLevel._HIGH
+          : riskLevel;
     }
     return riskLevel;
   }
 
   // ===== DESCRIPTION GENERATORS =====
 
-  private generateReadDescription(filePath: string, risk: FileOperationRisk, pathValidation: PathValidationResult): string {
+  private generateReadDescription(
+    filePath: string,
+    risk: FileOperationRisk,
+    pathValidation: PathValidationResult,
+  ): string {
     return `Read file: ${pathValidation.filename} (${risk.fileType.toLowerCase()}) from ${risk.pathRisk.toLowerCase()} area - Risk: ${risk.riskLevel}`;
   }
 
-  private generateWriteDescription(filePath: string, risk: FileOperationRisk, content: FileContentAnalysis, backupCreated: boolean): string {
+  private generateWriteDescription(
+    filePath: string,
+    risk: FileOperationRisk,
+    content: FileContentAnalysis,
+    backupCreated: boolean,
+  ): string {
     const sizeStr = `${(content.fileSize / 1024).toFixed(1)}KB`;
     const backupStr = backupCreated ? ' (backup created)' : '';
-    const sensitiveStr = content.sensitiveDataDetected ? ' containing sensitive data' : '';
+    const sensitiveStr = content.sensitiveDataDetected
+      ? ' containing sensitive data'
+      : '';
 
     return `Write ${sizeStr} to ${risk.fileType.toLowerCase()} file in ${risk.pathRisk.toLowerCase()} area${sensitiveStr}${backupStr} - Risk: ${risk.riskLevel}`;
   }
 
-  private generateDeleteDescription(filePath: string, risk: FileOperationRisk, backupCreated: boolean): string {
+  private generateDeleteDescription(
+    filePath: string,
+    risk: FileOperationRisk,
+    backupCreated: boolean,
+  ): string {
     const backupStr = backupCreated ? ' (backup created)' : '';
     return `Delete ${risk.fileType.toLowerCase()} file from ${risk.pathRisk.toLowerCase()} area${backupStr} - Risk: HIGH (irreversible)`;
   }
 
   // ===== CACHE MANAGEMENT =====
 
-  private generateCacheKey(operation: string, filePath: string, userId: string): string {
+  private generateCacheKey(
+    operation: string,
+    filePath: string,
+    userId: string,
+  ): string {
     const normalizedPath = path.resolve(filePath);
     return `${operation}_${userId}_${normalizedPath}`;
   }
@@ -917,7 +1103,11 @@ export class EnhancedFileSystemValidationService {
     return cached.result;
   }
 
-  private setCachedOperation(key: string, result: boolean, expiryMs: number): void {
+  private setCachedOperation(
+    key: string,
+    result: boolean,
+    expiryMs: number,
+  ): void {
     this.operationCache.set(key, {
       result,
       timestamp: new Date(),
@@ -937,14 +1127,21 @@ export class EnhancedFileSystemValidationService {
 
   // ===== PERFORMANCE TRACKING =====
 
-  private updatePerformanceMetrics(durationMs: number, fromCache: boolean): void {
+  private updatePerformanceMetrics(
+    durationMs: number,
+    fromCache: boolean,
+  ): void {
     if (fromCache) {
       this.performanceMetrics.cacheHitRate =
-        (this.performanceMetrics.cacheHitRate * (this.performanceMetrics.totalFileOperations - 1) + 1) /
+        (this.performanceMetrics.cacheHitRate *
+          (this.performanceMetrics.totalFileOperations - 1) +
+          1) /
         this.performanceMetrics.totalFileOperations;
     } else {
       this.performanceMetrics.averageValidationTime =
-        (this.performanceMetrics.averageValidationTime * (this.performanceMetrics.totalFileOperations - 1) + durationMs) /
+        (this.performanceMetrics.averageValidationTime *
+          (this.performanceMetrics.totalFileOperations - 1) +
+          durationMs) /
         this.performanceMetrics.totalFileOperations;
 
       if (durationMs < 100) this.performanceMetrics.sub100msOperations++;

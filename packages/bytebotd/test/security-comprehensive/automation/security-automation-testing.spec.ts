@@ -28,7 +28,7 @@ import {
   SecurityTestType,
   SecurityTestStatus,
   SecurityRiskLevel,
-  SecurityTestUtils
+  SecurityTestUtils,
 } from '../framework/security-test-framework';
 
 // ===== SECURITY AUTOMATION INTERFACES =====
@@ -50,7 +50,7 @@ enum SecurityScanType {
   COMPLIANCE_SCAN = 'COMPLIANCE_SCAN',
   THREAT_INTELLIGENCE = 'THREAT_INTELLIGENCE',
   BEHAVIORAL_ANALYSIS = 'BEHAVIORAL_ANALYSIS',
-  CONFIGURATION_SCAN = 'CONFIGURATION_SCAN'
+  CONFIGURATION_SCAN = 'CONFIGURATION_SCAN',
 }
 
 enum ScanFrequency {
@@ -59,7 +59,7 @@ enum ScanFrequency {
   HOURLY = 'HOURLY',
   DAILY = 'DAILY',
   WEEKLY = 'WEEKLY',
-  ON_DEMAND = 'ON_DEMAND'
+  ON_DEMAND = 'ON_DEMAND',
 }
 
 interface SecurityAlert {
@@ -81,7 +81,7 @@ enum SecurityAlertType {
   POLICY_VIOLATION = 'POLICY_VIOLATION',
   ANOMALY_DETECTED = 'ANOMALY_DETECTED',
   SYSTEM_COMPROMISE = 'SYSTEM_COMPROMISE',
-  DATA_BREACH = 'DATA_BREACH'
+  DATA_BREACH = 'DATA_BREACH',
 }
 
 interface AutomationRule {
@@ -120,7 +120,7 @@ enum AutomationActionType {
   AUTO_REMEDIATE = 'AUTO_REMEDIATE',
   GENERATE_REPORT = 'GENERATE_REPORT',
   ESCALATE_INCIDENT = 'ESCALATE_INCIDENT',
-  UPDATE_POLICY = 'UPDATE_POLICY'
+  UPDATE_POLICY = 'UPDATE_POLICY',
 }
 
 describe('Security Automation Testing Suite', () => {
@@ -132,13 +132,15 @@ describe('Security Automation Testing Suite', () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [AppModule],
-      providers: [SecurityTestFramework]
+      providers: [SecurityTestFramework],
     }).compile();
 
     app = module.createNestApplication();
     await app.init();
 
-    securityFramework = module.get<SecurityTestFramework>(SecurityTestFramework);
+    securityFramework = module.get<SecurityTestFramework>(
+      SecurityTestFramework,
+    );
     await securityFramework.initialize(module);
 
     configService = module.get<ConfigService>(ConfigService);
@@ -150,13 +152,15 @@ describe('Security Automation Testing Suite', () => {
   });
 
   describe('Automated Vulnerability Scanning', () => {
-
     it('should perform automated OWASP Top 10 vulnerability scanning', async () => {
       await securityFramework.executeSecurityTest(
         'Automated OWASP Top 10 Vulnerability Scan',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Trigger vulnerability scan
           const scanResponse = await request(app.getHttpServer())
@@ -165,7 +169,7 @@ describe('Security Automation Testing Suite', () => {
             .send({
               scanType: 'OWASP_TOP_10',
               targets: ['http://localhost:3000'],
-              automated: true
+              automated: true,
             });
 
           if (scanResponse.status === 202) {
@@ -176,7 +180,7 @@ describe('Security Automation Testing Suite', () => {
             let scanComplete = false;
             let attempts = 0;
             while (!scanComplete && attempts < 10) {
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              await new Promise((resolve) => setTimeout(resolve, 1000));
 
               const statusResponse = await request(app.getHttpServer())
                 .get(`/api/security/scan/${scanResponse.body.scanId}/status`)
@@ -192,7 +196,7 @@ describe('Security Automation Testing Suite', () => {
               attempts++;
             }
           }
-        }
+        },
       );
     });
 
@@ -201,7 +205,10 @@ describe('Security Automation Testing Suite', () => {
         'Automated Dependency Vulnerability Scan',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           const dependencyScanResponse = await request(app.getHttpServer())
             .post('/api/security/scan/dependencies')
@@ -209,15 +216,17 @@ describe('Security Automation Testing Suite', () => {
             .send({
               scanType: 'NPM_AUDIT',
               packageFile: 'package.json',
-              automated: true
+              automated: true,
             });
 
           if (dependencyScanResponse.status === 200) {
             expect(dependencyScanResponse.body.vulnerabilities).toBeDefined();
-            expect(Array.isArray(dependencyScanResponse.body.vulnerabilities)).toBeTruthy();
+            expect(
+              Array.isArray(dependencyScanResponse.body.vulnerabilities),
+            ).toBeTruthy();
             expect(dependencyScanResponse.body.summary).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -226,7 +235,10 @@ describe('Security Automation Testing Suite', () => {
         'Automated SAST Security Scan',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           const sastResponse = await request(app.getHttpServer())
             .post('/api/security/scan/sast')
@@ -235,14 +247,14 @@ describe('Security Automation Testing Suite', () => {
               scanType: 'STATIC_ANALYSIS',
               codebase: 'src/',
               language: 'typescript',
-              automated: true
+              automated: true,
             });
 
           if (sastResponse.status === 202) {
             expect(sastResponse.body.scanId).toBeDefined();
             expect(sastResponse.body.estimatedDuration).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -251,7 +263,10 @@ describe('Security Automation Testing Suite', () => {
         'Automated DAST Security Scan',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           const dastResponse = await request(app.getHttpServer())
             .post('/api/security/scan/dast')
@@ -260,26 +275,28 @@ describe('Security Automation Testing Suite', () => {
               scanType: 'DYNAMIC_ANALYSIS',
               targetUrl: 'http://localhost:3000',
               authenticated: true,
-              automated: true
+              automated: true,
             });
 
           if (dastResponse.status === 202) {
             expect(dastResponse.body.scanId).toBeDefined();
             expect(dastResponse.body.crawlingStarted).toBeTruthy();
           }
-        }
+        },
       );
     });
   });
 
   describe('Continuous Security Monitoring', () => {
-
     it('should validate real-time threat detection and monitoring', async () => {
       await securityFramework.executeSecurityTest(
         'Real-time Threat Detection Monitoring',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Check monitoring status
           const monitoringResponse = await request(app.getHttpServer())
@@ -309,7 +326,7 @@ describe('Security Automation Testing Suite', () => {
               expect(alertsResponse.body.alerts).toBeDefined();
             }
           }
-        }
+        },
       );
     });
 
@@ -318,17 +335,24 @@ describe('Security Automation Testing Suite', () => {
         'Automated Security Policy Enforcement',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Test rate limiting enforcement
           const rateLimitingTest = async () => {
             const requests = [];
             for (let i = 0; i < 20; i++) {
-              requests.push(request(app.getHttpServer()).get('/api/public/status'));
+              requests.push(
+                request(app.getHttpServer()).get('/api/public/status'),
+              );
             }
 
             const responses = await Promise.all(requests);
-            const rateLimitedResponses = responses.filter(r => r.status === 429);
+            const rateLimitedResponses = responses.filter(
+              (r) => r.status === 429,
+            );
 
             return rateLimitedResponses.length > 0;
           };
@@ -346,13 +370,13 @@ describe('Security Automation Testing Suite', () => {
             .send({
               policyType: 'IP_BLOCKING',
               targetIp: '192.168.1.100',
-              reason: 'suspected_malicious_activity'
+              reason: 'suspected_malicious_activity',
             });
 
           if (blockingResponse.status === 200) {
             expect(blockingResponse.body.policyEnforced).toBeTruthy();
           }
-        }
+        },
       );
     });
 
@@ -361,7 +385,10 @@ describe('Security Automation Testing Suite', () => {
         'Automated Incident Response Validation',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Simulate security incident
           const incidentResponse = await request(app.getHttpServer())
@@ -370,7 +397,7 @@ describe('Security Automation Testing Suite', () => {
             .send({
               incidentType: 'BRUTE_FORCE_ATTACK',
               severity: 'HIGH',
-              automated: true
+              automated: true,
             });
 
           if (incidentResponse.status === 201) {
@@ -379,15 +406,19 @@ describe('Security Automation Testing Suite', () => {
 
             // Check automated response actions
             const responseActionsResponse = await request(app.getHttpServer())
-              .get(`/api/security/incident/${incidentResponse.body.incidentId}/actions`)
+              .get(
+                `/api/security/incident/${incidentResponse.body.incidentId}/actions`,
+              )
               .set('Authorization', `Bearer ${adminToken}`);
 
             if (responseActionsResponse.status === 200) {
               expect(responseActionsResponse.body.actions).toBeDefined();
-              expect(Array.isArray(responseActionsResponse.body.actions)).toBeTruthy();
+              expect(
+                Array.isArray(responseActionsResponse.body.actions),
+              ).toBeTruthy();
             }
           }
-        }
+        },
       );
     });
 
@@ -396,7 +427,10 @@ describe('Security Automation Testing Suite', () => {
         'Behavioral Anomaly Detection Validation',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const userToken = securityFramework.generateTestJWT({ userId: '123', role: 'user' });
+          const userToken = securityFramework.generateTestJWT({
+            userId: '123',
+            role: 'user',
+          });
 
           // Simulate normal user behavior
           await request(app.getHttpServer())
@@ -412,18 +446,21 @@ describe('Security Automation Testing Suite', () => {
             '/api/admin/users',
             '/api/admin/system/config',
             '/api/admin/security/settings',
-            '/api/admin/logs/access'
+            '/api/admin/logs/access',
           ];
 
           for (const endpoint of anomalousActions) {
             await request(app.getHttpServer())
               .get(endpoint)
               .set('Authorization', `Bearer ${userToken}`)
-              .expect(res => expect([401, 403, 404]).toContain(res.status));
+              .expect((res) => expect([401, 403, 404]).toContain(res.status));
           }
 
           // Check for anomaly detection
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
           const anomalyResponse = await request(app.getHttpServer())
             .get('/api/security/anomalies/recent')
             .set('Authorization', `Bearer ${adminToken}`);
@@ -431,19 +468,21 @@ describe('Security Automation Testing Suite', () => {
           if (anomalyResponse.status === 200) {
             expect(anomalyResponse.body.anomalies).toBeDefined();
           }
-        }
+        },
       );
     });
   });
 
   describe('Security Automation Rules and Workflows', () => {
-
     it('should validate automated security rule configuration and execution', async () => {
       await securityFramework.executeSecurityTest(
         'Automated Security Rules Configuration',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Create automated security rule
           const ruleResponse = await request(app.getHttpServer())
@@ -454,21 +493,21 @@ describe('Security Automation Testing Suite', () => {
               trigger: {
                 eventType: 'failed_login_attempts',
                 threshold: 5,
-                timeWindow: 300 // 5 minutes
+                timeWindow: 300, // 5 minutes
               },
               condition: {
                 field: 'attempts',
                 operator: 'greater_than',
-                value: 5
+                value: 5,
               },
               action: {
                 type: 'BLOCK_REQUEST',
                 parameters: {
                   duration: 3600, // 1 hour
-                  reason: 'excessive_failed_logins'
-                }
+                  reason: 'excessive_failed_logins',
+                },
               },
-              enabled: true
+              enabled: true,
             });
 
           if (ruleResponse.status === 201) {
@@ -483,8 +522,8 @@ describe('Security Automation Testing Suite', () => {
                 testEvent: {
                   eventType: 'failed_login_attempts',
                   attempts: 6,
-                  sourceIp: '192.168.1.100'
-                }
+                  sourceIp: '192.168.1.100',
+                },
               });
 
             if (ruleTestResponse.status === 200) {
@@ -492,7 +531,7 @@ describe('Security Automation Testing Suite', () => {
               expect(ruleTestResponse.body.actionExecuted).toBeTruthy();
             }
           }
-        }
+        },
       );
     });
 
@@ -501,7 +540,10 @@ describe('Security Automation Testing Suite', () => {
         'Automated Compliance Monitoring',
         SecurityTestType.COMPLIANCE_VALIDATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Start compliance monitoring
           const monitoringResponse = await request(app.getHttpServer())
@@ -511,7 +553,7 @@ describe('Security Automation Testing Suite', () => {
               standards: ['SOC2_TYPE_II', 'GDPR', 'HIPAA'],
               frequency: 'CONTINUOUS',
               automated: true,
-              autoRemediate: true
+              autoRemediate: true,
             });
 
           if (monitoringResponse.status === 200) {
@@ -525,10 +567,12 @@ describe('Security Automation Testing Suite', () => {
 
             if (violationsResponse.status === 200) {
               expect(violationsResponse.body.violations).toBeDefined();
-              expect(Array.isArray(violationsResponse.body.violations)).toBeTruthy();
+              expect(
+                Array.isArray(violationsResponse.body.violations),
+              ).toBeTruthy();
             }
           }
-        }
+        },
       );
     });
 
@@ -537,7 +581,10 @@ describe('Security Automation Testing Suite', () => {
         'Automated Security Reporting',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Generate automated security report
           const reportResponse = await request(app.getHttpServer())
@@ -548,7 +595,7 @@ describe('Security Automation Testing Suite', () => {
               period: 'DAILY',
               automated: true,
               includeMetrics: true,
-              includeRecommendations: true
+              includeRecommendations: true,
             });
 
           if (reportResponse.status === 200) {
@@ -572,19 +619,21 @@ describe('Security Automation Testing Suite', () => {
             expect(metricsResponse.body.securityMetrics).toBeDefined();
             expect(metricsResponse.body.timestamp).toBeDefined();
           }
-        }
+        },
       );
     });
   });
 
   describe('CI/CD Security Integration', () => {
-
     it('should validate automated security scanning in CI/CD pipeline', async () => {
       await securityFramework.executeSecurityTest(
         'CI/CD Security Integration Validation',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Simulate CI/CD pipeline trigger
           const pipelineResponse = await request(app.getHttpServer())
@@ -595,7 +644,7 @@ describe('Security Automation Testing Suite', () => {
               branch: 'feature/security-testing',
               commitHash: 'abc123def456',
               scanTypes: ['SAST', 'DEPENDENCY', 'SECRET_SCAN'],
-              automated: true
+              automated: true,
             });
 
           if (pipelineResponse.status === 202) {
@@ -604,7 +653,9 @@ describe('Security Automation Testing Suite', () => {
 
             // Check pipeline scan status
             const statusResponse = await request(app.getHttpServer())
-              .get(`/api/security/cicd/scan/${pipelineResponse.body.scanId}/status`)
+              .get(
+                `/api/security/cicd/scan/${pipelineResponse.body.scanId}/status`,
+              )
               .set('Authorization', `Bearer ${adminToken}`);
 
             if (statusResponse.status === 200) {
@@ -612,7 +663,7 @@ describe('Security Automation Testing Suite', () => {
               expect(statusResponse.body.scanResults).toBeDefined();
             }
           }
-        }
+        },
       );
     });
 
@@ -621,7 +672,10 @@ describe('Security Automation Testing Suite', () => {
         'Automated Security Gates Validation',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Test security gate evaluation
           const gateResponse = await request(app.getHttpServer())
@@ -634,9 +688,9 @@ describe('Security Automation Testing Suite', () => {
                 {
                   severity: 'HIGH',
                   type: 'VULNERABILITY',
-                  description: 'SQL Injection vulnerability found'
-                }
-              ]
+                  description: 'SQL Injection vulnerability found',
+                },
+              ],
             });
 
           if (gateResponse.status === 200) {
@@ -649,19 +703,21 @@ describe('Security Automation Testing Suite', () => {
               expect(gateResponse.body.remediationRequired).toBeTruthy();
             }
           }
-        }
+        },
       );
     });
   });
 
   describe('Third-Party Security Tool Integration', () => {
-
     it('should validate OWASP ZAP integration and automation', async () => {
       await securityFramework.executeSecurityTest(
         'OWASP ZAP Integration Validation',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Test OWASP ZAP scan integration
           const zapResponse = await request(app.getHttpServer())
@@ -671,14 +727,14 @@ describe('Security Automation Testing Suite', () => {
               targetUrl: 'http://localhost:3000',
               scanMode: 'ACTIVE',
               authenticated: true,
-              automated: true
+              automated: true,
             });
 
           if (zapResponse.status === 202) {
             expect(zapResponse.body.zapScanId).toBeDefined();
             expect(zapResponse.body.status).toBe('initiated');
           }
-        }
+        },
       );
     });
 
@@ -687,7 +743,10 @@ describe('Security Automation Testing Suite', () => {
         'Automated Secret Scanning Integration',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Test secret scanning
           const secretScanResponse = await request(app.getHttpServer())
@@ -696,14 +755,14 @@ describe('Security Automation Testing Suite', () => {
             .send({
               scanTarget: 'repository',
               includeHistory: true,
-              automated: true
+              automated: true,
             });
 
           if (secretScanResponse.status === 200) {
             expect(secretScanResponse.body.secretsFound).toBeDefined();
             expect(secretScanResponse.body.scanSummary).toBeDefined();
           }
-        }
+        },
       );
     });
 
@@ -712,7 +771,10 @@ describe('Security Automation Testing Suite', () => {
         'Threat Intelligence Integration Validation',
         SecurityTestType.THREAT_SIMULATION,
         async () => {
-          const adminToken = securityFramework.generateTestJWT({ userId: '456', role: 'admin' });
+          const adminToken = securityFramework.generateTestJWT({
+            userId: '456',
+            role: 'admin',
+          });
 
           // Test threat intelligence feed
           const threatIntelResponse = await request(app.getHttpServer())
@@ -730,13 +792,13 @@ describe('Security Automation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`)
             .send({
               indicators: ['192.168.1.100', 'malicious-domain.com'],
-              automated: true
+              automated: true,
             });
 
           if (indicatorResponse.status === 200) {
             expect(indicatorResponse.body.results).toBeDefined();
           }
-        }
+        },
       );
     });
   });

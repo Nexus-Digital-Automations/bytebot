@@ -64,7 +64,7 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
   constructor(
     private url: string,
     private clientId: string,
-    private options: WebSocketClientOptions = {}
+    private options: WebSocketClientOptions = {},
   ) {
     super();
     this.sessionId = `test_session_${Date.now()}_${clientId}`;
@@ -96,9 +96,13 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
 
         this.ws.on('open', () => {
           this.connected = true;
-          this.metrics.connectionTime = performance.now() - this.connectionStartTime;
+          this.metrics.connectionTime =
+            performance.now() - this.connectionStartTime;
           this.startHeartbeat();
-          this.emit('connected', { clientId: this.clientId, connectionTime: this.metrics.connectionTime });
+          this.emit('connected', {
+            clientId: this.clientId,
+            connectionTime: this.metrics.connectionTime,
+          });
           resolve();
         });
 
@@ -121,14 +125,16 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
             clientId: this.clientId,
             code,
             reason: reason.toString(),
-            metrics: this.getMetrics()
+            metrics: this.getMetrics(),
           });
 
-          if (this.options.autoReconnect && this.reconnectAttempts < (this.options.maxReconnectAttempts ?? 5)) {
+          if (
+            this.options.autoReconnect &&
+            this.reconnectAttempts < (this.options.maxReconnectAttempts ?? 5)
+          ) {
             this.attemptReconnection();
           }
         });
-
       } catch (error) {
         reject(error);
       }
@@ -151,12 +157,11 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
         clientId: this.clientId,
         message,
         processingTime,
-        totalMessages: this.messages.length
+        totalMessages: this.messages.length,
       });
 
       // Handle specific message types
       this.processSpecialMessages(message);
-
     } catch (error) {
       this.metrics.errors++;
       this.emit('messageError', { clientId: this.clientId, error });
@@ -169,13 +174,22 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
         this.sendHeartbeatAck(message);
         break;
       case ConversationalMessageType.SESSION_READY:
-        this.emit('sessionReady', { clientId: this.clientId, sessionInfo: message.payload });
+        this.emit('sessionReady', {
+          clientId: this.clientId,
+          sessionInfo: message.payload,
+        });
         break;
       case ConversationalMessageType.VALIDATION_REQUEST:
-        this.emit('validationRequest', { clientId: this.clientId, validation: message.payload });
+        this.emit('validationRequest', {
+          clientId: this.clientId,
+          validation: message.payload,
+        });
         break;
       case ConversationalMessageType.PROGRESS_UPDATE:
-        this.emit('progressUpdate', { clientId: this.clientId, progress: message.payload });
+        this.emit('progressUpdate', {
+          clientId: this.clientId,
+          progress: message.payload,
+        });
         break;
     }
   }
@@ -249,19 +263,22 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
     this.emit('reconnecting', {
       clientId: this.clientId,
       attempt: this.reconnectAttempts,
-      delay
+      delay,
     });
 
     setTimeout(async () => {
       try {
         await this.connect();
         this.reconnectAttempts = 0; // Reset on successful reconnection
-        this.emit('reconnected', { clientId: this.clientId, attempts: this.reconnectAttempts });
+        this.emit('reconnected', {
+          clientId: this.clientId,
+          attempts: this.reconnectAttempts,
+        });
       } catch (error) {
         this.emit('reconnectionFailed', {
           clientId: this.clientId,
           attempt: this.reconnectAttempts,
-          error
+          error,
         });
       }
     }, delay);
@@ -301,7 +318,7 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
           this.emit('messageSent', {
             clientId: this.clientId,
             message: fullMessage,
-            sendTime
+            sendTime,
           });
           resolve();
         }
@@ -311,7 +328,7 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
 
   async waitForMessage(
     predicate: (message: ConversationalMessage) => boolean,
-    timeout = 5000
+    timeout = 5000,
   ): Promise<ConversationalMessage> {
     const start = Date.now();
 
@@ -320,10 +337,12 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
       if (message) {
         return message;
       }
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
 
-    throw new Error(`Timeout waiting for message matching predicate (client: ${this.clientId})`);
+    throw new Error(
+      `Timeout waiting for message matching predicate (client: ${this.clientId})`,
+    );
   }
 
   async sendValidationRequest(action: ValidationAction): Promise<string> {
@@ -371,7 +390,10 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
     return validationId;
   }
 
-  async sendUserConfirmation(validationId: string, approved: boolean): Promise<string> {
+  async sendUserConfirmation(
+    validationId: string,
+    approved: boolean,
+  ): Promise<string> {
     const confirmationId = `conf_${validationId}_${this.clientId}`;
 
     const confirmation: UserConfirmationMessage = {
@@ -404,7 +426,7 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
   }
 
   getMessagesByType(type: ConversationalMessageType): ConversationalMessage[] {
-    return this.messages.filter(msg => msg.type === type);
+    return this.messages.filter((msg) => msg.type === type);
   }
 
   clearMessages(): void {
@@ -413,13 +435,15 @@ class EnterpriseWebSocketTestClient extends EventEmitter {
 
   getMetrics(): ConnectionMetrics {
     const now = performance.now();
-    const averageLatency = this.metrics.messagesReceived > 0
-      ? this.metrics.totalLatency / this.metrics.messagesReceived
-      : 0;
+    const averageLatency =
+      this.metrics.messagesReceived > 0
+        ? this.metrics.totalLatency / this.metrics.messagesReceived
+        : 0;
 
-    const throughput = this.metrics.messagesSent > 0
-      ? this.metrics.messagesSent / ((now - this.connectionStartTime) / 1000)
-      : 0;
+    const throughput =
+      this.metrics.messagesSent > 0
+        ? this.metrics.messagesSent / ((now - this.connectionStartTime) / 1000)
+        : 0;
 
     return {
       ...this.metrics,
@@ -490,7 +514,7 @@ class ValidationWorkflowTester {
 
   async executeCompleteValidationWorkflow(
     action: ValidationAction,
-    expectedResult: 'approved' | 'rejected' = 'approved'
+    expectedResult: 'approved' | 'rejected' = 'approved',
   ): Promise<ValidationWorkflowResult> {
     const startTime = performance.now();
 
@@ -499,22 +523,30 @@ class ValidationWorkflowTester {
 
     // Step 2: Wait for validation response
     const response = await this.client.waitForMessage(
-      msg => msg.type === ConversationalMessageType.VALIDATION_RESPONSE &&
-             msg.payload.validationId === validationId,
-      10000
+      (msg) =>
+        msg.type === ConversationalMessageType.VALIDATION_RESPONSE &&
+        msg.payload.validationId === validationId,
+      10000,
     );
 
     // Step 3: Collect progress updates
-    const progressUpdates = await this.collectProgressUpdates(validationId, 5000);
+    const progressUpdates = await this.collectProgressUpdates(
+      validationId,
+      5000,
+    );
 
     // Step 4: Send user confirmation
-    const confirmationId = await this.client.sendUserConfirmation(validationId, expectedResult === 'approved');
+    const confirmationId = await this.client.sendUserConfirmation(
+      validationId,
+      expectedResult === 'approved',
+    );
 
     // Step 5: Wait for confirmation result
     const result = await this.client.waitForMessage(
-      msg => msg.type === ConversationalMessageType.CONFIRMATION_RESULT &&
-             msg.payload.validationId === validationId,
-      10000
+      (msg) =>
+        msg.type === ConversationalMessageType.CONFIRMATION_RESULT &&
+        msg.payload.validationId === validationId,
+      10000,
     );
 
     const duration = performance.now() - startTime;
@@ -525,7 +557,11 @@ class ValidationWorkflowTester {
       request: { validationId, action },
       response,
       progressUpdates,
-      confirmation: { confirmationId, validationId, approved: expectedResult === 'approved' },
+      confirmation: {
+        confirmationId,
+        validationId,
+        approved: expectedResult === 'approved',
+      },
       result,
       duration,
       success: result.payload.result === expectedResult,
@@ -534,18 +570,19 @@ class ValidationWorkflowTester {
 
   private async collectProgressUpdates(
     validationId: string,
-    timeout = 5000
+    timeout = 5000,
   ): Promise<ProgressUpdateMessage[]> {
     const progressUpdates: ProgressUpdateMessage[] = [];
     const startTime = Date.now();
 
     while (Date.now() - startTime < timeout) {
       try {
-        const update = await this.client.waitForMessage(
-          msg => msg.type === ConversationalMessageType.PROGRESS_UPDATE &&
-                 msg.payload.operationId === validationId,
-          1000
-        ) as ProgressUpdateMessage;
+        const update = (await this.client.waitForMessage(
+          (msg) =>
+            msg.type === ConversationalMessageType.PROGRESS_UPDATE &&
+            msg.payload.operationId === validationId,
+          1000,
+        )) as ProgressUpdateMessage;
 
         progressUpdates.push(update);
 
@@ -573,7 +610,11 @@ interface ValidationWorkflowResult {
   request: { validationId: string; action: ValidationAction };
   response: ConversationalMessage;
   progressUpdates: ProgressUpdateMessage[];
-  confirmation: { confirmationId: string; validationId: string; approved: boolean };
+  confirmation: {
+    confirmationId: string;
+    validationId: string;
+    approved: boolean;
+  };
   result: ConversationalMessage;
   duration: number;
   success: boolean;
@@ -587,11 +628,17 @@ class ConcurrentConnectionManager extends EventEmitter {
   private connectionMetrics: Map<string, ConnectionMetrics> = new Map();
   private startTime = 0;
 
-  constructor(private baseUrl: string, private totalConnections: number) {
+  constructor(
+    private baseUrl: string,
+    private totalConnections: number,
+  ) {
     super();
   }
 
-  async establishConnections(batchSize = 50, delayBetweenBatches = 100): Promise<void> {
+  async establishConnections(
+    batchSize = 50,
+    delayBetweenBatches = 100,
+  ): Promise<void> {
     this.startTime = performance.now();
     const batches = Math.ceil(this.totalConnections / batchSize);
 
@@ -610,24 +657,26 @@ class ConcurrentConnectionManager extends EventEmitter {
             maxReconnectAttempts: 3,
             enableHeartbeat: true,
             heartbeatInterval: 30000,
-          }
+          },
         );
 
         this.clients.set(clientId, client);
         this.setupClientEventHandlers(client);
 
         batchPromises.push(
-          client.connect().catch(error => {
+          client.connect().catch((error) => {
             this.emit('connectionFailed', { clientId, error });
             throw error;
-          })
+          }),
         );
       }
 
       await Promise.allSettled(batchPromises);
 
       if (batch < batches - 1) {
-        await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayBetweenBatches),
+        );
       }
 
       this.emit('batchCompleted', {
@@ -647,7 +696,9 @@ class ConcurrentConnectionManager extends EventEmitter {
     });
   }
 
-  private setupClientEventHandlers(client: EnterpriseWebSocketTestClient): void {
+  private setupClientEventHandlers(
+    client: EnterpriseWebSocketTestClient,
+  ): void {
     client.on('connected', (data) => {
       this.emit('clientConnected', data);
     });
@@ -666,9 +717,13 @@ class ConcurrentConnectionManager extends EventEmitter {
     });
   }
 
-  async performConcurrentValidation(validationCount = 100): Promise<ValidationWorkflowResult[]> {
+  async performConcurrentValidation(
+    validationCount = 100,
+  ): Promise<ValidationWorkflowResult[]> {
     const results: ValidationWorkflowResult[] = [];
-    const connectedClients = Array.from(this.clients.values()).filter(client => client.isConnected());
+    const connectedClients = Array.from(this.clients.values()).filter(
+      (client) => client.isConnected(),
+    );
 
     if (connectedClients.length === 0) {
       throw new Error('No connected clients available for validation testing');
@@ -694,21 +749,26 @@ class ConcurrentConnectionManager extends EventEmitter {
       };
 
       validationPromises.push(
-        tester.executeCompleteValidationWorkflow(action, 'approved')
-          .catch(error => {
+        tester
+          .executeCompleteValidationWorkflow(action, 'approved')
+          .catch((error) => {
             return {
               validationId: `failed_${i}`,
               confirmationId: `failed_conf_${i}`,
               request: { validationId: `failed_${i}`, action },
               response: {} as ConversationalMessage,
               progressUpdates: [],
-              confirmation: { confirmationId: `failed_conf_${i}`, validationId: `failed_${i}`, approved: false },
+              confirmation: {
+                confirmationId: `failed_conf_${i}`,
+                validationId: `failed_${i}`,
+                approved: false,
+              },
               result: {} as ConversationalMessage,
               duration: 0,
               success: false,
               error,
             } as ValidationWorkflowResult & { error: unknown };
-          })
+          }),
       );
     }
 
@@ -725,8 +785,12 @@ class ConcurrentConnectionManager extends EventEmitter {
     return results;
   }
 
-  async performLatencyBenchmark(messageCount = 1000): Promise<LatencyBenchmarkResult> {
-    const connectedClients = Array.from(this.clients.values()).filter(client => client.isConnected());
+  async performLatencyBenchmark(
+    messageCount = 1000,
+  ): Promise<LatencyBenchmarkResult> {
+    const connectedClients = Array.from(this.clients.values()).filter(
+      (client) => client.isConnected(),
+    );
 
     if (connectedClients.length === 0) {
       throw new Error('No connected clients available for latency testing');
@@ -749,10 +813,10 @@ class ConcurrentConnectionManager extends EventEmitter {
         const latency = performance.now() - messageStartTime;
         latencies.push(latency);
 
-        if (latency > 50) { // Target: <50ms
+        if (latency > 50) {
+          // Target: <50ms
           errors.push(i);
         }
-
       } catch (error) {
         errors.push(i);
       }
@@ -764,7 +828,8 @@ class ConcurrentConnectionManager extends EventEmitter {
     return {
       messageCount,
       totalTime,
-      averageLatency: latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length,
+      averageLatency:
+        latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length,
       medianLatency: latencies[Math.floor(latencies.length / 2)] ?? 0,
       p95Latency: latencies[Math.floor(latencies.length * 0.95)] ?? 0,
       p99Latency: latencies[Math.floor(latencies.length * 0.99)] ?? 0,
@@ -777,7 +842,9 @@ class ConcurrentConnectionManager extends EventEmitter {
   }
 
   getConnectedCount(): number {
-    return Array.from(this.clients.values()).filter(client => client.isConnected()).length;
+    return Array.from(this.clients.values()).filter((client) =>
+      client.isConnected(),
+    ).length;
   }
 
   getConnectionMetrics(): Map<string, ConnectionMetrics> {
@@ -792,8 +859,8 @@ class ConcurrentConnectionManager extends EventEmitter {
 
   async disconnectAll(): Promise<void> {
     const disconnectPromises = Array.from(this.clients.values())
-      .filter(client => client.isConnected())
-      .map(client => client.disconnect());
+      .filter((client) => client.isConnected())
+      .map((client) => client.disconnect());
 
     await Promise.allSettled(disconnectPromises);
     this.clients.clear();
@@ -823,12 +890,12 @@ interface LatencyBenchmarkResult {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
     };
     return config[key] ?? defaultValue;
   }),
@@ -862,18 +929,27 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
-    parlantService = module.get<ParlantWebSocketBridgeService>(ParlantWebSocketBridgeService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
+    parlantService = module.get<ParlantWebSocketBridgeService>(
+      ParlantWebSocketBridgeService,
+    );
 
     // Initialize services
     await integrationService.onModuleInit();
 
     // Give services time to start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Initialize concurrent connection manager
-    concurrentManager = new ConcurrentConnectionManager(TEST_URL, TARGET_CONCURRENT_CONNECTIONS);
+    concurrentManager = new ConcurrentConnectionManager(
+      TEST_URL,
+      TARGET_CONCURRENT_CONNECTIONS,
+    );
   });
 
   afterAll(async () => {
@@ -893,7 +969,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
 
   describe('Connection Lifecycle Management', () => {
     it('should establish single WebSocket connection successfully', async () => {
-      const client = new EnterpriseWebSocketTestClient(TEST_URL, 'test_single_client');
+      const client = new EnterpriseWebSocketTestClient(
+        TEST_URL,
+        'test_single_client',
+      );
 
       await client.connect();
       expect(client.isConnected()).toBe(true);
@@ -906,7 +985,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
     });
 
     it('should handle connection authentication and session setup', async () => {
-      const client = new EnterpriseWebSocketTestClient(TEST_URL, 'test_auth_client');
+      const client = new EnterpriseWebSocketTestClient(
+        TEST_URL,
+        'test_auth_client',
+      );
 
       const sessionReadyPromise = new Promise((resolve) => {
         client.on('sessionReady', resolve);
@@ -921,10 +1003,14 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
     });
 
     it('should maintain heartbeat and connection health', async () => {
-      const client = new EnterpriseWebSocketTestClient(TEST_URL, 'test_heartbeat_client', {
-        enableHeartbeat: true,
-        heartbeatInterval: 5000, // 5 seconds for testing
-      });
+      const client = new EnterpriseWebSocketTestClient(
+        TEST_URL,
+        'test_heartbeat_client',
+        {
+          enableHeartbeat: true,
+          heartbeatInterval: 5000, // 5 seconds for testing
+        },
+      );
 
       let heartbeatReceived = false;
       client.on('message', (data) => {
@@ -936,7 +1022,7 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
       await client.connect();
 
       // Wait for heartbeat
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      await new Promise((resolve) => setTimeout(resolve, 6000));
 
       expect(heartbeatReceived).toBe(true);
 
@@ -964,7 +1050,9 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
       const finalConnectedCount = concurrentManager.getConnectedCount();
 
       expect(finalConnectedCount).toBeGreaterThanOrEqual(950); // Allow 5% failure rate
-      expect(finalConnectedCount / TARGET_CONCURRENT_CONNECTIONS).toBeGreaterThanOrEqual(0.95);
+      expect(
+        finalConnectedCount / TARGET_CONCURRENT_CONNECTIONS,
+      ).toBeGreaterThanOrEqual(0.95);
 
       console.log('Concurrent Connection Results:', {
         target: TARGET_CONCURRENT_CONNECTIONS,
@@ -1005,7 +1093,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
     let testClient: EnterpriseWebSocketTestClient;
 
     beforeEach(async () => {
-      testClient = new EnterpriseWebSocketTestClient(TEST_URL, `workflow_test_${Date.now()}`);
+      testClient = new EnterpriseWebSocketTestClient(
+        TEST_URL,
+        `workflow_test_${Date.now()}`,
+      );
       await testClient.connect();
     });
 
@@ -1031,7 +1122,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
         } as ActionImpact,
       };
 
-      const result = await tester.executeCompleteValidationWorkflow(action, 'approved');
+      const result = await tester.executeCompleteValidationWorkflow(
+        action,
+        'approved',
+      );
 
       expect(result.success).toBe(true);
       expect(result.duration).toBeLessThan(10000); // <10 seconds
@@ -1056,7 +1150,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
         } as ActionImpact,
       };
 
-      const result = await tester.executeCompleteValidationWorkflow(action, 'rejected');
+      const result = await tester.executeCompleteValidationWorkflow(
+        action,
+        'rejected',
+      );
 
       expect(result.success).toBe(true);
       expect(result.result.payload.result).toBe('rejected');
@@ -1073,10 +1170,15 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
         await concurrentManager.establishConnections(50, 100);
       }
 
-      const validationResults = await concurrentManager.performConcurrentValidation(100);
+      const validationResults =
+        await concurrentManager.performConcurrentValidation(100);
 
-      const successfulValidations = validationResults.filter(result => result.success);
-      const averageDuration = validationResults.reduce((sum, result) => sum + result.duration, 0) / validationResults.length;
+      const successfulValidations = validationResults.filter(
+        (result) => result.success,
+      );
+      const averageDuration =
+        validationResults.reduce((sum, result) => sum + result.duration, 0) /
+        validationResults.length;
 
       expect(successfulValidations.length).toBeGreaterThanOrEqual(85); // 85% success rate
       expect(averageDuration).toBeLessThan(5000); // <5 seconds average
@@ -1094,10 +1196,14 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
 
   describe('Connection Recovery and Reconnection', () => {
     it('should automatically reconnect after connection loss', async () => {
-      const client = new EnterpriseWebSocketTestClient(TEST_URL, 'reconnect_test_client', {
-        autoReconnect: true,
-        maxReconnectAttempts: 3,
-      });
+      const client = new EnterpriseWebSocketTestClient(
+        TEST_URL,
+        'reconnect_test_client',
+        {
+          autoReconnect: true,
+          maxReconnectAttempts: 3,
+        },
+      );
 
       let reconnected = false;
       client.on('reconnected', () => {
@@ -1111,7 +1217,7 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
       client['ws']?.terminate();
 
       // Wait for reconnection
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       expect(reconnected).toBe(true);
 
@@ -1142,9 +1248,13 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
 
       if (connectedCount > 0) {
         const connectionMetrics = concurrentManager.getConnectionMetrics();
-        const memoryUsages = Array.from(connectionMetrics.values()).map(m => m.memoryUsage);
+        const memoryUsages = Array.from(connectionMetrics.values()).map(
+          (m) => m.memoryUsage,
+        );
 
-        const averageMemoryUsage = memoryUsages.reduce((sum, usage) => sum + usage, 0) / memoryUsages.length;
+        const averageMemoryUsage =
+          memoryUsages.reduce((sum, usage) => sum + usage, 0) /
+          memoryUsages.length;
         const maxMemoryUsage = Math.max(...memoryUsages);
 
         // Memory usage should be reasonable (less than 100MB per connection)
@@ -1163,7 +1273,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
 
   describe('Security and Compliance Validation', () => {
     it('should enforce security context validation', async () => {
-      const client = new EnterpriseWebSocketTestClient(TEST_URL, 'security_test_client');
+      const client = new EnterpriseWebSocketTestClient(
+        TEST_URL,
+        'security_test_client',
+      );
       await client.connect();
 
       const action: ValidationAction = {
@@ -1182,8 +1295,9 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
       const validationId = await client.sendValidationRequest(action);
 
       const response = await client.waitForMessage(
-        msg => msg.type === ConversationalMessageType.VALIDATION_RESPONSE &&
-               msg.payload.validationId === validationId
+        (msg) =>
+          msg.type === ConversationalMessageType.VALIDATION_RESPONSE &&
+          msg.payload.validationId === validationId,
       );
 
       expect(response.payload.status).toBe('received');
@@ -1192,7 +1306,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
     });
 
     it('should maintain audit trails for compliance', async () => {
-      const client = new EnterpriseWebSocketTestClient(TEST_URL, 'audit_test_client');
+      const client = new EnterpriseWebSocketTestClient(
+        TEST_URL,
+        'audit_test_client',
+      );
       await client.connect();
 
       const tester = new ValidationWorkflowTester(client);
@@ -1210,7 +1327,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
         } as ActionImpact,
       };
 
-      const result = await tester.executeCompleteValidationWorkflow(action, 'approved');
+      const result = await tester.executeCompleteValidationWorkflow(
+        action,
+        'approved',
+      );
 
       // Verify audit trail exists
       expect(result.request).toBeDefined();
@@ -1233,7 +1353,10 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
     });
 
     it('should maintain zero message loss during normal operations', async () => {
-      const client = new EnterpriseWebSocketTestClient(TEST_URL, 'message_loss_test');
+      const client = new EnterpriseWebSocketTestClient(
+        TEST_URL,
+        'message_loss_test',
+      );
       await client.connect();
 
       const messageCount = 100;
@@ -1252,7 +1375,7 @@ describe('Comprehensive WebSocket Testing Suite for PARLANT PHASE 1', () => {
       }
 
       // Wait for processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const messageLossRate = (messageCount - messagesReceived) / messageCount;
       expect(messageLossRate).toBe(0); // Zero message loss

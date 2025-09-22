@@ -37,13 +37,13 @@ import { AxiosResponse } from 'axios';
 import {
   ParlantUltraPerformanceOptimizerService,
   UltraOptimizedValidationRequest,
-  UltraOptimizedValidationResponse
+  UltraOptimizedValidationResponse,
 } from '../optimization/parlant-ultra-performance-optimizer.service';
 import { ParlantEnterpriseAuditService } from '../audit/parlant-enterprise-audit.service';
 import { ParlantQATestingFrameworkService } from '../testing/parlant-qa-testing-framework.service';
 import {
   RiskLevel,
-  ParlantConversationContext
+  ParlantConversationContext,
 } from '../parlant-integration.service';
 
 // ===== EXTERNAL API RESPONSE TYPE DEFINITIONS =====
@@ -116,7 +116,9 @@ export interface OpenInterpreterCancelApiResponse {
 /**
  * Type guard for OpenInterpreterStatusApiResponse
  */
-function isOpenInterpreterStatusApiResponse(data: unknown): data is OpenInterpreterStatusApiResponse {
+function isOpenInterpreterStatusApiResponse(
+  data: unknown,
+): data is OpenInterpreterStatusApiResponse {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
@@ -125,14 +127,18 @@ function isOpenInterpreterStatusApiResponse(data: unknown): data is OpenInterpre
   return (
     'status' in obj &&
     typeof obj.status === 'string' &&
-    ['submitted', 'running', 'completed', 'failed', 'timeout'].includes(obj.status)
+    ['submitted', 'running', 'completed', 'failed', 'timeout'].includes(
+      obj.status,
+    )
   );
 }
 
 /**
  * Type guard for OpenInterpreterResultsApiResponse
  */
-function isOpenInterpreterResultsApiResponse(data: unknown): data is OpenInterpreterResultsApiResponse {
+function isOpenInterpreterResultsApiResponse(
+  data: unknown,
+): data is OpenInterpreterResultsApiResponse {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
@@ -141,14 +147,18 @@ function isOpenInterpreterResultsApiResponse(data: unknown): data is OpenInterpr
   return (
     'status' in obj &&
     typeof obj.status === 'string' &&
-    ['submitted', 'running', 'completed', 'failed', 'timeout'].includes(obj.status)
+    ['submitted', 'running', 'completed', 'failed', 'timeout'].includes(
+      obj.status,
+    )
   );
 }
 
 /**
  * Type guard for OpenInterpreterExecuteApiResponse
  */
-function isOpenInterpreterExecuteApiResponse(data: unknown): data is OpenInterpreterExecuteApiResponse {
+function isOpenInterpreterExecuteApiResponse(
+  data: unknown,
+): data is OpenInterpreterExecuteApiResponse {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
@@ -159,39 +169,41 @@ function isOpenInterpreterExecuteApiResponse(data: unknown): data is OpenInterpr
     typeof obj.job_id === 'string' &&
     'status' in obj &&
     typeof obj.status === 'string' &&
-    ['submitted', 'running', 'completed', 'failed', 'timeout'].includes(obj.status)
+    ['submitted', 'running', 'completed', 'failed', 'timeout'].includes(
+      obj.status,
+    )
   );
 }
 
 /**
  * Type guard for OpenInterpreterCancelApiResponse
  */
-function isOpenInterpreterCancelApiResponse(data: unknown): data is OpenInterpreterCancelApiResponse {
-  return (
-    typeof data === 'object' &&
-    data !== null
-  );
+function isOpenInterpreterCancelApiResponse(
+  data: unknown,
+): data is OpenInterpreterCancelApiResponse {
+  return typeof data === 'object' && data !== null;
 }
 
 /**
  * Type guard for UltraOptimizedValidationResponse with approved property
  */
-function isValidationResponseWithApproved(data: unknown): data is UltraOptimizedValidationResponse & { approved: boolean } {
+function isValidationResponseWithApproved(
+  data: unknown,
+): data is UltraOptimizedValidationResponse & { approved: boolean } {
   if (typeof data !== 'object' || data === null) {
     return false;
   }
 
   const obj = data as Record<string, unknown>;
-  return (
-    'approved' in obj &&
-    typeof obj.approved === 'boolean'
-  );
+  return 'approved' in obj && typeof obj.approved === 'boolean';
 }
 
 /**
  * Type guard for UltraOptimizedValidationResponse with ultraPerformanceMetadata
  */
-function isValidationResponseWithMetadata(data: unknown): data is UltraOptimizedValidationResponse & {
+function isValidationResponseWithMetadata(
+  data: unknown,
+): data is UltraOptimizedValidationResponse & {
   ultraPerformanceMetadata: {
     l0CacheHit?: boolean;
     totalUltraLatencyMs: number;
@@ -202,9 +214,11 @@ function isValidationResponseWithMetadata(data: unknown): data is UltraOptimized
   }
 
   const obj = data as Record<string, unknown>;
-  if (!('ultraPerformanceMetadata' in obj) ||
-      typeof obj.ultraPerformanceMetadata !== 'object' ||
-      obj.ultraPerformanceMetadata === null) {
+  if (
+    !('ultraPerformanceMetadata' in obj) ||
+    typeof obj.ultraPerformanceMetadata !== 'object' ||
+    obj.ultraPerformanceMetadata === null
+  ) {
     return false;
   }
 
@@ -220,15 +234,25 @@ function isValidationResponseWithMetadata(data: unknown): data is UltraOptimized
  * Open-Interpreter execution request
  */
 export interface OpenInterpreterExecutionRequest {
-  readonly language: 'python' | 'javascript' | 'bash' | 'shell' | 'sql' | 'r' | 'go' | 'rust' | 'java' | 'cpp';
+  readonly language:
+    | 'python'
+    | 'javascript'
+    | 'bash'
+    | 'shell'
+    | 'sql'
+    | 'r'
+    | 'go'
+    | 'rust'
+    | 'java'
+    | 'cpp';
   readonly code: string;
   readonly context?: Record<string, unknown>;
   readonly timeout?: number;
   readonly validation?: {
     readonly enableParlantValidation: boolean;
     readonly complianceRequired?: ('GDPR' | 'SOX' | 'HIPAA' | 'PCI_DSS')[];
-  readonly riskLevel?: RiskLevel;
-  readonly maxValidationLatency?: number;
+    readonly riskLevel?: RiskLevel;
+    readonly maxValidationLatency?: number;
   };
 }
 
@@ -238,7 +262,8 @@ export interface OpenInterpreterExecutionRequest {
 export interface OpenInterpreterExecutionResponse {
   readonly jobId: string;
   readonly status: 'submitted' | 'running' | 'completed' | 'failed' | 'timeout';
-  readonly result?: {readonly stdout: string;
+  readonly result?: {
+    readonly stdout: string;
     readonly stderr: string;
     readonly exitCode: number;
     readonly files: Array<{
@@ -315,7 +340,9 @@ export interface IntegrationPerformanceMetrics {
 
 @Injectable()
 export class OpenInterpreterParlantBridgeService implements OnModuleInit {
-  private readonly logger = new Logger(OpenInterpreterParlantBridgeService.name);
+  private readonly logger = new Logger(
+    OpenInterpreterParlantBridgeService.name,
+  );
 
   // Configuration
   private readonly openInterpreterBaseUrl: string;
@@ -324,12 +351,15 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
   private readonly maxRetries: number = 3;
 
   // Job tracking
-  private readonly activeJobs = new Map<string, {
-    request: OpenInterpreterExecutionRequest;
-    startTime: Date;
-    context: ParlantConversationContext;
-    validationResult?: UltraOptimizedValidationResponse;
-  }>();
+  private readonly activeJobs = new Map<
+    string,
+    {
+      request: OpenInterpreterExecutionRequest;
+      startTime: Date;
+      context: ParlantConversationContext;
+      validationResult?: UltraOptimizedValidationResponse;
+    }
+  >();
 
   // Performance metrics
   private integrationMetrics = {
@@ -341,7 +371,7 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
     sub500msValidations: 0,
     complianceValidations: 0,
     cacheHits: 0,
-    errorCount: 0
+    errorCount: 0,
   };
 
   constructor(
@@ -349,9 +379,11 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly ultraPerformanceOptimizer: ParlantUltraPerformanceOptimizerService,
     private readonly auditService: ParlantEnterpriseAuditService,
-    private readonly qaTestingFramework: ParlantQATestingFrameworkService
+    private readonly qaTestingFramework: ParlantQATestingFrameworkService,
   ) {
-    this.openInterpreterBaseUrl = this.configService.get<string>('OPEN_INTERPRETER_URL') || 'http://localhost:8000';
+    this.openInterpreterBaseUrl =
+      this.configService.get<string>('OPEN_INTERPRETER_URL') ||
+      'http://localhost:8000';
   }
 
   async onModuleInit(): Promise<void> {
@@ -371,44 +403,67 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
   async executeCode(
     request: OpenInterpreterExecutionRequest,
     context: ParlantConversationContext = {
-      userId: 'system',agentRole: 'open-interpreter-bridge',securityLevel: 'MEDIUM',
+      userId: 'system',
+      agentRole: 'open-interpreter-bridge',
+      securityLevel: 'MEDIUM',
       conversationHistory: [],
-      metadata: {}
-    }
+      metadata: {},
+    },
   ): Promise<OpenInterpreterExecutionResponse> {
     const startTime = new Date();
     this.integrationMetrics.totalRequests++;
 
     try {
-      this.logger.log(`Executing ${request.language} code with Parlant validation`);
+      this.logger.log(
+        `Executing ${request.language} code with Parlant validation`,
+      );
 
       // Step 1: Risk assessment and Parlant validation
       let validationResult: UltraOptimizedValidationResponse | undefined;
-      if (request.validation?.enableParlantValidation ?? this.enableValidation) {
+      if (
+        request.validation?.enableParlantValidation ??
+        this.enableValidation
+      ) {
         const validationStartTime = Date.now();
 
         const riskAssessment = this.assessCodeExecutionRisk(request);
 
         if (riskAssessment.requiresConfirmation) {
-          const validationRequest = this.createValidationRequest(request, riskAssessment, context);
-          validationResult = await this.ultraPerformanceOptimizer.validateWithUltraOptimization(
-            validationRequest,
-            context
+          const validationRequest = this.createValidationRequest(
+            request,
+            riskAssessment,
+            context,
           );
+          validationResult =
+            await this.ultraPerformanceOptimizer.validateWithUltraOptimization(
+              validationRequest,
+              context,
+            );
 
-          if (!isValidationResponseWithApproved(validationResult) ||
-              !(validationResult as UltraOptimizedValidationResponse & { approved: boolean }).approved) {
+          if (
+            !isValidationResponseWithApproved(validationResult) ||
+            !(
+              validationResult as UltraOptimizedValidationResponse & {
+                approved: boolean;
+              }
+            ).approved
+          ) {
             const errorResponse: OpenInterpreterExecutionResponse = {
               jobId: `denied_${Date.now()}`,
-              status: 'failed',error: {message: 'Code execution denied by Parlant validation',type: 'ValidationRejected'},parlantValidation: {
+              status: 'failed',
+              error: {
+                message: 'Code execution denied by Parlant validation',
+                type: 'ValidationRejected',
+              },
+              parlantValidation: {
                 validated: true,
                 validationLatency: Date.now() - validationStartTime,
                 riskAssessment: riskAssessment.riskLevel,
-                approved: false
+                approved: false,
               },
               submittedAt: startTime,
               completedAt: new Date(),
-              totalLatency: Date.now() - startTime.getTime()
+              totalLatency: Date.now() - startTime.getTime(),
             };
 
             this.integrationMetrics.failedRequests++;
@@ -428,10 +483,14 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
           }
 
           // Track cache hits
-          if (isValidationResponseWithMetadata(validationResult) &&
-              (validationResult as UltraOptimizedValidationResponse & {
+          if (
+            isValidationResponseWithMetadata(validationResult) &&
+            (
+              validationResult as UltraOptimizedValidationResponse & {
                 ultraPerformanceMetadata: { l0CacheHit?: boolean };
-              }).ultraPerformanceMetadata.l0CacheHit) {
+              }
+            ).ultraPerformanceMetadata.l0CacheHit
+          ) {
             this.integrationMetrics.cacheHits++;
           }
         }
@@ -445,26 +504,40 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
         request,
         startTime,
         context,
-        validationResult: (validationResult as UltraOptimizedValidationResponse | undefined) || undefined
+        validationResult:
+          (validationResult as UltraOptimizedValidationResponse | undefined) ||
+          undefined,
       });
 
       const response: OpenInterpreterExecutionResponse = {
         ...executionResult,
-        parlantValidation: validationResult && isValidationResponseWithMetadata(validationResult) && isValidationResponseWithApproved(validationResult) ? {
-          validated: true,
-          validationLatency: (validationResult as UltraOptimizedValidationResponse & {
-            ultraPerformanceMetadata: { totalUltraLatencyMs: number };
-          }).ultraPerformanceMetadata.totalUltraLatencyMs,
-          complianceResults: request.validation?.complianceRequired ? {} : undefined, // TODO: Add compliance results
-          riskAssessment: this.assessCodeExecutionRisk(request).riskLevel,
-          approved: (validationResult as UltraOptimizedValidationResponse & { approved: boolean }).approved
-        } : undefined,
-        submittedAt: startTime
+        parlantValidation:
+          validationResult &&
+          isValidationResponseWithMetadata(validationResult) &&
+          isValidationResponseWithApproved(validationResult)
+            ? {
+                validated: true,
+                validationLatency: (
+                  validationResult as UltraOptimizedValidationResponse & {
+                    ultraPerformanceMetadata: { totalUltraLatencyMs: number };
+                  }
+                ).ultraPerformanceMetadata.totalUltraLatencyMs,
+                complianceResults: request.validation?.complianceRequired
+                  ? {}
+                  : undefined, // TODO: Add compliance results
+                riskAssessment: this.assessCodeExecutionRisk(request).riskLevel,
+                approved: (
+                  validationResult as UltraOptimizedValidationResponse & {
+                    approved: boolean;
+                  }
+                ).approved,
+              }
+            : undefined,
+        submittedAt: startTime,
       };
 
       this.integrationMetrics.successfulRequests++;
       return response;
-
     } catch (error) {
       this.integrationMetrics.failedRequests++;
       this.integrationMetrics.errorCount++;
@@ -473,13 +546,15 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
 
       return {
         jobId: `error_${Date.now()}`,
-        status: 'failed',error: {message: error instanceof Error ? error.message : String(error),
+        status: 'failed',
+        error: {
+          message: error instanceof Error ? error.message : String(error),
           type: 'ExecutionError',
-          stackTrace: error instanceof Error ? error.stack : undefined
+          stackTrace: error instanceof Error ? error.stack : undefined,
         },
         submittedAt: startTime,
         completedAt: new Date(),
-        totalLatency: Date.now() - startTime.getTime()
+        totalLatency: Date.now() - startTime.getTime(),
       };
     }
   }
@@ -490,11 +565,15 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
   async getJobStatus(jobId: string): Promise<OpenInterpreterJobStatus> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.openInterpreterBaseUrl}/jobs/${jobId}/status`)
+        this.httpService.get(
+          `${this.openInterpreterBaseUrl}/jobs/${jobId}/status`,
+        ),
       );
 
       if (!isOpenInterpreterStatusApiResponse(response.data)) {
-        throw new Error('Invalid response format from Open-Interpreter status endpoint');
+        throw new Error(
+          'Invalid response format from Open-Interpreter status endpoint',
+        );
       }
 
       const apiData = response.data;
@@ -502,31 +581,44 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
         jobId,
         status: apiData.status,
         progress: apiData.progress,
-        estimatedCompletion: apiData.estimated_completion ?
-          new Date(apiData.estimated_completion) : undefined,
+        estimatedCompletion: apiData.estimated_completion
+          ? new Date(apiData.estimated_completion)
+          : undefined,
         currentStep: apiData.current_step,
-        logs: apiData.logs || []
+        logs: apiData.logs || [],
       };
-
     } catch (error) {
-      this.logger.error(`Failed to get job status for ${jobId}:`, error);throw new Error(`Failed to retrieve job status: ${error instanceof Error ? error.message : String(error)}`);}}
+      this.logger.error(`Failed to get job status for ${jobId}:`, error);
+      throw new Error(
+        `Failed to retrieve job status: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 
   /**
    * Get job results from Open-Interpreter
    */
-  async getJobResults(jobId: string): Promise<OpenInterpreterExecutionResponse> {
+  async getJobResults(
+    jobId: string,
+  ): Promise<OpenInterpreterExecutionResponse> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.openInterpreterBaseUrl}/jobs/${jobId}/results`)
+        this.httpService.get(
+          `${this.openInterpreterBaseUrl}/jobs/${jobId}/results`,
+        ),
       );
 
       if (!isOpenInterpreterResultsApiResponse(response.data)) {
-        throw new Error('Invalid response format from Open-Interpreter results endpoint');
+        throw new Error(
+          'Invalid response format from Open-Interpreter results endpoint',
+        );
       }
 
       const apiData = response.data;
       const jobInfo = this.activeJobs.get(jobId);
-      const totalLatency = jobInfo ? Date.now() - jobInfo.startTime.getTime() : undefined;
+      const totalLatency = jobInfo
+        ? Date.now() - jobInfo.startTime.getTime()
+        : undefined;
 
       // Update metrics
       this.integrationMetrics.totalLatency += totalLatency || 0;
@@ -534,46 +626,64 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
       return {
         jobId,
         status: apiData.status,
-        result: apiData.result ? {
-          stdout: apiData.result.stdout || '',
-          stderr: apiData.result.stderr || '',
-          exitCode: apiData.result.exit_code || 0,
-          files: apiData.result.files || [],
-          executionTime: apiData.result.execution_time || 0,
-          resourceUsage: apiData.result.resource_usage || {
-            cpuPercent: 0,
-            memoryMB: 0,
-            diskUsage: 0
-          }
-        } : undefined,
+        result: apiData.result
+          ? {
+              stdout: apiData.result.stdout || '',
+              stderr: apiData.result.stderr || '',
+              exitCode: apiData.result.exit_code || 0,
+              files: apiData.result.files || [],
+              executionTime: apiData.result.execution_time || 0,
+              resourceUsage: apiData.result.resource_usage || {
+                cpuPercent: 0,
+                memoryMB: 0,
+                diskUsage: 0,
+              },
+            }
+          : undefined,
         error: apiData.error,
-        parlantValidation: jobInfo?.validationResult &&
-                          isValidationResponseWithMetadata(jobInfo.validationResult) &&
-                          isValidationResponseWithApproved(jobInfo.validationResult) ? {
-          validated: true,
-          validationLatency: jobInfo.validationResult.ultraPerformanceMetadata.totalUltraLatencyMs,
-          riskAssessment: this.assessCodeExecutionRisk(jobInfo.request).riskLevel,
-          approved: jobInfo.validationResult.approved
-        } : undefined,
+        parlantValidation:
+          jobInfo?.validationResult &&
+          isValidationResponseWithMetadata(jobInfo.validationResult) &&
+          isValidationResponseWithApproved(jobInfo.validationResult)
+            ? {
+                validated: true,
+                validationLatency:
+                  jobInfo.validationResult.ultraPerformanceMetadata
+                    .totalUltraLatencyMs,
+                riskAssessment: this.assessCodeExecutionRisk(jobInfo.request)
+                  .riskLevel,
+                approved: jobInfo.validationResult.approved,
+              }
+            : undefined,
         submittedAt: jobInfo?.startTime || new Date(),
         completedAt: new Date(),
-        totalLatency
+        totalLatency,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to get job results for ${jobId}:`, error);throw new Error(`Failed to retrieve job results: ${error instanceof Error ? error.message : String(error)}`);}}
+      this.logger.error(`Failed to get job results for ${jobId}:`, error);
+      throw new Error(
+        `Failed to retrieve job results: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 
   /**
    * Cancel job execution
    */
-  async cancelJob(jobId: string): Promise<{ cancelled: boolean; message: string }> {
+  async cancelJob(
+    jobId: string,
+  ): Promise<{ cancelled: boolean; message: string }> {
     try {
       const response = await firstValueFrom(
-        this.httpService.post(`${this.openInterpreterBaseUrl}/jobs/${jobId}/cancel`)
+        this.httpService.post(
+          `${this.openInterpreterBaseUrl}/jobs/${jobId}/cancel`,
+        ),
       );
 
       if (!isOpenInterpreterCancelApiResponse(response.data)) {
-        throw new Error('Invalid response format from Open-Interpreter cancel endpoint');
+        throw new Error(
+          'Invalid response format from Open-Interpreter cancel endpoint',
+        );
       }
 
       const apiData = response.data;
@@ -582,19 +692,22 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
 
       return {
         cancelled: apiData.cancelled || false,
-        message: apiData.message || 'Job cancellation requested'
+        message: apiData.message || 'Job cancellation requested',
       };
-
     } catch (error) {
-      this.logger.error(`Failed to cancel job ${jobId}:`, error);return {cancelled: false,
-        message: `Failed to cancel job: ${error instanceof Error ? error.message : String(error)}`
+      this.logger.error(`Failed to cancel job ${jobId}:`, error);
+      return {
+        cancelled: false,
+        message: `Failed to cancel job: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
 
   // ===== RISK ASSESSMENT AND VALIDATION =====
 
-  private assessCodeExecutionRisk(request: OpenInterpreterExecutionRequest): CodeExecutionRiskAssessment {
+  private assessCodeExecutionRisk(
+    request: OpenInterpreterExecutionRequest,
+  ): CodeExecutionRiskAssessment {
     const riskFactors: string[] = [];
     const securityConcerns: string[] = [];
     const complianceIssues: string[] = [];
@@ -606,24 +719,54 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
 
     // Language-specific risk assessment
     switch (request.language) {
-      case 'bash':case 'shell':riskLevel = RiskLevel._HIGH;riskFactors.push('shell_execution', 'system_access');requiresConfirmation = true;break;
-      case 'python':if (code.includes('import os') || code.includes('subprocess') || code.includes('exec(')) {riskLevel = RiskLevel._HIGH;riskFactors.push('system_calls', 'dynamic_execution');requiresConfirmation = true;}
+      case 'bash':
+      case 'shell':
+        riskLevel = RiskLevel._HIGH;
+        riskFactors.push('shell_execution', 'system_access');
+        requiresConfirmation = true;
         break;
-      case 'sql':if (code.includes('drop') || code.includes('delete') || code.includes('update')) {riskLevel = RiskLevel._MODERATE;riskFactors.push('data_modification');requiresConfirmation = true;}
+      case 'python':
+        if (
+          code.includes('import os') ||
+          code.includes('subprocess') ||
+          code.includes('exec(')
+        ) {
+          riskLevel = RiskLevel._HIGH;
+          riskFactors.push('system_calls', 'dynamic_execution');
+          requiresConfirmation = true;
+        }
+        break;
+      case 'sql':
+        if (
+          code.includes('drop') ||
+          code.includes('delete') ||
+          code.includes('update')
+        ) {
+          riskLevel = RiskLevel._MODERATE;
+          riskFactors.push('data_modification');
+          requiresConfirmation = true;
+        }
         break;
     }
 
     // Code content risk assessment
     const dangerousPatterns = [
-      'rm -rf', 'del /f', 'format', 'mkfs',  // Destructive file operations'curl', 'wget', 'fetch', 'requests.get',  // Network access'eval(', 'exec(', 'system(', '__import__',  // Dynamic execution'subprocess', 'os.system', 'shell_exec',  // System calls'password', 'secret', 'key', 'token',  // Sensitive data'database', 'db.', 'sql', 'query',  // Database operations'file:', 'ftp:', 'http:', 'https:'  // External resources
+      'rm -rf',
+      'del /f',
+      'format',
+      'mkfs', // Destructive file operations'curl', 'wget', 'fetch', 'requests.get',  // Network access'eval(', 'exec(', 'system(', '__import__',  // Dynamic execution'subprocess', 'os.system', 'shell_exec',  // System calls'password', 'secret', 'key', 'token',  // Sensitive data'database', 'db.', 'sql', 'query',  // Database operations'file:', 'ftp:', 'http:', 'https:'  // External resources
     ];
 
     for (const pattern of dangerousPatterns) {
       if (code.includes(pattern.toLowerCase())) {
-        riskFactors.push(`dangerous_pattern_${pattern.replace(/[^a-z0-9]/g, '_')}`);
+        riskFactors.push(
+          `dangerous_pattern_${pattern.replace(/[^a-z0-9]/g, '_')}`,
+        );
         if (['rm -rf', 'del /f', 'format', 'eval('].includes(pattern)) {
           riskLevel = RiskLevel._CRITICAL;
-          securityConcerns.push(`Potentially destructive operation: ${pattern}`);
+          securityConcerns.push(
+            `Potentially destructive operation: ${pattern}`,
+          );
           requiresConfirmation = true;
         }
       }
@@ -633,18 +776,71 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
     if (request.validation?.complianceRequired?.length) {
       for (const regulation of request.validation.complianceRequired) {
         switch (regulation) {
-          case 'GDPR':if (code.includes('personal') || code.includes('email') || code.includes('name')) {complianceIssues.push('Potential personal data processing detected');}break;
-          case 'HIPAA':if (code.includes('health') || code.includes('medical') || code.includes('patient')) {complianceIssues.push('Potential healthcare data processing detected');}break;
-          case 'SOX':if (code.includes('financial') || code.includes('accounting') || code.includes('audit')) {complianceIssues.push('Potential financial data processing detected');}break;
-          case 'PCI_DSS':if (code.includes('card') || code.includes('payment') || code.includes('cvv')) {complianceIssues.push('Potential payment data processing detected');}break;
+          case 'GDPR':
+            if (
+              code.includes('personal') ||
+              code.includes('email') ||
+              code.includes('name')
+            ) {
+              complianceIssues.push(
+                'Potential personal data processing detected',
+              );
+            }
+            break;
+          case 'HIPAA':
+            if (
+              code.includes('health') ||
+              code.includes('medical') ||
+              code.includes('patient')
+            ) {
+              complianceIssues.push(
+                'Potential healthcare data processing detected',
+              );
+            }
+            break;
+          case 'SOX':
+            if (
+              code.includes('financial') ||
+              code.includes('accounting') ||
+              code.includes('audit')
+            ) {
+              complianceIssues.push(
+                'Potential financial data processing detected',
+              );
+            }
+            break;
+          case 'PCI_DSS':
+            if (
+              code.includes('card') ||
+              code.includes('payment') ||
+              code.includes('cvv')
+            ) {
+              complianceIssues.push(
+                'Potential payment data processing detected',
+              );
+            }
+            break;
         }
       }
     }
 
     // Generate recommendations
     if (riskLevel === RiskLevel._CRITICAL) {
-      recommendedActions.push('Require multi-party approval');recommendedActions.push('Execute in isolated sandbox');recommendedActions.push('Comprehensive audit logging');} else if (riskLevel === RiskLevel._HIGH) {recommendedActions.push('Require user confirmation');recommendedActions.push('Monitor execution closely');recommendedActions.push('Enable detailed logging');} else if (riskLevel === RiskLevel._MODERATE) {recommendedActions.push('Standard monitoring');recommendedActions.push('Basic audit logging');}const allowExecution = riskLevel !== RiskLevel._CRITICAL ||
-      (request.validation?.riskLevel && request.validation.riskLevel >= riskLevel);
+      recommendedActions.push('Require multi-party approval');
+      recommendedActions.push('Execute in isolated sandbox');
+      recommendedActions.push('Comprehensive audit logging');
+    } else if (riskLevel === RiskLevel._HIGH) {
+      recommendedActions.push('Require user confirmation');
+      recommendedActions.push('Monitor execution closely');
+      recommendedActions.push('Enable detailed logging');
+    } else if (riskLevel === RiskLevel._MODERATE) {
+      recommendedActions.push('Standard monitoring');
+      recommendedActions.push('Basic audit logging');
+    }
+    const allowExecution =
+      riskLevel !== RiskLevel._CRITICAL ||
+      (request.validation?.riskLevel &&
+        request.validation.riskLevel >= riskLevel);
 
     return {
       riskLevel,
@@ -653,26 +849,31 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
       complianceIssues,
       recommendedActions,
       allowExecution,
-      requiresConfirmation: requiresConfirmation || riskLevel >= RiskLevel._HIGH
+      requiresConfirmation:
+        requiresConfirmation || riskLevel >= RiskLevel._HIGH,
     };
   }
 
   private createValidationRequest(
     request: OpenInterpreterExecutionRequest,
     riskAssessment: CodeExecutionRiskAssessment,
-    context: ParlantConversationContext
+    context: ParlantConversationContext,
   ): UltraOptimizedValidationRequest {
     return {
-      functionName: 'execute_code',functionParams: {language: request.language,
+      functionName: 'execute_code',
+      functionParams: {
+        language: request.language,
         code: request.code,
         codeLength: request.code.length,
         riskFactors: riskAssessment.riskFactors,
-        securityConcerns: riskAssessment.securityConcerns
+        securityConcerns: riskAssessment.securityConcerns,
       },
       riskLevel: riskAssessment.riskLevel,
       context: {
-        source: 'open-interpreter-bridge',language: request.language,riskAssessment: riskAssessment.riskLevel,
-        ...request.context
+        source: 'open-interpreter-bridge',
+        language: request.language,
+        riskAssessment: riskAssessment.riskLevel,
+        ...request.context,
       },
       ultraOptimizationHints: {
         enableL0Cache: true,
@@ -680,30 +881,39 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
         enableMicroBatching: false, // Code execution should not be batched
         complianceRequired: request.validation?.complianceRequired,
         maxLatencyMs: request.validation?.maxValidationLatency || 500,
-        priorityLevel: riskAssessment.riskLevel === RiskLevel._CRITICAL ? 'ULTRA' : 'HIGH'
-      }
+        priorityLevel:
+          riskAssessment.riskLevel === RiskLevel._CRITICAL ? 'ULTRA' : 'HIGH',
+      },
     };
   }
 
   // ===== REMOTE EXECUTION =====
 
-  private async executeCodeRemotely(request: OpenInterpreterExecutionRequest): Promise<OpenInterpreterExecutionResponse> {
+  private async executeCodeRemotely(
+    request: OpenInterpreterExecutionRequest,
+  ): Promise<OpenInterpreterExecutionResponse> {
     const payload = {
       language: request.language,
       code: request.code,
       timeout: request.timeout || this.defaultTimeout,
-      context: request.context || {}
+      context: request.context || {},
     };
 
     try {
       const response: AxiosResponse = await firstValueFrom(
-        this.httpService.post(`${this.openInterpreterBaseUrl}/execute`, payload, {
-          timeout: request.timeout || this.defaultTimeout
-        })
+        this.httpService.post(
+          `${this.openInterpreterBaseUrl}/execute`,
+          payload,
+          {
+            timeout: request.timeout || this.defaultTimeout,
+          },
+        ),
       );
 
       if (!isOpenInterpreterExecuteApiResponse(response.data)) {
-        throw new Error('Invalid response format from Open-Interpreter execute endpoint');
+        throw new Error(
+          'Invalid response format from Open-Interpreter execute endpoint',
+        );
       }
 
       const apiData = response.data;
@@ -712,17 +922,22 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
         status: apiData.status,
         submittedAt: new Date(),
         result: apiData.result,
-        error: apiData.error
+        error: apiData.error,
       };
-
     } catch (error) {
       this.logger.error('Remote code execution failed:', error);
-      throw new Error(`Remote execution failed: ${error instanceof Error ? error.message : String(error)}`);}}
+      throw new Error(
+        `Remote execution failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 
   private async verifyServerConnectivity(): Promise<void> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.openInterpreterBaseUrl}/health`, { timeout: 5000 })
+        this.httpService.get(`${this.openInterpreterBaseUrl}/health`, {
+          timeout: 5000,
+        }),
       );
 
       if (response.status === 200) {
@@ -730,9 +945,11 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
       } else {
         throw new Error(`Server returned status ${response.status}`);
       }
-
     } catch (error) {
-      this.logger.warn('Open-Interpreter server connectivity check failed:', error);// Don't throw error - allow service to start even if server is not available
+      this.logger.warn(
+        'Open-Interpreter server connectivity check failed:',
+        error,
+      ); // Don't throw error - allow service to start even if server is not available
     }
   }
 
@@ -743,14 +960,21 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
    */
   getPerformanceMetrics(): IntegrationPerformanceMetrics {
     const totalRequests = this.integrationMetrics.totalRequests;
-    const averageLatency = totalRequests > 0 ?
-      this.integrationMetrics.totalLatency / totalRequests : 0;
-    const averageValidationLatency = this.integrationMetrics.sub500msValidations > 0 ?
-      this.integrationMetrics.totalValidationLatency / this.integrationMetrics.sub500msValidations : 0;
-    const cacheHitRate = totalRequests > 0 ?
-      this.integrationMetrics.cacheHits / totalRequests : 0;
-    const errorRate = totalRequests > 0 ?
-      this.integrationMetrics.errorCount / totalRequests : 0;
+    const averageLatency =
+      totalRequests > 0
+        ? this.integrationMetrics.totalLatency / totalRequests
+        : 0;
+    const averageValidationLatency =
+      this.integrationMetrics.sub500msValidations > 0
+        ? this.integrationMetrics.totalValidationLatency /
+          this.integrationMetrics.sub500msValidations
+        : 0;
+    const cacheHitRate =
+      totalRequests > 0 ? this.integrationMetrics.cacheHits / totalRequests : 0;
+    const errorRate =
+      totalRequests > 0
+        ? this.integrationMetrics.errorCount / totalRequests
+        : 0;
 
     return {
       totalRequests,
@@ -762,7 +986,7 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
       complianceValidations: this.integrationMetrics.complianceValidations,
       cacheHitRate,
       errorRate,
-      throughputPerSecond: 0 // TODO: Calculate based on time window
+      throughputPerSecond: 0, // TODO: Calculate based on time window
     };
   }
 
@@ -776,20 +1000,25 @@ export class OpenInterpreterParlantBridgeService implements OnModuleInit {
   /**
    * Get server health status
    */
-  async getServerHealth(): Promise<{ healthy: boolean; latency?: number; error?: string }> {
+  async getServerHealth(): Promise<{
+    healthy: boolean;
+    latency?: number;
+    error?: string;
+  }> {
     try {
       const startTime = Date.now();
       await firstValueFrom(
-        this.httpService.get(`${this.openInterpreterBaseUrl}/health`, { timeout: 5000 })
+        this.httpService.get(`${this.openInterpreterBaseUrl}/health`, {
+          timeout: 5000,
+        }),
       );
       const latency = Date.now() - startTime;
 
       return { healthy: true, latency };
-
     } catch (error) {
       return {
         healthy: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

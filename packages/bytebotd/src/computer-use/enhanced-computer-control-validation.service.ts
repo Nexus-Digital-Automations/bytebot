@@ -26,11 +26,12 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ParlantIntegrationService,
+import {
+  ParlantIntegrationService,
   ParlantValidationRequest,
   ParlantConversationContext,
   RiskLevel,
-  ConversationalValidationError
+  ConversationalValidationError,
 } from '../parlant/parlant-integration.service';
 import {
   ComputerAction,
@@ -50,7 +51,8 @@ import {
 /**
  * Computer control validation context with performance tracking
  */
-export interface ComputerControlValidationContext extends ParlantConversationContext {
+export interface ComputerControlValidationContext
+  extends ParlantConversationContext {
   readonly screenResolution: { width: number; height: number };
   readonly activeApplication?: string;
   readonly currentWindowTitle?: string;
@@ -72,8 +74,18 @@ export interface ComputerControlValidationContext extends ParlantConversationCon
  */
 export interface MouseOperationRisk {
   readonly riskLevel: RiskLevel;
-  readonly coordinateRisk: 'SAFE' | 'UI_ELEMENT' | 'SYSTEM_AREA' | 'CRITICAL_ZONE';
-  readonly clickTargetType: 'BUTTON' | 'LINK' | 'INPUT' | 'MENU' | 'SYSTEM' | 'UNKNOWN';
+  readonly coordinateRisk:
+    | 'SAFE'
+    | 'UI_ELEMENT'
+    | 'SYSTEM_AREA'
+    | 'CRITICAL_ZONE';
+  readonly clickTargetType:
+    | 'BUTTON'
+    | 'LINK'
+    | 'INPUT'
+    | 'MENU'
+    | 'SYSTEM'
+    | 'UNKNOWN';
   readonly potentialImpact: string[];
   readonly requiresConfirmation: boolean;
   readonly safeguards: string[];
@@ -84,7 +96,12 @@ export interface MouseOperationRisk {
  */
 export interface KeyboardInputRisk {
   readonly riskLevel: RiskLevel;
-  readonly contentType: 'TEXT' | 'PASSWORD' | 'COMMAND' | 'SYSTEM_KEY' | 'UNKNOWN';
+  readonly contentType:
+    | 'TEXT'
+    | 'PASSWORD'
+    | 'COMMAND'
+    | 'SYSTEM_KEY'
+    | 'UNKNOWN';
   readonly sensitiveData: boolean;
   readonly systemImpact: 'NONE' | 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
   readonly validationRequired: boolean;
@@ -106,7 +123,9 @@ interface ValidationCache {
 
 @Injectable()
 export class EnhancedComputerControlValidationService {
-  private readonly logger = new Logger(EnhancedComputerControlValidationService.name);
+  private readonly logger = new Logger(
+    EnhancedComputerControlValidationService.name,
+  );
   private readonly validationCache = new Map<string, ValidationCache>();
   private readonly performanceMetrics = {
     totalValidations: 0,
@@ -118,7 +137,7 @@ export class EnhancedComputerControlValidationService {
   };
 
   constructor(
-    private readonly parlantIntegrationService: ParlantIntegrationService
+    private readonly parlantIntegrationService: ParlantIntegrationService,
   ) {
     this.logger.log('Enhanced Computer Control Validation Service initialized');
 
@@ -136,7 +155,7 @@ export class EnhancedComputerControlValidationService {
    */
   async validateMouseMovement(
     action: MoveMouseAction,
-    context: ComputerControlValidationContext
+    context: ComputerControlValidationContext,
   ): Promise<boolean> {
     const operationId = `mouse_move_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -151,7 +170,10 @@ export class EnhancedComputerControlValidationService {
       }
 
       // Risk assessment for mouse coordinates
-      const riskAssessment = await this.assessMouseOperationRisk(action, context);
+      const riskAssessment = await this.assessMouseOperationRisk(
+        action,
+        context,
+      );
 
       // Fast-path for safe movements (cursor tracking, etc.)
       if (riskAssessment.riskLevel === RiskLevel._MINIMAL) {
@@ -173,12 +195,18 @@ export class EnhancedComputerControlValidationService {
         riskLevel: riskAssessment.riskLevel,
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 200),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            200,
+          ),
           requiresRealtime: context.performanceRequirements.requiresRealtime,
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       // Cache successful validations
       if (validationResponse.approved) {
@@ -187,7 +215,6 @@ export class EnhancedComputerControlValidationService {
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
       this.logger.error(`[${operationId}] Mouse movement validation failed`, {
         operationId,
@@ -210,14 +237,17 @@ export class EnhancedComputerControlValidationService {
    */
   async validateMouseClick(
     action: ClickMouseAction,
-    context: ComputerControlValidationContext
+    context: ComputerControlValidationContext,
   ): Promise<boolean> {
     const operationId = `mouse_click_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
     try {
       // Enhanced risk assessment for clicks
-      const riskAssessment = await this.assessMouseOperationRisk(action, context);
+      const riskAssessment = await this.assessMouseOperationRisk(
+        action,
+        context,
+      );
 
       // All clicks require some level of validation due to potential UI changes
       const validationRequest: ParlantValidationRequest = {
@@ -228,30 +258,41 @@ export class EnhancedComputerControlValidationService {
           targetType: riskAssessment.clickTargetType,
           riskAssessment,
         },
-        actionDescription: this.generateClickDescription(action, riskAssessment),
+        actionDescription: this.generateClickDescription(
+          action,
+          riskAssessment,
+        ),
         context: context,
         riskLevel: riskAssessment.riskLevel,
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 350),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            350,
+          ),
           requiresRealtime: context.performanceRequirements.requiresRealtime,
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       if (validationResponse.approved) {
-        this.logger.log(`[${operationId}] Mouse click approved: ${riskAssessment.clickTargetType}`, {
-          operationId,
-          coordinates: action.coordinates,
-          riskLevel: riskAssessment.riskLevel,
-          validationTime: Date.now() - startTime,
-        });
+        this.logger.log(
+          `[${operationId}] Mouse click approved: ${riskAssessment.clickTargetType}`,
+          {
+            operationId,
+            coordinates: action.coordinates,
+            riskLevel: riskAssessment.riskLevel,
+            validationTime: Date.now() - startTime,
+          },
+        );
       }
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
       this.logger.error(`[${operationId}] Mouse click validation failed`, {
         operationId,
@@ -269,7 +310,7 @@ export class EnhancedComputerControlValidationService {
    */
   async validateComplexMouseOperation(
     action: DragMouseAction | TraceMouseAction | ScrollAction,
-    context: ComputerControlValidationContext
+    context: ComputerControlValidationContext,
   ): Promise<boolean> {
     const operationId = `mouse_complex_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -286,23 +327,31 @@ export class EnhancedComputerControlValidationService {
         riskLevel,
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 500),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            500,
+          ),
           requiresRealtime: false, // Complex operations can tolerate slightly higher latency
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
-      this.logger.error(`[${operationId}] Complex mouse operation validation failed`, {
-        operationId,
-        action: action.action,
-        error: error instanceof Error ? error.message : String(error),
-        duration: Date.now() - startTime,
-      });
+      this.logger.error(
+        `[${operationId}] Complex mouse operation validation failed`,
+        {
+          operationId,
+          action: action.action,
+          error: error instanceof Error ? error.message : String(error),
+          duration: Date.now() - startTime,
+        },
+      );
       throw error;
     }
   }
@@ -314,7 +363,7 @@ export class EnhancedComputerControlValidationService {
    */
   async validateKeyboardInput(
     action: TypeTextAction | TypeKeysAction | PressKeysAction | PasteTextAction,
-    context: ComputerControlValidationContext
+    context: ComputerControlValidationContext,
   ): Promise<boolean> {
     const operationId = `keyboard_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
@@ -332,7 +381,10 @@ export class EnhancedComputerControlValidationService {
       const inputRisk = await this.assessKeyboardInputRisk(action, context);
 
       // Fast-path for safe text input
-      if (inputRisk.riskLevel === RiskLevel._MINIMAL && !inputRisk.sensitiveData) {
+      if (
+        inputRisk.riskLevel === RiskLevel._MINIMAL &&
+        !inputRisk.sensitiveData
+      ) {
         this.setCachedValidation(cacheKey, true, 10000); // 10s cache for safe input
         this.updatePerformanceMetrics(Date.now() - startTime, false);
         return true;
@@ -347,21 +399,29 @@ export class EnhancedComputerControlValidationService {
         riskLevel: inputRisk.riskLevel,
         operationId,
         performanceRequirements: {
-          maxValidationTimeMs: Math.min(context.performanceRequirements.maxValidationTimeMs, 350),
+          maxValidationTimeMs: Math.min(
+            context.performanceRequirements.maxValidationTimeMs,
+            350,
+          ),
           requiresRealtime: context.performanceRequirements.requiresRealtime,
         },
       };
 
-      const validationResponse = await this.parlantIntegrationService.validateFunctionExecution(validationRequest);
+      const validationResponse =
+        await this.parlantIntegrationService.validateFunctionExecution(
+          validationRequest,
+        );
 
       // Cache approved safe input patterns
-      if (validationResponse.approved && inputRisk.riskLevel <= RiskLevel._LOW) {
+      if (
+        validationResponse.approved &&
+        inputRisk.riskLevel <= RiskLevel._LOW
+      ) {
         this.setCachedValidation(cacheKey, true, 5000); // 5s cache for approved input
       }
 
       this.updatePerformanceMetrics(Date.now() - startTime, false);
       return validationResponse.approved;
-
     } catch (error) {
       this.logger.error(`[${operationId}] Keyboard input validation failed`, {
         operationId,
@@ -380,7 +440,7 @@ export class EnhancedComputerControlValidationService {
    */
   private async assessMouseOperationRisk(
     action: MoveMouseAction | ClickMouseAction,
-    context: ComputerControlValidationContext
+    context: ComputerControlValidationContext,
   ): Promise<MouseOperationRisk> {
     const coordinates = action.coordinates;
     if (!coordinates) {
@@ -396,7 +456,10 @@ export class EnhancedComputerControlValidationService {
 
     // Analyze coordinate risk based on screen zones
     const coordinateRisk = this.analyzeCoordinateRisk(coordinates, context);
-    const clickTargetType = await this.identifyClickTarget(coordinates, context);
+    const clickTargetType = await this.identifyClickTarget(
+      coordinates,
+      context,
+    );
 
     let riskLevel: RiskLevel;
     const potentialImpact: string[] = [];
@@ -457,7 +520,7 @@ export class EnhancedComputerControlValidationService {
    */
   private async assessKeyboardInputRisk(
     action: TypeTextAction | TypeKeysAction | PressKeysAction | PasteTextAction,
-    context: ComputerControlValidationContext
+    context: ComputerControlValidationContext,
   ): Promise<KeyboardInputRisk> {
     let contentType: KeyboardInputRisk['contentType'] = 'TEXT';
     let sensitiveData = false;
@@ -510,7 +573,11 @@ export class EnhancedComputerControlValidationService {
   /**
    * Generate cache key for mouse operations
    */
-  private generateCacheKey(operation: string, action: any, context: ComputerControlValidationContext): string {
+  private generateCacheKey(
+    operation: string,
+    action: any,
+    context: ComputerControlValidationContext,
+  ): string {
     const baseKey = `${operation}_${context.userId}_${context.activeApplication}`;
     if (action.coordinates) {
       return `${baseKey}_${action.coordinates.x}_${action.coordinates.y}`;
@@ -521,7 +588,10 @@ export class EnhancedComputerControlValidationService {
   /**
    * Generate cache key for keyboard operations
    */
-  private generateKeyboardCacheKey(action: any, context: ComputerControlValidationContext): string {
+  private generateKeyboardCacheKey(
+    action: any,
+    context: ComputerControlValidationContext,
+  ): string {
     const baseKey = `keyboard_${context.userId}_${context.activeApplication}`;
 
     if ('text' in action && action.text) {
@@ -531,7 +601,9 @@ export class EnhancedComputerControlValidationService {
     }
 
     if ('keys' in action && action.keys) {
-      const keysStr = Array.isArray(action.keys) ? action.keys.join('_') : action.keys;
+      const keysStr = Array.isArray(action.keys)
+        ? action.keys.join('_')
+        : action.keys;
       return `${baseKey}_keys_${keysStr}`;
     }
 
@@ -543,7 +615,7 @@ export class EnhancedComputerControlValidationService {
    */
   private analyzeCoordinateRisk(
     coordinates: { x: number; y: number },
-    context: ComputerControlValidationContext
+    context: ComputerControlValidationContext,
   ): MouseOperationRisk['coordinateRisk'] {
     const { width, height } = context.screenResolution;
 
@@ -556,8 +628,12 @@ export class EnhancedComputerControlValidationService {
 
     // Check if coordinates are in critical zones
     for (const zone of criticalZones) {
-      if (coordinates.x >= zone.x && coordinates.x <= zone.x + zone.width &&
-          coordinates.y >= zone.y && coordinates.y <= zone.y + zone.height) {
+      if (
+        coordinates.x >= zone.x &&
+        coordinates.x <= zone.x + zone.width &&
+        coordinates.y >= zone.y &&
+        coordinates.y <= zone.y + zone.height
+      ) {
         return 'CRITICAL_ZONE';
       }
     }
@@ -575,7 +651,7 @@ export class EnhancedComputerControlValidationService {
    */
   private async identifyClickTarget(
     coordinates: { x: number; y: number },
-    context: ComputerControlValidationContext
+    context: ComputerControlValidationContext,
   ): Promise<MouseOperationRisk['clickTargetType']> {
     // Placeholder implementation - in real system would use:
     // - OCR/computer vision to identify UI elements
@@ -599,7 +675,7 @@ export class EnhancedComputerControlValidationService {
       /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}/, // Email pattern
     ];
 
-    return sensitivePatterns.some(pattern => pattern.test(content));
+    return sensitivePatterns.some((pattern) => pattern.test(content));
   }
 
   /**
@@ -615,7 +691,7 @@ export class EnhancedComputerControlValidationService {
       /^\w+\.\w+\s*\(/,
     ];
 
-    return commandPatterns.some(pattern => pattern.test(content.trim()));
+    return commandPatterns.some((pattern) => pattern.test(content.trim()));
   }
 
   /**
@@ -632,7 +708,7 @@ export class EnhancedComputerControlValidationService {
     ];
 
     const keyCombo = keys.join('+').toLowerCase();
-    return systemKeys.some(sysKey => keyCombo.includes(sysKey));
+    return systemKeys.some((sysKey) => keyCombo.includes(sysKey));
   }
 
   /**
@@ -643,7 +719,7 @@ export class EnhancedComputerControlValidationService {
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(36);
@@ -652,8 +728,14 @@ export class EnhancedComputerControlValidationService {
   /**
    * Check if mouse movement is for accessibility
    */
-  private isAccessibilityMovement(action: MoveMouseAction, context: ComputerControlValidationContext): boolean {
-    return context.userAccessibilityNeeds && context.userAccessibilityNeeds.length > 0;
+  private isAccessibilityMovement(
+    action: MoveMouseAction,
+    context: ComputerControlValidationContext,
+  ): boolean {
+    return (
+      context.userAccessibilityNeeds &&
+      context.userAccessibilityNeeds.length > 0
+    );
   }
 
   /**
@@ -661,12 +743,18 @@ export class EnhancedComputerControlValidationService {
    */
   private escalateRiskLevel(currentLevel: RiskLevel): RiskLevel {
     switch (currentLevel) {
-      case RiskLevel._MINIMAL: return RiskLevel._LOW;
-      case RiskLevel._LOW: return RiskLevel._MODERATE;
-      case RiskLevel._MODERATE: return RiskLevel._HIGH;
-      case RiskLevel._HIGH: return RiskLevel._CRITICAL;
-      case RiskLevel._CRITICAL: return RiskLevel._CRITICAL;
-      default: return RiskLevel._MODERATE;
+      case RiskLevel._MINIMAL:
+        return RiskLevel._LOW;
+      case RiskLevel._LOW:
+        return RiskLevel._MODERATE;
+      case RiskLevel._MODERATE:
+        return RiskLevel._HIGH;
+      case RiskLevel._HIGH:
+        return RiskLevel._CRITICAL;
+      case RiskLevel._CRITICAL:
+        return RiskLevel._CRITICAL;
+      default:
+        return RiskLevel._MODERATE;
     }
   }
 
@@ -686,7 +774,11 @@ export class EnhancedComputerControlValidationService {
     return cached.result;
   }
 
-  private setCachedValidation(key: string, result: boolean, expiryMs: number): void {
+  private setCachedValidation(
+    key: string,
+    result: boolean,
+    expiryMs: number,
+  ): void {
     this.validationCache.set(key, {
       key,
       result,
@@ -707,16 +799,23 @@ export class EnhancedComputerControlValidationService {
 
   // ===== PERFORMANCE TRACKING =====
 
-  private updatePerformanceMetrics(durationMs: number, fromCache: boolean): void {
+  private updatePerformanceMetrics(
+    durationMs: number,
+    fromCache: boolean,
+  ): void {
     this.performanceMetrics.totalValidations++;
 
     if (fromCache) {
       this.performanceMetrics.cacheHitRate =
-        (this.performanceMetrics.cacheHitRate * (this.performanceMetrics.totalValidations - 1) + 1) /
+        (this.performanceMetrics.cacheHitRate *
+          (this.performanceMetrics.totalValidations - 1) +
+          1) /
         this.performanceMetrics.totalValidations;
     } else {
       this.performanceMetrics.averageValidationTime =
-        (this.performanceMetrics.averageValidationTime * (this.performanceMetrics.totalValidations - 1) + durationMs) /
+        (this.performanceMetrics.averageValidationTime *
+          (this.performanceMetrics.totalValidations - 1) +
+          durationMs) /
         this.performanceMetrics.totalValidations;
 
       if (durationMs < 200) this.performanceMetrics.sub200msOperations++;
@@ -728,20 +827,26 @@ export class EnhancedComputerControlValidationService {
   private logPerformanceMetrics(): void {
     const { totalValidations } = this.performanceMetrics;
 
-    this.logger.log('Enhanced Computer Control Validation Performance Metrics', {
-      totalValidations,
-      averageValidationTime: `${this.performanceMetrics.averageValidationTime.toFixed(2)}ms`,
-      cacheHitRate: `${(this.performanceMetrics.cacheHitRate * 100).toFixed(1)}%`,
-      sub200msRate: `${((this.performanceMetrics.sub200msOperations / totalValidations) * 100).toFixed(1)}%`,
-      sub350msRate: `${((this.performanceMetrics.sub350msOperations / totalValidations) * 100).toFixed(1)}%`,
-      sub500msRate: `${((this.performanceMetrics.sub500msOperations / totalValidations) * 100).toFixed(1)}%`,
-      cacheSize: this.validationCache.size,
-    });
+    this.logger.log(
+      'Enhanced Computer Control Validation Performance Metrics',
+      {
+        totalValidations,
+        averageValidationTime: `${this.performanceMetrics.averageValidationTime.toFixed(2)}ms`,
+        cacheHitRate: `${(this.performanceMetrics.cacheHitRate * 100).toFixed(1)}%`,
+        sub200msRate: `${((this.performanceMetrics.sub200msOperations / totalValidations) * 100).toFixed(1)}%`,
+        sub350msRate: `${((this.performanceMetrics.sub350msOperations / totalValidations) * 100).toFixed(1)}%`,
+        sub500msRate: `${((this.performanceMetrics.sub500msOperations / totalValidations) * 100).toFixed(1)}%`,
+        cacheSize: this.validationCache.size,
+      },
+    );
   }
 
   // ===== DESCRIPTION GENERATORS =====
 
-  private generateClickDescription(action: ClickMouseAction, risk: MouseOperationRisk): string {
+  private generateClickDescription(
+    action: ClickMouseAction,
+    risk: MouseOperationRisk,
+  ): string {
     const coords = action.coordinates;
     const button = action.button ?? 'left';
     const target = risk.clickTargetType.toLowerCase();
@@ -749,7 +854,9 @@ export class EnhancedComputerControlValidationService {
     return `${button} click on ${target} at coordinates (${coords?.x}, ${coords?.y}) - Risk: ${risk.riskLevel}`;
   }
 
-  private generateComplexMouseDescription(action: DragMouseAction | TraceMouseAction | ScrollAction): string {
+  private generateComplexMouseDescription(
+    action: DragMouseAction | TraceMouseAction | ScrollAction,
+  ): string {
     switch (action.action) {
       case 'drag_mouse':
         return `Drag mouse operation with complex path`;
@@ -762,7 +869,10 @@ export class EnhancedComputerControlValidationService {
     }
   }
 
-  private generateKeyboardDescription(action: TypeTextAction | TypeKeysAction | PressKeysAction | PasteTextAction, risk: KeyboardInputRisk): string {
+  private generateKeyboardDescription(
+    action: TypeTextAction | TypeKeysAction | PressKeysAction | PasteTextAction,
+    risk: KeyboardInputRisk,
+  ): string {
     const actionType = action.action;
     const contentType = risk.contentType.toLowerCase();
     const masked = risk.maskContent ? '[CONTENT MASKED]' : '';
@@ -770,7 +880,10 @@ export class EnhancedComputerControlValidationService {
     return `${actionType} operation with ${contentType} content ${masked} - Risk: ${risk.riskLevel}`;
   }
 
-  private assessComplexMouseRisk(action: DragMouseAction | TraceMouseAction | ScrollAction, context: ComputerControlValidationContext): RiskLevel {
+  private assessComplexMouseRisk(
+    action: DragMouseAction | TraceMouseAction | ScrollAction,
+    context: ComputerControlValidationContext,
+  ): RiskLevel {
     // Complex mouse operations typically have moderate to high risk
     switch (action.action) {
       case 'scroll':
@@ -784,7 +897,9 @@ export class EnhancedComputerControlValidationService {
     }
   }
 
-  private sanitizeComplexMouseParams(action: DragMouseAction | TraceMouseAction | ScrollAction): Record<string, unknown> {
+  private sanitizeComplexMouseParams(
+    action: DragMouseAction | TraceMouseAction | ScrollAction,
+  ): Record<string, unknown> {
     // Remove potentially sensitive path data while preserving validation context
     const sanitized: Record<string, unknown> = {
       action: action.action,
@@ -799,13 +914,18 @@ export class EnhancedComputerControlValidationService {
     }
 
     if ('path' in action && action.path) {
-      sanitized.pathLength = Array.isArray(action.path) ? action.path.length : 1;
+      sanitized.pathLength = Array.isArray(action.path)
+        ? action.path.length
+        : 1;
     }
 
     return sanitized;
   }
 
-  private sanitizeKeyboardParams(action: TypeTextAction | TypeKeysAction | PressKeysAction | PasteTextAction, risk: KeyboardInputRisk): Record<string, unknown> {
+  private sanitizeKeyboardParams(
+    action: TypeTextAction | TypeKeysAction | PressKeysAction | PasteTextAction,
+    risk: KeyboardInputRisk,
+  ): Record<string, unknown> {
     const sanitized: Record<string, unknown> = {
       action: action.action,
       contentType: risk.contentType,

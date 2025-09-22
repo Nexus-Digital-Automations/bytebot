@@ -39,7 +39,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
-  RiskLevel
+  RiskLevel,
 } from '../../src/parlant/parlant-integration.service';
 
 import { ParlantMultiLevelCacheService } from '../../src/parlant/caching/parlant-multi-level-cache.service';
@@ -119,21 +119,29 @@ class CacheDatabaseTestUtils {
         name: 'Sequential Cache Loading',
         description: 'Sequential requests to build cache hit rate',
         requestCount: 1000,
-        cacheKeyPatterns: ['user_data_{{userId}}', 'function_{{functionName}}', 'session_{{sessionId}}'],
+        cacheKeyPatterns: [
+          'user_data_{{userId}}',
+          'function_{{functionName}}',
+          'session_{{sessionId}}',
+        ],
         expectedHitRate: 0.85,
         warmupRequests: 200,
         testDuration: 30000,
-        concurrentUsers: 1
+        concurrentUsers: 1,
       },
       {
         name: 'Concurrent Cache Access',
         description: 'Concurrent users accessing cached data',
         requestCount: 500,
-        cacheKeyPatterns: ['shared_config', 'global_settings', 'common_data_{{type}}'],
+        cacheKeyPatterns: [
+          'shared_config',
+          'global_settings',
+          'common_data_{{type}}',
+        ],
         expectedHitRate: 0.88,
         warmupRequests: 100,
         testDuration: 20000,
-        concurrentUsers: 10
+        concurrentUsers: 10,
       },
       {
         name: 'Pattern-Based Cache Optimization',
@@ -142,23 +150,23 @@ class CacheDatabaseTestUtils {
         cacheKeyPatterns: [
           'frequent_{{id}}', // 70% of requests
           'occasional_{{id}}', // 25% of requests
-          'rare_{{id}}' // 5% of requests
+          'rare_{{id}}', // 5% of requests
         ],
-        expectedHitRate: 0.90,
+        expectedHitRate: 0.9,
         warmupRequests: 400,
         testDuration: 45000,
-        concurrentUsers: 5
+        concurrentUsers: 5,
       },
       {
         name: 'Cache Invalidation Stress Test',
         description: 'High invalidation rate with cache rebuilding',
         requestCount: 800,
         cacheKeyPatterns: ['volatile_{{timestamp}}', 'temporary_{{id}}'],
-        expectedHitRate: 0.60, // Lower due to invalidations
+        expectedHitRate: 0.6, // Lower due to invalidations
         warmupRequests: 100,
         testDuration: 25000,
-        concurrentUsers: 8
-      }
+        concurrentUsers: 8,
+      },
     ];
   }
 
@@ -174,7 +182,7 @@ class CacheDatabaseTestUtils {
         recordCount: 1000,
         concurrentConnections: 20,
         expectedLatency: 100,
-        consistencyCheck: true
+        consistencyCheck: true,
       },
       {
         name: 'Batch Write Operations',
@@ -183,7 +191,7 @@ class CacheDatabaseTestUtils {
         recordCount: 500,
         concurrentConnections: 10,
         expectedLatency: 250,
-        consistencyCheck: true
+        consistencyCheck: true,
       },
       {
         name: 'Transaction Integrity Test',
@@ -192,7 +200,7 @@ class CacheDatabaseTestUtils {
         recordCount: 200,
         concurrentConnections: 5,
         expectedLatency: 300,
-        consistencyCheck: true
+        consistencyCheck: true,
       },
       {
         name: 'Concurrent Batch Processing',
@@ -201,15 +209,17 @@ class CacheDatabaseTestUtils {
         recordCount: 1500,
         concurrentConnections: 15,
         expectedLatency: 400,
-        consistencyCheck: true
-      }
+        consistencyCheck: true,
+      },
     ];
   }
 
   /**
    * Generate realistic validation requests for cache testing
    */
-  static generateCacheTestRequests(config: CacheTestConfig): ParlantValidationRequest[] {
+  static generateCacheTestRequests(
+    config: CacheTestConfig,
+  ): ParlantValidationRequest[] {
     const requests: ParlantValidationRequest[] = [];
 
     for (let i = 0; i < config.requestCount; i++) {
@@ -241,7 +251,7 @@ class CacheDatabaseTestUtils {
           userId,
           testIndex: i,
           pattern: patternIndex,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         },
         actionDescription: `Cache test request ${i} for pattern ${pattern}`,
         riskLevel: i % 3 === 0 ? RiskLevel.LOW : RiskLevel.MEDIUM,
@@ -255,9 +265,9 @@ class CacheDatabaseTestUtils {
           metadata: {
             cacheTest: true,
             pattern: pattern,
-            batchId: Math.floor(i / 50)
-          }
-        }
+            batchId: Math.floor(i / 50),
+          },
+        },
       });
     }
 
@@ -269,7 +279,7 @@ class CacheDatabaseTestUtils {
    */
   static validateCacheMetrics(
     metrics: CachePerformanceMetrics,
-    expectedHitRate: number
+    expectedHitRate: number,
   ): { passed: boolean; violations: string[]; score: number } {
     const violations: string[] = [];
     let score = 100;
@@ -277,32 +287,38 @@ class CacheDatabaseTestUtils {
     // Hit rate validation
     if (metrics.hitRate < expectedHitRate) {
       violations.push(
-        `Cache hit rate ${(metrics.hitRate * 100).toFixed(1)}% below target ${(expectedHitRate * 100).toFixed(1)}%`
+        `Cache hit rate ${(metrics.hitRate * 100).toFixed(1)}% below target ${(expectedHitRate * 100).toFixed(1)}%`,
       );
       score -= 30;
     }
 
     // Performance validation
     if (metrics.avgAccessTime > 50) {
-      violations.push(`Average access time ${metrics.avgAccessTime}ms exceeds 50ms target`);
+      violations.push(
+        `Average access time ${metrics.avgAccessTime}ms exceeds 50ms target`,
+      );
       score -= 20;
     }
 
     if (metrics.p95AccessTime > 100) {
-      violations.push(`P95 access time ${metrics.p95AccessTime}ms exceeds 100ms target`);
+      violations.push(
+        `P95 access time ${metrics.p95AccessTime}ms exceeds 100ms target`,
+      );
       score -= 15;
     }
 
     // L1 cache efficiency
     if (metrics.l1HitRate < 0.3) {
-      violations.push(`L1 hit rate ${(metrics.l1HitRate * 100).toFixed(1)}% too low`);
+      violations.push(
+        `L1 hit rate ${(metrics.l1HitRate * 100).toFixed(1)}% too low`,
+      );
       score -= 10;
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      score: Math.max(0, score)
+      score: Math.max(0, score),
     };
   }
 
@@ -311,39 +327,47 @@ class CacheDatabaseTestUtils {
    */
   static validateDatabaseMetrics(
     metrics: DatabasePerformanceMetrics,
-    expectedLatency: number
+    expectedLatency: number,
   ): { passed: boolean; violations: string[]; score: number } {
     const violations: string[] = [];
     let score = 100;
 
     // Latency validation
     if (metrics.avgLatency > expectedLatency) {
-      violations.push(`Average latency ${metrics.avgLatency}ms exceeds target ${expectedLatency}ms`);
+      violations.push(
+        `Average latency ${metrics.avgLatency}ms exceeds target ${expectedLatency}ms`,
+      );
       score -= 25;
     }
 
     if (metrics.p95Latency > expectedLatency * 1.5) {
-      violations.push(`P95 latency ${metrics.p95Latency}ms exceeds 150% of target`);
+      violations.push(
+        `P95 latency ${metrics.p95Latency}ms exceeds 150% of target`,
+      );
       score -= 20;
     }
 
     // Success rate validation
     const successRate = metrics.successfulOperations / metrics.totalOperations;
     if (successRate < 0.99) {
-      violations.push(`Success rate ${(successRate * 100).toFixed(1)}% below 99% target`);
+      violations.push(
+        `Success rate ${(successRate * 100).toFixed(1)}% below 99% target`,
+      );
       score -= 30;
     }
 
     // Consistency validation
     if (metrics.consistencyViolations > 0) {
-      violations.push(`${metrics.consistencyViolations} consistency violations detected`);
+      violations.push(
+        `${metrics.consistencyViolations} consistency violations detected`,
+      );
       score -= 40;
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      score: Math.max(0, score)
+      score: Math.max(0, score),
     };
   }
 
@@ -352,23 +376,31 @@ class CacheDatabaseTestUtils {
    */
   static async simulateDatabaseOperation(
     operationType: 'READ' | 'WRITE' | 'TRANSACTION' | 'BATCH',
-    recordCount: number
+    recordCount: number,
   ): Promise<{ duration: number; success: boolean; recordsProcessed: number }> {
     const startTime = Date.now();
 
     // Simulate different operation types with realistic delays
     switch (operationType) {
       case 'READ':
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 20 + 10));
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.random() * 20 + 10),
+        );
         break;
       case 'WRITE':
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 50 + 25));
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.random() * 50 + 25),
+        );
         break;
       case 'TRANSACTION':
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.random() * 100 + 50),
+        );
         break;
       case 'BATCH':
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100));
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.random() * 200 + 100),
+        );
         break;
     }
 
@@ -378,7 +410,7 @@ class CacheDatabaseTestUtils {
     return {
       duration,
       success,
-      recordsProcessed: success ? recordCount : 0
+      recordsProcessed: success ? recordCount : 0,
     };
   }
 }
@@ -392,9 +424,7 @@ describe('Parlant Cache and Database Integration', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot()
-      ],
+      imports: [ConfigModule.forRoot()],
       providers: [
         ParlantMultiLevelCacheService,
         ParlantIntegrationService,
@@ -405,15 +435,21 @@ describe('Parlant Cache and Database Integration', () => {
           useValue: new Redis({
             host: 'localhost',
             port: 6379,
-            db: 15 // Test database
-          })
-        }
-      ]
+            db: 15, // Test database
+          }),
+        },
+      ],
     }).compile();
 
-    cacheService = module.get<ParlantMultiLevelCacheService>(ParlantMultiLevelCacheService);
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
-    orchestrator = module.get<ParlantPerformanceOrchestratorService>(ParlantPerformanceOrchestratorService);
+    cacheService = module.get<ParlantMultiLevelCacheService>(
+      ParlantMultiLevelCacheService,
+    );
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
+    orchestrator = module.get<ParlantPerformanceOrchestratorService>(
+      ParlantPerformanceOrchestratorService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
@@ -430,7 +466,9 @@ describe('Parlant Cache and Database Integration', () => {
       const config = CacheDatabaseTestUtils.generateCacheTestConfigs()[0]!; // Sequential Cache Loading
       const requests = CacheDatabaseTestUtils.generateCacheTestRequests(config);
 
-      logger.log(`Starting ${config.name} - Target hit rate: ${(config.expectedHitRate * 100).toFixed(1)}%`);
+      logger.log(
+        `Starting ${config.name} - Target hit rate: ${(config.expectedHitRate * 100).toFixed(1)}%`,
+      );
 
       // Clear cache to start fresh
       await cacheService.clearAllCaches();
@@ -460,19 +498,28 @@ describe('Parlant Cache and Database Integration', () => {
       const metrics: CachePerformanceMetrics = {
         testName: config.name,
         totalRequests: testRequests.length,
-        cacheHits: Math.round(cacheStats.overallStats.totalHitRate * testRequests.length),
-        cacheMisses: Math.round((1 - cacheStats.overallStats.totalHitRate) * testRequests.length),
+        cacheHits: Math.round(
+          cacheStats.overallStats.totalHitRate * testRequests.length,
+        ),
+        cacheMisses: Math.round(
+          (1 - cacheStats.overallStats.totalHitRate) * testRequests.length,
+        ),
         hitRate: cacheStats.overallStats.totalHitRate,
         l1HitRate: cacheStats.l1Stats.hitRate,
         l2HitRate: cacheStats.l2Stats?.hitRate || 0,
         redisHitRate: cacheStats.l3Stats?.hitRate || 0,
-        avgAccessTime: accessTimes.reduce((sum, time) => sum + time, 0) / accessTimes.length,
-        p95AccessTime: sortedAccessTimes[Math.floor(sortedAccessTimes.length * 0.95)] || 0,
+        avgAccessTime:
+          accessTimes.reduce((sum, time) => sum + time, 0) / accessTimes.length,
+        p95AccessTime:
+          sortedAccessTimes[Math.floor(sortedAccessTimes.length * 0.95)] || 0,
         cacheSize: cacheStats.l1Stats.size + (cacheStats.l2Stats?.size || 0),
-        invalidationCount: 0
+        invalidationCount: 0,
       };
 
-      const validation = CacheDatabaseTestUtils.validateCacheMetrics(metrics, config.expectedHitRate);
+      const validation = CacheDatabaseTestUtils.validateCacheMetrics(
+        metrics,
+        config.expectedHitRate,
+      );
 
       logger.log(`Sequential Cache Results:
         Hit Rate: ${(metrics.hitRate * 100).toFixed(1)}% (Target: ${(config.expectedHitRate * 100).toFixed(1)}%)
@@ -492,23 +539,34 @@ describe('Parlant Cache and Database Integration', () => {
       const config = CacheDatabaseTestUtils.generateCacheTestConfigs()[1]!; // Concurrent Cache Access
       const requests = CacheDatabaseTestUtils.generateCacheTestRequests(config);
 
-      logger.log(`Starting ${config.name} with ${config.concurrentUsers} concurrent users`);
+      logger.log(
+        `Starting ${config.name} with ${config.concurrentUsers} concurrent users`,
+      );
 
       // Clear cache for fresh start
       await cacheService.clearAllCaches();
 
       // Concurrent warmup
       const warmupRequests = requests.slice(0, config.warmupRequests);
-      await Promise.all(warmupRequests.map(req => parlantService.validateFunctionExecution(req)));
+      await Promise.all(
+        warmupRequests.map((req) =>
+          parlantService.validateFunctionExecution(req),
+        ),
+      );
 
       // Concurrent test execution
       const testRequests = requests.slice(config.warmupRequests);
       const userBatches = [];
 
       // Divide requests among concurrent users
-      const requestsPerUser = Math.ceil(testRequests.length / config.concurrentUsers);
+      const requestsPerUser = Math.ceil(
+        testRequests.length / config.concurrentUsers,
+      );
       for (let i = 0; i < config.concurrentUsers; i++) {
-        const userRequests = testRequests.slice(i * requestsPerUser, (i + 1) * requestsPerUser);
+        const userRequests = testRequests.slice(
+          i * requestsPerUser,
+          (i + 1) * requestsPerUser,
+        );
         userBatches.push(userRequests);
       }
 
@@ -522,7 +580,7 @@ describe('Parlant Cache and Database Integration', () => {
           userAccessTimes.push(Date.now() - requestStart);
 
           // Small delay to simulate realistic user behavior
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
         }
 
         return userAccessTimes;
@@ -538,19 +596,29 @@ describe('Parlant Cache and Database Integration', () => {
       const concurrentMetrics: CachePerformanceMetrics = {
         testName: config.name,
         totalRequests: testRequests.length,
-        cacheHits: Math.round(finalCacheStats.overallStats.totalHitRate * testRequests.length),
-        cacheMisses: Math.round((1 - finalCacheStats.overallStats.totalHitRate) * testRequests.length),
+        cacheHits: Math.round(
+          finalCacheStats.overallStats.totalHitRate * testRequests.length,
+        ),
+        cacheMisses: Math.round(
+          (1 - finalCacheStats.overallStats.totalHitRate) * testRequests.length,
+        ),
         hitRate: finalCacheStats.overallStats.totalHitRate,
         l1HitRate: finalCacheStats.l1Stats.hitRate,
         l2HitRate: finalCacheStats.l2Stats?.hitRate || 0,
         redisHitRate: finalCacheStats.l3Stats?.hitRate || 0,
-        avgAccessTime: allAccessTimes.reduce((sum, time) => sum + time, 0) / allAccessTimes.length,
+        avgAccessTime:
+          allAccessTimes.reduce((sum, time) => sum + time, 0) /
+          allAccessTimes.length,
         p95AccessTime: sortedTimes[Math.floor(sortedTimes.length * 0.95)] || 0,
-        cacheSize: finalCacheStats.l1Stats.size + (finalCacheStats.l2Stats?.size || 0),
-        invalidationCount: 0
+        cacheSize:
+          finalCacheStats.l1Stats.size + (finalCacheStats.l2Stats?.size || 0),
+        invalidationCount: 0,
       };
 
-      const concurrentValidation = CacheDatabaseTestUtils.validateCacheMetrics(concurrentMetrics, config.expectedHitRate);
+      const concurrentValidation = CacheDatabaseTestUtils.validateCacheMetrics(
+        concurrentMetrics,
+        config.expectedHitRate,
+      );
 
       logger.log(`Concurrent Cache Results:
         Hit Rate: ${(concurrentMetrics.hitRate * 100).toFixed(1)}% (Target: ${(config.expectedHitRate * 100).toFixed(1)}%)
@@ -575,12 +643,19 @@ describe('Parlant Cache and Database Integration', () => {
       await cacheService.clearAllCaches();
 
       // Execute requests with pattern tracking
-      const patternMetrics = new Map<string, { requests: number; hits: number; accessTimes: number[] }>();
+      const patternMetrics = new Map<
+        string,
+        { requests: number; hits: number; accessTimes: number[] }
+      >();
 
       for (const request of requests) {
         const pattern = request.context.metadata?.pattern as string;
         if (!patternMetrics.has(pattern)) {
-          patternMetrics.set(pattern, { requests: 0, hits: 0, accessTimes: [] });
+          patternMetrics.set(pattern, {
+            requests: 0,
+            hits: 0,
+            accessTimes: [],
+          });
         }
 
         const patternData = patternMetrics.get(pattern)!;
@@ -592,7 +667,8 @@ describe('Parlant Cache and Database Integration', () => {
         patternData.accessTimes.push(accessTime);
 
         // Simulate cache hit detection (simplified)
-        if (accessTime < 50) { // Assume fast access indicates cache hit
+        if (accessTime < 50) {
+          // Assume fast access indicates cache hit
           patternData.hits++;
         }
       }
@@ -603,29 +679,43 @@ describe('Parlant Cache and Database Integration', () => {
       logger.log(`Pattern-Based Cache Analysis:`);
       for (const [pattern, data] of patternMetrics) {
         const hitRate = data.hits / data.requests;
-        const avgAccessTime = data.accessTimes.reduce((sum, time) => sum + time, 0) / data.accessTimes.length;
+        const avgAccessTime =
+          data.accessTimes.reduce((sum, time) => sum + time, 0) /
+          data.accessTimes.length;
 
-        logger.log(`  ${pattern}: ${(hitRate * 100).toFixed(1)}% hit rate, ${avgAccessTime.toFixed(1)}ms avg access`);
+        logger.log(
+          `  ${pattern}: ${(hitRate * 100).toFixed(1)}% hit rate, ${avgAccessTime.toFixed(1)}ms avg access`,
+        );
       }
 
       const finalMetrics: CachePerformanceMetrics = {
         testName: config.name,
         totalRequests: requests.length,
-        cacheHits: Math.round(overallCacheStats.overallStats.totalHitRate * requests.length),
-        cacheMisses: Math.round((1 - overallCacheStats.overallStats.totalHitRate) * requests.length),
+        cacheHits: Math.round(
+          overallCacheStats.overallStats.totalHitRate * requests.length,
+        ),
+        cacheMisses: Math.round(
+          (1 - overallCacheStats.overallStats.totalHitRate) * requests.length,
+        ),
         hitRate: overallCacheStats.overallStats.totalHitRate,
         l1HitRate: overallCacheStats.l1Stats.hitRate,
         l2HitRate: overallCacheStats.l2Stats?.hitRate || 0,
         redisHitRate: overallCacheStats.l3Stats?.hitRate || 0,
-        avgAccessTime: Array.from(patternMetrics.values())
-          .flatMap(data => data.accessTimes)
-          .reduce((sum, time) => sum + time, 0) / requests.length,
+        avgAccessTime:
+          Array.from(patternMetrics.values())
+            .flatMap((data) => data.accessTimes)
+            .reduce((sum, time) => sum + time, 0) / requests.length,
         p95AccessTime: 0, // Calculate if needed
-        cacheSize: overallCacheStats.l1Stats.size + (overallCacheStats.l2Stats?.size || 0),
-        invalidationCount: 0
+        cacheSize:
+          overallCacheStats.l1Stats.size +
+          (overallCacheStats.l2Stats?.size || 0),
+        invalidationCount: 0,
       };
 
-      const patternValidation = CacheDatabaseTestUtils.validateCacheMetrics(finalMetrics, config.expectedHitRate);
+      const patternValidation = CacheDatabaseTestUtils.validateCacheMetrics(
+        finalMetrics,
+        config.expectedHitRate,
+      );
 
       logger.log(`Pattern Optimization Results:
         Overall Hit Rate: ${(finalMetrics.hitRate * 100).toFixed(1)}%
@@ -633,7 +723,7 @@ describe('Parlant Cache and Database Integration', () => {
         Score: ${patternValidation.score}/100`);
 
       expect(patternValidation.score).toBeGreaterThan(80);
-      expect(finalMetrics.hitRate).toBeGreaterThan(0.80); // Allow slightly lower for pattern testing
+      expect(finalMetrics.hitRate).toBeGreaterThan(0.8); // Allow slightly lower for pattern testing
     }, 120000);
   });
 
@@ -643,29 +733,39 @@ describe('Parlant Cache and Database Integration', () => {
     it('should handle high-frequency database reads efficiently', async () => {
       const config = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[0]!; // High-Frequency Reads
 
-      logger.log(`Starting ${config.name} with ${config.recordCount} operations`);
+      logger.log(
+        `Starting ${config.name} with ${config.recordCount} operations`,
+      );
 
-      const operations: Promise<{ duration: number; success: boolean; recordsProcessed: number }>[] = [];
+      const operations: Promise<{
+        duration: number;
+        success: boolean;
+        recordsProcessed: number;
+      }>[] = [];
       const startTime = Date.now();
 
       // Execute concurrent read operations
       for (let i = 0; i < config.recordCount; i++) {
-        const operation = CacheDatabaseTestUtils.simulateDatabaseOperation('READ', 1);
+        const operation = CacheDatabaseTestUtils.simulateDatabaseOperation(
+          'READ',
+          1,
+        );
         operations.push(operation);
 
         // Add slight delay for realistic load
         if (i % config.concurrentConnections === 0) {
-          await new Promise(resolve => setTimeout(resolve, 5));
+          await new Promise((resolve) => setTimeout(resolve, 5));
         }
       }
 
       const results = await Promise.all(operations);
       const totalDuration = Date.now() - startTime;
 
-      const successfulOps = results.filter(r => r.success).length;
+      const successfulOps = results.filter((r) => r.success).length;
       const failedOps = results.length - successfulOps;
-      const avgLatency = results.reduce((sum, r) => sum + r.duration, 0) / results.length;
-      const latencies = results.map(r => r.duration).sort((a, b) => a - b);
+      const avgLatency =
+        results.reduce((sum, r) => sum + r.duration, 0) / results.length;
+      const latencies = results.map((r) => r.duration).sort((a, b) => a - b);
       const p95Latency = latencies[Math.floor(latencies.length * 0.95)] || 0;
 
       const dbMetrics: DatabasePerformanceMetrics = {
@@ -678,10 +778,13 @@ describe('Parlant Cache and Database Integration', () => {
         throughput: (results.length / totalDuration) * 1000,
         connectionPoolUsage: config.concurrentConnections,
         transactionRollbacks: 0,
-        consistencyViolations: 0
+        consistencyViolations: 0,
       };
 
-      const dbValidation = CacheDatabaseTestUtils.validateDatabaseMetrics(dbMetrics, config.expectedLatency);
+      const dbValidation = CacheDatabaseTestUtils.validateDatabaseMetrics(
+        dbMetrics,
+        config.expectedLatency,
+      );
 
       logger.log(`Database Read Results:
         Operations: ${dbMetrics.totalOperations}
@@ -697,8 +800,10 @@ describe('Parlant Cache and Database Integration', () => {
     }, 45000);
 
     it('should maintain data consistency during concurrent operations', async () => {
-      const readConfig = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[0]!; // Reads
-      const writeConfig = CacheDatabaseTestUtils.generateDatabaseTestConfigs()[1]!; // Writes
+      const readConfig =
+        CacheDatabaseTestUtils.generateDatabaseTestConfigs()[0]!; // Reads
+      const writeConfig =
+        CacheDatabaseTestUtils.generateDatabaseTestConfigs()[1]!; // Writes
 
       logger.log('Starting concurrent read/write consistency test');
 
@@ -710,25 +815,31 @@ describe('Parlant Cache and Database Integration', () => {
 
       // Launch read operations
       for (let i = 0; i < readConfig.recordCount; i++) {
-        readOperations.push(CacheDatabaseTestUtils.simulateDatabaseOperation('READ', 1));
+        readOperations.push(
+          CacheDatabaseTestUtils.simulateDatabaseOperation('READ', 1),
+        );
       }
 
       // Launch write operations
       for (let i = 0; i < writeConfig.recordCount; i++) {
-        writeOperations.push(CacheDatabaseTestUtils.simulateDatabaseOperation('WRITE', 1));
+        writeOperations.push(
+          CacheDatabaseTestUtils.simulateDatabaseOperation('WRITE', 1),
+        );
       }
 
       // Wait for all operations to complete
       const [readResults, writeResults] = await Promise.all([
         Promise.all(readOperations),
-        Promise.all(writeOperations)
+        Promise.all(writeOperations),
       ]);
 
       const totalDuration = Date.now() - startTime;
 
       // Analyze consistency
       const totalOperations = readResults.length + writeResults.length;
-      const successfulOps = [...readResults, ...writeResults].filter(r => r.success).length;
+      const successfulOps = [...readResults, ...writeResults].filter(
+        (r) => r.success,
+      ).length;
       const consistencyViolations = 0; // Would be detected in real implementation
 
       logger.log(`Consistency Test Results:
@@ -752,7 +863,7 @@ describe('Parlant Cache and Database Integration', () => {
       const testData = [
         { id: 'sync-1', data: 'initial-value-1' },
         { id: 'sync-2', data: 'initial-value-2' },
-        { id: 'sync-3', data: 'initial-value-3' }
+        { id: 'sync-3', data: 'initial-value-3' },
       ];
 
       // Populate cache with initial data
@@ -769,8 +880,8 @@ describe('Parlant Cache and Database Integration', () => {
             agentRole: 'assistant',
             securityLevel: 'LOW',
             conversationHistory: [],
-            metadata: { syncTest: true, dataId: item.id }
-          }
+            metadata: { syncTest: true, dataId: item.id },
+          },
         };
 
         await parlantService.validateFunctionExecution(mockRequest);
@@ -783,7 +894,8 @@ describe('Parlant Cache and Database Integration', () => {
       // Simulate database updates
       const updateOperations = testData.map(async (item) => {
         // Simulate database update
-        const updateResult = await CacheDatabaseTestUtils.simulateDatabaseOperation('WRITE', 1);
+        const updateResult =
+          await CacheDatabaseTestUtils.simulateDatabaseOperation('WRITE', 1);
 
         // Invalidate cache after database update
         if (updateResult.success) {
@@ -797,7 +909,7 @@ describe('Parlant Cache and Database Integration', () => {
       const updateResults = await Promise.all(updateOperations);
 
       // Verify updates were successful
-      const successfulUpdates = updateResults.filter(r => r.success).length;
+      const successfulUpdates = updateResults.filter((r) => r.success).length;
       expect(successfulUpdates).toBe(testData.length);
 
       // Test cache refresh after invalidation
@@ -814,8 +926,8 @@ describe('Parlant Cache and Database Integration', () => {
             agentRole: 'assistant',
             securityLevel: 'LOW',
             conversationHistory: [],
-            metadata: { refreshTest: true, dataId: item.id }
-          }
+            metadata: { refreshTest: true, dataId: item.id },
+          },
         };
 
         const startTime = Date.now();
@@ -826,7 +938,9 @@ describe('Parlant Cache and Database Integration', () => {
         expect(refreshTime).toBeLessThan(100);
       }
 
-      logger.log('✓ Cache-database synchronization test completed successfully');
+      logger.log(
+        '✓ Cache-database synchronization test completed successfully',
+      );
     }, 30000);
   });
 });

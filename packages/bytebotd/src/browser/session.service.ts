@@ -101,7 +101,8 @@ interface SessionMetricEntry {
 export class SessionService implements OnModuleDestroy {
   private readonly logger = new Logger(SessionService.name);
   private readonly resourceLimits: ResourceLimits;
-  private readonly sessionMetrics: Map<string, SessionMetricEntry[]> = new Map();
+  private readonly sessionMetrics: Map<string, SessionMetricEntry[]> =
+    new Map();
   private readonly performanceCounters = {
     sessionCreations: 0,
     sessionCleanups: 0,
@@ -117,10 +118,22 @@ export class SessionService implements OnModuleDestroy {
     // Initialize resource limits from configuration
     this.resourceLimits = {
       maxSessions: this.configService.get<number>('MAX_BROWSER_SESSIONS', 50),
-      maxMemoryMB: this.configService.get<number>('MAX_BROWSER_MEMORY_MB', 8192),
-      maxProcesses: this.configService.get<number>('MAX_BROWSER_PROCESSES', 100),
-      maxSessionLifetimeMs: this.configService.get<number>('MAX_SESSION_LIFETIME_MS', 7200000), // 2 hours
-      maxInactiveMs: this.configService.get<number>('MAX_SESSION_INACTIVE_MS', 1800000), // 30 minutes
+      maxMemoryMB: this.configService.get<number>(
+        'MAX_BROWSER_MEMORY_MB',
+        8192,
+      ),
+      maxProcesses: this.configService.get<number>(
+        'MAX_BROWSER_PROCESSES',
+        100,
+      ),
+      maxSessionLifetimeMs: this.configService.get<number>(
+        'MAX_SESSION_LIFETIME_MS',
+        7200000,
+      ), // 2 hours
+      maxInactiveMs: this.configService.get<number>(
+        'MAX_SESSION_INACTIVE_MS',
+        1800000,
+      ), // 30 minutes
     };
 
     // Start system monitoring
@@ -143,7 +156,9 @@ export class SessionService implements OnModuleDestroy {
   /**
    * Create new browser session with enhanced validation
    */
-  async createSession(dto: CreateBrowserSessionDto): Promise<BrowserSessionDto> {
+  async createSession(
+    dto: CreateBrowserSessionDto,
+  ): Promise<BrowserSessionDto> {
     const startTime = Date.now();
     const sessionId = uuidv4();
 
@@ -158,7 +173,9 @@ export class SessionService implements OnModuleDestroy {
       // Validate resource limits
       const resourceCheck = await this.validateResourceLimits();
       if (!resourceCheck.allowed) {
-        throw new Error(`Resource limits exceeded: ${resourceCheck.violations?.join(', ')}`);
+        throw new Error(
+          `Resource limits exceeded: ${resourceCheck.violations?.join(', ')}`,
+        );
       }
 
       // Create session using base service
@@ -197,7 +214,10 @@ export class SessionService implements OnModuleDestroy {
 
       return session;
     } catch (error) {
-      this.logger.error(`Enhanced session creation failed: ${sessionId}`, error);
+      this.logger.error(
+        `Enhanced session creation failed: ${sessionId}`,
+        error,
+      );
 
       // Log session creation failure event (in production would emit event)
       this.logger.debug('Session creation failure event', {
@@ -214,7 +234,9 @@ export class SessionService implements OnModuleDestroy {
   /**
    * Get session with enhanced metrics
    */
-  async getSessionWithMetrics(sessionId: string): Promise<BrowserSessionDto | null> {
+  async getSessionWithMetrics(
+    sessionId: string,
+  ): Promise<BrowserSessionDto | null> {
     this.logger.debug(`Retrieving session with metrics: ${sessionId}`);
 
     const session = this.browserSessionService.getSession(sessionId);
@@ -251,7 +273,9 @@ export class SessionService implements OnModuleDestroy {
 
     // Apply status filter
     if (options.status) {
-      sessions = sessions.filter(session => session.status === options.status);
+      sessions = sessions.filter(
+        (session) => session.status === options.status,
+      );
     }
 
     // Sort sessions
@@ -267,7 +291,10 @@ export class SessionService implements OnModuleDestroy {
     });
 
     const total = sessions.length;
-    const paginatedSessions = sessions.slice(options.offset, options.offset + options.limit);
+    const paginatedSessions = sessions.slice(
+      options.offset,
+      options.offset + options.limit,
+    );
 
     return {
       sessions: paginatedSessions,
@@ -313,23 +340,31 @@ export class SessionService implements OnModuleDestroy {
 
       // Record configuration update
       this.recordSessionMetric(sessionId, {
-        type: 'config_updated',timestamp: new Date(),data: {
+        type: 'config_updated',
+        timestamp: new Date(),
+        data: {
           updates: updateDto,
           previousConfig: session.config,
         },
       });
 
       // Log session update event (in production would emit event)
-      this.logger.debug('Session update event', {sessionId,updates: updateDto,
+      this.logger.debug('Session update event', {
+        sessionId,
+        updates: updateDto,
         event: 'session.updated',
       });
 
-      this.logger.log(`Session config updated: ${sessionId}`, {sessionId,updates: Object.keys(updateDto),
+      this.logger.log(`Session config updated: ${sessionId}`, {
+        sessionId,
+        updates: Object.keys(updateDto),
       });
 
       return session;
     } catch (error) {
-      this.logger.error(`Session config update failed: ${sessionId}`, error);throw error;}
+      this.logger.error(`Session config update failed: ${sessionId}`, error);
+      throw error;
+    }
   }
 
   /**
@@ -357,7 +392,9 @@ export class SessionService implements OnModuleDestroy {
 
       // Get session info before closing for metrics
       const session = this.browserSessionService.getSession(sessionId);
-      const resourceUsageBefore = session ? await this.getSessionResourceUsage(sessionId) : null;
+      const resourceUsageBefore = session
+        ? await this.getSessionResourceUsage(sessionId)
+        : null;
 
       // Close session using base service
       await this.browserSessionService.closeSession(sessionId);
@@ -428,17 +465,23 @@ export class SessionService implements OnModuleDestroy {
 
     // Check session count limit
     if (current.sessions >= this.resourceLimits.maxSessions) {
-      violations.push(`Session count (${current.sessions}) exceeds limit (${this.resourceLimits.maxSessions})`);
+      violations.push(
+        `Session count (${current.sessions}) exceeds limit (${this.resourceLimits.maxSessions})`,
+      );
     }
 
     // Check memory usage limit
     if (current.memoryMB >= this.resourceLimits.maxMemoryMB) {
-      violations.push(`Memory usage (${current.memoryMB}MB) exceeds limit (${this.resourceLimits.maxMemoryMB}MB)`);
+      violations.push(
+        `Memory usage (${current.memoryMB}MB) exceeds limit (${this.resourceLimits.maxMemoryMB}MB)`,
+      );
     }
 
     // Check process count limit
     if (current.processes >= this.resourceLimits.maxProcesses) {
-      violations.push(`Process count (${current.processes}) exceeds limit (${this.resourceLimits.maxProcesses})`);
+      violations.push(
+        `Process count (${current.processes}) exceeds limit (${this.resourceLimits.maxProcesses})`,
+      );
     }
 
     return {
@@ -458,7 +501,9 @@ export class SessionService implements OnModuleDestroy {
     processes: number;
   }> {
     const sessions = this.browserSessionService.getAllSessions();
-    const activeSessions = sessions.filter(s => s.status === BrowserSessionStatus.ACTIVE);
+    const activeSessions = sessions.filter(
+      (s) => s.status === BrowserSessionStatus.ACTIVE,
+    );
 
     let totalMemoryMB = 0;
     let totalProcesses = 0;
@@ -474,7 +519,10 @@ export class SessionService implements OnModuleDestroy {
         }
       } catch (error) {
         // Process might have been terminated
-        this.logger.debug(`Could not get usage for PID ${session.browserPid}`, error);
+        this.logger.debug(
+          `Could not get usage for PID ${session.browserPid}`,
+          error,
+        );
       }
     }
 
@@ -519,11 +567,18 @@ export class SessionService implements OnModuleDestroy {
         // Calculate resources that would be freed
         if (!options.dryRun) {
           try {
-            const resourceUsage = await this.getSessionResourceUsage(session.sessionId);
+            const resourceUsage = await this.getSessionResourceUsage(
+              session.sessionId,
+            );
             freedMemoryMB += resourceUsage.memoryMB;
             freedProcesses += 1;
           } catch (error) {
-            this.logger.debug(`Could not calculate resource usage for session ${session.sessionId}`, error);}}
+            this.logger.debug(
+              `Could not calculate resource usage for session ${session.sessionId}`,
+              error,
+            );
+          }
+        }
       }
     }
 
@@ -533,7 +588,9 @@ export class SessionService implements OnModuleDestroy {
     if (!options.dryRun) {
       for (const sessionId of candidates) {
         try {
-          await this.closeSessionWithCleanup(sessionId, { force: options.force });
+          await this.closeSessionWithCleanup(sessionId, {
+            force: options.force,
+          });
           cleaned++;
         } catch (error) {
           this.logger.error(`Failed to cleanup session ${sessionId}`, error);
@@ -562,7 +619,9 @@ export class SessionService implements OnModuleDestroy {
   /**
    * Perform comprehensive health check
    */
-  async performHealthCheck(sessionId: string): Promise<SessionHealthCheckDto | null> {
+  async performHealthCheck(
+    sessionId: string,
+  ): Promise<SessionHealthCheckDto | null> {
     this.logger.debug(`Performing health check: ${sessionId}`);
 
     const session = this.browserSessionService.getSession(sessionId);
@@ -584,20 +643,26 @@ export class SessionService implements OnModuleDestroy {
 
       // Check memory usage
       const resourceUsage = await this.getSessionResourceUsage(sessionId);
-      if (resourceUsage.memoryMB > 1024) { // 1GB threshold
+      if (resourceUsage.memoryMB > 1024) {
+        // 1GB threshold
         issues.push(`High memory usage: ${resourceUsage.memoryMB}MB`);
         healthScore -= 20;
       }
 
       // Check session activity
       const inactiveTime = Date.now() - session.lastActivityAt.getTime();
-      if (inactiveTime > 600000) { // 10 minutes
-        issues.push(`Session inactive for ${Math.round(inactiveTime / 60000)} minutes`);
+      if (inactiveTime > 600000) {
+        // 10 minutes
+        issues.push(
+          `Session inactive for ${Math.round(inactiveTime / 60000)} minutes`,
+        );
         healthScore -= 15;
       }
 
       // Check tab health
-      const unhealthyTabs = session.tabs.filter(tab => !tab.url || tab.url === 'chrome-error://');
+      const unhealthyTabs = session.tabs.filter(
+        (tab) => !tab.url || tab.url === 'chrome-error://',
+      );
       if (unhealthyTabs.length > 0) {
         issues.push(`${unhealthyTabs.length} tabs in error state`);
         healthScore -= unhealthyTabs.length * 5;
@@ -647,13 +712,20 @@ export class SessionService implements OnModuleDestroy {
         healthScore: 0,
         checkTimestamp: new Date(),
         checkDurationMs: Date.now() - startTime,
-        issues: [`Health check failed: ${error instanceof Error ? error.message : String(error)}`],};}
+        issues: [
+          `Health check failed: ${error instanceof Error ? error.message : String(error)}`,
+        ],
+      };
+    }
   }
 
   /**
    * Get session metrics
    */
-  async getSessionMetrics(sessionId: string, timeframe: string): Promise<SessionMetricsDto | null> {
+  async getSessionMetrics(
+    sessionId: string,
+    timeframe: string,
+  ): Promise<SessionMetricsDto | null> {
     this.logger.debug(`Getting session metrics: ${sessionId}`, { timeframe });
 
     const session = this.browserSessionService.getSession(sessionId);
@@ -667,14 +739,22 @@ export class SessionService implements OnModuleDestroy {
 
     // Get session metrics within timeframe
     const sessionMetrics = this.sessionMetrics.get(sessionId) || [];
-    const recentMetrics = sessionMetrics.filter(m => m.timestamp >= cutoffTime);
+    const recentMetrics = sessionMetrics.filter(
+      (m) => m.timestamp >= cutoffTime,
+    );
 
     // Calculate performance metrics
     const performanceMetrics = {
       averageResponseTimeMs: this.calculateAverageResponseTime(recentMetrics),
       peakMemoryUsageMB: this.calculatePeakMemoryUsage(recentMetrics),
       averageCpuUsagePercent: this.calculateAverageCpuUsage(recentMetrics),
-      totalScreenshots: recentMetrics.filter(m => m.type === 'screenshot_taken').length,totalPageLoads: recentMetrics.filter(m => m.type === 'page_loaded').length,totalActions: recentMetrics.filter(m => m.type === 'action_executed').length,
+      totalScreenshots: recentMetrics.filter(
+        (m) => m.type === 'screenshot_taken',
+      ).length,
+      totalPageLoads: recentMetrics.filter((m) => m.type === 'page_loaded')
+        .length,
+      totalActions: recentMetrics.filter((m) => m.type === 'action_executed')
+        .length,
     };
 
     // Get current resource usage
@@ -714,10 +794,13 @@ export class SessionService implements OnModuleDestroy {
   /**
    * Execute bulk session operation
    */
-  async executeBulkOperation(operation: BulkSessionOperationDto): Promise<BulkSessionResultDto> {
+  async executeBulkOperation(
+    operation: BulkSessionOperationDto,
+  ): Promise<BulkSessionResultDto> {
     this.logger.log(`Executing bulk operation: ${operation.operation}`, {
       operation: operation.operation,
-      sessionCount: operation.sessionIds?.length ?? operation.sessionConfigs?.length ?? 0,
+      sessionCount:
+        operation.sessionIds?.length ?? operation.sessionConfigs?.length ?? 0,
       parallel: operation.parallel,
     });
 
@@ -727,22 +810,43 @@ export class SessionService implements OnModuleDestroy {
 
     try {
       switch (operation.operation) {
-        case 'create':if (operation.sessionConfigs) {await this.executeBulkCreate(operation.sessionConfigs, operation.parallel, successful, failed);
+        case 'create':
+          if (operation.sessionConfigs) {
+            await this.executeBulkCreate(
+              operation.sessionConfigs,
+              operation.parallel,
+              successful,
+              failed,
+            );
           }
           break;
 
-        case 'close':if (operation.sessionIds) {await this.executeBulkClose(operation.sessionIds, operation.parallel, successful, failed);
+        case 'close':
+          if (operation.sessionIds) {
+            await this.executeBulkClose(
+              operation.sessionIds,
+              operation.parallel,
+              successful,
+              failed,
+            );
           }
           break;
 
         case 'health_check':
           if (operation.sessionIds) {
-            await this.executeBulkHealthCheck(operation.sessionIds, operation.parallel, successful, failed);
+            await this.executeBulkHealthCheck(
+              operation.sessionIds,
+              operation.parallel,
+              successful,
+              failed,
+            );
           }
           break;
 
         default:
-          throw new Error(`Unsupported bulk operation: ${operation.operation}`);}const result: BulkSessionResultDto = {
+          throw new Error(`Unsupported bulk operation: ${operation.operation}`);
+      }
+      const result: BulkSessionResultDto = {
         operation: operation.operation,
         totalSessions: successful.length + failed.length,
         successful,
@@ -750,11 +854,14 @@ export class SessionService implements OnModuleDestroy {
         executionTimeMs: Date.now() - startTime,
         summary: {
           successRate: successful.length / (successful.length + failed.length),
-          avgExecutionTimeMs: (Date.now() - startTime) / (successful.length + failed.length),
+          avgExecutionTimeMs:
+            (Date.now() - startTime) / (successful.length + failed.length),
         },
       };
 
-      this.logger.log(`Bulk operation completed: ${operation.operation}`, {operation: operation.operation,successful: successful.length,
+      this.logger.log(`Bulk operation completed: ${operation.operation}`, {
+        operation: operation.operation,
+        successful: successful.length,
         failed: failed.length,
         executionTimeMs: result.executionTimeMs,
       });
@@ -802,23 +909,38 @@ export class SessionService implements OnModuleDestroy {
 
     const sessionsByStatus = {
       total: sessions.length,
-      active: sessions.filter(s => s.status === BrowserSessionStatus.ACTIVE).length,
-      idle: sessions.filter(s => s.status === BrowserSessionStatus.IDLE).length,
-      error: sessions.filter(s => s.status === BrowserSessionStatus.ERROR).length,
+      active: sessions.filter((s) => s.status === BrowserSessionStatus.ACTIVE)
+        .length,
+      idle: sessions.filter((s) => s.status === BrowserSessionStatus.IDLE)
+        .length,
+      error: sessions.filter((s) => s.status === BrowserSessionStatus.ERROR)
+        .length,
     };
 
     const performance = {
-      averageSessionCreationMs: this.performanceCounters.sessionCreations > 0
-        ? Math.round(this.performanceCounters.totalCreationTimeMs / this.performanceCounters.sessionCreations)
-        : 0,
-      averageSessionCleanupMs: this.performanceCounters.sessionCleanups > 0
-        ? Math.round(this.performanceCounters.totalCleanupTimeMs / this.performanceCounters.sessionCleanups)
-        : 0,
+      averageSessionCreationMs:
+        this.performanceCounters.sessionCreations > 0
+          ? Math.round(
+              this.performanceCounters.totalCreationTimeMs /
+                this.performanceCounters.sessionCreations,
+            )
+          : 0,
+      averageSessionCleanupMs:
+        this.performanceCounters.sessionCleanups > 0
+          ? Math.round(
+              this.performanceCounters.totalCleanupTimeMs /
+                this.performanceCounters.sessionCleanups,
+            )
+          : 0,
       systemUptime: process.uptime(),
     };
 
     // Determine overall system status
-    let status = 'healthy';if (resourceUsage.memoryMB > this.resourceLimits.maxMemoryMB * 0.9) {status = 'warning';}if (resourceUsage.sessions >= this.resourceLimits.maxSessions) {
+    let status = 'healthy';
+    if (resourceUsage.memoryMB > this.resourceLimits.maxMemoryMB * 0.9) {
+      status = 'warning';
+    }
+    if (resourceUsage.sessions >= this.resourceLimits.maxSessions) {
       status = 'critical';
     }
 
@@ -889,8 +1011,12 @@ export class SessionService implements OnModuleDestroy {
 
     // Penalize high memory usage
     const recentResourceMetrics = metrics
-      .filter(m => m.type === 'resource_usage').slice(-10);if (recentResourceMetrics.length > 0) {
-      const avgMemory = recentResourceMetrics.reduce((sum, m) => sum + m.data.memoryMB, 0) / recentResourceMetrics.length;
+      .filter((m) => m.type === 'resource_usage')
+      .slice(-10);
+    if (recentResourceMetrics.length > 0) {
+      const avgMemory =
+        recentResourceMetrics.reduce((sum, m) => sum + m.data.memoryMB, 0) /
+        recentResourceMetrics.length;
       if (avgMemory > 512) score -= 20;
       if (avgMemory > 1024) score -= 30;
     }
@@ -898,20 +1024,40 @@ export class SessionService implements OnModuleDestroy {
     return Math.max(0, score);
   }
 
-  private async getBasicHealthStatus(sessionId: string): Promise<'healthy' | 'warning' | 'critical'> {const session = this.browserSessionService.getSession(sessionId);if (!session) return 'critical';if (session.status === BrowserSessionStatus.ERROR) return 'critical';if (session.status === BrowserSessionStatus.ACTIVE) return 'healthy';return 'warning';}private getRecentActivity(sessionId: string): SessionMetricEntry[] {
+  private async getBasicHealthStatus(
+    sessionId: string,
+  ): Promise<'healthy' | 'warning' | 'critical'> {
+    const session = this.browserSessionService.getSession(sessionId);
+    if (!session) return 'critical';
+    if (session.status === BrowserSessionStatus.ERROR) return 'critical';
+    if (session.status === BrowserSessionStatus.ACTIVE) return 'healthy';
+    return 'warning';
+  }
+  private getRecentActivity(sessionId: string): SessionMetricEntry[] {
     const metrics = this.sessionMetrics.get(sessionId) || [];
     const recentTime = new Date(Date.now() - 300000); // Last 5 minutes
-    return metrics.filter(m => m.timestamp >= recentTime).slice(-20);
+    return metrics.filter((m) => m.timestamp >= recentTime).slice(-20);
   }
 
   private getSessionSortValue(session: BrowserSessionDto, sortBy: string): any {
     switch (sortBy) {
-      case 'createdAt':return session.createdAt.getTime();case 'lastActivityAt':return session.lastActivityAt.getTime();case 'upTimeMs':return session.statistics.upTimeMs;case 'name':return session.name.toLowerCase();default:
+      case 'createdAt':
+        return session.createdAt.getTime();
+      case 'lastActivityAt':
+        return session.lastActivityAt.getTime();
+      case 'upTimeMs':
+        return session.statistics.upTimeMs;
+      case 'name':
+        return session.name.toLowerCase();
+      default:
         return session.createdAt.getTime();
     }
   }
 
-  private recordSessionMetric(sessionId: string, metric: SessionMetricEntry): void {
+  private recordSessionMetric(
+    sessionId: string,
+    metric: SessionMetricEntry,
+  ): void {
     const metrics = this.sessionMetrics.get(sessionId) || [];
     metrics.push(metric);
 
@@ -923,30 +1069,69 @@ export class SessionService implements OnModuleDestroy {
     this.sessionMetrics.set(sessionId, metrics);
   }
 
-  private async checkProcessHealth(pid: number): Promise<{ healthy: boolean; reason?: string }> {
+  private async checkProcessHealth(
+    pid: number,
+  ): Promise<{ healthy: boolean; reason?: string }> {
     if (pid <= 0) {
-      return { healthy: false, reason: 'Invalid PID' };}try {
+      return { healthy: false, reason: 'Invalid PID' };
+    }
+    try {
       // Mock process health check (in production would use pidusage)
       // Simulate process health based on PID validity
       if (pid < 1000 || pid > 99999) {
-        return { healthy: false, reason: 'Invalid PID range' };}// Mock occasional unhealthy processes
-      if (Math.random() < 0.05) { // 5% chance of unhealthy
-        return { healthy: false, reason: 'Process not responding' };}return { healthy: true };
+        return { healthy: false, reason: 'Invalid PID range' };
+      } // Mock occasional unhealthy processes
+      if (Math.random() < 0.05) {
+        // 5% chance of unhealthy
+        return { healthy: false, reason: 'Process not responding' };
+      }
+      return { healthy: true };
     } catch (_error) {
-      return { healthy: false, reason: 'Process not found' };}}
+      return { healthy: false, reason: 'Process not found' };
+    }
+  }
 
   private parseTimeframe(timeframe: string): number {
     const timeframes: Record<string, number> = {
-      '5m': 5 * 60 * 1000,'15m': 15 * 60 * 1000,'1h': 60 * 60 * 1000,'24h': 24 * 60 * 60 * 1000,};return timeframes[timeframe] || timeframes['15m'];}private calculateAverageResponseTime(metrics: SessionMetricEntry[]): number {
-    const responseMetrics = metrics.filter(m => m.data && typeof m.data.responseTimeMs === 'number');if (responseMetrics.length === 0) return 0;return responseMetrics.reduce((sum, m) => sum + (m.data.responseTimeMs as number), 0) / responseMetrics.length;
+      '5m': 5 * 60 * 1000,
+      '15m': 15 * 60 * 1000,
+      '1h': 60 * 60 * 1000,
+      '24h': 24 * 60 * 60 * 1000,
+    };
+    return timeframes[timeframe] || timeframes['15m'];
+  }
+  private calculateAverageResponseTime(metrics: SessionMetricEntry[]): number {
+    const responseMetrics = metrics.filter(
+      (m) => m.data && typeof m.data.responseTimeMs === 'number',
+    );
+    if (responseMetrics.length === 0) return 0;
+    return (
+      responseMetrics.reduce(
+        (sum, m) => sum + (m.data.responseTimeMs as number),
+        0,
+      ) / responseMetrics.length
+    );
   }
 
   private calculatePeakMemoryUsage(metrics: SessionMetricEntry[]): number {
-    const memoryMetrics = metrics.filter(m => m.data && typeof m.data.memoryMB === 'number');if (memoryMetrics.length === 0) return 0;return Math.max(...memoryMetrics.map(m => m.data.memoryMB as number));
+    const memoryMetrics = metrics.filter(
+      (m) => m.data && typeof m.data.memoryMB === 'number',
+    );
+    if (memoryMetrics.length === 0) return 0;
+    return Math.max(...memoryMetrics.map((m) => m.data.memoryMB as number));
   }
 
   private calculateAverageCpuUsage(metrics: SessionMetricEntry[]): number {
-    const cpuMetrics = metrics.filter(m => m.data && typeof m.data.cpuUsagePercent === 'number');if (cpuMetrics.length === 0) return 0;return cpuMetrics.reduce((sum, m) => sum + (m.data.cpuUsagePercent as number), 0) / cpuMetrics.length;
+    const cpuMetrics = metrics.filter(
+      (m) => m.data && typeof m.data.cpuUsagePercent === 'number',
+    );
+    if (cpuMetrics.length === 0) return 0;
+    return (
+      cpuMetrics.reduce(
+        (sum, m) => sum + (m.data.cpuUsagePercent as number),
+        0,
+      ) / cpuMetrics.length
+    );
   }
 
   private calculateActivityScore(metrics: SessionMetricEntry[]): number {
@@ -955,15 +1140,49 @@ export class SessionService implements OnModuleDestroy {
     return Math.min(100, metrics.length * 2);
   }
 
-  private calculateMemoryTrend(metrics: SessionMetricEntry[]): 'increasing' | 'decreasing' | 'stable' {const memoryMetrics = metrics.filter(m => m.data && typeof m.data.memoryMB === 'number').slice(-10);if (memoryMetrics.length < 3) return 'stable';const first = memoryMetrics[0].data.memoryMB as number;const last = memoryMetrics[memoryMetrics.length - 1].data.memoryMB as number;
+  private calculateMemoryTrend(
+    metrics: SessionMetricEntry[],
+  ): 'increasing' | 'decreasing' | 'stable' {
+    const memoryMetrics = metrics
+      .filter((m) => m.data && typeof m.data.memoryMB === 'number')
+      .slice(-10);
+    if (memoryMetrics.length < 3) return 'stable';
+    const first = memoryMetrics[0].data.memoryMB as number;
+    const last = memoryMetrics[memoryMetrics.length - 1].data
+      .memoryMB as number;
     const change = (last - first) / first;
 
-    if (change > 0.1) return 'increasing';if (change < -0.1) return 'decreasing';return 'stable';}private calculateCpuTrend(metrics: SessionMetricEntry[]): 'increasing' | 'decreasing' | 'stable' {const cpuMetrics = metrics.filter(m => m.data && typeof m.data.cpuUsagePercent === 'number').slice(-10);if (cpuMetrics.length < 3) return 'stable';const first = cpuMetrics[0].data.cpuUsagePercent as number;const last = cpuMetrics[cpuMetrics.length - 1].data.cpuUsagePercent as number;
+    if (change > 0.1) return 'increasing';
+    if (change < -0.1) return 'decreasing';
+    return 'stable';
+  }
+  private calculateCpuTrend(
+    metrics: SessionMetricEntry[],
+  ): 'increasing' | 'decreasing' | 'stable' {
+    const cpuMetrics = metrics
+      .filter((m) => m.data && typeof m.data.cpuUsagePercent === 'number')
+      .slice(-10);
+    if (cpuMetrics.length < 3) return 'stable';
+    const first = cpuMetrics[0].data.cpuUsagePercent as number;
+    const last = cpuMetrics[cpuMetrics.length - 1].data
+      .cpuUsagePercent as number;
     const change = Math.abs(last - first);
 
-    if (change > 10) return last > first ? 'increasing' : 'decreasing';return 'stable';}private calculateActivityTrend(metrics: SessionMetricEntry[]): 'increasing' | 'decreasing' | 'stable' {if (metrics.length < 10) return 'stable';const recent = metrics.slice(-5).length;const previous = metrics.slice(-10, -5).length;
+    if (change > 10) return last > first ? 'increasing' : 'decreasing';
+    return 'stable';
+  }
+  private calculateActivityTrend(
+    metrics: SessionMetricEntry[],
+  ): 'increasing' | 'decreasing' | 'stable' {
+    if (metrics.length < 10) return 'stable';
+    const recent = metrics.slice(-5).length;
+    const previous = metrics.slice(-10, -5).length;
 
-    if (recent > previous * 1.2) return 'increasing';if (recent < previous * 0.8) return 'decreasing';return 'stable';}private async executeBulkCreate(
+    if (recent > previous * 1.2) return 'increasing';
+    if (recent < previous * 0.8) return 'decreasing';
+    return 'stable';
+  }
+  private async executeBulkCreate(
     configs: CreateBrowserSessionDto[],
     parallel: boolean,
     successful: string[],
@@ -976,7 +1195,9 @@ export class SessionService implements OnModuleDestroy {
           successful.push(session.sessionId);
         } catch (error) {
           failed.push({
-            sessionId: 'unknown',error: error instanceof Error ? error.message : String(error),});
+            sessionId: 'unknown',
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       });
       await Promise.all(promises);
@@ -987,7 +1208,9 @@ export class SessionService implements OnModuleDestroy {
           successful.push(session.sessionId);
         } catch (error) {
           failed.push({
-            sessionId: 'unknown',error: error instanceof Error ? error.message : String(error),});
+            sessionId: 'unknown',
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
     }
@@ -1066,18 +1289,33 @@ export class SessionService implements OnModuleDestroy {
       const resourceUsage = await this.getCurrentResourceUsage();
 
       // Log system monitoring event (in production would emit event)
-      this.logger.debug('System monitoring event', {timestamp: new Date(),resourceUsage,
+      this.logger.debug('System monitoring event', {
+        timestamp: new Date(),
+        resourceUsage,
         sessionCount: resourceUsage.sessions,
-        event: 'system.monitoring',});// Check for resource warnings
+        event: 'system.monitoring',
+      }); // Check for resource warnings
       if (resourceUsage.memoryMB > this.resourceLimits.maxMemoryMB * 0.9) {
-        this.logger.warn('High memory usage warning', {type: 'high_memory_usage',current: resourceUsage.memoryMB,limit: this.resourceLimits.maxMemoryMB,
-          event: 'system.warning',});}
+        this.logger.warn('High memory usage warning', {
+          type: 'high_memory_usage',
+          current: resourceUsage.memoryMB,
+          limit: this.resourceLimits.maxMemoryMB,
+          event: 'system.warning',
+        });
+      }
 
       if (resourceUsage.sessions > this.resourceLimits.maxSessions * 0.9) {
-        this.logger.warn('High session count warning', {type: 'high_session_count',current: resourceUsage.sessions,limit: this.resourceLimits.maxSessions,
-          event: 'system.warning',});}
+        this.logger.warn('High session count warning', {
+          type: 'high_session_count',
+          current: resourceUsage.sessions,
+          limit: this.resourceLimits.maxSessions,
+          event: 'system.warning',
+        });
+      }
     } catch (error) {
-      this.logger.error('System monitoring failed', error);}}
+      this.logger.error('System monitoring failed', error);
+    }
+  }
 
   /**
    * Cleanup on service destruction

@@ -18,7 +18,11 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { BaseConversationalRepositoryService, RepositoryOperationContext, BusinessValidationResult } from './base-conversational-repository.service';
+import {
+  BaseConversationalRepositoryService,
+  RepositoryOperationContext,
+  BusinessValidationResult,
+} from './base-conversational-repository.service';
 import { ConversationalDatabaseService } from '../conversational-database.service';
 import { UserEntity } from '../../test-utils/database-types';
 import { Repository, QueryOptions } from '../../types/index';
@@ -48,16 +52,29 @@ interface UserRoleValidation {
  */
 @Injectable()
 export class UserConversationalRepositoryService extends BaseConversationalRepositoryService<UserEntity> {
-  private readonly logger = new Logger(UserConversationalRepositoryService.name);
+  private readonly logger = new Logger(
+    UserConversationalRepositoryService.name,
+  );
 
   /** Valid user roles */
-  private readonly validRoles = ['admin', 'user', 'moderator', 'guest', 'system'];
+  private readonly validRoles = [
+    'admin',
+    'user',
+    'moderator',
+    'guest',
+    'system',
+  ];
 
   /** Email validation regex */
   private readonly emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   /** Sensitive fields to redact in logs */
-  private readonly sensitiveFields = ['passwordHash', 'password', 'token', 'secret'];
+  private readonly sensitiveFields = [
+    'passwordHash',
+    'password',
+    'token',
+    'secret',
+  ];
 
   constructor(
     conversationalDbService: ConversationalDatabaseService,
@@ -110,8 +127,13 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       }
 
       // Password validation (for create/update operations)
-      if ((data as { password?: string }).password && context?.requirePasswordValidation !== false) {
-        const passwordValidation = this.validatePassword((data as { password?: string }).password);
+      if (
+        (data as { password?: string }).password &&
+        context?.requirePasswordValidation !== false
+      ) {
+        const passwordValidation = this.validatePassword(
+          (data as { password?: string }).password,
+        );
         if (!passwordValidation.valid) {
           result.errors.push(...passwordValidation.errors);
           result.valid = false;
@@ -123,7 +145,9 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       if (data.role && context?.requireRoleValidation !== false) {
         const roleValidation = this.validateUserRole(data.role, context);
         if (!roleValidation.valid) {
-          result.errors.push(`Invalid role: ${data.role}. Allowed roles: ${roleValidation.allowedRoles.join(', ')}`);
+          result.errors.push(
+            `Invalid role: ${data.role}. Allowed roles: ${roleValidation.allowedRoles.join(', ')}`,
+          );
           result.valid = false;
         }
       }
@@ -152,22 +176,28 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
         this.performSecurityChecks(operation, data, result, context);
       }
 
-      this.logger.debug(`Business rule validation completed for user ${operation}`, {
-        valid: result.valid,
-        errorsCount: result.errors.length,
-        warningsCount: result.warnings.length,
-        operation,
-      });
+      this.logger.debug(
+        `Business rule validation completed for user ${operation}`,
+        {
+          valid: result.valid,
+          errorsCount: result.errors.length,
+          warningsCount: result.warnings.length,
+          operation,
+        },
+      );
 
       return result;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Business rule validation failed for user ${operation}: ${errorMessage}`, {
-        operation,
-        error: errorMessage,
-        data: this.sanitizeUserData(data),
-      });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Business rule validation failed for user ${operation}: ${errorMessage}`,
+        {
+          operation,
+          error: errorMessage,
+          data: this.sanitizeUserData(data),
+        },
+      );
 
       result.valid = false;
       result.errors.push(`Validation error: ${errorMessage}`);
@@ -186,7 +216,10 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     const transformed = { ...entity };
 
     // Always redact password hash unless explicitly requested by system
-    if (context?.userRole !== 'system' && context?.bypassSecurityChecks !== true) {
+    if (
+      context?.userRole !== 'system' &&
+      context?.bypassSecurityChecks !== true
+    ) {
       (transformed as Partial<UserEntity>).passwordHash = '[REDACTED]';
     }
 
@@ -210,7 +243,11 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     email: string,
     operation: string,
   ): Promise<{ valid: boolean; errors: string[]; warnings: string[] }> {
-    const result = { valid: true, errors: [] as string[], warnings: [] as string[] };
+    const result = {
+      valid: true,
+      errors: [] as string[],
+      warnings: [] as string[],
+    };
 
     // Format validation
     if (!this.emailRegex.test(email)) {
@@ -241,7 +278,9 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
         }
       } catch (error) {
         this.logger.warn('Could not check email uniqueness', { email, error });
-        result.warnings.push('Email uniqueness check failed - proceeding with caution');
+        result.warnings.push(
+          'Email uniqueness check failed - proceeding with caution',
+        );
       }
     }
 
@@ -256,10 +295,16 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Validate password strength
    */
-  private validatePassword(
-    password?: string,
-  ): { valid: boolean; errors: string[]; warnings: string[] } {
-    const result = { valid: true, errors: [] as string[], warnings: [] as string[] };
+  private validatePassword(password?: string): {
+    valid: boolean;
+    errors: string[];
+    warnings: string[];
+  } {
+    const result = {
+      valid: true,
+      errors: [] as string[],
+      warnings: [] as string[],
+    };
 
     if (!password) {
       result.valid = false;
@@ -275,22 +320,30 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
 
     // Complexity checks
     if (!/[A-Z]/.test(password)) {
-      result.warnings.push('Password should contain at least one uppercase letter');
+      result.warnings.push(
+        'Password should contain at least one uppercase letter',
+      );
     }
     if (!/[a-z]/.test(password)) {
-      result.warnings.push('Password should contain at least one lowercase letter');
+      result.warnings.push(
+        'Password should contain at least one lowercase letter',
+      );
     }
     if (!/\d/.test(password)) {
       result.warnings.push('Password should contain at least one number');
     }
 
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      result.warnings.push('Password should contain at least one special character');
+      result.warnings.push(
+        'Password should contain at least one special character',
+      );
     }
 
     // Common password check
     const commonPasswords = ['password', '123456', 'qwerty', 'admin'];
-    if (commonPasswords.some(common => password.toLowerCase().includes(common))) {
+    if (
+      commonPasswords.some((common) => password.toLowerCase().includes(common))
+    ) {
       result.valid = false;
       result.errors.push('Password contains common patterns and is not secure');
     }
@@ -346,8 +399,10 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       system: 5,
     };
 
-    const currentLevel = roleHierarchy[currentRole as keyof typeof roleHierarchy] || 0;
-    const targetLevel = roleHierarchy[targetRole as keyof typeof roleHierarchy] || 0;
+    const currentLevel =
+      roleHierarchy[currentRole as keyof typeof roleHierarchy] || 0;
+    const targetLevel =
+      roleHierarchy[targetRole as keyof typeof roleHierarchy] || 0;
 
     // Users can only assign roles at their level or below
     return currentLevel >= targetLevel;
@@ -373,7 +428,9 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
 
     // Default values recommendation
     if (data.isActive === undefined) {
-      result.recommendations.push('Consider setting isActive explicitly (defaults to true)');
+      result.recommendations.push(
+        'Consider setting isActive explicitly (defaults to true)',
+      );
     }
   }
 
@@ -396,7 +453,9 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       const canChangeRole = this.canAssignRole(context.userRole, data.role);
       if (!canChangeRole) {
         result.valid = false;
-        result.errors.push(`Insufficient permissions to change role to '${data.role}'`);
+        result.errors.push(
+          `Insufficient permissions to change role to '${data.role}'`,
+        );
       }
     }
 
@@ -426,8 +485,12 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       result.errors.push('Insufficient permissions for user deletion');
     }
 
-    result.warnings.push('User deletion is irreversible and will remove all associated data');
-    result.recommendations.push('Consider deactivating the user instead of deletion');
+    result.warnings.push(
+      'User deletion is irreversible and will remove all associated data',
+    );
+    result.recommendations.push(
+      'Consider deactivating the user instead of deletion',
+    );
   }
 
   /**
@@ -444,9 +507,15 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       result.errors.push('Insufficient permissions for bulk user deletion');
     }
 
-    result.warnings.push('Bulk user deletion is a critical operation that cannot be undone');
-    result.recommendations.push('Ensure all affected users have been properly notified');
-    result.recommendations.push('Consider bulk deactivation instead of deletion');
+    result.warnings.push(
+      'Bulk user deletion is a critical operation that cannot be undone',
+    );
+    result.recommendations.push(
+      'Ensure all affected users have been properly notified',
+    );
+    result.recommendations.push(
+      'Consider bulk deactivation instead of deletion',
+    );
   }
 
   /**
@@ -460,7 +529,9 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   ): void {
     // Check for suspicious patterns
     if (data.email && this.isSuspiciousEmail(data.email)) {
-      result.warnings.push('Email pattern appears suspicious - may require additional verification');
+      result.warnings.push(
+        'Email pattern appears suspicious - may require additional verification',
+      );
     }
 
     // Rate limiting check (simplified)
@@ -488,12 +559,12 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   private isSuspiciousEmail(email: string): boolean {
     const suspiciousPatterns = [
       /^\d+@/, // Starts with numbers
-      /@\d+\./,  // Domain starts with numbers
+      /@\d+\./, // Domain starts with numbers
       /\+.*\+/, // Multiple plus signs
       /\.{2,}/, // Multiple consecutive dots
     ];
 
-    return suspiciousPatterns.some(pattern => pattern.test(email));
+    return suspiciousPatterns.some((pattern) => pattern.test(email));
   }
 
   /**
@@ -512,7 +583,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     if (!data) return data;
 
     const sanitized = { ...data };
-    this.sensitiveFields.forEach(field => {
+    this.sensitiveFields.forEach((field) => {
       if (field in sanitized) {
         (sanitized as Record<string, unknown>)[field] = '[REDACTED]';
       }
@@ -524,7 +595,9 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Sanitize context for logging
    */
-  private sanitizeContext(context?: UserOperationContext): Partial<UserOperationContext> | undefined {
+  private sanitizeContext(
+    context?: UserOperationContext,
+  ): Partial<UserOperationContext> | undefined {
     if (!context) return context;
 
     return {
@@ -546,7 +619,10 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     email: string,
     context?: UserOperationContext,
   ): Promise<UserEntity | null> {
-    this.logger.debug('Finding user by email', { email, context: this.sanitizeContext(context) });
+    this.logger.debug('Finding user by email', {
+      email,
+      context: this.sanitizeContext(context),
+    });
 
     try {
       const users = await this.findAll(
@@ -558,10 +634,13 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       );
 
       return users.length > 0 ? users[0] : null;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to find user by email: ${errorMessage}`, { email, error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to find user by email: ${errorMessage}`, {
+        email,
+        error: errorMessage,
+      });
       throw error;
     }
   }
@@ -573,7 +652,10 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     role: string,
     context?: UserOperationContext,
   ): Promise<readonly UserEntity[]> {
-    this.logger.debug('Finding users by role', { role, context: this.sanitizeContext(context) });
+    this.logger.debug('Finding users by role', {
+      role,
+      context: this.sanitizeContext(context),
+    });
 
     try {
       return this.findAll(
@@ -582,10 +664,13 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
         } as QueryOptions,
         context,
       );
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to find users by role: ${errorMessage}`, { role, error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to find users by role: ${errorMessage}`, {
+        role,
+        error: errorMessage,
+      });
       throw error;
     }
   }
@@ -593,8 +678,12 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   /**
    * Find active users with conversational validation
    */
-  async findActiveUsers(context?: UserOperationContext): Promise<readonly UserEntity[]> {
-    this.logger.debug('Finding active users', { context: this.sanitizeContext(context) });
+  async findActiveUsers(
+    context?: UserOperationContext,
+  ): Promise<readonly UserEntity[]> {
+    this.logger.debug('Finding active users', {
+      context: this.sanitizeContext(context),
+    });
 
     try {
       return this.findAll(
@@ -603,10 +692,12 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
         } as QueryOptions,
         context,
       );
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to find active users: ${errorMessage}`, { error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to find active users: ${errorMessage}`, {
+        error: errorMessage,
+      });
       throw error;
     }
   }
@@ -618,16 +709,15 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     id: string,
     context?: UserOperationContext,
   ): Promise<UserEntity | null> {
-    this.logger.debug('Deactivating user', { id, context: this.sanitizeContext(context) });
-
-    return this.update(
+    this.logger.debug('Deactivating user', {
       id,
-      { isActive: false } as Partial<UserEntity>,
-      {
-        ...context,
-        businessPurpose: context?.businessPurpose ?? 'Deactivate user account',
-      },
-    );
+      context: this.sanitizeContext(context),
+    });
+
+    return this.update(id, { isActive: false } as Partial<UserEntity>, {
+      ...context,
+      businessPurpose: context?.businessPurpose ?? 'Deactivate user account',
+    });
   }
 
   /**
@@ -637,15 +727,14 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
     id: string,
     context?: UserOperationContext,
   ): Promise<UserEntity | null> {
-    this.logger.debug('Reactivating user', { id, context: this.sanitizeContext(context) });
-
-    return this.update(
+    this.logger.debug('Reactivating user', {
       id,
-      { isActive: true } as Partial<UserEntity>,
-      {
-        ...context,
-        businessPurpose: context?.businessPurpose ?? 'Reactivate user account',
-      },
-    );
+      context: this.sanitizeContext(context),
+    });
+
+    return this.update(id, { isActive: true } as Partial<UserEntity>, {
+      ...context,
+      businessPurpose: context?.businessPurpose ?? 'Reactivate user account',
+    });
   }
 }

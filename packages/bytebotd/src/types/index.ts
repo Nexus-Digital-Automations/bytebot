@@ -200,10 +200,7 @@ export interface LoadTestResult {
  * Re-export shared UserRole enum for compatibility
  * NOTE: Using shared package types to ensure consistency across services
  */
-export {
-  UserRole,
-  Permission,
-} from '@bytebot/shared';
+export { UserRole, Permission } from '@bytebot/shared';
 
 /**
  * Type alias for backward compatibility with local Permission interface
@@ -674,7 +671,12 @@ export interface ClientInfo {
   readonly timestamp: string;
 
   // Enhanced security context for AIgent-Parlant bridge
-  readonly securityClassification?: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED' | 'CLASSIFIED';
+  readonly securityClassification?:
+    | 'PUBLIC'
+    | 'INTERNAL'
+    | 'CONFIDENTIAL'
+    | 'RESTRICTED'
+    | 'CLASSIFIED';
   readonly organizationId?: string;
   readonly departmentId?: string;
   readonly complianceFrameworks?: string[];

@@ -16,9 +16,7 @@
  *
  * @author Claude Code - Database Testing Specialist
  * @version 1.0.0
- */;
-
-import { Test, TestingModule } from '@nestjs/testing';
+ */ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { ConversationalDatabaseService } from '../conversational-database.service';
 // Removed unused imports: DatabaseOperationType, DatabaseRiskLevel;
@@ -29,7 +27,6 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   // Removed unused import: RiskLevel
-
 } from '../../parlant/parlant-integration.service';
 import { BaseEntity, Repository } from '../../types/index';
 // Removed unused import: QueryOptions
@@ -44,7 +41,6 @@ interface TestEntity extends BaseEntity {
   name: string;
   email: string;
   status: string;
-
 }
 
 interface MockParlantValidationResponse extends ParlantValidationResponse {
@@ -53,14 +49,13 @@ interface MockParlantValidationResponse extends ParlantValidationResponse {
   reason?: string;
   recommendations?: string[];
   requiresManualApproval?: boolean;
-
 }
 
 const createMockValidationResponse = (
   approved: boolean,
   conversationId: string,
   reason?: string,
-  options?: Partial<MockParlantValidationResponse>
+  options?: Partial<MockParlantValidationResponse>,
 ): MockParlantValidationResponse => ({
   approved,
   conversationId,
@@ -69,14 +64,15 @@ const createMockValidationResponse = (
   reasoning: reason ?? (approved ? 'Operation approved' : 'Operation denied'),
   confidence: 0.95,
   ...options,
-
 });
 
 const createMockParlantService = () => ({
-  validateOperation: jest.fn<Promise<MockParlantValidationResponse>, [ParlantValidationRequest]>(),
+  validateOperation: jest.fn<
+    Promise<MockParlantValidationResponse>,
+    [ParlantValidationRequest]
+  >(),
   createConversation: jest.fn(),
   endConversation: jest.fn(),
-
 });
 
 const createMockRepository = (): jest.Mocked<Repository<TestEntity>> => ({
@@ -86,20 +82,18 @@ const createMockRepository = (): jest.Mocked<Repository<TestEntity>> => ({
   update: jest.fn(),
   delete: jest.fn(),
   count: jest.fn(),
-
 });
 
 const createMockConfigService = () => ({
   get: jest.fn((key: string) => {
     const config: Record<string, unknown> = {
-  DB_SLOW_QUERY_THRESHOLD: '1000',
+      DB_SLOW_QUERY_THRESHOLD: '1000',
       DB_CRITICAL_QUERY_THRESHOLD: '5000',
       DB_ENABLE_QUERY_CACHING: 'true',
       DB_CACHE_TTL: '300',
       DB_MAX_RETRY_ATTEMPTS: '3',
       DB_RETRY_DELAY: '1000',
-    
-};
+    };
     return config[key];
   }),
 });
@@ -118,78 +112,81 @@ describe('ConversationalDatabaseService', () => {
     mockRepository = createMockRepository();
 
     const module: TestingModule = await Test.createTestingModule({
-  providers: [
+      providers: [
         ConversationalDatabaseService,
         {
-  provide: ParlantIntegrationService,
+          provide: ParlantIntegrationService,
           useValue: parlantService,
-        
-},
+        },
         {
-  provide: ConfigService,
+          provide: ConfigService,
           useValue: configService,
-        
-},
+        },
       ],
     }).compile();
 
-    service = module.get<ConversationalDatabaseService>(ConversationalDatabaseService);
+    service = module.get<ConversationalDatabaseService>(
+      ConversationalDatabaseService,
+    );
   });
 
   afterEach(() => {
-  jest.clearAllMocks();
-  
-});
+    jest.clearAllMocks();
+  });
 
   // ===== INITIALIZATION TESTS =====
 
   describe('Initialization', () => {
-  it('should be defined', () => {
+    it('should be defined', () => {
       expect(service).toBeDefined();
-    
-});
+    });
 
     it('should initialize with correct risk mappings', () => {
-  // Test by trying operations with different risk levelsexpect(service).toBeDefined();
+      // Test by trying operations with different risk levelsexpect(service).toBeDefined();
       // We can't directly test private properties, but we can verify behavior
-    
-});
+    });
 
     it('should have empty caches and metrics on initialization', () => {
-  const metrics = service.getMetrics();expect(metrics.totalOperations).toBe(0);
+      const metrics = service.getMetrics();
+      expect(metrics.totalOperations).toBe(0);
       expect(metrics.approvedOperations).toBe(0);
       expect(metrics.rejectedOperations).toBe(0);
 
       const cacheStatus = service.getCacheStatus();
       expect(cacheStatus.size).toBe(0);
-    
-});
+    });
   });
 
   // ===== FIND BY ID TESTS =====
 
   describe('findById', () => {
-  const testEntity: TestEntity = {
-  id: 'test-id-1',
+    const testEntity: TestEntity = {
+      id: 'test-id-1',
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
       version: 1,
       name: 'Test Entity',
       email: 'test@example.com',
       status: 'active',
-    
-};
+    };
 
     it('should successfully find entity with approved validation', async () => {
-  // Arrange
+      // Arrange
       parlantService.validateOperation.mockResolvedValue(
-        createMockValidationResponse(true, 'conv-123', 'Low risk read operation approved')
+        createMockValidationResponse(
+          true,
+          'conv-123',
+          'Low risk read operation approved',
+        ),
       );
       mockRepository.findById.mockResolvedValue(testEntity);
 
       // Act
-      const result = await service.findById(mockRepository, 'test-id-1', {userId: 'user-123',userRole: 'user',businessPurpose: 'Find test entity',
-});// Assert
+      const result = await service.findById(mockRepository, 'test-id-1', {
+        userId: 'user-123',
+        userRole: 'user',
+        businessPurpose: 'Find test entity',
+      }); // Assert
       expect(result).toEqual(testEntity);
       expect(parlantService.validateOperation).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -200,7 +197,7 @@ describe('ConversationalDatabaseService', () => {
             entityId: 'test-id-1',
             requiresBackup: false,
           }) as unknown,
-        })
+        }),
       );
       expect(mockRepository.findById).toHaveBeenCalledWith('test-id-1');
     });
@@ -208,7 +205,11 @@ describe('ConversationalDatabaseService', () => {
     it('should reject operation when validation fails', async () => {
       // Arrange
       parlantService.validateOperation.mockResolvedValue(
-        createMockValidationResponse(false, 'conv-456', 'Access denied for this resource')
+        createMockValidationResponse(
+          false,
+          'conv-456',
+          'Access denied for this resource',
+        ),
       );
 
       // Act & Assert
@@ -216,7 +217,7 @@ describe('ConversationalDatabaseService', () => {
         service.findById(mockRepository, 'test-id-1', {
           userId: 'user-123',
           userRole: 'guest',
-        })
+        }),
       ).rejects.toThrow(ConversationalValidationError);
       expect(mockRepository.findById).not.toHaveBeenCalled();
     });
@@ -227,11 +228,13 @@ describe('ConversationalDatabaseService', () => {
         approved: true,
         conversationId: 'conv-789',
       });
-      mockRepository.findById.mockRejectedValue(new Error('Database connection failed'));
+      mockRepository.findById.mockRejectedValue(
+        new Error('Database connection failed'),
+      );
 
       // Act & Assert
       await expect(
-        service.findById(mockRepository, 'test-id-1')
+        service.findById(mockRepository, 'test-id-1'),
       ).rejects.toThrow('Database connection failed');
     });
 
@@ -240,19 +243,29 @@ describe('ConversationalDatabaseService', () => {
       parlantService.validateOperation.mockResolvedValue({
         approved: true,
         conversationId: 'conv-123',
-});mockRepository.findById.mockResolvedValue(null);
+      });
+      mockRepository.findById.mockResolvedValue(null);
 
       // Act
-      const result = await service.findById(mockRepository, 'non-existent-id');// Assertexpect(result).toBeNull();
+      const result = await service.findById(mockRepository, 'non-existent-id'); // Assertexpect(result).toBeNull();
     });
   });
 
   // ===== CREATE TESTS =====
 
-  describe('create', () => {const createData = {name: 'New Entity',email: 'new@example.com',status: 'active',};const createdEntity: TestEntity = {
-  id: 'new-id-1',createdAt: '2024-01-01T00:00:00Z',updatedAt: '2024-01-01T00:00:00Z',version: 1,...createData,
-    
-};
+  describe('create', () => {
+    const createData = {
+      name: 'New Entity',
+      email: 'new@example.com',
+      status: 'active',
+    };
+    const createdEntity: TestEntity = {
+      id: 'new-id-1',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      version: 1,
+      ...createData,
+    };
 
     it('should successfully create entity with backup', async () => {
       // Arrange
@@ -265,12 +278,20 @@ describe('ConversationalDatabaseService', () => {
 
       // Act
       const result = await service.create(mockRepository, createData, {
-        userId: 'user-123',userRole: 'admin',businessPurpose: 'Create new test entity',});// Assert
+        userId: 'user-123',
+        userRole: 'admin',
+        businessPurpose: 'Create new test entity',
+      }); // Assert
       expect(result).toEqual(createdEntity);
       expect(parlantService.validateOperation).toHaveBeenCalledWith(
         expect.objectContaining({
-          operationType: 'DATABASE_CREATE',riskLevel: 'MEDIUM',parameters: expect.objectContaining({databaseOperation: 'CREATE',requiresBackup: true,}) as unknown,
-        })
+          operationType: 'DATABASE_CREATE',
+          riskLevel: 'MEDIUM',
+          parameters: expect.objectContaining({
+            databaseOperation: 'CREATE',
+            requiresBackup: true,
+          }) as unknown,
+        }),
       );
       expect(mockRepository.create).toHaveBeenCalledWith(createData);
 
@@ -292,19 +313,21 @@ describe('ConversationalDatabaseService', () => {
         service.create(mockRepository, createData, {
           userId: 'user-123',
           userRole: 'guest',
-        })
+        }),
       ).rejects.toThrow(ConversationalValidationError);
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
 
     it('should handle validation service errors with failsafe', async () => {
       // Arrange
-      parlantService.validateOperation.mockRejectedValue(new Error('Parlant service unavailable'));
+      parlantService.validateOperation.mockRejectedValue(
+        new Error('Parlant service unavailable'),
+      );
 
       // Act & Assert
-      await expect(
-        service.create(mockRepository, createData)
-      ).rejects.toThrow('Parlant service unavailable');
+      await expect(service.create(mockRepository, createData)).rejects.toThrow(
+        'Parlant service unavailable',
+      );
     });
   });
 
@@ -344,11 +367,16 @@ describe('ConversationalDatabaseService', () => {
       mockRepository.update.mockResolvedValue(updatedEntity);
 
       // Act
-      const result = await service.update(mockRepository, 'update-id-1', updateData, {
-        userId: 'user-123',
-        userRole: 'admin',
-        businessPurpose: 'Update entity status',
-      });
+      const result = await service.update(
+        mockRepository,
+        'update-id-1',
+        updateData,
+        {
+          userId: 'user-123',
+          userRole: 'admin',
+          businessPurpose: 'Update entity status',
+        },
+      );
 
       // Assert
       expect(result).toEqual(updatedEntity);
@@ -361,9 +389,12 @@ describe('ConversationalDatabaseService', () => {
             entityId: 'update-id-1',
             requiresBackup: true,
           }) as unknown,
-        })
+        }),
       );
-      expect(mockRepository.update).toHaveBeenCalledWith('update-id-1', updateData);
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        'update-id-1',
+        updateData,
+      );
     });
 
     it('should handle entity not found for update', async () => {
@@ -376,7 +407,11 @@ describe('ConversationalDatabaseService', () => {
       mockRepository.update.mockResolvedValue(null);
 
       // Act
-      const result = await service.update(mockRepository, 'non-existent-id', updateData);
+      const result = await service.update(
+        mockRepository,
+        'non-existent-id',
+        updateData,
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -407,16 +442,26 @@ describe('ConversationalDatabaseService', () => {
       mockRepository.delete.mockResolvedValue(true);
 
       // Act
-      const result = await service.delete(mockRepository, 'delete-id-1', {userId: 'admin-123',userRole: 'admin',businessPurpose: 'Remove obsolete entity',confirmDeletion: true,});
+      const result = await service.delete(mockRepository, 'delete-id-1', {
+        userId: 'admin-123',
+        userRole: 'admin',
+        businessPurpose: 'Remove obsolete entity',
+        confirmDeletion: true,
+      });
 
       // Assert
       expect(result).toBe(true);
       expect(parlantService.validateOperation).toHaveBeenCalledWith(
         expect.objectContaining({
-  operationType: 'DATABASE_DELETE',riskLevel: 'CRITICAL',parameters: expect.objectContaining({databaseOperation: 'DELETE',entityId: 'delete-id-1',requiresBackup: true,requiresMultiPartyApproval: true,
-          
-}) as unknown,
-        })
+          operationType: 'DATABASE_DELETE',
+          riskLevel: 'CRITICAL',
+          parameters: expect.objectContaining({
+            databaseOperation: 'DELETE',
+            entityId: 'delete-id-1',
+            requiresBackup: true,
+            requiresMultiPartyApproval: true,
+          }) as unknown,
+        }),
       );
       expect(mockRepository.delete).toHaveBeenCalledWith('delete-id-1');
 
@@ -438,7 +483,7 @@ describe('ConversationalDatabaseService', () => {
         service.delete(mockRepository, 'delete-id-1', {
           userId: 'user-123',
           userRole: 'user',
-        })
+        }),
       ).rejects.toThrow(ConversationalValidationError);
       expect(mockRepository.delete).not.toHaveBeenCalled();
     });
@@ -457,7 +502,7 @@ describe('ConversationalDatabaseService', () => {
           userId: 'user-123',
           userRole: 'user',
           confirmDeletion: true,
-        })
+        }),
       ).rejects.toThrow(ConversationalValidationError);
     });
   });
@@ -502,10 +547,14 @@ describe('ConversationalDatabaseService', () => {
       expect(result).toEqual(createdEntities);
       expect(parlantService.validateOperation).toHaveBeenCalledWith(
         expect.objectContaining({
-  operationType: 'DATABASE_BULK_CREATE',riskLevel: 'HIGH',parameters: expect.objectContaining({databaseOperation: 'BULK_CREATE',affectedRecords: 3,requiresBackup: true,
-          
-}) as unknown,
-        })
+          operationType: 'DATABASE_BULK_CREATE',
+          riskLevel: 'HIGH',
+          parameters: expect.objectContaining({
+            databaseOperation: 'BULK_CREATE',
+            affectedRecords: 3,
+            requiresBackup: true,
+          }) as unknown,
+        }),
       );
       expect(mockRepository.create).toHaveBeenCalledTimes(3);
     });
@@ -523,7 +572,7 @@ describe('ConversationalDatabaseService', () => {
         service.bulkCreate(mockRepository, bulkData, {
           userId: 'user-123',
           userRole: 'user',
-        })
+        }),
       ).rejects.toThrow(ConversationalValidationError);
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
@@ -558,11 +607,15 @@ describe('ConversationalDatabaseService', () => {
       expect(result).toBe(2); // Number of entities deleted
       expect(parlantService.validateOperation).toHaveBeenCalledWith(
         expect.objectContaining({
-  operationType: 'DATABASE_BULK_DELETE',riskLevel: 'CRITICAL',parameters: expect.objectContaining({databaseOperation: 'BULK_DELETE',affectedRecords: 5,requiresBackup: true,
+          operationType: 'DATABASE_BULK_DELETE',
+          riskLevel: 'CRITICAL',
+          parameters: expect.objectContaining({
+            databaseOperation: 'BULK_DELETE',
+            affectedRecords: 5,
+            requiresBackup: true,
             requiresMultiPartyApproval: true,
-          
-}) as unknown,
-        })
+          }) as unknown,
+        }),
       );
     });
 
@@ -579,14 +632,24 @@ describe('ConversationalDatabaseService', () => {
         service.bulkDelete(mockRepository, deleteFilter, {
           userId: 'admin-123',
           userRole: 'admin',
-        })
+        }),
       ).rejects.toThrow(ConversationalValidationError);
     });
   });
 
   // ===== CACHING TESTS =====
 
-  describe('Caching', () => {const testEntity: TestEntity = {id: 'cache-test-1',createdAt: '2024-01-01T00:00:00Z',updatedAt: '2024-01-01T00:00:00Z',version: 1,name: 'Cache Test Entity',email: 'cache@example.com',status: 'active',};it('should cache validation results for low-risk operations', async () => {
+  describe('Caching', () => {
+    const testEntity: TestEntity = {
+      id: 'cache-test-1',
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      version: 1,
+      name: 'Cache Test Entity',
+      email: 'cache@example.com',
+      status: 'active',
+    };
+    it('should cache validation results for low-risk operations', async () => {
       // Arrange
       parlantService.validateOperation.mockResolvedValue({
         approved: true,
@@ -627,12 +690,22 @@ describe('ConversationalDatabaseService', () => {
       mockRepository.delete.mockResolvedValue(true);
 
       // Act - Two delete operations
-      await service.delete(mockRepository, 'cache-test-1', {userId: 'admin-123',userRole: 'admin',confirmDeletion: true,});
+      await service.delete(mockRepository, 'cache-test-1', {
+        userId: 'admin-123',
+        userRole: 'admin',
+        confirmDeletion: true,
+      });
 
       parlantService.validateOperation.mockResolvedValue({
-  approved: true,
-        conversationId: 'conv-no-cache-456',reason: 'Critical operation approved again',
-});await service.delete(mockRepository, 'cache-test-1', {userId: 'admin-123',userRole: 'admin',confirmDeletion: true,});
+        approved: true,
+        conversationId: 'conv-no-cache-456',
+        reason: 'Critical operation approved again',
+      });
+      await service.delete(mockRepository, 'cache-test-1', {
+        userId: 'admin-123',
+        userRole: 'admin',
+        confirmDeletion: true,
+      });
 
       // Assert - Both operations should be validated separately
       expect(parlantService.validateOperation).toHaveBeenCalledTimes(2);
@@ -664,9 +737,8 @@ describe('ConversationalDatabaseService', () => {
       try {
         await service.findById(mockRepository, 'metrics-test-2');
       } catch (_error) {
-  // Expected to fail
-      
-}
+        // Expected to fail
+      }
 
       // Assert
       const metrics = service.getMetrics();
@@ -689,7 +761,10 @@ describe('ConversationalDatabaseService', () => {
       } as TestEntity);
 
       // Act
-      await service.create(mockRepository, { name: 'Backup Test' } as Omit<TestEntity, keyof BaseEntity>);
+      await service.create(mockRepository, { name: 'Backup Test' } as Omit<
+        TestEntity,
+        keyof BaseEntity
+      >);
 
       // Assert
       const backupStatus = service.getBackupStatus();
@@ -712,12 +787,14 @@ describe('ConversationalDatabaseService', () => {
   describe('Error Handling', () => {
     it('should handle Parlant service unavailability gracefully', async () => {
       // Arrange
-      parlantService.validateOperation.mockRejectedValue(new Error('Service unavailable'));
+      parlantService.validateOperation.mockRejectedValue(
+        new Error('Service unavailable'),
+      );
 
       // Act & Assert
-      await expect(
-        service.findById(mockRepository, 'test-id')
-      ).rejects.toThrow('Service unavailable');
+      await expect(service.findById(mockRepository, 'test-id')).rejects.toThrow(
+        'Service unavailable',
+      );
     });
 
     it('should handle repository errors during operations', async () => {
@@ -726,12 +803,14 @@ describe('ConversationalDatabaseService', () => {
         approved: true,
         conversationId: 'conv-error-123',
       });
-      mockRepository.findById.mockRejectedValue(new Error('Database connection lost'));
+      mockRepository.findById.mockRejectedValue(
+        new Error('Database connection lost'),
+      );
 
       // Act & Assert
-      await expect(
-        service.findById(mockRepository, 'test-id')
-      ).rejects.toThrow('Database connection lost');
+      await expect(service.findById(mockRepository, 'test-id')).rejects.toThrow(
+        'Database connection lost',
+      );
     });
 
     it('should provide meaningful error messages', async () => {
@@ -747,32 +826,74 @@ describe('ConversationalDatabaseService', () => {
         service.findById(mockRepository, 'test-id', {
           userId: 'user-123',
           userRole: 'guest',
-        })
-      ).rejects.toThrow('Database findById operation rejected: User does not have permission to access this resource');
+        }),
+      ).rejects.toThrow(
+        'Database findById operation rejected: User does not have permission to access this resource',
+      );
     });
   });
 
   // ===== INTEGRATION TESTS =====
 
   describe('Integration Tests', () => {
-  it('should handle complex workflow with multiple operations', async () => {// This would test a complex scenario with create -> update -> delete// with proper validation, backup, and audit trail generation
+    it('should handle complex workflow with multiple operations', async () => {
+      // This would test a complex scenario with create -> update -> delete// with proper validation, backup, and audit trail generation
 
-      const createData = { name: 'Integration Test Entity', email: 'integration@example.com', status: 'active' 
-};const createdEntity: TestEntity = {
-  id: 'integration-1',createdAt: '2024-01-01T00:00:00Z',updatedAt: '2024-01-01T00:00:00Z',version: 1,...createData,
-      
-};
+      const createData = {
+        name: 'Integration Test Entity',
+        email: 'integration@example.com',
+        status: 'active',
+      };
+      const createdEntity: TestEntity = {
+        id: 'integration-1',
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+        version: 1,
+        ...createData,
+      };
 
       // Setup mocks for all operations
       parlantService.validateOperation
-        .mockResolvedValueOnce({ approved: true, conversationId: 'conv-create' }).mockResolvedValueOnce({ approved: true, conversationId: 'conv-update' }).mockResolvedValueOnce({ approved: true, conversationId: 'conv-delete' });mockRepository.create.mockResolvedValue(createdEntity);mockRepository.findById.mockResolvedValue(createdEntity);
-      mockRepository.update.mockResolvedValue({ ...createdEntity, status: 'inactive' });mockRepository.delete.mockResolvedValue(true);// Execute workflow
+        .mockResolvedValueOnce({
+          approved: true,
+          conversationId: 'conv-create',
+        })
+        .mockResolvedValueOnce({
+          approved: true,
+          conversationId: 'conv-update',
+        })
+        .mockResolvedValueOnce({
+          approved: true,
+          conversationId: 'conv-delete',
+        });
+      mockRepository.create.mockResolvedValue(createdEntity);
+      mockRepository.findById.mockResolvedValue(createdEntity);
+      mockRepository.update.mockResolvedValue({
+        ...createdEntity,
+        status: 'inactive',
+      });
+      mockRepository.delete.mockResolvedValue(true); // Execute workflow
       const created = await service.create(mockRepository, createData, {
-        userId: 'admin-123',userRole: 'admin',businessPurpose: 'Integration test creation',});const updated = await service.update(mockRepository, created.id, { status: 'inactive' }, {userId: 'admin-123',userRole: 'admin',businessPurpose: 'Integration test update',});const deleted = await service.delete(mockRepository, created.id, {
-  userId: 'admin-123',userRole: 'admin',businessPurpose: 'Integration test deletion',
+        userId: 'admin-123',
+        userRole: 'admin',
+        businessPurpose: 'Integration test creation',
+      });
+      const updated = await service.update(
+        mockRepository,
+        created.id,
+        { status: 'inactive' },
+        {
+          userId: 'admin-123',
+          userRole: 'admin',
+          businessPurpose: 'Integration test update',
+        },
+      );
+      const deleted = await service.delete(mockRepository, created.id, {
+        userId: 'admin-123',
+        userRole: 'admin',
+        businessPurpose: 'Integration test deletion',
         confirmDeletion: true,
-      
-});
+      });
 
       // Verify all operations completed successfully
       expect(created).toBeDefined();

@@ -15,11 +15,15 @@
  * @version 1.0.0
  */
 
-import { jest } from '@jest/globals';import WebSocket from 'ws';import { EventEmitter } from 'events';import {ParlantValidationRequest,
+import { jest } from '@jest/globals';
+import WebSocket from 'ws';
+import { EventEmitter } from 'events';
+import {
+  ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ConversationEntry,
-  ParlantConversationContext
+  ParlantConversationContext,
 } from '../parlant/parlant-integration.service';
 
 // ===== MOCK CONFIGURATION =====
@@ -58,14 +62,21 @@ export class MockParlantApiClient {
   /**
    * Mock session creation
    */
-  async createSession(userId: string, agentRole: string): Promise<{ sessionId: string }> {
+  async createSession(
+    userId: string,
+    agentRole: string,
+  ): Promise<{ sessionId: string }> {
     await this.simulateDelay();
 
-    const sessionId = `mock_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;const session = {id: sessionId,
+    const sessionId = `mock_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const session = {
+      id: sessionId,
       agent_id: agentRole,
       customer_id: userId,
       title: `Mock Session for ${userId}`,
-      status: 'active',created_at: new Date().toISOString(),};
+      status: 'active',
+      created_at: new Date().toISOString(),
+    };
 
     this.sessionStore.set(sessionId, session);
     this.requestCount++;
@@ -76,7 +87,9 @@ export class MockParlantApiClient {
   /**
    * Mock validation request
    */
-  async validateFunction(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
+  async validateFunction(
+    request: ParlantValidationRequest,
+  ): Promise<ParlantValidationResponse> {
     await this.simulateDelay();
 
     // Check cache first
@@ -93,7 +106,10 @@ export class MockParlantApiClient {
       : this.generateFailureResponse(request);
 
     // Cache the response
-    if (this.config.enableCaching && this.responseCache.size < this.config.maxCacheSize) {
+    if (
+      this.config.enableCaching &&
+      this.responseCache.size < this.config.maxCacheSize
+    ) {
       this.responseCache.set(cacheKey, response);
     }
 
@@ -104,11 +120,13 @@ export class MockParlantApiClient {
   /**
    * Mock batch validation
    */
-  async validateBatch(requests: ParlantValidationRequest[]): Promise<ParlantValidationResponse[]> {
+  async validateBatch(
+    requests: ParlantValidationRequest[],
+  ): Promise<ParlantValidationResponse[]> {
     await this.simulateDelay(requests.length * 5); // Batch processing overhead
 
     const responses = await Promise.all(
-      requests.map(request => this.validateFunction(request))
+      requests.map((request) => this.validateFunction(request)),
     );
 
     return responses;
@@ -117,7 +135,9 @@ export class MockParlantApiClient {
   /**
    * Generate realistic success response
    */
-  private generateSuccessResponse(request: ParlantValidationRequest): ParlantValidationResponse {
+  private generateSuccessResponse(
+    request: ParlantValidationRequest,
+  ): ParlantValidationResponse {
     const confidence = this.calculateConfidence(request);
     const approved = confidence > 0.7;
 
@@ -141,13 +161,19 @@ export class MockParlantApiClient {
   /**
    * Generate realistic failure response
    */
-  private generateFailureResponse(request: ParlantValidationRequest): ParlantValidationResponse {
+  private generateFailureResponse(
+    request: ParlantValidationRequest,
+  ): ParlantValidationResponse {
     return {
       approved: false,
       confidence: 0.1,
       reasoning: `Mock validation failure for ${request.functionName}: ${this.generateErrorReason()}`,
-      intent: 'DENIED',suggestedAlternatives: [],validationTimestamp: new Date(),
-      conversationId: request.context.sessionId || 'mock_conversation',executionContext: {riskLevel: request.riskLevel,
+      intent: 'DENIED',
+      suggestedAlternatives: [],
+      validationTimestamp: new Date(),
+      conversationId: request.context.sessionId || 'mock_conversation',
+      executionContext: {
+        riskLevel: request.riskLevel,
         validationTimeMs: this.randomInRange(5, 20),
         cacheHit: false,
       },
@@ -181,8 +207,18 @@ export class MockParlantApiClient {
     }
 
     // Adjust based on function name patterns
-    if (request.functionName.includes('read') || request.functionName.includes('get')) {confidence += 0.1;}
-    if (request.functionName.includes('delete') || request.functionName.includes('remove')) {confidence -= 0.15;}
+    if (
+      request.functionName.includes('read') ||
+      request.functionName.includes('get')
+    ) {
+      confidence += 0.1;
+    }
+    if (
+      request.functionName.includes('delete') ||
+      request.functionName.includes('remove')
+    ) {
+      confidence -= 0.15;
+    }
 
     return Math.max(0.1, Math.min(0.99, confidence));
   }
@@ -190,11 +226,18 @@ export class MockParlantApiClient {
   /**
    * Generate reasoning text
    */
-  private generateReasoning(request: ParlantValidationRequest, approved: boolean): string {
+  private generateReasoning(
+    request: ParlantValidationRequest,
+    approved: boolean,
+  ): string {
     const action = approved ? 'approved' : 'denied';
     const risk = request.riskLevel.toLowerCase();
 
-    return `Mock validation ${action} for ${request.functionName} with ${risk} risk level. ` +`Action: ${request.actionDescription}. ` +`Context includes ${request.context.conversationHistory.length} conversation entries.`;
+    return (
+      `Mock validation ${action} for ${request.functionName} with ${risk} risk level. ` +
+      `Action: ${request.actionDescription}. ` +
+      `Context includes ${request.context.conversationHistory.length} conversation entries.`
+    );
   }
 
   /**
@@ -203,7 +246,19 @@ export class MockParlantApiClient {
   private extractIntent(request: ParlantValidationRequest): string {
     const functionName = request.functionName.toLowerCase();
 
-    if (functionName.includes('read') || functionName.includes('get')) {return 'QUERY_INFORMATION';}if (functionName.includes('create') || functionName.includes('add')) {return 'CREATE_RESOURCE';}if (functionName.includes('update') || functionName.includes('modify')) {return 'MODIFY_RESOURCE';}if (functionName.includes('delete') || functionName.includes('remove')) {return 'DELETE_RESOURCE';}return 'GENERAL_ACTION';
+    if (functionName.includes('read') || functionName.includes('get')) {
+      return 'QUERY_INFORMATION';
+    }
+    if (functionName.includes('create') || functionName.includes('add')) {
+      return 'CREATE_RESOURCE';
+    }
+    if (functionName.includes('update') || functionName.includes('modify')) {
+      return 'MODIFY_RESOURCE';
+    }
+    if (functionName.includes('delete') || functionName.includes('remove')) {
+      return 'DELETE_RESOURCE';
+    }
+    return 'GENERAL_ACTION';
   }
 
   /**
@@ -211,7 +266,9 @@ export class MockParlantApiClient {
    */
   private generateAlternatives(request: ParlantValidationRequest): string[] {
     return [
-      `Consider using a read-only version of ${request.functionName}`,`Add additional confirmation for ${request.actionDescription}`,`Use a lower-risk alternative approach`,
+      `Consider using a read-only version of ${request.functionName}`,
+      `Add additional confirmation for ${request.actionDescription}`,
+      `Use a lower-risk alternative approach`,
     ];
   }
 
@@ -220,7 +277,13 @@ export class MockParlantApiClient {
    */
   private generateErrorReason(): string {
     const reasons = [
-      'Insufficient permissions for requested action','Action conflicts with current security policy','Request parameters contain potentially unsafe values','Context indicates user intent mismatch','Risk level exceeds allowed threshold',];return reasons[Math.floor(Math.random() * reasons.length)];
+      'Insufficient permissions for requested action',
+      'Action conflicts with current security policy',
+      'Request parameters contain potentially unsafe values',
+      'Context indicates user intent mismatch',
+      'Risk level exceeds allowed threshold',
+    ];
+    return reasons[Math.floor(Math.random() * reasons.length)];
   }
 
   /**
@@ -252,7 +315,7 @@ export class MockParlantApiClient {
     const [min, max] = this.config.latencyRange;
     const delay = this.randomInRange(min, max) + extraMs;
 
-    return new Promise(resolve => setTimeout(resolve, delay));
+    return new Promise((resolve) => setTimeout(resolve, delay));
   }
 
   /**
@@ -296,17 +359,33 @@ export class MockParlantWebSocket extends EventEmitter {
     this.config = config;
 
     // Simulate connection
-    setTimeout(() => {
-      this.readyState = WebSocket.OPEN;
-      this.emit('open');}, this.randomInRange(10, 50));}
+    setTimeout(
+      () => {
+        this.readyState = WebSocket.OPEN;
+        this.emit('open');
+      },
+      this.randomInRange(10, 50),
+    );
+  }
 
   send(data: string): void {
     const message = JSON.parse(data);
     this.messageQueue.push(message);
 
     // Simulate response
-    setTimeout(() => {
-      this.emit('message', JSON.stringify({type: 'response',conversation_id: message.conversation_id,data: { status: 'received', timestamp: new Date().toISOString() }}));}, this.randomInRange(5, 25));
+    setTimeout(
+      () => {
+        this.emit(
+          'message',
+          JSON.stringify({
+            type: 'response',
+            conversation_id: message.conversation_id,
+            data: { status: 'received', timestamp: new Date().toISOString() },
+          }),
+        );
+      },
+      this.randomInRange(5, 25),
+    );
   }
 
   close(): void {
@@ -321,7 +400,9 @@ export class MockParlantWebSocket extends EventEmitter {
 
 // ===== MOCK PROVIDERS =====
 
-export const createParlantMocks = (config: MockConfig = DEFAULT_MOCK_CONFIG) => {
+export const createParlantMocks = (
+  config: MockConfig = DEFAULT_MOCK_CONFIG,
+) => {
   return {
     mockApiClient: new MockParlantApiClient(config),
     mockWebSocket: MockParlantWebSocket,
@@ -331,16 +412,26 @@ export const createParlantMocks = (config: MockConfig = DEFAULT_MOCK_CONFIG) => 
 
 // ===== TEST DATA GENERATORS =====
 
-export const generateMockConversationContext = (overrides: Partial<ParlantConversationContext> = {}): ParlantConversationContext => {
+export const generateMockConversationContext = (
+  overrides: Partial<ParlantConversationContext> = {},
+): ParlantConversationContext => {
   return {
-    userId: `mock_user_${Math.random().toString(36).substring(7)}`,sessionId: `mock_session_${Date.now()}`,
-    agentRole: 'AI_ASSISTANT',securityLevel: 'MEDIUM',conversationHistory: generateMockConversationHistory(),metadata: {
-      source: 'unit_test',timestamp: new Date().toISOString(),},
+    userId: `mock_user_${Math.random().toString(36).substring(7)}`,
+    sessionId: `mock_session_${Date.now()}`,
+    agentRole: 'AI_ASSISTANT',
+    securityLevel: 'MEDIUM',
+    conversationHistory: generateMockConversationHistory(),
+    metadata: {
+      source: 'unit_test',
+      timestamp: new Date().toISOString(),
+    },
     ...overrides,
   };
 };
 
-export const generateMockConversationHistory = (count: number = 3): ConversationEntry[] => {
+export const generateMockConversationHistory = (
+  count: number = 3,
+): ConversationEntry[] => {
   const entries: ConversationEntry[] = [];
 
   for (let i = 0; i < count; i++) {
@@ -348,18 +439,26 @@ export const generateMockConversationHistory = (count: number = 3): Conversation
       timestamp: new Date(Date.now() - (count - i) * 60000),
       speaker: i % 2 === 0 ? 'USER' : 'ASSISTANT',
       message: `Mock conversation message ${i + 1}`,
-      intent: i % 2 === 0 ? 'REQUEST_ACTION' : 'PROVIDE_RESPONSE',confidence: 0.8 + Math.random() * 0.2,});
+      intent: i % 2 === 0 ? 'REQUEST_ACTION' : 'PROVIDE_RESPONSE',
+      confidence: 0.8 + Math.random() * 0.2,
+    });
   }
 
   return entries;
 };
 
-export const generateMockValidationRequest = (overrides: Partial<ParlantValidationRequest> = {}): ParlantValidationRequest => {
+export const generateMockValidationRequest = (
+  overrides: Partial<ParlantValidationRequest> = {},
+): ParlantValidationRequest => {
   return {
-    functionName: 'mockFunction',functionParams: { param1: 'value1', param2: 42 },actionDescription: 'Mock function execution for testing',
+    functionName: 'mockFunction',
+    functionParams: { param1: 'value1', param2: 42 },
+    actionDescription: 'Mock function execution for testing',
     context: generateMockConversationContext(),
     riskLevel: RiskLevel._LOW,
-    operationId: `mock_op_${Date.now()}_${Math.random().toString(36).substring(7)}`,...overrides,};
+    operationId: `mock_op_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+    ...overrides,
+  };
 };
 
 // ===== JEST MOCK FACTORIES =====
@@ -376,21 +475,25 @@ export const createJestMockParlantService = () => {
   };
 
   // Configure default implementations
-  mockService.validateFunction.mockImplementation(async (request: ParlantValidationRequest) => {
-    return {
-      approved: true,
-      confidence: 0.9,
-      reasoning: `Mock approval for ${request.functionName}`,
-      intent: 'APPROVED_ACTION',suggestedAlternatives: [],validationTimestamp: new Date(),
-      conversationId: request.context.sessionId || 'mock_conversation',
-      executionContext: {
-        riskLevel: request.riskLevel,
-        validationTimeMs: 25,
-        cacheHit: false,
-      },
-      cached: false,
-    };
-  });
+  mockService.validateFunction.mockImplementation(
+    async (request: ParlantValidationRequest) => {
+      return {
+        approved: true,
+        confidence: 0.9,
+        reasoning: `Mock approval for ${request.functionName}`,
+        intent: 'APPROVED_ACTION',
+        suggestedAlternatives: [],
+        validationTimestamp: new Date(),
+        conversationId: request.context.sessionId || 'mock_conversation',
+        executionContext: {
+          riskLevel: request.riskLevel,
+          validationTimeMs: 25,
+          cacheHit: false,
+        },
+        cached: false,
+      };
+    },
+  );
 
   mockService.createSession.mockImplementation(async (userId: string) => {
     return { sessionId: `mock_session_${userId}_${Date.now()}` };

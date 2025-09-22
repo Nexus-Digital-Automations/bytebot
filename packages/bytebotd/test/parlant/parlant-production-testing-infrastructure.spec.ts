@@ -40,7 +40,7 @@ import {
   ParlantIntegrationService,
   ParlantValidationRequest,
   ParlantConversationContext,
-  RiskLevel
+  RiskLevel,
 } from '../../src/parlant/parlant-integration.service';
 
 /**
@@ -117,18 +117,19 @@ class ProductionTestingUtils {
         timeout: 300000,
         retryCount: 2,
         dependencies: [],
-        environment: 'PRODUCTION'
+        environment: 'PRODUCTION',
       },
       {
         name: 'Parlant Performance Comprehensive',
-        description: 'Performance testing with sub-1000ms targets and 85%+ cache hit rates',
+        description:
+          'Performance testing with sub-1000ms targets and 85%+ cache hit rates',
         filePath: './test/parlant/parlant-performance-comprehensive.spec.ts',
         category: 'PERFORMANCE',
         priority: 'CRITICAL',
         timeout: 600000,
         retryCount: 1,
         dependencies: ['Parlant Conversational Validation'],
-        environment: 'PRODUCTION'
+        environment: 'PRODUCTION',
       },
       {
         name: 'Parlant Security Validation',
@@ -139,37 +140,44 @@ class ProductionTestingUtils {
         timeout: 300000,
         retryCount: 2,
         dependencies: [],
-        environment: 'PRODUCTION'
+        environment: 'PRODUCTION',
       },
       {
         name: 'Parlant E2E Workflow',
-        description: 'End-to-end workflow testing including WebSocket streaming',
+        description:
+          'End-to-end workflow testing including WebSocket streaming',
         filePath: './test/parlant/parlant-e2e-workflow.spec.ts',
         category: 'E2E',
         priority: 'HIGH',
         timeout: 900000,
         retryCount: 1,
-        dependencies: ['Parlant Conversational Validation', 'Parlant Security Validation'],
-        environment: 'PRODUCTION'
+        dependencies: [
+          'Parlant Conversational Validation',
+          'Parlant Security Validation',
+        ],
+        environment: 'PRODUCTION',
       },
       {
         name: 'Parlant Cache Database Integration',
-        description: 'Cache and database integration with 85%+ hit rate validation',
+        description:
+          'Cache and database integration with 85%+ hit rate validation',
         filePath: './test/parlant/parlant-cache-database-integration.spec.ts',
         category: 'INTEGRATION',
         priority: 'HIGH',
         timeout: 600000,
         retryCount: 1,
         dependencies: ['Parlant Performance Comprehensive'],
-        environment: 'PRODUCTION'
-      }
+        environment: 'PRODUCTION',
+      },
     ];
   }
 
   /**
    * Execute test suite with proper error handling and metrics collection
    */
-  static async executeTestSuite(config: TestSuiteConfig): Promise<TestExecutionResult> {
+  static async executeTestSuite(
+    config: TestSuiteConfig,
+  ): Promise<TestExecutionResult> {
     return new Promise((resolve) => {
       const startTime = Date.now();
       let stdout = '';
@@ -177,7 +185,7 @@ class ProductionTestingUtils {
 
       const testProcess = spawn('npm', ['test', '--', config.filePath], {
         stdio: 'pipe',
-        env: { ...process.env, NODE_ENV: 'test' }
+        env: { ...process.env, NODE_ENV: 'test' },
       });
 
       testProcess.stdout?.on('data', (data) => {
@@ -196,7 +204,8 @@ class ProductionTestingUtils {
         const testsRun = this.extractMetric(stdout, /(\d+) tests?/i) || 0;
         const testsPassed = this.extractMetric(stdout, /(\d+) passed/i) || 0;
         const testsFailed = this.extractMetric(stdout, /(\d+) failed/i) || 0;
-        const coverage = this.extractMetric(stdout, /(\d+\.?\d*)% coverage/i) || 0;
+        const coverage =
+          this.extractMetric(stdout, /(\d+\.?\d*)% coverage/i) || 0;
 
         const errors = stderr ? [stderr.trim()] : [];
         const warnings = this.extractWarnings(stdout);
@@ -214,8 +223,8 @@ class ProductionTestingUtils {
           performanceMetrics: {
             executionTime: duration,
             memoryUsage: process.memoryUsage().heapUsed,
-            cpuUsage: 0 // Would be measured in real implementation
-          }
+            cpuUsage: 0, // Would be measured in real implementation
+          },
         });
       });
 
@@ -232,7 +241,7 @@ class ProductionTestingUtils {
           coverage: 0,
           errors: [`Test suite timed out after ${config.timeout}ms`],
           warnings: [],
-          performanceMetrics: {}
+          performanceMetrics: {},
         });
       }, config.timeout);
     });
@@ -264,7 +273,9 @@ class ProductionTestingUtils {
   /**
    * Validate production infrastructure components
    */
-  static async validateInfrastructure(): Promise<InfrastructureValidationResult[]> {
+  static async validateInfrastructure(): Promise<
+    InfrastructureValidationResult[]
+  > {
     const validationResults: InfrastructureValidationResult[] = [];
 
     // Database connectivity
@@ -291,7 +302,7 @@ class ProductionTestingUtils {
   private static async validateDatabase(): Promise<InfrastructureValidationResult> {
     try {
       // Simulate database connectivity check
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       return {
         component: 'Database',
@@ -300,10 +311,12 @@ class ProductionTestingUtils {
           connectionPoolSize: 20,
           activeConnections: 5,
           responseTime: 45,
-          uptime: '99.9%'
+          uptime: '99.9%',
         },
         issues: [],
-        recommendations: ['Consider increasing connection pool for high load periods']
+        recommendations: [
+          'Consider increasing connection pool for high load periods',
+        ],
       };
     } catch (error) {
       return {
@@ -311,7 +324,10 @@ class ProductionTestingUtils {
         status: 'FAILED',
         metrics: {},
         issues: [`Database connection failed: ${error}`],
-        recommendations: ['Check database server status', 'Verify connection configuration']
+        recommendations: [
+          'Check database server status',
+          'Verify connection configuration',
+        ],
       };
     }
   }
@@ -322,7 +338,7 @@ class ProductionTestingUtils {
   private static async validateRedisCache(): Promise<InfrastructureValidationResult> {
     try {
       // Simulate Redis connectivity check
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       return {
         component: 'Redis Cache',
@@ -331,10 +347,10 @@ class ProductionTestingUtils {
           memoryUsage: '45%',
           hitRate: '87%',
           connectedClients: 15,
-          commandsPerSecond: 1250
+          commandsPerSecond: 1250,
         },
         issues: [],
-        recommendations: ['Monitor memory usage during peak hours']
+        recommendations: ['Monitor memory usage during peak hours'],
       };
     } catch (error) {
       return {
@@ -342,7 +358,10 @@ class ProductionTestingUtils {
         status: 'FAILED',
         metrics: {},
         issues: [`Redis connection failed: ${error}`],
-        recommendations: ['Check Redis server status', 'Verify cluster configuration']
+        recommendations: [
+          'Check Redis server status',
+          'Verify cluster configuration',
+        ],
       };
     }
   }
@@ -358,10 +377,13 @@ class ProductionTestingUtils {
         activeConnections: 150,
         messagesPerSecond: 500,
         averageLatency: 85,
-        connectionErrors: 2
+        connectionErrors: 2,
       },
       issues: ['Minor connection timeout issues during peak load'],
-      recommendations: ['Increase WebSocket timeout configuration', 'Implement connection pooling']
+      recommendations: [
+        'Increase WebSocket timeout configuration',
+        'Implement connection pooling',
+      ],
     };
   }
 
@@ -376,10 +398,13 @@ class ProductionTestingUtils {
         metricsCollected: 1500,
         alertsConfigured: 25,
         dashboardsActive: 8,
-        dataRetention: '30 days'
+        dataRetention: '30 days',
       },
       issues: [],
-      recommendations: ['Add more granular performance metrics', 'Set up alerting for cache hit rates']
+      recommendations: [
+        'Add more granular performance metrics',
+        'Set up alerting for cache hit rates',
+      ],
     };
   }
 
@@ -394,10 +419,12 @@ class ProductionTestingUtils {
         jwtValidationTime: 15,
         sessionSecurityScore: 95,
         encryptionStrength: 'AES-256',
-        auditLogsEnabled: true
+        auditLogsEnabled: true,
       },
       issues: [],
-      recommendations: ['Implement additional rate limiting for auth endpoints']
+      recommendations: [
+        'Implement additional rate limiting for auth endpoints',
+      ],
     };
   }
 
@@ -406,16 +433,32 @@ class ProductionTestingUtils {
    */
   static async generateTestReport(
     testResults: TestExecutionResult[],
-    infrastructureResults: InfrastructureValidationResult[]
+    infrastructureResults: InfrastructureValidationResult[],
   ): Promise<string> {
-    const totalTests = testResults.reduce((sum, result) => sum + result.testsRun, 0);
-    const totalPassed = testResults.reduce((sum, result) => sum + result.testsPassed, 0);
-    const totalFailed = testResults.reduce((sum, result) => sum + result.testsFailed, 0);
-    const overallSuccessRate = totalTests > 0 ? (totalPassed / totalTests) * 100 : 0;
-    const averageCoverage = testResults.reduce((sum, result) => sum + result.coverage, 0) / testResults.length;
+    const totalTests = testResults.reduce(
+      (sum, result) => sum + result.testsRun,
+      0,
+    );
+    const totalPassed = testResults.reduce(
+      (sum, result) => sum + result.testsPassed,
+      0,
+    );
+    const totalFailed = testResults.reduce(
+      (sum, result) => sum + result.testsFailed,
+      0,
+    );
+    const overallSuccessRate =
+      totalTests > 0 ? (totalPassed / totalTests) * 100 : 0;
+    const averageCoverage =
+      testResults.reduce((sum, result) => sum + result.coverage, 0) /
+      testResults.length;
 
-    const criticalIssues = infrastructureResults.filter(r => r.status === 'FAILED').length;
-    const warnings = infrastructureResults.filter(r => r.status === 'DEGRADED').length;
+    const criticalIssues = infrastructureResults.filter(
+      (r) => r.status === 'FAILED',
+    ).length;
+    const warnings = infrastructureResults.filter(
+      (r) => r.status === 'DEGRADED',
+    ).length;
 
     const report = `
 # Parlant Integration Production Testing Report
@@ -432,7 +475,9 @@ Generated: ${new Date().toISOString()}
 
 ## Test Suite Results
 
-${testResults.map(result => `
+${testResults
+  .map(
+    (result) => `
 ### ${result.suiteName}
 - **Status**: ${result.passed ? '✅ PASSED' : '❌ FAILED'}
 - **Duration**: ${result.duration}ms
@@ -441,17 +486,25 @@ ${testResults.map(result => `
 - **Coverage**: ${result.coverage.toFixed(1)}%
 ${result.errors.length > 0 ? `- **Errors**: ${result.errors.join(', ')}` : ''}
 ${result.warnings.length > 0 ? `- **Warnings**: ${result.warnings.join(', ')}` : ''}
-`).join('')}
+`,
+  )
+  .join('')}
 
 ## Infrastructure Validation
 
-${infrastructureResults.map(result => `
+${infrastructureResults
+  .map(
+    (result) => `
 ### ${result.component}
 - **Status**: ${result.status === 'HEALTHY' ? '✅' : result.status === 'DEGRADED' ? '⚠️' : '❌'} ${result.status}
-- **Metrics**: ${Object.entries(result.metrics).map(([key, value]) => `${key}: ${value}`).join(', ')}
+- **Metrics**: ${Object.entries(result.metrics)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ')}
 ${result.issues.length > 0 ? `- **Issues**: ${result.issues.join(', ')}` : ''}
 ${result.recommendations.length > 0 ? `- **Recommendations**: ${result.recommendations.join(', ')}` : ''}
-`).join('')}
+`,
+  )
+  .join('')}
 
 ## Performance Summary
 - **Parlant Response Time Target**: < 1000ms P95 ✅
@@ -482,16 +535,27 @@ ${this.generateReadinessAssessment(testResults, infrastructureResults)}
    */
   private static generateReadinessAssessment(
     testResults: TestExecutionResult[],
-    infrastructureResults: InfrastructureValidationResult[]
+    infrastructureResults: InfrastructureValidationResult[],
   ): string {
-    const allTestsPassed = testResults.every(result => result.passed);
+    const allTestsPassed = testResults.every((result) => result.passed);
     const criticalInfrastructureHealthy = infrastructureResults
-      .filter(result => ['Database', 'Redis Cache', 'Security Infrastructure'].includes(result.component))
-      .every(result => result.status === 'HEALTHY');
+      .filter((result) =>
+        ['Database', 'Redis Cache', 'Security Infrastructure'].includes(
+          result.component,
+        ),
+      )
+      .every((result) => result.status === 'HEALTHY');
 
-    const readinessScore = this.calculateReadinessScore(testResults, infrastructureResults);
+    const readinessScore = this.calculateReadinessScore(
+      testResults,
+      infrastructureResults,
+    );
 
-    if (readinessScore >= 95 && allTestsPassed && criticalInfrastructureHealthy) {
+    if (
+      readinessScore >= 95 &&
+      allTestsPassed &&
+      criticalInfrastructureHealthy
+    ) {
       return `
 🎉 **PRODUCTION READY** (Score: ${readinessScore}/100)
 All critical tests passed and infrastructure is healthy. Ready for production deployment.
@@ -514,19 +578,30 @@ Critical issues detected. Must resolve all failures before production deployment
    */
   private static calculateReadinessScore(
     testResults: TestExecutionResult[],
-    infrastructureResults: InfrastructureValidationResult[]
+    infrastructureResults: InfrastructureValidationResult[],
   ): number {
     // Test success contribution (60% of score)
-    const totalTests = testResults.reduce((sum, result) => sum + result.testsRun, 0);
-    const totalPassed = testResults.reduce((sum, result) => sum + result.testsPassed, 0);
+    const totalTests = testResults.reduce(
+      (sum, result) => sum + result.testsRun,
+      0,
+    );
+    const totalPassed = testResults.reduce(
+      (sum, result) => sum + result.testsPassed,
+      0,
+    );
     const testScore = totalTests > 0 ? (totalPassed / totalTests) * 60 : 0;
 
     // Infrastructure health contribution (30% of score)
-    const healthyComponents = infrastructureResults.filter(r => r.status === 'HEALTHY').length;
-    const infrastructureScore = (healthyComponents / infrastructureResults.length) * 30;
+    const healthyComponents = infrastructureResults.filter(
+      (r) => r.status === 'HEALTHY',
+    ).length;
+    const infrastructureScore =
+      (healthyComponents / infrastructureResults.length) * 30;
 
     // Coverage contribution (10% of score)
-    const averageCoverage = testResults.reduce((sum, result) => sum + result.coverage, 0) / testResults.length;
+    const averageCoverage =
+      testResults.reduce((sum, result) => sum + result.coverage, 0) /
+      testResults.length;
     const coverageScore = (averageCoverage / 100) * 10;
 
     return Math.round(testScore + infrastructureScore + coverageScore);
@@ -540,16 +615,13 @@ describe('Parlant Production Testing Infrastructure', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot()
-      ],
-      providers: [
-        ParlantIntegrationService,
-        Logger
-      ]
+      imports: [ConfigModule.forRoot()],
+      providers: [ParlantIntegrationService, Logger],
     }).compile();
 
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
@@ -566,12 +638,20 @@ describe('Parlant Production Testing Infrastructure', () => {
       const testSuites = ProductionTestingUtils.getTestSuiteConfigs();
       const testResults: TestExecutionResult[] = [];
 
-      logger.log('🚀 Starting comprehensive Parlant testing infrastructure validation');
-      logger.log(`Executing ${testSuites.length} test suites for production readiness`);
+      logger.log(
+        '🚀 Starting comprehensive Parlant testing infrastructure validation',
+      );
+      logger.log(
+        `Executing ${testSuites.length} test suites for production readiness`,
+      );
 
       // Execute critical tests first
-      const criticalSuites = testSuites.filter(suite => suite.priority === 'CRITICAL');
-      const nonCriticalSuites = testSuites.filter(suite => suite.priority !== 'CRITICAL');
+      const criticalSuites = testSuites.filter(
+        (suite) => suite.priority === 'CRITICAL',
+      );
+      const nonCriticalSuites = testSuites.filter(
+        (suite) => suite.priority !== 'CRITICAL',
+      );
 
       // Run critical tests sequentially to ensure stability
       for (const suite of criticalSuites) {
@@ -590,11 +670,13 @@ describe('Parlant Production Testing Infrastructure', () => {
           warnings: [],
           performanceMetrics: {
             memoryUsage: process.memoryUsage().heapUsed,
-            executionTime: Math.random() * 30000 + 10000
-          }
+            executionTime: Math.random() * 30000 + 10000,
+          },
         };
 
-        mockResult.testsPassed = mockResult.passed ? mockResult.testsRun : Math.floor(mockResult.testsRun * 0.9);
+        mockResult.testsPassed = mockResult.passed
+          ? mockResult.testsRun
+          : Math.floor(mockResult.testsRun * 0.9);
         mockResult.testsFailed = mockResult.testsRun - mockResult.testsPassed;
 
         testResults.push(mockResult);
@@ -608,7 +690,12 @@ describe('Parlant Production Testing Infrastructure', () => {
       }
 
       // Run non-critical tests in parallel for efficiency
-      if (criticalSuites.every(suite => testResults.find(r => r.suiteName === suite.name)?.passed)) {
+      if (
+        criticalSuites.every(
+          (suite) =>
+            testResults.find((r) => r.suiteName === suite.name)?.passed,
+        )
+      ) {
         logger.log('Running non-critical test suites in parallel');
 
         const nonCriticalPromises = nonCriticalSuites.map(async (suite) => {
@@ -624,11 +711,13 @@ describe('Parlant Production Testing Infrastructure', () => {
             warnings: Math.random() > 0.7 ? ['Minor performance warning'] : [],
             performanceMetrics: {
               memoryUsage: process.memoryUsage().heapUsed,
-              executionTime: Math.random() * 20000 + 5000
-            }
+              executionTime: Math.random() * 20000 + 5000,
+            },
           };
 
-          mockResult.testsPassed = mockResult.passed ? mockResult.testsRun : Math.floor(mockResult.testsRun * 0.8);
+          mockResult.testsPassed = mockResult.passed
+            ? mockResult.testsRun
+            : Math.floor(mockResult.testsRun * 0.8);
           mockResult.testsFailed = mockResult.testsRun - mockResult.testsPassed;
 
           return mockResult;
@@ -640,10 +729,14 @@ describe('Parlant Production Testing Infrastructure', () => {
 
       // Validate infrastructure
       logger.log('Validating production infrastructure components');
-      const infrastructureResults = await ProductionTestingUtils.validateInfrastructure();
+      const infrastructureResults =
+        await ProductionTestingUtils.validateInfrastructure();
 
       // Generate comprehensive report
-      const report = await ProductionTestingUtils.generateTestReport(testResults, infrastructureResults);
+      const report = await ProductionTestingUtils.generateTestReport(
+        testResults,
+        infrastructureResults,
+      );
 
       // Write report to file (in production environment)
       const reportPath = `./test-reports/parlant-production-readiness-${Date.now()}.md`;
@@ -653,17 +746,28 @@ describe('Parlant Production Testing Infrastructure', () => {
         await writeFile(reportPath, report);
         logger.log(`📊 Comprehensive test report generated: ${reportPath}`);
       } catch (error) {
-        logger.log('📊 Test report generated (file write simulated in test environment)');
+        logger.log(
+          '📊 Test report generated (file write simulated in test environment)',
+        );
       }
 
       // Calculate overall success metrics
-      const totalTests = testResults.reduce((sum, result) => sum + result.testsRun, 0);
-      const totalPassed = testResults.reduce((sum, result) => sum + result.testsPassed, 0);
-      const overallSuccessRate = totalTests > 0 ? (totalPassed / totalTests) * 100 : 0;
-      const criticalTestsPassed = criticalSuites.every(suite =>
-        testResults.find(r => r.suiteName === suite.name)?.passed
+      const totalTests = testResults.reduce(
+        (sum, result) => sum + result.testsRun,
+        0,
       );
-      const infrastructureHealthy = infrastructureResults.every(r => r.status === 'HEALTHY');
+      const totalPassed = testResults.reduce(
+        (sum, result) => sum + result.testsPassed,
+        0,
+      );
+      const overallSuccessRate =
+        totalTests > 0 ? (totalPassed / totalTests) * 100 : 0;
+      const criticalTestsPassed = criticalSuites.every(
+        (suite) => testResults.find((r) => r.suiteName === suite.name)?.passed,
+      );
+      const infrastructureHealthy = infrastructureResults.every(
+        (r) => r.status === 'HEALTHY',
+      );
 
       logger.log(`
 🎯 Production Readiness Summary:
@@ -677,17 +781,23 @@ describe('Parlant Production Testing Infrastructure', () => {
       // Production readiness validation
       expect(criticalTestsPassed).toBe(true);
       expect(overallSuccessRate).toBeGreaterThan(90);
-      expect(infrastructureResults.filter(r => r.status === 'FAILED')).toHaveLength(0);
+      expect(
+        infrastructureResults.filter((r) => r.status === 'FAILED'),
+      ).toHaveLength(0);
 
       // Performance targets validation
-      const performanceTestResult = testResults.find(r => r.suiteName.includes('Performance'));
+      const performanceTestResult = testResults.find((r) =>
+        r.suiteName.includes('Performance'),
+      );
       if (performanceTestResult) {
         expect(performanceTestResult.passed).toBe(true);
         expect(performanceTestResult.coverage).toBeGreaterThan(80);
       }
 
       // Security validation
-      const securityTestResult = testResults.find(r => r.suiteName.includes('Security'));
+      const securityTestResult = testResults.find((r) =>
+        r.suiteName.includes('Security'),
+      );
       if (securityTestResult) {
         expect(securityTestResult.passed).toBe(true);
         expect(securityTestResult.errors).toHaveLength(0);
@@ -695,7 +805,6 @@ describe('Parlant Production Testing Infrastructure', () => {
 
       logger.log('🎉 Parlant integration is PRODUCTION READY!');
       logger.log(report.split('\n').slice(0, 20).join('\n') + '\n...\n');
-
     }, 300000); // 5 minute timeout for full suite
 
     it('should validate production deployment configuration', async () => {
@@ -706,26 +815,28 @@ describe('Parlant Production Testing Infrastructure', () => {
           'websocket-bridge-service',
           'security-bridge-service',
           'performance-orchestrator',
-          'cache-service'
+          'cache-service',
         ],
         healthCheckEndpoints: [
           '/health/parlant',
           '/health/websocket',
           '/health/security',
           '/health/cache',
-          '/health/database'
+          '/health/database',
         ],
         monitoringSetup: true,
         alertingConfigured: true,
         backupStrategy: 'automated-daily',
         scalingPolicy: 'auto-scaling-enabled',
-        securityCompliance: ['SOC2', 'GDPR', 'HIPAA']
+        securityCompliance: ['SOC2', 'GDPR', 'HIPAA'],
       };
 
       logger.log('Validating production deployment configuration');
 
       // Validate service configuration
-      expect(deploymentConfig.services).toContain('parlant-integration-service');
+      expect(deploymentConfig.services).toContain(
+        'parlant-integration-service',
+      );
       expect(deploymentConfig.services).toContain('websocket-bridge-service');
       expect(deploymentConfig.services).toContain('security-bridge-service');
 
@@ -748,43 +859,48 @@ describe('Parlant Production Testing Infrastructure', () => {
       const loadTestScenarios = [
         { name: 'Normal Load', users: 100, duration: 60000, expectedRPS: 50 },
         { name: 'Peak Load', users: 500, duration: 30000, expectedRPS: 200 },
-        { name: 'Stress Load', users: 1000, duration: 15000, expectedRPS: 300 }
+        { name: 'Stress Load', users: 1000, duration: 15000, expectedRPS: 300 },
       ];
 
       for (const scenario of loadTestScenarios) {
-        logger.log(`Running ${scenario.name}: ${scenario.users} users for ${scenario.duration}ms`);
+        logger.log(
+          `Running ${scenario.name}: ${scenario.users} users for ${scenario.duration}ms`,
+        );
 
         const startTime = Date.now();
 
         // Simulate load test execution
-        const userPromises = Array.from({ length: Math.min(scenario.users, 50) }, async (_, i) => {
-          const mockRequest: ParlantValidationRequest = {
-            functionName: `load_test_function_${i}`,
-            functionParams: { loadTestUser: i, scenario: scenario.name },
-            actionDescription: `Load test request for ${scenario.name}`,
-            riskLevel: RiskLevel.LOW,
-            operationId: `load-test-${scenario.name}-${i}`,
-            context: {
-              userId: `load-user-${i}`,
-              sessionId: `load-session-${Math.floor(i / 10)}`,
-              agentRole: 'assistant',
-              securityLevel: 'LOW',
-              conversationHistory: [],
-              metadata: { loadTest: true, scenario: scenario.name }
-            }
-          };
+        const userPromises = Array.from(
+          { length: Math.min(scenario.users, 50) },
+          async (_, i) => {
+            const mockRequest: ParlantValidationRequest = {
+              functionName: `load_test_function_${i}`,
+              functionParams: { loadTestUser: i, scenario: scenario.name },
+              actionDescription: `Load test request for ${scenario.name}`,
+              riskLevel: RiskLevel.LOW,
+              operationId: `load-test-${scenario.name}-${i}`,
+              context: {
+                userId: `load-user-${i}`,
+                sessionId: `load-session-${Math.floor(i / 10)}`,
+                agentRole: 'assistant',
+                securityLevel: 'LOW',
+                conversationHistory: [],
+                metadata: { loadTest: true, scenario: scenario.name },
+              },
+            };
 
-          try {
-            await parlantService.validateFunctionExecution(mockRequest);
-            return true;
-          } catch (error) {
-            return false;
-          }
-        });
+            try {
+              await parlantService.validateFunctionExecution(mockRequest);
+              return true;
+            } catch (error) {
+              return false;
+            }
+          },
+        );
 
         const results = await Promise.all(userPromises);
         const duration = Date.now() - startTime;
-        const successRate = results.filter(r => r).length / results.length;
+        const successRate = results.filter((r) => r).length / results.length;
         const actualRPS = (results.length / duration) * 1000;
 
         logger.log(`${scenario.name} Results:
@@ -813,11 +929,13 @@ describe('Parlant Production Testing Infrastructure', () => {
         errorRate: { current: 0.02, threshold: 0.05, status: 'healthy' },
         throughput: { current: 150, threshold: 100, status: 'healthy' },
         memoryUsage: { current: 0.65, threshold: 0.8, status: 'healthy' },
-        dbConnections: { current: 15, threshold: 50, status: 'healthy' }
+        dbConnections: { current: 15, threshold: 50, status: 'healthy' },
       };
 
       for (const [metric, data] of Object.entries(monitoringMetrics)) {
-        logger.log(`${metric}: ${data.current} (threshold: ${data.threshold}) - ${data.status}`);
+        logger.log(
+          `${metric}: ${data.current} (threshold: ${data.threshold}) - ${data.status}`,
+        );
 
         if (metric === 'errorRate') {
           expect(data.current).toBeLessThan(data.threshold);
@@ -831,7 +949,7 @@ describe('Parlant Production Testing Infrastructure', () => {
         { metric: 'response_time_p95', threshold: 1000, enabled: true },
         { metric: 'cache_hit_rate', threshold: 0.85, enabled: true },
         { metric: 'error_rate', threshold: 0.05, enabled: true },
-        { metric: 'memory_usage', threshold: 0.8, enabled: true }
+        { metric: 'memory_usage', threshold: 0.8, enabled: true },
       ];
 
       for (const alert of alertConfigurations) {
@@ -848,28 +966,45 @@ describe('Parlant Production Testing Infrastructure', () => {
       const recoveryProcedures = [
         {
           scenario: 'Database Failure',
-          steps: ['Detect failure', 'Switch to backup', 'Restore service', 'Sync data'],
+          steps: [
+            'Detect failure',
+            'Switch to backup',
+            'Restore service',
+            'Sync data',
+          ],
           expectedRecoveryTime: 300000, // 5 minutes
-          tested: true
+          tested: true,
         },
         {
           scenario: 'Cache Service Failure',
-          steps: ['Detect failure', 'Fallback to database', 'Restart cache', 'Repopulate cache'],
+          steps: [
+            'Detect failure',
+            'Fallback to database',
+            'Restart cache',
+            'Repopulate cache',
+          ],
           expectedRecoveryTime: 180000, // 3 minutes
-          tested: true
+          tested: true,
         },
         {
           scenario: 'WebSocket Service Failure',
-          steps: ['Detect failure', 'Restart service', 'Reconnect clients', 'Resume streaming'],
+          steps: [
+            'Detect failure',
+            'Restart service',
+            'Reconnect clients',
+            'Resume streaming',
+          ],
           expectedRecoveryTime: 120000, // 2 minutes
-          tested: true
-        }
+          tested: true,
+        },
       ];
 
       for (const procedure of recoveryProcedures) {
         logger.log(`Disaster Recovery: ${procedure.scenario}`);
         logger.log(`  Steps: ${procedure.steps.join(' → ')}`);
-        logger.log(`  Expected Recovery Time: ${procedure.expectedRecoveryTime}ms`);
+        logger.log(
+          `  Expected Recovery Time: ${procedure.expectedRecoveryTime}ms`,
+        );
         logger.log(`  Tested: ${procedure.tested ? '✅' : '❌'}`);
 
         expect(procedure.tested).toBe(true);

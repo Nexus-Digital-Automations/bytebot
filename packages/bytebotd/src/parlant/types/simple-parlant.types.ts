@@ -151,7 +151,7 @@ export enum EvidenceType {
   SYSTEM_LOG = 'system_log',
   USER_ACTION = 'user_action',
   VALIDATION_RESULT = 'validation_result',
-  COMPLIANCE_RECORD = 'compliance_record'
+  COMPLIANCE_RECORD = 'compliance_record',
 }
 
 export interface EvidenceItem {
@@ -182,7 +182,11 @@ export interface LegalMetadata {
   readonly jurisdiction: string[];
   readonly legalHold: boolean;
   readonly privileged: boolean;
-  readonly confidentiality: 'public' | 'internal' | 'confidential' | 'privileged';
+  readonly confidentiality:
+    | 'public'
+    | 'internal'
+    | 'confidential'
+    | 'privileged';
   readonly retentionRequirement: number;
   readonly disposalDate?: Date;
   readonly expertWitness?: ExpertWitnessAssignment;
@@ -229,7 +233,12 @@ export interface ChainOfCustodyEntry {
   readonly evidenceId: string;
   readonly timestamp: Date;
   readonly custodian: string;
-  readonly action: 'created' | 'accessed' | 'modified' | 'transferred' | 'verified';
+  readonly action:
+    | 'created'
+    | 'accessed'
+    | 'modified'
+    | 'transferred'
+    | 'verified';
   readonly location: string;
   readonly purpose: string;
   readonly authorization: string;

@@ -18,7 +18,9 @@ import { EnterpriseRateLimitGuard } from '../guards/rate-limit.guard';
 import { SecurityHeadersMiddleware } from '../middleware/security-headers.middleware';
 import { DeprecationGuard } from '../versioning/deprecation.guard';
 import { VersionInterceptor } from '../versioning/version.interceptor';
-import Redis from 'ioredis';@Module({imports: [ConfigModule],
+import Redis from 'ioredis';
+@Module({
+  imports: [ConfigModule],
   providers: [
     // Reflector for versioning decorators
     Reflector,
@@ -26,11 +28,16 @@ import Redis from 'ioredis';@Module({imports: [ConfigModule],
     // Redis client for rate limiting
     {
       provide: 'REDIS_CLIENT',
-      useFactory: (configService: ConfigService) => {return new Redis({
-          host: configService.get<string>('REDIS_HOST', 'localhost'),port: configService.get<number>('REDIS_PORT', 6379),password: configService.get<string>('REDIS_PASSWORD'),
-      db: configService.get<number>('REDIS_DB', 2), // Separate DB for BytebotDmaxRetriesPerRequest: 3,
-      lazyConnect: true,
-          keyPrefix: 'bytebotd:',});},
+      useFactory: (configService: ConfigService) => {
+        return new Redis({
+          host: configService.get<string>('REDIS_HOST', 'localhost'),
+          port: configService.get<number>('REDIS_PORT', 6379),
+          password: configService.get<string>('REDIS_PASSWORD'),
+          db: configService.get<number>('REDIS_DB', 2), // Separate DB for BytebotDmaxRetriesPerRequest: 3,
+          lazyConnect: true,
+          keyPrefix: 'bytebotd:',
+        });
+      },
       inject: [ConfigService],
     },
 
@@ -39,18 +46,20 @@ import Redis from 'ioredis';@Module({imports: [ConfigModule],
       provide: APP_PIPE,
       useFactory: (configService: ConfigService) => {
         const environment = configService.get<string>(
-          'NODE_ENV','development',);// Use different validation levels based on environment
+          'NODE_ENV',
+          'development',
+        ); // Use different validation levels based on environment
         switch (environment) {
-
           case 'production':
-        return BytebotDValidationPipes.MAXIMUM_SECURITY;
-        case 'staging':return BytebotDValidationPipes.DESKTOP_OPERATIONS;
-    case 'development':return BytebotDValidationPipes.DEVELOPMENT;
-  default:
-        return BytebotDValidationPipes.STANDARD;
-        break;
-        
-    }
+            return BytebotDValidationPipes.MAXIMUM_SECURITY;
+          case 'staging':
+            return BytebotDValidationPipes.DESKTOP_OPERATIONS;
+          case 'development':
+            return BytebotDValidationPipes.DEVELOPMENT;
+          default:
+            return BytebotDValidationPipes.STANDARD;
+            break;
+        }
       },
       inject: [ConfigService],
     },
@@ -58,10 +67,11 @@ import Redis from 'ioredis';@Module({imports: [ConfigModule],
     // Throttler module options for EnterpriseRateLimitGuard
     {
       provide: 'THROTTLER:MODULE_OPTIONS',
-      useValue: {throttlers: [
+      useValue: {
+        throttlers: [
           {
             name: 'default',
-      ttl: 60000, // 60 secondslimit: 100, // 100 requests per minute for desktop operations
+            ttl: 60000, // 60 secondslimit: 100, // 100 requests per minute for desktop operations
           },
         ],
       },
@@ -70,7 +80,8 @@ import Redis from 'ioredis';@Module({imports: [ConfigModule],
     // Throttler storage for EnterpriseRateLimitGuard
     {
       provide: 'THROTTLER_STORAGE',
-      useValue: {getRecord: () => Promise.resolve({ totalHits: 0, timeToExpire: 0 }),
+      useValue: {
+        getRecord: () => Promise.resolve({ totalHits: 0, timeToExpire: 0 }),
         addRecord: () => Promise.resolve({ totalHits: 1, timeToExpire: 60000 }),
       },
     },
@@ -100,7 +111,11 @@ import Redis from 'ioredis';@Module({imports: [ConfigModule],
     VersionInterceptor,
   ],
   exports: [
-    'REDIS_CLIENT','THROTTLER:MODULE_OPTIONS','THROTTLER_STORAGE',SecurityHeadersMiddleware,EnterpriseRateLimitGuard,
+    'REDIS_CLIENT',
+    'THROTTLER:MODULE_OPTIONS',
+    'THROTTLER_STORAGE',
+    SecurityHeadersMiddleware,
+    EnterpriseRateLimitGuard,
     DeprecationGuard,
     VersionInterceptor,
   ],

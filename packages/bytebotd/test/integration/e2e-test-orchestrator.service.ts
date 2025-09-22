@@ -18,7 +18,12 @@
  * @author Integration Testing Team
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
@@ -42,7 +47,13 @@ interface E2ETestEnvironment {
  */
 interface E2ETestService {
   name: string;
-  type: 'BYTEBOT' | 'PARLANT' | 'BROWSER_USE' | 'COMPUTER_USE' | 'AUTH' | 'DATABASE';
+  type:
+    | 'BYTEBOT'
+    | 'PARLANT'
+    | 'BROWSER_USE'
+    | 'COMPUTER_USE'
+    | 'AUTH'
+    | 'DATABASE';
   endpoint: string;
   healthCheckPath: string;
   dependencies: string[];
@@ -180,7 +191,10 @@ interface E2EOrchestrationEvents {
 }
 
 @Injectable()
-export class E2ETestOrchestratorService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class E2ETestOrchestratorService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(E2ETestOrchestratorService.name);
   private environments = new Map<string, E2ETestEnvironment>();
   private activeTests = new Map<string, E2ETestMetrics>();
@@ -208,7 +222,9 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
   /**
    * Create and initialize a test environment
    */
-  async createTestEnvironment(config: Partial<E2ETestEnvironment>): Promise<E2ETestEnvironment> {
+  async createTestEnvironment(
+    config: Partial<E2ETestEnvironment>,
+  ): Promise<E2ETestEnvironment> {
     const environment: E2ETestEnvironment = {
       id: config.id || `env-${Date.now()}`,
       name: config.name || 'Test Environment',
@@ -217,10 +233,12 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       externalServices: config.externalServices || [],
       configuration: config.configuration || {},
       initialized: false,
-      healthy: false
+      healthy: false,
     };
 
-    this.logger.log(`Creating test environment: ${environment.name} (${environment.id})`);
+    this.logger.log(
+      `Creating test environment: ${environment.name} (${environment.id})`,
+    );
 
     try {
       await this.initializeServices(environment);
@@ -234,11 +252,15 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       this.environments.set(environment.id, environment);
       this.emit('environment.initialized', environment);
 
-      this.logger.log(`Test environment initialized successfully: ${environment.id}`);
+      this.logger.log(
+        `Test environment initialized successfully: ${environment.id}`,
+      );
       return environment;
-
     } catch (error) {
-      this.logger.error(`Failed to initialize test environment ${environment.id}:`, error);
+      this.logger.error(
+        `Failed to initialize test environment ${environment.id}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -246,9 +268,14 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
   /**
    * Start a test suite with monitoring
    */
-  async startTestSuite(suiteName: string, environmentId?: string): Promise<string> {
+  async startTestSuite(
+    suiteName: string,
+    environmentId?: string,
+  ): Promise<string> {
     const testId = `test-${Date.now()}`;
-    const environment = environmentId ? this.environments.get(environmentId) : this.environments.values().next().value;
+    const environment = environmentId
+      ? this.environments.get(environmentId)
+      : this.environments.values().next().value;
 
     if (!environment || !environment.healthy) {
       throw new Error(`Test environment not available: ${environmentId}`);
@@ -264,15 +291,15 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
         networkLatency: [],
         databaseResponseTimes: [],
         webSocketLatency: [],
-        apiResponseTimes: {}
+        apiResponseTimes: {},
       },
       errorSummary: {
         totalErrors: 0,
         errorsByCategory: {},
         criticalErrors: [],
         recoveredErrors: [],
-        errorPatterns: []
-      }
+        errorPatterns: [],
+      },
     };
 
     this.activeTests.set(testId, metrics);
@@ -291,7 +318,7 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     duration: number,
     status: 'PASSED' | 'FAILED' | 'SKIPPED',
     stepMetrics: Record<string, number> = {},
-    errors: string[] = []
+    errors: string[] = [],
   ): void {
     const testMetrics = this.activeTests.get(testId);
     if (!testMetrics) {
@@ -305,7 +332,7 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       status,
       stepMetrics,
       resourceUsage: this.getCurrentResourceUsage(),
-      errors
+      errors,
     };
 
     testMetrics.testCases.push(testCaseMetric);
@@ -313,7 +340,7 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     // Update error summary
     if (errors.length > 0) {
       testMetrics.errorSummary.totalErrors += errors.length;
-      errors.forEach(error => {
+      errors.forEach((error) => {
         const category = this.categorizeError(error);
         testMetrics.errorSummary.errorsByCategory[category] =
           (testMetrics.errorSummary.errorsByCategory[category] || 0) + 1;
@@ -321,7 +348,9 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     }
 
     this.emit('test.completed', testCaseName, testCaseMetric);
-    this.logger.log(`Test case completed: ${testCaseName} - ${status} (${duration}ms)`);
+    this.logger.log(
+      `Test case completed: ${testCaseName} - ${status} (${duration}ms)`,
+    );
   }
 
   /**
@@ -334,11 +363,14 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     }
 
     testMetrics.endTime = new Date();
-    testMetrics.totalDuration = testMetrics.endTime.getTime() - testMetrics.startTime.getTime();
+    testMetrics.totalDuration =
+      testMetrics.endTime.getTime() - testMetrics.startTime.getTime();
 
     this.activeTests.delete(testId);
 
-    this.logger.log(`Test suite completed: ${testMetrics.testSuiteName} - Duration: ${testMetrics.totalDuration}ms`);
+    this.logger.log(
+      `Test suite completed: ${testMetrics.testSuiteName} - Duration: ${testMetrics.totalDuration}ms`,
+    );
     return testMetrics;
   }
 
@@ -348,7 +380,7 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
   async establishWebSocketConnection(
     connectionId: string,
     endpoint: string,
-    protocol?: string
+    protocol?: string,
   ): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(endpoint, protocol);
@@ -381,7 +413,7 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
    */
   async sendWebSocketMessage(
     connectionId: string,
-    message: Record<string, unknown>
+    message: Record<string, unknown>,
   ): Promise<{ latency: number; response?: Record<string, unknown> }> {
     const ws = this.webSocketConnections.get(connectionId);
     if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -429,7 +461,9 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       await this.seedDatabaseData(database, dataSet);
     }
 
-    this.logger.log(`Test data seeding completed for environment: ${environmentId}`);
+    this.logger.log(
+      `Test data seeding completed for environment: ${environmentId}`,
+    );
   }
 
   /**
@@ -453,9 +487,11 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       this.emit('environment.destroyed', environmentId);
 
       this.logger.log(`Test environment cleanup completed: ${environmentId}`);
-
     } catch (error) {
-      this.logger.error(`Error during environment cleanup: ${environmentId}`, error);
+      this.logger.error(
+        `Error during environment cleanup: ${environmentId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -470,7 +506,7 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       networkLatency: this.collectNetworkLatency(),
       databaseResponseTimes: this.collectDatabaseResponseTimes(),
       webSocketLatency: this.collectWebSocketLatency(),
-      apiResponseTimes: this.collectApiResponseTimes()
+      apiResponseTimes: this.collectApiResponseTimes(),
     };
   }
 
@@ -489,8 +525,8 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       configuration: {
         timeoutMs: 30000,
         retryCount: 3,
-        parallelExecution: true
-      }
+        parallelExecution: true,
+      },
     };
 
     await this.createTestEnvironment(defaultConfig);
@@ -509,9 +545,9 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
           retryCount: 3,
           requiredEnvironmentVariables: ['DATABASE_URL'],
           setupCommands: [],
-          validationChecks: ['api_responsive', 'database_connected']
+          validationChecks: ['api_responsive', 'database_connected'],
         },
-        status: 'STOPPED'
+        status: 'STOPPED',
       },
       {
         name: 'parlant-service',
@@ -524,10 +560,10 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
           retryCount: 3,
           requiredEnvironmentVariables: ['PARLANT_API_KEY'],
           setupCommands: [],
-          validationChecks: ['parlant_responsive', 'conversation_ready']
+          validationChecks: ['parlant_responsive', 'conversation_ready'],
         },
-        status: 'STOPPED'
-      }
+        status: 'STOPPED',
+      },
     ];
   }
 
@@ -536,23 +572,31 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       {
         name: 'main',
         type: 'POSTGRESQL',
-        connectionString: this.configService.get('TEST_DATABASE_URL', 'postgresql://localhost:5432/bytebot_test'),
+        connectionString: this.configService.get(
+          'TEST_DATABASE_URL',
+          'postgresql://localhost:5432/bytebot_test',
+        ),
         testSchema: 'test_schema',
         seedData: [],
-        cleanupPolicy: 'TRUNCATE'
+        cleanupPolicy: 'TRUNCATE',
       },
       {
         name: 'cache',
         type: 'REDIS',
-        connectionString: this.configService.get('TEST_REDIS_URL', 'redis://localhost:6379/15'),
+        connectionString: this.configService.get(
+          'TEST_REDIS_URL',
+          'redis://localhost:6379/15',
+        ),
         testSchema: '',
         seedData: [],
-        cleanupPolicy: 'RESET'
-      }
+        cleanupPolicy: 'RESET',
+      },
     ];
   }
 
-  private async initializeServices(environment: E2ETestEnvironment): Promise<void> {
+  private async initializeServices(
+    environment: E2ETestEnvironment,
+  ): Promise<void> {
     for (const service of environment.services) {
       await this.initializeService(service);
     }
@@ -565,7 +609,8 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
 
     try {
       // Validate environment variables
-      for (const envVar of service.initialization.requiredEnvironmentVariables) {
+      for (const envVar of service.initialization
+        .requiredEnvironmentVariables) {
         if (!process.env[envVar]) {
           throw new Error(`Required environment variable not set: ${envVar}`);
         }
@@ -578,10 +623,13 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       this.emit('service.started', service);
 
       this.logger.log(`Service initialized successfully: ${service.name}`);
-
     } catch (error) {
       service.status = 'ERROR';
-      this.emit('service.failed', service, error instanceof Error ? error.message : 'Unknown error');
+      this.emit(
+        'service.failed',
+        service,
+        error instanceof Error ? error.message : 'Unknown error',
+      );
       throw error;
     }
   }
@@ -593,22 +641,27 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         // Simulate health check (replace with actual HTTP request in real implementation)
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
-        this.logger.log(`Service health check passed: ${service.name} (attempt ${attempt})`);
+        this.logger.log(
+          `Service health check passed: ${service.name} (attempt ${attempt})`,
+        );
         return;
-
       } catch (error) {
         if (attempt === maxRetries) {
-          throw new Error(`Service health check failed after ${maxRetries} attempts: ${service.name}`);
+          throw new Error(
+            `Service health check failed after ${maxRetries} attempts: ${service.name}`,
+          );
         }
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
   }
 
-  private async initializeDatabases(environment: E2ETestEnvironment): Promise<void> {
+  private async initializeDatabases(
+    environment: E2ETestEnvironment,
+  ): Promise<void> {
     for (const database of environment.databases) {
       await this.initializeDatabase(database);
     }
@@ -618,27 +671,33 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     this.logger.log(`Initializing database: ${database.name}`);
 
     // Simulate database initialization
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     this.logger.log(`Database initialized: ${database.name}`);
   }
 
-  private async setupExternalServiceMocks(environment: E2ETestEnvironment): Promise<void> {
+  private async setupExternalServiceMocks(
+    environment: E2ETestEnvironment,
+  ): Promise<void> {
     for (const service of environment.externalServices) {
       await this.setupExternalServiceMock(service);
     }
   }
 
-  private async setupExternalServiceMock(service: E2EExternalService): Promise<void> {
+  private async setupExternalServiceMock(
+    service: E2EExternalService,
+  ): Promise<void> {
     this.logger.log(`Setting up external service mock: ${service.name}`);
 
     // Simulate mock service setup
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     this.logger.log(`External service mock ready: ${service.name}`);
   }
 
-  private async validateEnvironment(environment: E2ETestEnvironment): Promise<void> {
+  private async validateEnvironment(
+    environment: E2ETestEnvironment,
+  ): Promise<void> {
     this.logger.log(`Validating environment: ${environment.id}`);
 
     // Validate all services are running
@@ -672,7 +731,10 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       try {
         await this.cleanupTestEnvironment(environmentId);
       } catch (error) {
-        this.logger.error(`Error cleaning up environment ${environmentId}:`, error);
+        this.logger.error(
+          `Error cleaning up environment ${environmentId}:`,
+          error,
+        );
       }
     }
   }
@@ -686,16 +748,21 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     this.webSocketConnections.clear();
   }
 
-  private async seedDatabaseData(database: E2ETestDatabase, dataSet?: string): Promise<void> {
+  private async seedDatabaseData(
+    database: E2ETestDatabase,
+    dataSet?: string,
+  ): Promise<void> {
     this.logger.log(`Seeding data for database: ${database.name}`);
 
     // Simulate database seeding
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     this.logger.log(`Database seeding completed: ${database.name}`);
   }
 
-  private async cleanupDatabases(environment: E2ETestEnvironment): Promise<void> {
+  private async cleanupDatabases(
+    environment: E2ETestEnvironment,
+  ): Promise<void> {
     for (const database of environment.databases) {
       await this.cleanupDatabase(database);
     }
@@ -705,7 +772,7 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     this.logger.log(`Cleaning up database: ${database.name}`);
 
     // Simulate database cleanup
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     this.logger.log(`Database cleanup completed: ${database.name}`);
   }
@@ -716,10 +783,12 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     }
   }
 
-  private async cleanupExternalServiceMocks(environment: E2ETestEnvironment): Promise<void> {
+  private async cleanupExternalServiceMocks(
+    environment: E2ETestEnvironment,
+  ): Promise<void> {
     for (const service of environment.externalServices) {
       // Simulate mock cleanup
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
 
@@ -729,7 +798,7 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
       averageCpuPercent: Math.floor(Math.random() * 50) + 10,
       networkRequestCount: Math.floor(Math.random() * 100) + 50,
       databaseQueryCount: Math.floor(Math.random() * 20) + 5,
-      cacheHitRate: Math.random() * 0.4 + 0.6 // 60-100%
+      cacheHitRate: Math.random() * 0.4 + 0.6, // 60-100%
     };
   }
 
@@ -772,7 +841,10 @@ export class E2ETestOrchestratorService extends EventEmitter implements OnModule
     return {
       '/auth': Array.from({ length: 5 }, () => Math.random() * 300 + 100),
       '/parlant': Array.from({ length: 5 }, () => Math.random() * 500 + 200),
-      '/computer-use': Array.from({ length: 5 }, () => Math.random() * 400 + 150)
+      '/computer-use': Array.from(
+        { length: 5 },
+        () => Math.random() * 400 + 150,
+      ),
     };
   }
 }

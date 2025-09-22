@@ -34,7 +34,7 @@ import {
   Logger,
   HttpStatus,
   HttpException,
-  HttpCode
+  HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -44,7 +44,7 @@ import {
   ApiQuery,
   ApiBody,
   ApiBearerAuth,
-  ApiSecurity
+  ApiSecurity,
 } from '@nestjs/swagger';
 
 // PARLANT Validation Integration - local implementations to bypass import issues
@@ -57,7 +57,11 @@ const ParlantValidated = (config: {
   timeout: number;
 }) => {
   // Mock decorator implementation - would integrate with Parlant in production
-  return function(target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: unknown,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     return descriptor;
   };
 };
@@ -65,18 +69,22 @@ const ParlantValidated = (config: {
 // Add ConversationContext parameter decorator mock
 const ConversationContext = () => {
   // Mock parameter decorator implementation
-  return function(target: unknown, propertyKey: string | symbol | undefined, parameterIndex: number) {
+  return function (
+    target: unknown,
+    propertyKey: string | symbol | undefined,
+    parameterIndex: number,
+  ) {
     // Mock implementation
   };
 };
 
 // Local SecurityLevel constants
 enum SecurityLevel {
-  _MINIMAL = "minimal",
-  _LOW = "low",
-  _MEDIUM = "medium",
-  _HIGH = "high",
-  _CRITICAL = "critical",
+  _MINIMAL = 'minimal',
+  _LOW = 'low',
+  _MEDIUM = 'medium',
+  _HIGH = 'high',
+  _CRITICAL = 'critical',
 }
 
 // Conversation context type
@@ -109,7 +117,7 @@ export const ParlantApplicationRead = (description: string) =>
     securityLevel: SecurityLevel._LOW,
     cacheable: true,
     cacheTtl: 180000, // 3 minutes
-    timeout: 2000
+    timeout: 2000,
   });
 
 export const ParlantApplicationWrite = (description: string) =>
@@ -117,7 +125,7 @@ export const ParlantApplicationWrite = (description: string) =>
     description,
     securityLevel: SecurityLevel._MEDIUM,
     cacheable: false,
-    timeout: 8000
+    timeout: 8000,
   });
 
 export const ParlantFeatureFlag = (description: string) =>
@@ -125,7 +133,7 @@ export const ParlantFeatureFlag = (description: string) =>
     description,
     securityLevel: SecurityLevel._HIGH,
     cacheable: false,
-    timeout: 5000
+    timeout: 5000,
   });
 
 export const ParlantUserPreference = (description: string) =>
@@ -134,7 +142,7 @@ export const ParlantUserPreference = (description: string) =>
     securityLevel: SecurityLevel._LOW,
     cacheable: true,
     cacheTtl: 600000, // 10 minutes
-    timeout: 3000
+    timeout: 3000,
   });
 
 export const ParlantTenantConfiguration = (description: string) =>
@@ -142,7 +150,7 @@ export const ParlantTenantConfiguration = (description: string) =>
     description,
     securityLevel: SecurityLevel._HIGH,
     cacheable: false,
-    timeout: 10000
+    timeout: 10000,
   });
 
 // ===== APPLICATION CONFIGURATION DTOS =====
@@ -164,7 +172,13 @@ export interface ApplicationSettingDto {
   scope: 'GLOBAL' | 'TENANT' | 'USER' | 'SESSION';
 
   /** Setting category */
-  category: 'UI' | 'BEHAVIOR' | 'PERFORMANCE' | 'INTEGRATION' | 'FEATURE' | 'PREFERENCE';
+  category:
+    | 'UI'
+    | 'BEHAVIOR'
+    | 'PERFORMANCE'
+    | 'INTEGRATION'
+    | 'FEATURE'
+    | 'PREFERENCE';
 
   /** Setting description */
   description?: string;
@@ -247,7 +261,13 @@ export interface UserPreferenceDto {
   userId: string;
 
   /** Preference category */
-  category: 'UI' | 'NOTIFICATION' | 'PRIVACY' | 'ACCESSIBILITY' | 'PERFORMANCE' | 'CUSTOM';
+  category:
+    | 'UI'
+    | 'NOTIFICATION'
+    | 'PRIVACY'
+    | 'ACCESSIBILITY'
+    | 'PERFORMANCE'
+    | 'CUSTOM';
 
   /** Preference settings */
   preferences: Record<string, unknown>;
@@ -372,10 +392,14 @@ export interface ABTestConfigurationDto {
 @ApiBearerAuth()
 @ApiSecurity('bearer')
 export class ApplicationConfigurationApiController {
-  private readonly logger = new Logger(ApplicationConfigurationApiController.name);
+  private readonly logger = new Logger(
+    ApplicationConfigurationApiController.name,
+  );
 
   constructor() {
-    this.logger.log('Application Configuration API Controller initialized with comprehensive PARLANT validation');
+    this.logger.log(
+      'Application Configuration API Controller initialized with comprehensive PARLANT validation',
+    );
   }
 
   // ===== APPLICATION SETTINGS MANAGEMENT =====
@@ -390,10 +414,26 @@ export class ApplicationConfigurationApiController {
   // @ParlantApplicationRead('Retrieve application settings for user interface and behavior configuration')
   @ApiOperation({
     summary: 'Get application settings',
-    description: 'Retrieve application configuration settings with scope filtering'
+    description:
+      'Retrieve application configuration settings with scope filtering',
   })
-  @ApiQuery({ name: 'scope', required: false, enum: ['GLOBAL', 'TENANT', 'USER', 'SESSION'] })
-  @ApiQuery({ name: 'category', required: false, enum: ['UI', 'BEHAVIOR', 'PERFORMANCE', 'INTEGRATION', 'FEATURE', 'PREFERENCE'] })
+  @ApiQuery({
+    name: 'scope',
+    required: false,
+    enum: ['GLOBAL', 'TENANT', 'USER', 'SESSION'],
+  })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    enum: [
+      'UI',
+      'BEHAVIOR',
+      'PERFORMANCE',
+      'INTEGRATION',
+      'FEATURE',
+      'PREFERENCE',
+    ],
+  })
   @ApiQuery({ name: 'tenantId', required: false, type: 'string' })
   async getApplicationSettings(
     @Query('scope') scope?: string,
@@ -419,26 +459,26 @@ export class ApplicationConfigurationApiController {
       category,
       tenantId,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation - would retrieve from application configuration store
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
 
     return {
       settings: {
         'ui.theme': 'dark',
         'ui.language': 'en-US',
         'behavior.autoSave': true,
-        'performance.cacheDuration': 300000
+        'performance.cacheDuration': 300000,
       },
       metadata: {
         scope: scope || 'GLOBAL',
         category,
         totalSettings: 4,
         lastModified: new Date(),
-        cacheExpiry: new Date(Date.now() + 180000) // 3 minutes
-      }
+        cacheExpiry: new Date(Date.now() + 180000), // 3 minutes
+      },
     };
   }
 
@@ -448,10 +488,13 @@ export class ApplicationConfigurationApiController {
   @Put('settings/:key')
   // Temporarily replaced with standard decorator to fix ESLint errors
   // @OperatorOrAdmin()
-  @ParlantApplicationWrite('Update application setting with validation and scope verification')
+  @ParlantApplicationWrite(
+    'Update application setting with validation and scope verification',
+  )
   @ApiOperation({
     summary: 'Update application setting',
-    description: 'Update application configuration setting with comprehensive validation'
+    description:
+      'Update application configuration setting with comprehensive validation',
   })
   @ApiParam({ name: 'key', description: 'Application setting key' })
   async updateApplicationSetting(
@@ -476,7 +519,7 @@ export class ApplicationConfigurationApiController {
       category: settingDto.category,
       hotReloadable: settingDto.hotReloadable,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -487,7 +530,10 @@ export class ApplicationConfigurationApiController {
       const previousValue = await this.getCurrentSettingValue(key);
 
       // Create change record
-      const changeId = await this.createSettingChangeRecord(settingDto, user.id);
+      const changeId = await this.createSettingChangeRecord(
+        settingDto,
+        user.id,
+      );
 
       // Apply setting change
       await this.applyApplicationSetting(key, settingDto, changeId);
@@ -495,13 +541,16 @@ export class ApplicationConfigurationApiController {
       // Handle hot reload if supported
       const hotReloaded = await this.handleHotReload(key, settingDto);
 
-      this.logger.log(`[${operationId}] Application setting updated successfully`, {
-        operationId,
-        key,
-        changeId,
-        hotReloaded,
-        userId: user.id
-      });
+      this.logger.log(
+        `[${operationId}] Application setting updated successfully`,
+        {
+          operationId,
+          key,
+          changeId,
+          hotReloaded,
+          userId: user.id,
+        },
+      );
 
       return {
         success: true,
@@ -509,20 +558,19 @@ export class ApplicationConfigurationApiController {
         previousValue,
         newValue: settingDto.value,
         hotReloaded,
-        changeId
+        changeId,
       };
-
     } catch (error) {
       this.logger.error(`[${operationId}] Application setting update failed`, {
         operationId,
         key,
         error: error instanceof Error ? error.message : String(error),
-        userId: user.id
+        userId: user.id,
       });
 
       throw new HttpException(
         `Application setting update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -539,7 +587,8 @@ export class ApplicationConfigurationApiController {
   // @ParlantApplicationRead('Retrieve feature flags for application functionality control')
   @ApiOperation({
     summary: 'Get feature flags',
-    description: 'Retrieve feature flags with rollout status and targeting information'
+    description:
+      'Retrieve feature flags with rollout status and targeting information',
   })
   @ApiQuery({ name: 'environment', required: false, type: 'string' })
   @ApiQuery({ name: 'enabled', required: false, type: 'boolean' })
@@ -564,11 +613,11 @@ export class ApplicationConfigurationApiController {
       environment,
       enabled,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation - would retrieve from feature flag service
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     const mockFlags: FeatureFlagDto[] = [
       {
         name: 'new-dashboard',
@@ -576,27 +625,27 @@ export class ApplicationConfigurationApiController {
         enabled: true,
         rolloutStrategy: {
           type: 'GRADUAL',
-          percentage: 50
+          percentage: 50,
         },
         metadata: {
           createdBy: 'admin',
           createdAt: new Date(),
           lastModified: new Date(),
           modifiedBy: 'admin',
-          version: '1.0.0'
+          version: '1.0.0',
         },
-        justification: 'Gradual rollout of new dashboard features'
-      }
+        justification: 'Gradual rollout of new dashboard features',
+      },
     ];
 
     return {
       flags: mockFlags,
       metadata: {
         totalFlags: mockFlags.length,
-        enabledFlags: mockFlags.filter(f => f.enabled).length,
+        enabledFlags: mockFlags.filter((f) => f.enabled).length,
         environment,
-        userEligible: mockFlags.filter(f => f.enabled).length
-      }
+        userEligible: mockFlags.filter((f) => f.enabled).length,
+      },
     };
   }
 
@@ -606,10 +655,13 @@ export class ApplicationConfigurationApiController {
   @Put('feature-flags/:name')
   // Temporarily replaced with standard decorator to fix ESLint errors
   // @OperatorOrAdmin()
-  @ParlantFeatureFlag('Update feature flag with rollout strategy validation and impact assessment')
+  @ParlantFeatureFlag(
+    'Update feature flag with rollout strategy validation and impact assessment',
+  )
   @ApiOperation({
     summary: 'Update feature flag',
-    description: 'Update feature flag configuration with rollout strategy validation'
+    description:
+      'Update feature flag configuration with rollout strategy validation',
   })
   @ApiParam({ name: 'name', description: 'Feature flag name' })
   async updateFeatureFlag(
@@ -633,7 +685,7 @@ export class ApplicationConfigurationApiController {
       rolloutType: flagDto.rolloutStrategy.type,
       rolloutPercentage: flagDto.rolloutStrategy.percentage,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -641,10 +693,17 @@ export class ApplicationConfigurationApiController {
       this.validateFeatureFlag(flagDto);
 
       // Assess rollout impact
-      const impactAssessment = await this.assessFeatureFlagImpact(name, flagDto);
+      const impactAssessment = await this.assessFeatureFlagImpact(
+        name,
+        flagDto,
+      );
 
       // Create change record
-      const changeId = await this.createFeatureFlagChangeRecord(name, flagDto, user.id);
+      const changeId = await this.createFeatureFlagChangeRecord(
+        name,
+        flagDto,
+        user.id,
+      );
 
       // Apply feature flag change
       await this.applyFeatureFlagChange(name, flagDto, changeId);
@@ -654,7 +713,7 @@ export class ApplicationConfigurationApiController {
         name,
         changeId,
         affectedUsers: impactAssessment.affectedUsers,
-        userId: user.id
+        userId: user.id,
       });
 
       return {
@@ -662,20 +721,19 @@ export class ApplicationConfigurationApiController {
         name,
         rolloutStatus: flagDto.enabled ? 'ENABLED' : 'DISABLED',
         affectedUsers: impactAssessment.affectedUsers,
-        changeId
+        changeId,
       };
-
     } catch (error) {
       this.logger.error(`[${operationId}] Feature flag update failed`, {
         operationId,
         name,
         error: error instanceof Error ? error.message : String(error),
-        userId: user.id
+        userId: user.id,
       });
 
       throw new HttpException(
         `Feature flag update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -692,10 +750,21 @@ export class ApplicationConfigurationApiController {
   // @ParlantUserPreference('Retrieve user preferences with privacy and personalization settings')
   @ApiOperation({
     summary: 'Get user preferences',
-    description: 'Retrieve user preferences and personalization settings'
+    description: 'Retrieve user preferences and personalization settings',
   })
   @ApiParam({ name: 'userId', description: 'User ID' })
-  @ApiQuery({ name: 'category', required: false, enum: ['UI', 'NOTIFICATION', 'PRIVACY', 'ACCESSIBILITY', 'PERFORMANCE', 'CUSTOM'] })
+  @ApiQuery({
+    name: 'category',
+    required: false,
+    enum: [
+      'UI',
+      'NOTIFICATION',
+      'PRIVACY',
+      'ACCESSIBILITY',
+      'PERFORMANCE',
+      'CUSTOM',
+    ],
+  })
   async getUserPreferences(
     @Param('userId') userId: string,
     @Query('category') category?: string,
@@ -709,40 +778,47 @@ export class ApplicationConfigurationApiController {
       targetUserId: userId,
       category,
       requestingUserId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Validate user access
     this.validateUserAccess(user, userId);
 
     // Mock implementation - would retrieve from user preference store
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     return {
       userId,
-      category: (category as 'UI' | 'NOTIFICATION' | 'PRIVACY' | 'ACCESSIBILITY' | 'PERFORMANCE' | 'CUSTOM') || 'UI',
+      category:
+        (category as
+          | 'UI'
+          | 'NOTIFICATION'
+          | 'PRIVACY'
+          | 'ACCESSIBILITY'
+          | 'PERFORMANCE'
+          | 'CUSTOM') || 'UI',
       preferences: {
         theme: 'dark',
         language: 'en-US',
         notifications: {
           email: true,
           push: false,
-          sms: false
+          sms: false,
         },
         privacy: {
           analyticsOptIn: false,
-          dataSharing: false
-        }
+          dataSharing: false,
+        },
       },
       metadata: {
         lastUpdated: new Date(),
         source: 'USER',
-        version: '1.0.0'
+        version: '1.0.0',
       },
       privacy: {
         shareWithTenant: false,
         shareForAnalytics: false,
-        retentionDays: 365
-      }
+        retentionDays: 365,
+      },
     };
   }
 
@@ -756,7 +832,7 @@ export class ApplicationConfigurationApiController {
   // @ParlantUserPreference('Update user preferences with privacy validation and consent management')
   @ApiOperation({
     summary: 'Update user preferences',
-    description: 'Update user preferences with privacy and consent validation'
+    description: 'Update user preferences with privacy and consent validation',
   })
   @ApiParam({ name: 'userId', description: 'User ID' })
   async updateUserPreferences(
@@ -777,7 +853,7 @@ export class ApplicationConfigurationApiController {
       targetUserId: userId,
       category: preferencesDto.category,
       requestingUserId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     try {
@@ -788,36 +864,41 @@ export class ApplicationConfigurationApiController {
       this.validateUserPreferences(preferencesDto);
 
       // Create change record
-      const changeId = await this.createPreferencesChangeRecord(preferencesDto, user.id);
+      const changeId = await this.createPreferencesChangeRecord(
+        preferencesDto,
+        user.id,
+      );
 
       // Apply preferences change
       await this.applyUserPreferencesChange(userId, preferencesDto, changeId);
 
-      this.logger.log(`[${operationId}] User preferences updated successfully`, {
-        operationId,
-        userId,
-        changeId,
-        requestingUserId: user.id
-      });
+      this.logger.log(
+        `[${operationId}] User preferences updated successfully`,
+        {
+          operationId,
+          userId,
+          changeId,
+          requestingUserId: user.id,
+        },
+      );
 
       return {
         success: true,
         userId,
         updatedCategories: [preferencesDto.category],
-        changeId
+        changeId,
       };
-
     } catch (error) {
       this.logger.error(`[${operationId}] User preferences update failed`, {
         operationId,
         userId,
         error: error instanceof Error ? error.message : String(error),
-        requestingUserId: user.id
+        requestingUserId: user.id,
       });
 
       throw new HttpException(
         `User preferences update failed: ${error instanceof Error ? error.message : String(error)}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -830,10 +911,13 @@ export class ApplicationConfigurationApiController {
   @Get('tenant/:tenantId')
   // Temporarily replaced with standard decorator to fix ESLint errors
   // @OperatorOrAdmin()
-  @ParlantTenantConfiguration('Retrieve tenant configuration with multi-tenant isolation validation')
+  @ParlantTenantConfiguration(
+    'Retrieve tenant configuration with multi-tenant isolation validation',
+  )
   @ApiOperation({
     summary: 'Get tenant configuration',
-    description: 'Retrieve tenant-specific configuration with isolation validation'
+    description:
+      'Retrieve tenant-specific configuration with isolation validation',
   })
   @ApiParam({ name: 'tenantId', description: 'Tenant ID' })
   @ApiQuery({ name: 'namespace', required: false, type: 'string' })
@@ -850,11 +934,11 @@ export class ApplicationConfigurationApiController {
       tenantId,
       namespace,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext?.conversationId,
     });
 
     // Mock implementation - would retrieve from tenant configuration store
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     return {
       tenantId,
       namespace: namespace || 'default',
@@ -862,32 +946,32 @@ export class ApplicationConfigurationApiController {
         branding: {
           logo: 'tenant-logo.png',
           primaryColor: '#007bff',
-          secondaryColor: '#6c757d'
+          secondaryColor: '#6c757d',
         },
         features: {
           analytics: true,
           reporting: true,
-          apiAccess: true
-        }
+          apiAccess: true,
+        },
       },
       metadata: {
         configurationVersion: '1.0.0',
         lastUpdated: new Date(),
         updatedBy: user.id,
-        migrationStatus: 'COMPLETED'
+        migrationStatus: 'COMPLETED',
       },
       resourceLimits: {
         maxUsers: 1000,
         maxStorage: 10240, // 10GB
         maxAPIRequests: 100000,
-        maxConcurrentSessions: 100
+        maxConcurrentSessions: 100,
       },
       features: {
         enabled: ['analytics', 'reporting'],
         disabled: ['beta-feature'],
-        beta: ['new-dashboard']
+        beta: ['new-dashboard'],
       },
-      justification: 'Standard tenant configuration'
+      justification: 'Standard tenant configuration',
     };
   }
 
@@ -897,14 +981,17 @@ export class ApplicationConfigurationApiController {
     if (!dto.justification || dto.justification.length < 10) {
       throw new HttpException(
         'Business justification required for application setting changes',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
-    if (dto.validation?.required && (dto.value === null || dto.value === undefined)) {
+    if (
+      dto.validation?.required &&
+      (dto.value === null || dto.value === undefined)
+    ) {
       throw new HttpException(
         'Value is required for this setting',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
@@ -913,14 +1000,17 @@ export class ApplicationConfigurationApiController {
     if (!dto.justification || dto.justification.length < 15) {
       throw new HttpException(
         'Detailed justification required for feature flag changes',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
 
-    if (dto.rolloutStrategy.type === 'GRADUAL' && !dto.rolloutStrategy.percentage) {
+    if (
+      dto.rolloutStrategy.type === 'GRADUAL' &&
+      !dto.rolloutStrategy.percentage
+    ) {
       throw new HttpException(
         'Percentage required for gradual rollout strategy',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
@@ -929,48 +1019,67 @@ export class ApplicationConfigurationApiController {
     if (!dto.preferences || Object.keys(dto.preferences).length === 0) {
       throw new HttpException(
         'Preferences data is required',
-        HttpStatus.BAD_REQUEST
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
 
-  private validateUserAccess(requestingUser: ByteBotdUser, targetUserId: string): void {
+  private validateUserAccess(
+    requestingUser: ByteBotdUser,
+    targetUserId: string,
+  ): void {
     // Users can only access their own preferences unless they're admin/operator
-    if (requestingUser.id !== targetUserId && !['ADMIN', 'OPERATOR'].includes(requestingUser.role)) {
+    if (
+      requestingUser.id !== targetUserId &&
+      !['ADMIN', 'OPERATOR'].includes(requestingUser.role)
+    ) {
       throw new HttpException(
         'Insufficient permissions to access user preferences',
-        HttpStatus.FORBIDDEN
+        HttpStatus.FORBIDDEN,
       );
     }
   }
 
   private async getCurrentSettingValue(key: string): Promise<unknown> {
     // Mock implementation - would retrieve from application configuration store
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     return null;
   }
 
-  private async createSettingChangeRecord(dto: ApplicationSettingDto, userId: string): Promise<string> {
+  private async createSettingChangeRecord(
+    dto: ApplicationSettingDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create change tracking record
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     return `app_setting_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async applyApplicationSetting(key: string, dto: ApplicationSettingDto, changeId: string): Promise<void> {
+  private async applyApplicationSetting(
+    key: string,
+    dto: ApplicationSettingDto,
+    changeId: string,
+  ): Promise<void> {
     // Mock implementation - would apply setting to application configuration store
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     this.logger.log(`Applying application setting: ${key} (${changeId})`);
   }
 
-  private async handleHotReload(key: string, dto: ApplicationSettingDto): Promise<boolean> {
+  private async handleHotReload(
+    key: string,
+    dto: ApplicationSettingDto,
+  ): Promise<boolean> {
     // Mock implementation - would trigger hot reload if supported
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     return dto.hotReloadable || false;
   }
 
-  private async assessFeatureFlagImpact(name: string, dto: FeatureFlagDto): Promise<{ affectedUsers: number }> {
+  private async assessFeatureFlagImpact(
+    name: string,
+    dto: FeatureFlagDto,
+  ): Promise<{ affectedUsers: number }> {
     // Mock implementation - would calculate impact based on rollout strategy
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     let affectedUsers = 0;
 
     if (dto.enabled) {
@@ -979,7 +1088,9 @@ export class ApplicationConfigurationApiController {
           affectedUsers = 10000; // All users
           break;
         case 'GRADUAL':
-          affectedUsers = Math.floor(10000 * (dto.rolloutStrategy.percentage || 0) / 100);
+          affectedUsers = Math.floor(
+            (10000 * (dto.rolloutStrategy.percentage || 0)) / 100,
+          );
           break;
         case 'TARGETED':
           affectedUsers = dto.rolloutStrategy.targetUsers?.length || 0;
@@ -992,28 +1103,45 @@ export class ApplicationConfigurationApiController {
     return { affectedUsers };
   }
 
-  private async createFeatureFlagChangeRecord(name: string, dto: FeatureFlagDto, userId: string): Promise<string> {
+  private async createFeatureFlagChangeRecord(
+    name: string,
+    dto: FeatureFlagDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create feature flag change record
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     return `feature_flag_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async applyFeatureFlagChange(name: string, dto: FeatureFlagDto, changeId: string): Promise<void> {
+  private async applyFeatureFlagChange(
+    name: string,
+    dto: FeatureFlagDto,
+    changeId: string,
+  ): Promise<void> {
     // Mock implementation - would apply feature flag change
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     this.logger.log(`Applying feature flag change: ${name} (${changeId})`);
   }
 
-  private async createPreferencesChangeRecord(dto: UserPreferenceDto, userId: string): Promise<string> {
+  private async createPreferencesChangeRecord(
+    dto: UserPreferenceDto,
+    userId: string,
+  ): Promise<string> {
     // Mock implementation - would create preferences change record
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
     return `preferences_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async applyUserPreferencesChange(userId: string, dto: UserPreferenceDto, changeId: string): Promise<void> {
+  private async applyUserPreferencesChange(
+    userId: string,
+    dto: UserPreferenceDto,
+    changeId: string,
+  ): Promise<void> {
     // Mock implementation - would apply preferences change
-    await new Promise(resolve => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
-    this.logger.log(`Applying user preferences change: ${userId} (${changeId})`);
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Add minimal await to satisfy linter
+    this.logger.log(
+      `Applying user preferences change: ${userId} (${changeId})`,
+    );
   }
 
   private generateOperationId(): string {

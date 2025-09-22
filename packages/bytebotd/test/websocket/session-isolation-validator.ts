@@ -83,7 +83,11 @@ export interface SessionIsolationTestResults {
   violationsBySeverity: Record<string, number>;
   criticalViolations: IsolationViolation[];
   sessionIsolationScore: number; // 0.0 to 1.0
-  complianceLevel: 'non_compliant' | 'partially_compliant' | 'compliant' | 'fully_compliant';
+  complianceLevel:
+    | 'non_compliant'
+    | 'partially_compliant'
+    | 'compliant'
+    | 'fully_compliant';
   recommendations: string[];
   testDuration: number;
   sessionsValidated: number;
@@ -163,7 +167,7 @@ export class SessionIsolationValidator extends EventEmitter {
     conversationId: string,
     userId: string,
     clientId: string,
-    isolationLevel: 'strict' | 'moderate' | 'relaxed' = 'strict'
+    isolationLevel: 'strict' | 'moderate' | 'relaxed' = 'strict',
   ): void {
     const boundary: SessionBoundary = {
       sessionId,
@@ -212,7 +216,7 @@ export class SessionIsolationValidator extends EventEmitter {
     }
 
     // Record violations
-    violations.forEach(violation => {
+    violations.forEach((violation) => {
       this.violations.push(violation);
       this.emit('violationDetected', violation);
 
@@ -231,23 +235,27 @@ export class SessionIsolationValidator extends EventEmitter {
   /**
    * Detect cross-session message routing leaks
    */
-  private detectCrossSessionMessageLeaks(message: ConversationalMessage): IsolationViolation[] {
+  private detectCrossSessionMessageLeaks(
+    message: ConversationalMessage,
+  ): IsolationViolation[] {
     const violations: IsolationViolation[] = [];
 
     // Check if message session ID matches registered boundary
     if (!this.sessionBoundaries.has(message.sessionId)) {
-      violations.push(this.createViolation(
-        IsolationViolationType.MESSAGE_ROUTING_LEAK,
-        'high',
-        message.sessionId,
-        'unknown',
-        {
-          description: `Message received for unregistered session: ${message.sessionId}`,
-          affectedData: message,
-          detectionMethod: 'session_boundary_check',
-          potentialImpact: 'Message could be delivered to wrong session',
-        }
-      ));
+      violations.push(
+        this.createViolation(
+          IsolationViolationType.MESSAGE_ROUTING_LEAK,
+          'high',
+          message.sessionId,
+          'unknown',
+          {
+            description: `Message received for unregistered session: ${message.sessionId}`,
+            affectedData: message,
+            detectionMethod: 'session_boundary_check',
+            potentialImpact: 'Message could be delivered to wrong session',
+          },
+        ),
+      );
       return violations;
     }
 
@@ -257,53 +265,73 @@ export class SessionIsolationValidator extends EventEmitter {
     if (message.payload && typeof message.payload === 'object') {
       const payload = message.payload as Record<string, unknown>;
 
-      if (payload.conversationId && payload.conversationId !== sessionBoundary.conversationId) {
-        violations.push(this.createViolation(
-          IsolationViolationType.CONVERSATION_CONTAMINATION,
-          'high',
-          message.sessionId,
-          String(payload.conversationId),
-          {
-            description: `Message contains foreign conversation ID: ${payload.conversationId}`,
-            affectedData: payload,
-            detectionMethod: 'conversation_id_mismatch',
-            potentialImpact: 'Conversation state contamination between sessions',
-          }
-        ));
+      if (
+        payload.conversationId &&
+        payload.conversationId !== sessionBoundary.conversationId
+      ) {
+        violations.push(
+          this.createViolation(
+            IsolationViolationType.CONVERSATION_CONTAMINATION,
+            'high',
+            message.sessionId,
+            String(payload.conversationId),
+            {
+              description: `Message contains foreign conversation ID: ${payload.conversationId}`,
+              affectedData: payload,
+              detectionMethod: 'conversation_id_mismatch',
+              potentialImpact:
+                'Conversation state contamination between sessions',
+            },
+          ),
+        );
       }
 
       // Check for user ID contamination
       if (payload.userId && payload.userId !== sessionBoundary.userId) {
-        violations.push(this.createViolation(
-          IsolationViolationType.USER_PROFILE_CROSS_POLLUTION,
-          'critical',
-          message.sessionId,
-          String(payload.userId),
-          {
-            description: `Message contains foreign user ID: ${payload.userId}`,
-            affectedData: payload,
-            detectionMethod: 'user_id_contamination',
-            potentialImpact: 'User data cross-contamination and privacy breach',
-          }
-        ));
+        violations.push(
+          this.createViolation(
+            IsolationViolationType.USER_PROFILE_CROSS_POLLUTION,
+            'critical',
+            message.sessionId,
+            String(payload.userId),
+            {
+              description: `Message contains foreign user ID: ${payload.userId}`,
+              affectedData: payload,
+              detectionMethod: 'user_id_contamination',
+              potentialImpact:
+                'User data cross-contamination and privacy breach',
+            },
+          ),
+        );
       }
 
       // Check for session context boundary violations
-      if (payload.sessionContext && typeof payload.sessionContext === 'object') {
-        const sessionContext = payload.sessionContext as Record<string, unknown>;
-        if (sessionContext.sessionId && sessionContext.sessionId !== message.sessionId) {
-          violations.push(this.createViolation(
-            IsolationViolationType.SESSION_CONTEXT_BOUNDARY_VIOLATION,
-            'medium',
-            message.sessionId,
-            String(sessionContext.sessionId),
-            {
-              description: `Session context contains foreign session ID: ${sessionContext.sessionId}`,
-              affectedData: sessionContext,
-              detectionMethod: 'session_context_validation',
-              potentialImpact: 'Session context mixing and state confusion',
-            }
-          ));
+      if (
+        payload.sessionContext &&
+        typeof payload.sessionContext === 'object'
+      ) {
+        const sessionContext = payload.sessionContext as Record<
+          string,
+          unknown
+        >;
+        if (
+          sessionContext.sessionId &&
+          sessionContext.sessionId !== message.sessionId
+        ) {
+          violations.push(
+            this.createViolation(
+              IsolationViolationType.SESSION_CONTEXT_BOUNDARY_VIOLATION,
+              'medium',
+              message.sessionId,
+              String(sessionContext.sessionId),
+              {
+                description: `Session context contains foreign session ID: ${sessionContext.sessionId}`,
+                affectedData: sessionContext,
+                detectionMethod: 'session_context_validation',
+                potentialImpact: 'Session context mixing and state confusion',
+              },
+            ),
+          );
         }
       }
     }
@@ -314,7 +342,9 @@ export class SessionIsolationValidator extends EventEmitter {
   /**
    * Validate conversation state isolation
    */
-  private validateConversationStateIsolation(message: ConversationalMessage): IsolationViolation[] {
+  private validateConversationStateIsolation(
+    message: ConversationalMessage,
+  ): IsolationViolation[] {
     const violations: IsolationViolation[] = [];
 
     const sessionState = this.conversationStates.get(message.sessionId) ?? {};
@@ -324,18 +354,22 @@ export class SessionIsolationValidator extends EventEmitter {
       const payload = message.payload as Record<string, unknown>;
 
       if (payload.globalStateUpdate) {
-        violations.push(this.createViolation(
-          IsolationViolationType.CONVERSATION_CONTAMINATION,
-          'high',
-          message.sessionId,
-          'global',
-          {
-            description: 'Message contains global state update that could affect other sessions',
-            affectedData: payload.globalStateUpdate,
-            detectionMethod: 'global_state_mutation_detection',
-            potentialImpact: 'Global state changes affecting session isolation',
-          }
-        ));
+        violations.push(
+          this.createViolation(
+            IsolationViolationType.CONVERSATION_CONTAMINATION,
+            'high',
+            message.sessionId,
+            'global',
+            {
+              description:
+                'Message contains global state update that could affect other sessions',
+              affectedData: payload.globalStateUpdate,
+              detectionMethod: 'global_state_mutation_detection',
+              potentialImpact:
+                'Global state changes affecting session isolation',
+            },
+          ),
+        );
       }
 
       // Update session state tracking
@@ -351,7 +385,9 @@ export class SessionIsolationValidator extends EventEmitter {
   /**
    * Validate user profile isolation
    */
-  private validateUserProfileIsolation(message: ConversationalMessage): IsolationViolation[] {
+  private validateUserProfileIsolation(
+    message: ConversationalMessage,
+  ): IsolationViolation[] {
     const violations: IsolationViolation[] = [];
 
     const sessionBoundary = this.sessionBoundaries.get(message.sessionId);
@@ -366,18 +402,21 @@ export class SessionIsolationValidator extends EventEmitter {
 
         // Check if user profile belongs to this session
         if (userProfile.userId !== sessionBoundary.userId) {
-          violations.push(this.createViolation(
-            IsolationViolationType.USER_PROFILE_CROSS_POLLUTION,
-            'critical',
-            message.sessionId,
-            String(userProfile.userId),
-            {
-              description: `Message contains user profile for different user: ${userProfile.userId}`,
-              affectedData: userProfile,
-              detectionMethod: 'user_profile_ownership_check',
-              potentialImpact: 'User profile data exposure and privacy violation',
-            }
-          ));
+          violations.push(
+            this.createViolation(
+              IsolationViolationType.USER_PROFILE_CROSS_POLLUTION,
+              'critical',
+              message.sessionId,
+              String(userProfile.userId),
+              {
+                description: `Message contains user profile for different user: ${userProfile.userId}`,
+                affectedData: userProfile,
+                detectionMethod: 'user_profile_ownership_check',
+                potentialImpact:
+                  'User profile data exposure and privacy violation',
+              },
+            ),
+          );
         }
 
         // Update tracked user profile for this session
@@ -393,7 +432,9 @@ export class SessionIsolationValidator extends EventEmitter {
   /**
    * Validate event stream segregation
    */
-  private validateEventStreamSegregation(message: ConversationalMessage): IsolationViolation[] {
+  private validateEventStreamSegregation(
+    message: ConversationalMessage,
+  ): IsolationViolation[] {
     const violations: IsolationViolation[] = [];
 
     // Check for event stream routing hints that might cause cross-session delivery
@@ -402,21 +443,26 @@ export class SessionIsolationValidator extends EventEmitter {
 
       // Look for global or broadcast routing hints
       const globalHints = ['global', 'broadcast', 'all_sessions', '*'];
-      const hasGlobalHints = routingHints.some(hint => globalHints.includes(hint));
+      const hasGlobalHints = routingHints.some((hint) =>
+        globalHints.includes(hint),
+      );
 
       if (hasGlobalHints) {
-        violations.push(this.createViolation(
-          IsolationViolationType.EVENT_STREAM_CROSS_TALK,
-          'medium',
-          message.sessionId,
-          'multiple',
-          {
-            description: `Message contains global routing hints: ${routingHints.join(', ')}`,
-            affectedData: routingHints,
-            detectionMethod: 'routing_hint_analysis',
-            potentialImpact: 'Message could be delivered to multiple sessions',
-          }
-        ));
+        violations.push(
+          this.createViolation(
+            IsolationViolationType.EVENT_STREAM_CROSS_TALK,
+            'medium',
+            message.sessionId,
+            'multiple',
+            {
+              description: `Message contains global routing hints: ${routingHints.join(', ')}`,
+              affectedData: routingHints,
+              detectionMethod: 'routing_hint_analysis',
+              potentialImpact:
+                'Message could be delivered to multiple sessions',
+            },
+          ),
+        );
       }
     }
 
@@ -430,30 +476,44 @@ export class SessionIsolationValidator extends EventEmitter {
     const testDuration = performance.now() - this.validationStartTime;
 
     // Count violations by type
-    const violationsByType: Record<IsolationViolationType, number> = {} as Record<IsolationViolationType, number>;
-    Object.values(IsolationViolationType).forEach(type => {
-      violationsByType[type] = this.violations.filter(v => v.violationType === type).length;
+    const violationsByType: Record<IsolationViolationType, number> =
+      {} as Record<IsolationViolationType, number>;
+    Object.values(IsolationViolationType).forEach((type) => {
+      violationsByType[type] = this.violations.filter(
+        (v) => v.violationType === type,
+      ).length;
     });
 
     // Count violations by severity
     const violationsBySeverity: Record<string, number> = {};
-    ['low', 'medium', 'high', 'critical'].forEach(severity => {
-      violationsBySeverity[severity] = this.violations.filter(v => v.severity === severity).length;
+    ['low', 'medium', 'high', 'critical'].forEach((severity) => {
+      violationsBySeverity[severity] = this.violations.filter(
+        (v) => v.severity === severity,
+      ).length;
     });
 
     // Get critical violations
-    const criticalViolations = this.violations.filter(v => v.severity === 'critical');
+    const criticalViolations = this.violations.filter(
+      (v) => v.severity === 'critical',
+    );
 
     // Calculate session isolation score
     const totalSessions = this.sessionBoundaries.size;
-    const totalMessages = Array.from(this.messageTracking.values())
-      .reduce((sum, messages) => sum + messages.length, 0);
+    const totalMessages = Array.from(this.messageTracking.values()).reduce(
+      (sum, messages) => sum + messages.length,
+      0,
+    );
 
-    const violationRate = totalMessages > 0 ? this.violations.length / totalMessages : 0;
+    const violationRate =
+      totalMessages > 0 ? this.violations.length / totalMessages : 0;
     const sessionIsolationScore = Math.max(0, 1 - violationRate);
 
     // Determine compliance level
-    let complianceLevel: 'non_compliant' | 'partially_compliant' | 'compliant' | 'fully_compliant';
+    let complianceLevel:
+      | 'non_compliant'
+      | 'partially_compliant'
+      | 'compliant'
+      | 'fully_compliant';
     if (criticalViolations.length > 0) {
       complianceLevel = 'non_compliant';
     } else if (this.violations.length > totalMessages * 0.1) {
@@ -465,7 +525,10 @@ export class SessionIsolationValidator extends EventEmitter {
     }
 
     // Generate recommendations
-    const recommendations = this.generateRecommendations(violationsByType, violationsBySeverity);
+    const recommendations = this.generateRecommendations(
+      violationsByType,
+      violationsBySeverity,
+    );
 
     return {
       totalViolations: this.violations.length,
@@ -518,14 +581,19 @@ export class SessionIsolationValidator extends EventEmitter {
   /**
    * Check if payload contains references to other sessions
    */
-  private containsSessionReference(payload: Record<string, unknown>, sessionId: string): boolean {
+  private containsSessionReference(
+    payload: Record<string, unknown>,
+    sessionId: string,
+  ): boolean {
     const payloadString = JSON.stringify(payload).toLowerCase();
     const sessionIdLower = sessionId.toLowerCase();
 
     // Look for session ID references in payload
-    return payloadString.includes(sessionIdLower) ||
-           payloadString.includes(`session_${sessionIdLower}`) ||
-           payloadString.includes(`sessionid=${sessionIdLower}`);
+    return (
+      payloadString.includes(sessionIdLower) ||
+      payloadString.includes(`session_${sessionIdLower}`) ||
+      payloadString.includes(`sessionid=${sessionIdLower}`)
+    );
   }
 
   /**
@@ -541,7 +609,7 @@ export class SessionIsolationValidator extends EventEmitter {
       affectedData: unknown;
       detectionMethod: string;
       potentialImpact: string;
-    }
+    },
   ): IsolationViolation {
     return {
       violationType,
@@ -551,14 +619,17 @@ export class SessionIsolationValidator extends EventEmitter {
       targetSessionId,
       violationDetails,
       stackTrace: new Error().stack,
-      mitigationRecommendations: this.getMitigationRecommendations(violationType),
+      mitigationRecommendations:
+        this.getMitigationRecommendations(violationType),
     };
   }
 
   /**
    * Get mitigation recommendations for violation type
    */
-  private getMitigationRecommendations(violationType: IsolationViolationType): string[] {
+  private getMitigationRecommendations(
+    violationType: IsolationViolationType,
+  ): string[] {
     const recommendations: Record<IsolationViolationType, string[]> = {
       [IsolationViolationType.MESSAGE_ROUTING_LEAK]: [
         'Implement strict message routing validation',
@@ -602,7 +673,11 @@ export class SessionIsolationValidator extends EventEmitter {
       ],
     };
 
-    return recommendations[violationType] ?? ['Implement general isolation mechanisms'];
+    return (
+      recommendations[violationType] ?? [
+        'Implement general isolation mechanisms',
+      ]
+    );
   }
 
   /**
@@ -610,13 +685,15 @@ export class SessionIsolationValidator extends EventEmitter {
    */
   private generateRecommendations(
     violationsByType: Record<IsolationViolationType, number>,
-    violationsBySeverity: Record<string, number>
+    violationsBySeverity: Record<string, number>,
   ): string[] {
     const recommendations: string[] = [];
 
     // Critical severity recommendations
     if (violationsBySeverity.critical > 0) {
-      recommendations.push('URGENT: Address critical session isolation violations immediately');
+      recommendations.push(
+        'URGENT: Address critical session isolation violations immediately',
+      );
       recommendations.push('Implement emergency session isolation measures');
     }
 
@@ -633,9 +710,13 @@ export class SessionIsolationValidator extends EventEmitter {
 
     // General recommendations
     if (this.violations.length > 0) {
-      recommendations.push('Implement comprehensive session isolation testing in CI/CD pipeline');
+      recommendations.push(
+        'Implement comprehensive session isolation testing in CI/CD pipeline',
+      );
       recommendations.push('Add real-time session isolation monitoring');
-      recommendations.push('Consider implementing session isolation middleware');
+      recommendations.push(
+        'Consider implementing session isolation middleware',
+      );
     }
 
     return recommendations;
@@ -677,7 +758,12 @@ export class SessionIsolationValidator extends EventEmitter {
       case 'moderate':
         return [...baseTypes, 'validation_request', 'validation_response'];
       case 'relaxed':
-        return [...baseTypes, 'validation_request', 'validation_response', 'conversation_update'];
+        return [
+          ...baseTypes,
+          'validation_request',
+          'validation_response',
+          'conversation_update',
+        ];
       default:
         return baseTypes;
     }
@@ -726,10 +812,10 @@ export class SessionIsolationValidator extends EventEmitter {
   } {
     return {
       total: this.violations.length,
-      critical: this.violations.filter(v => v.severity === 'critical').length,
-      high: this.violations.filter(v => v.severity === 'high').length,
-      medium: this.violations.filter(v => v.severity === 'medium').length,
-      low: this.violations.filter(v => v.severity === 'low').length,
+      critical: this.violations.filter((v) => v.severity === 'critical').length,
+      high: this.violations.filter((v) => v.severity === 'high').length,
+      medium: this.violations.filter((v) => v.severity === 'medium').length,
+      low: this.violations.filter((v) => v.severity === 'low').length,
       recent: this.violations.slice(-10), // Last 10 violations
     };
   }

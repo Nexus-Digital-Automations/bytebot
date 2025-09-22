@@ -36,17 +36,27 @@ export class BrowserInteractionService {
   constructor(private readonly browserSessionService: BrowserSessionService) {
     // Initialize configuration
     this.pythonPath = process.env.PYTHON_PATH || 'python3';
-    this.browserUsePath = process.env.BROWSER_USE_PATH || '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
+    this.browserUsePath =
+      process.env.BROWSER_USE_PATH ||
+      '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
     this.enableScreenshots = process.env.ENABLE_SCREENSHOTS !== 'false';
-    this.interactionTimeout = parseInt(process.env.INTERACTION_TIMEOUT || '30000'); // 30 seconds
+    this.interactionTimeout = parseInt(
+      process.env.INTERACTION_TIMEOUT || '30000',
+    ); // 30 seconds
 
-    this.logger.log('BrowserInteractionService initialized with comprehensive DOM operations');
+    this.logger.log(
+      'BrowserInteractionService initialized with comprehensive DOM operations',
+    );
   }
 
   /**
    * Execute a click interaction on an element
    */
-  async click(sessionId: string, selector: string, options?: { coordinates?: CoordinatesDto; timeout?: number }): Promise<BrowserInteractionResponseDto> {
+  async click(
+    sessionId: string,
+    selector: string,
+    options?: { coordinates?: CoordinatesDto; timeout?: number },
+  ): Promise<BrowserInteractionResponseDto> {
     const interaction: BrowserInteractionDto = {
       type: 'click',
       selector,
@@ -60,7 +70,12 @@ export class BrowserInteractionService {
   /**
    * Execute a type interaction (input text into an element)
    */
-  async type(sessionId: string, selector: string, text: string, options?: { clear?: boolean; timeout?: number }): Promise<BrowserInteractionResponseDto> {
+  async type(
+    sessionId: string,
+    selector: string,
+    text: string,
+    options?: { clear?: boolean; timeout?: number },
+  ): Promise<BrowserInteractionResponseDto> {
     const interaction: BrowserInteractionDto = {
       type: 'type',
       selector,
@@ -75,7 +90,12 @@ export class BrowserInteractionService {
   /**
    * Execute a select interaction (select option from dropdown)
    */
-  async select(sessionId: string, selector: string, value: string | string[], options?: { timeout?: number }): Promise<BrowserInteractionResponseDto> {
+  async select(
+    sessionId: string,
+    selector: string,
+    value: string | string[],
+    options?: { timeout?: number },
+  ): Promise<BrowserInteractionResponseDto> {
     const interaction: BrowserInteractionDto = {
       type: 'select',
       selector,
@@ -89,7 +109,11 @@ export class BrowserInteractionService {
   /**
    * Execute a hover interaction
    */
-  async hover(sessionId: string, selector: string, options?: { timeout?: number }): Promise<BrowserInteractionResponseDto> {
+  async hover(
+    sessionId: string,
+    selector: string,
+    options?: { timeout?: number },
+  ): Promise<BrowserInteractionResponseDto> {
     const interaction: BrowserInteractionDto = {
       type: 'hover',
       selector,
@@ -102,7 +126,16 @@ export class BrowserInteractionService {
   /**
    * Execute a scroll interaction
    */
-  async scroll(sessionId: string, options: { selector?: string; coordinates?: CoordinatesDto; direction?: 'up' | 'down' | 'left' | 'right'; amount?: number; timeout?: number }): Promise<BrowserInteractionResponseDto> {
+  async scroll(
+    sessionId: string,
+    options: {
+      selector?: string;
+      coordinates?: CoordinatesDto;
+      direction?: 'up' | 'down' | 'left' | 'right';
+      amount?: number;
+      timeout?: number;
+    },
+  ): Promise<BrowserInteractionResponseDto> {
     const interaction: BrowserInteractionDto = {
       type: 'scroll',
       selector: options.selector,
@@ -120,7 +153,11 @@ export class BrowserInteractionService {
   /**
    * Navigate to a URL
    */
-  async navigate(sessionId: string, url: string, options?: { waitForLoad?: boolean; timeout?: number }): Promise<BrowserInteractionResponseDto> {
+  async navigate(
+    sessionId: string,
+    url: string,
+    options?: { waitForLoad?: boolean; timeout?: number },
+  ): Promise<BrowserInteractionResponseDto> {
     const interaction: BrowserInteractionDto = {
       type: 'navigate',
       value: url,
@@ -134,7 +171,14 @@ export class BrowserInteractionService {
   /**
    * Wait for an element to appear or disappear
    */
-  async wait(sessionId: string, selector: string, options: { state?: 'visible' | 'hidden' | 'attached' | 'detached'; timeout?: number }): Promise<BrowserInteractionResponseDto> {
+  async wait(
+    sessionId: string,
+    selector: string,
+    options: {
+      state?: 'visible' | 'hidden' | 'attached' | 'detached';
+      timeout?: number;
+    },
+  ): Promise<BrowserInteractionResponseDto> {
     const interaction: BrowserInteractionDto = {
       type: 'wait',
       selector,
@@ -148,9 +192,14 @@ export class BrowserInteractionService {
   /**
    * Get element information and properties
    */
-  async getElement(sessionId: string, selector: string): Promise<ServiceResponseDto<IDOMElement>> {
+  async getElement(
+    sessionId: string,
+    selector: string,
+  ): Promise<ServiceResponseDto<IDOMElement>> {
     try {
-      this.logger.log(`Getting element information for selector: ${selector} in session ${sessionId}`);
+      this.logger.log(
+        `Getting element information for selector: ${selector} in session ${sessionId}`,
+      );
 
       const pythonScript = this.generateElementInfoScript(selector);
 
@@ -176,16 +225,17 @@ export class BrowserInteractionService {
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
-      this.logger.error(`Failed to get element ${selector} in session ${sessionId}`, error);
+      this.logger.error(
+        `Failed to get element ${selector} in session ${sessionId}`,
+        error,
+      );
 
       return {
         success: false,
-        error: this.createBrowserError(
-          error,
-          { context: { sessionId, selector } }
-        ),
+        error: this.createBrowserError(error, {
+          context: { sessionId, selector },
+        }),
       };
     }
   }
@@ -193,9 +243,14 @@ export class BrowserInteractionService {
   /**
    * Get multiple elements matching a selector
    */
-  async getElements(sessionId: string, selector: string): Promise<ServiceResponseDto<IDOMElement[]>> {
+  async getElements(
+    sessionId: string,
+    selector: string,
+  ): Promise<ServiceResponseDto<IDOMElement[]>> {
     try {
-      this.logger.log(`Getting elements for selector: ${selector} in session ${sessionId}`);
+      this.logger.log(
+        `Getting elements for selector: ${selector} in session ${sessionId}`,
+      );
 
       const pythonScript = this.generateElementsInfoScript(selector);
 
@@ -221,16 +276,17 @@ export class BrowserInteractionService {
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
-      this.logger.error(`Failed to get elements ${selector} in session ${sessionId}`, error);
+      this.logger.error(
+        `Failed to get elements ${selector} in session ${sessionId}`,
+        error,
+      );
 
       return {
         success: false,
-        error: this.createBrowserError(
-          error,
-          { context: { sessionId, selector } }
-        ),
+        error: this.createBrowserError(error, {
+          context: { sessionId, selector },
+        }),
       };
     }
   }
@@ -238,11 +294,18 @@ export class BrowserInteractionService {
   /**
    * Take a screenshot of the current page or specific element
    */
-  async screenshot(sessionId: string, options?: { selector?: string; fullPage?: boolean; quality?: number }): Promise<ServiceResponseDto<string>> {
+  async screenshot(
+    sessionId: string,
+    options?: { selector?: string; fullPage?: boolean; quality?: number },
+  ): Promise<ServiceResponseDto<string>> {
     try {
       this.logger.log(`Taking screenshot in session ${sessionId}`);
 
-      const pythonScript = this.generateScreenshotScript(options?.selector, options?.fullPage, options?.quality);
+      const pythonScript = this.generateScreenshotScript(
+        options?.selector,
+        options?.fullPage,
+        options?.quality,
+      );
 
       const result = await this.executePythonCommand({
         command: this.pythonPath,
@@ -266,16 +329,15 @@ export class BrowserInteractionService {
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
-      this.logger.error(`Failed to take screenshot in session ${sessionId}`, error);
+      this.logger.error(
+        `Failed to take screenshot in session ${sessionId}`,
+        error,
+      );
 
       return {
         success: false,
-        error: this.createBrowserError(
-          error,
-          { context: { sessionId } }
-        ),
+        error: this.createBrowserError(error, { context: { sessionId } }),
       };
     }
   }
@@ -283,7 +345,11 @@ export class BrowserInteractionService {
   /**
    * Execute JavaScript code in the browser context
    */
-  async executeScript(sessionId: string, script: string, args?: any[]): Promise<ServiceResponseDto<any>> {
+  async executeScript(
+    sessionId: string,
+    script: string,
+    args?: any[],
+  ): Promise<ServiceResponseDto<any>> {
     try {
       this.logger.log(`Executing JavaScript in session ${sessionId}`);
 
@@ -311,16 +377,17 @@ export class BrowserInteractionService {
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
-      this.logger.error(`Failed to execute JavaScript in session ${sessionId}`, error);
+      this.logger.error(
+        `Failed to execute JavaScript in session ${sessionId}`,
+        error,
+      );
 
       return {
         success: false,
-        error: this.createBrowserError(
-          error,
-          { context: { sessionId, script } }
-        ),
+        error: this.createBrowserError(error, {
+          context: { sessionId, script },
+        }),
       };
     }
   }
@@ -328,7 +395,11 @@ export class BrowserInteractionService {
   /**
    * Get current page information (title, URL, etc.)
    */
-  async getPageInfo(sessionId: string): Promise<ServiceResponseDto<{ title: string; url: string; html?: string }>> {
+  async getPageInfo(
+    sessionId: string,
+  ): Promise<
+    ServiceResponseDto<{ title: string; url: string; html?: string }>
+  > {
     try {
       this.logger.log(`Getting page info for session ${sessionId}`);
 
@@ -356,16 +427,15 @@ export class BrowserInteractionService {
           timestamp: new Date(),
         },
       };
-
     } catch (error) {
-      this.logger.error(`Failed to get page info in session ${sessionId}`, error);
+      this.logger.error(
+        `Failed to get page info in session ${sessionId}`,
+        error,
+      );
 
       return {
         success: false,
-        error: this.createBrowserError(
-          error,
-          { context: { sessionId } }
-        ),
+        error: this.createBrowserError(error, { context: { sessionId } }),
       };
     }
   }
@@ -373,11 +443,16 @@ export class BrowserInteractionService {
   /**
    * Execute a browser interaction through Python browser-use framework
    */
-  private async executeInteraction(sessionId: string, interaction: BrowserInteractionDto): Promise<BrowserInteractionResponseDto> {
+  private async executeInteraction(
+    sessionId: string,
+    interaction: BrowserInteractionDto,
+  ): Promise<BrowserInteractionResponseDto> {
     const startTime = Date.now();
 
     try {
-      this.logger.log(`Executing ${interaction.type} interaction for session ${sessionId}`);
+      this.logger.log(
+        `Executing ${interaction.type} interaction for session ${sessionId}`,
+      );
 
       const pythonScript = this.generateInteractionScript(interaction);
 
@@ -396,27 +471,43 @@ export class BrowserInteractionService {
       const responseData = this.parseInteractionResult(result.stdout);
 
       // Record task completion in session service
-      this.browserSessionService.recordTaskCompletion(sessionId, duration, true);
+      this.browserSessionService.recordTaskCompletion(
+        sessionId,
+        duration,
+        true,
+      );
 
-      this.logger.log(`Interaction ${interaction.type} completed in ${duration}ms`);
+      this.logger.log(
+        `Interaction ${interaction.type} completed in ${duration}ms`,
+      );
 
       return {
         success: true,
         data: responseData,
         screenshot: responseData.screenshot,
       };
-
     } catch (error) {
       const duration = Date.now() - startTime;
 
       // Record task failure in session service
-      this.browserSessionService.recordTaskCompletion(sessionId, duration, false);
+      this.browserSessionService.recordTaskCompletion(
+        sessionId,
+        duration,
+        false,
+      );
 
       const browserError = this.createBrowserError(error, {
-        context: { sessionId, interaction: interaction.type, selector: interaction.selector },
+        context: {
+          sessionId,
+          interaction: interaction.type,
+          selector: interaction.selector,
+        },
       });
 
-      this.logger.error(`Interaction ${interaction.type} failed after ${duration}ms`, error);
+      this.logger.error(
+        `Interaction ${interaction.type} failed after ${duration}ms`,
+        error,
+      );
 
       return {
         success: false,
@@ -428,7 +519,9 @@ export class BrowserInteractionService {
   /**
    * Generate Python script for browser interaction
    */
-  private generateInteractionScript(interaction: BrowserInteractionDto): string {
+  private generateInteractionScript(
+    interaction: BrowserInteractionDto,
+  ): string {
     const baseScript = `
 import asyncio
 import json
@@ -445,9 +538,10 @@ async def execute_interaction():
         result = None
 
         if "${interaction.type}" == "click":
-            ${interaction.coordinates ?
-              `result = await agent.browser.page.click(${interaction.coordinates.x}, ${interaction.coordinates.y})` :
-              `result = await agent.browser.click("${interaction.selector || ''}")`
+            ${
+              interaction.coordinates
+                ? `result = await agent.browser.page.click(${interaction.coordinates.x}, ${interaction.coordinates.y})`
+                : `result = await agent.browser.click("${interaction.selector || ''}")`
             }
         elif "${interaction.type}" == "type":
             ${interaction.options?.clear ? `await agent.browser.page.fill("${interaction.selector || ''}", "")` : ''}
@@ -457,10 +551,11 @@ async def execute_interaction():
         elif "${interaction.type}" == "hover":
             result = await agent.browser.page.hover("${interaction.selector || ''}")
         elif "${interaction.type}" == "scroll":
-            ${interaction.selector ?
-              `element = await agent.browser.page.query_selector("${interaction.selector}")
-               result = await element.scroll_into_view_if_needed()` :
-              `result = await agent.browser.page.evaluate('''() => {
+            ${
+              interaction.selector
+                ? `element = await agent.browser.page.query_selector("${interaction.selector}")
+               result = await element.scroll_into_view_if_needed()`
+                : `result = await agent.browser.page.evaluate('''() => {
                  window.scrollBy(${interaction.coordinates?.x || 0}, ${interaction.coordinates?.y || interaction.options?.amount || 100});
                }''')`
             }
@@ -629,7 +724,11 @@ if __name__ == "__main__":
   /**
    * Generate Python script for screenshot capture
    */
-  private generateScreenshotScript(selector?: string, fullPage?: boolean, quality?: number): string {
+  private generateScreenshotScript(
+    selector?: string,
+    fullPage?: boolean,
+    quality?: number,
+  ): string {
     return `
 import asyncio
 import json
@@ -645,13 +744,14 @@ async def take_screenshot():
             "quality": ${quality || 80}
         }
 
-        ${selector ?
-          `element = await agent.browser.page.query_selector("${selector}")
+        ${
+          selector
+            ? `element = await agent.browser.page.query_selector("${selector}")
            if element:
                screenshot_data = await element.screenshot(**screenshot_options)
            else:
-               raise Exception("Element not found for screenshot")` :
-          `screenshot_data = await agent.browser.page.screenshot(**screenshot_options)`
+               raise Exception("Element not found for screenshot")`
+            : `screenshot_data = await agent.browser.page.screenshot(**screenshot_options)`
         }
 
         # Encode to base64
@@ -670,7 +770,10 @@ if __name__ == "__main__":
   /**
    * Generate Python script for JavaScript execution
    */
-  private generateJavaScriptExecutionScript(script: string, args?: any[]): string {
+  private generateJavaScriptExecutionScript(
+    script: string,
+    args?: any[],
+  ): string {
     const argsJson = JSON.stringify(args || []);
 
     return `
@@ -860,7 +963,11 @@ if __name__ == "__main__":
   /**
    * Parse page info result from Python output
    */
-  private parsePageInfoResult(stdout: string): { title: string; url: string; html?: string } {
+  private parsePageInfoResult(stdout: string): {
+    title: string;
+    url: string;
+    html?: string;
+  } {
     try {
       const parsed = JSON.parse(stdout.trim());
       if (parsed.error) {
@@ -877,7 +984,10 @@ if __name__ == "__main__":
    */
   private createBrowserError(
     error: any,
-    options: { context?: any; severity?: 'info' | 'warning' | 'error' | 'critical' } = {}
+    options: {
+      context?: any;
+      severity?: 'info' | 'warning' | 'error' | 'critical';
+    } = {},
   ): IBrowserError {
     return {
       code: error.code || 'INTERACTION_ERROR',

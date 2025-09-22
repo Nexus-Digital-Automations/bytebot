@@ -58,7 +58,11 @@ export const RequireDatabaseHealth = (options?: {
   allowReadOnly?: boolean;
   timeout?: number;
 }) => {
-  return (target: object, propertyKey?: string, descriptor?: PropertyDescriptor) => {
+  return (
+    target: object,
+    propertyKey?: string,
+    descriptor?: PropertyDescriptor,
+  ) => {
     if (propertyKey && descriptor) {
       Reflect.defineMetadata(
         'database-health-config',
@@ -85,12 +89,24 @@ export class DatabaseHealthGuard implements CanActivate {
     private readonly reflector: Reflector,
   ) {
     this.config = {
-      checkInterval: this.configService.get<number>('DB_HEALTH_CHECK_INTERVAL', 30000), // 30 seconds
+      checkInterval: this.configService.get<number>(
+        'DB_HEALTH_CHECK_INTERVAL',
+        30000,
+      ), // 30 seconds
       timeout: this.configService.get<number>('DB_HEALTH_CHECK_TIMEOUT', 5000), // 5 seconds
       maxRetries: this.configService.get<number>('DB_HEALTH_MAX_RETRIES', 3),
-      cacheTimeout: this.configService.get<number>('DB_HEALTH_CACHE_TIMEOUT', 10000), // 10 seconds
-      requireHealthy: this.configService.get<boolean>('DB_HEALTH_REQUIRE_HEALTHY', true),
-      gracefulDegradation: this.configService.get<boolean>('DB_HEALTH_GRACEFUL_DEGRADATION', true),
+      cacheTimeout: this.configService.get<number>(
+        'DB_HEALTH_CACHE_TIMEOUT',
+        10000,
+      ), // 10 seconds
+      requireHealthy: this.configService.get<boolean>(
+        'DB_HEALTH_REQUIRE_HEALTHY',
+        true,
+      ),
+      gracefulDegradation: this.configService.get<boolean>(
+        'DB_HEALTH_GRACEFUL_DEGRADATION',
+        true,
+      ),
     };
 
     // Initialize health status
@@ -116,16 +132,18 @@ export class DatabaseHealthGuard implements CanActivate {
     const controller = context.getClass();
 
     // Get database health configuration from metadata
-    const methodConfig = this.reflector.get<{
-      requireHealthy?: boolean;
-      allowReadOnly?: boolean;
-      timeout?: number;
-    }>('database-health-config', handler) || {};
-    const classConfig = this.reflector.get<{
-      requireHealthy?: boolean;
-      allowReadOnly?: boolean;
-      timeout?: number;
-    }>('database-health-config', controller) || {};
+    const methodConfig =
+      this.reflector.get<{
+        requireHealthy?: boolean;
+        allowReadOnly?: boolean;
+        timeout?: number;
+      }>('database-health-config', handler) || {};
+    const classConfig =
+      this.reflector.get<{
+        requireHealthy?: boolean;
+        allowReadOnly?: boolean;
+        timeout?: number;
+      }>('database-health-config', controller) || {};
 
     const options = {
       requireHealthy: this.config.requireHealthy,
@@ -143,14 +161,14 @@ export class DatabaseHealthGuard implements CanActivate {
       if (!healthStatus.isHealthy) {
         this.logger.warn(
           `Database health check failed - Status: unhealthy, ` +
-          `Response time: ${healthStatus.responseTime}ms, ` +
-          `Error: ${healthStatus.errorMessage || 'Unknown error'}`
+            `Response time: ${healthStatus.responseTime}ms, ` +
+            `Error: ${healthStatus.errorMessage || 'Unknown error'}`,
         );
 
         // Check if we should allow graceful degradation
         if (options.allowReadOnly && this.isReadOnlyOperation(request)) {
           this.logger.debug(
-            `Allowing read-only operation despite database health issues: ${request.method} ${request.url}`
+            `Allowing read-only operation despite database health issues: ${request.method} ${request.url}`,
           );
           return true;
         }
@@ -171,14 +189,14 @@ export class DatabaseHealthGuard implements CanActivate {
       }
 
       this.logger.debug(
-        `Database health check passed - Response time: ${healthStatus.responseTime}ms`
+        `Database health check passed - Response time: ${healthStatus.responseTime}ms`,
       );
 
       return true;
     } catch (error) {
       this.logger.error(
         `Database health guard failed: ${(error as Error).message}`,
-        (error as Error).stack
+        (error as Error).stack,
       );
       throw error;
     }
@@ -192,7 +210,8 @@ export class DatabaseHealthGuard implements CanActivate {
 
     // Return cached status if still valid
     if (
-      this.healthStatus.lastChecked.getTime() + this.config.cacheTimeout > now &&
+      this.healthStatus.lastChecked.getTime() + this.config.cacheTimeout >
+        now &&
       this.healthStatus.checkCount > 0
     ) {
       return this.healthStatus;
@@ -225,7 +244,9 @@ export class DatabaseHealthGuard implements CanActivate {
 
     while (retries <= this.config.maxRetries) {
       try {
-        this.logger.debug(`Performing database health check (attempt ${retries + 1})`);
+        this.logger.debug(
+          `Performing database health check (attempt ${retries + 1})`,
+        );
 
         // Simulate database health check
         // In a real implementation, this would check actual database connectivity
@@ -237,18 +258,24 @@ export class DatabaseHealthGuard implements CanActivate {
           responseTime,
           lastChecked: new Date(),
           checkCount: this.healthStatus.checkCount + 1,
-          successCount: isHealthy ? this.healthStatus.successCount + 1 : this.healthStatus.successCount,
-          failureCount: isHealthy ? this.healthStatus.failureCount : this.healthStatus.failureCount + 1,
-          errorMessage: isHealthy ? undefined : 'Database connectivity check failed',
+          successCount: isHealthy
+            ? this.healthStatus.successCount + 1
+            : this.healthStatus.successCount,
+          failureCount: isHealthy
+            ? this.healthStatus.failureCount
+            : this.healthStatus.failureCount + 1,
+          errorMessage: isHealthy
+            ? undefined
+            : 'Database connectivity check failed',
         };
 
         if (isHealthy) {
           this.logger.debug(
-            `Database health check successful - Response time: ${responseTime}ms`
+            `Database health check successful - Response time: ${responseTime}ms`,
           );
         } else {
           this.logger.warn(
-            `Database health check failed - Response time: ${responseTime}ms`
+            `Database health check failed - Response time: ${responseTime}ms`,
           );
         }
 
@@ -258,7 +285,7 @@ export class DatabaseHealthGuard implements CanActivate {
         const responseTime = Date.now() - startTime;
 
         this.logger.error(
-          `Database health check attempt ${retries} failed: ${(error as Error).message}`
+          `Database health check attempt ${retries} failed: ${(error as Error).message}`,
         );
 
         if (retries > this.config.maxRetries) {
@@ -276,7 +303,7 @@ export class DatabaseHealthGuard implements CanActivate {
         }
 
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * retries));
       }
     }
 
@@ -324,7 +351,7 @@ export class DatabaseHealthGuard implements CanActivate {
       '/sessions/.*/state',
     ];
 
-    return readOnlyPatterns.some(pattern => {
+    return readOnlyPatterns.some((pattern) => {
       const regex = new RegExp(pattern.replace(/\*/g, '[^/]*'));
       return regex.test(url);
     });
@@ -340,12 +367,14 @@ export class DatabaseHealthGuard implements CanActivate {
       } catch (error) {
         this.logger.error(
           `Periodic health check failed: ${(error as Error).message}`,
-          (error as Error).stack
+          (error as Error).stack,
         );
       }
     }, this.config.checkInterval);
 
-    this.logger.log(`Periodic health checks started with ${this.config.checkInterval}ms interval`);
+    this.logger.log(
+      `Periodic health checks started with ${this.config.checkInterval}ms interval`,
+    );
   }
 
   /**
@@ -357,9 +386,10 @@ export class DatabaseHealthGuard implements CanActivate {
     healthPercentage: number;
   } {
     const uptime = Date.now() - this.healthStatus.lastChecked.getTime();
-    const healthPercentage = this.healthStatus.checkCount > 0
-      ? (this.healthStatus.successCount / this.healthStatus.checkCount) * 100
-      : 0;
+    const healthPercentage =
+      this.healthStatus.checkCount > 0
+        ? (this.healthStatus.successCount / this.healthStatus.checkCount) * 100
+        : 0;
 
     return {
       ...this.healthStatus,
@@ -387,12 +417,18 @@ export class DatabaseHealthGuard implements CanActivate {
       responseTime: 0,
       lastChecked: new Date(),
       checkCount: this.healthStatus.checkCount + 1,
-      successCount: isHealthy ? this.healthStatus.successCount + 1 : this.healthStatus.successCount,
-      failureCount: isHealthy ? this.healthStatus.failureCount : this.healthStatus.failureCount + 1,
+      successCount: isHealthy
+        ? this.healthStatus.successCount + 1
+        : this.healthStatus.successCount,
+      failureCount: isHealthy
+        ? this.healthStatus.failureCount
+        : this.healthStatus.failureCount + 1,
       errorMessage,
     };
 
-    this.logger.debug(`Health status manually set to: ${isHealthy ? 'healthy' : 'unhealthy'}`);
+    this.logger.debug(
+      `Health status manually set to: ${isHealthy ? 'healthy' : 'unhealthy'}`,
+    );
   }
 
   /**

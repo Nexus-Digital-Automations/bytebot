@@ -25,18 +25,20 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
-    // Monitoring Servicesimport { JobMonitoringService } from './services/job-monitoring.service';
-    // Controllersimport { JobMonitoringController } from './controllers/job-monitoring.controller';
-    // WebSocket Gatewaysimport { MonitoringRealtimeGateway } from './gateways/monitoring-realtime.gateway';
-    // Dependenciesimport { MetricsService } from '../metrics/metrics.service';
-import { CacheService } from '../cache/cache.service';@Module({imports: [
+// Monitoring Servicesimport { JobMonitoringService } from './services/job-monitoring.service';
+// Controllersimport { JobMonitoringController } from './controllers/job-monitoring.controller';
+// WebSocket Gatewaysimport { MonitoringRealtimeGateway } from './gateways/monitoring-realtime.gateway';
+// Dependenciesimport { MetricsService } from '../metrics/metrics.service';
+import { CacheService } from '../cache/cache.service';
+@Module({
+  imports: [
     // Event system for real-time monitoring
     EventEmitterModule.forRoot({
       // Enable async event handling for better performance
       wildcard: false,
       delimiter: '.',
-  newListener: false,
-  removeListener: false,
+      newListener: false,
+      removeListener: false,
       maxListeners: 20,
       verboseMemoryLeak: false,
       ignoreErrors: false,
@@ -81,6 +83,14 @@ export class MonitoringModule {
     private readonly monitoringGateway: MonitoringRealtimeGateway,
   ) {
     // Module initialization logging
-    console.log('🚀 Enterprise Job Monitoring Module initialized');console.log('📊 Dashboard endpoints: /monitoring/*');console.log('📡 WebSocket gateway: /monitoring namespace');console.log('⚡ Real-time monitoring: ACTIVE');console.log('📈 Metrics collection: COMPREHENSIVE');console.log('🔔 Alerting system: ENABLED');console.log('💹 Business intelligence: ACTIVE');console.log('🎯 SLA monitoring: CONFIGURED');console.log('📦 Capacity planning: OPERATIONAL');
+    console.log('🚀 Enterprise Job Monitoring Module initialized');
+    console.log('📊 Dashboard endpoints: /monitoring/*');
+    console.log('📡 WebSocket gateway: /monitoring namespace');
+    console.log('⚡ Real-time monitoring: ACTIVE');
+    console.log('📈 Metrics collection: COMPREHENSIVE');
+    console.log('🔔 Alerting system: ENABLED');
+    console.log('💹 Business intelligence: ACTIVE');
+    console.log('🎯 SLA monitoring: CONFIGURED');
+    console.log('📦 Capacity planning: OPERATIONAL');
   }
 }

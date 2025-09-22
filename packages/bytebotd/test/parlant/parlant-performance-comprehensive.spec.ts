@@ -38,7 +38,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantConversationContext,
-  RiskLevel
+  RiskLevel,
 } from '../../src/parlant/parlant-integration.service';
 
 import { ParlantPerformanceOrchestratorService } from '../../src/parlant/optimization/parlant-performance-orchestrator.service';
@@ -124,7 +124,7 @@ class PerformanceTestUtils {
         expectedP99ResponseTime: 800,
         expectedThroughput: 10,
         expectedCacheHitRate: 0.2,
-        warmupRequests: 10
+        warmupRequests: 10,
       },
       {
         name: 'Light Load',
@@ -136,7 +136,7 @@ class PerformanceTestUtils {
         expectedP99ResponseTime: 1200,
         expectedThroughput: 50,
         expectedCacheHitRate: 0.6,
-        warmupRequests: 50
+        warmupRequests: 50,
       },
       {
         name: 'Medium Load',
@@ -148,7 +148,7 @@ class PerformanceTestUtils {
         expectedP99ResponseTime: 1500,
         expectedThroughput: 100,
         expectedCacheHitRate: 0.75,
-        warmupRequests: 100
+        warmupRequests: 100,
       },
       {
         name: 'High Load',
@@ -160,7 +160,7 @@ class PerformanceTestUtils {
         expectedP99ResponseTime: 1800,
         expectedThroughput: 200,
         expectedCacheHitRate: 0.85,
-        warmupRequests: 200
+        warmupRequests: 200,
       },
       {
         name: 'Stress Test',
@@ -172,7 +172,7 @@ class PerformanceTestUtils {
         expectedP99ResponseTime: 2000,
         expectedThroughput: 300,
         expectedCacheHitRate: 0.88,
-        warmupRequests: 300
+        warmupRequests: 300,
       },
       {
         name: 'Burst Load',
@@ -183,19 +183,24 @@ class PerformanceTestUtils {
         expectedP95ResponseTime: 1200,
         expectedP99ResponseTime: 2500,
         expectedThroughput: 250,
-        expectedCacheHitRate: 0.90,
-        warmupRequests: 500
-      }
+        expectedCacheHitRate: 0.9,
+        warmupRequests: 500,
+      },
     ];
   }
 
   /**
    * Calculate percentile from sorted array of response times
    */
-  static calculatePercentile(sortedTimes: number[], percentile: number): number {
+  static calculatePercentile(
+    sortedTimes: number[],
+    percentile: number,
+  ): number {
     if (sortedTimes.length === 0) return 0;
     const index = Math.ceil((percentile / 100) * sortedTimes.length) - 1;
-    return sortedTimes[Math.max(0, Math.min(index, sortedTimes.length - 1))] || 0;
+    return (
+      sortedTimes[Math.max(0, Math.min(index, sortedTimes.length - 1))] || 0
+    );
   }
 
   /**
@@ -212,16 +217,18 @@ class PerformanceTestUtils {
       'delete_item',
       'share_resource',
       'backup_data',
-      'sync_settings'
+      'sync_settings',
     ];
 
     const riskLevels = [RiskLevel.LOW, RiskLevel.MEDIUM, RiskLevel.HIGH];
     const securityLevels = ['LOW', 'MEDIUM', 'HIGH'] as const;
 
     return Array.from({ length: count }, (_, i) => {
-      const funcName = functionTemplates[i % functionTemplates.length] || 'default_function';
+      const funcName =
+        functionTemplates[i % functionTemplates.length] || 'default_function';
       const riskLevel = riskLevels[i % riskLevels.length] || RiskLevel.MEDIUM;
-      const securityLevel = securityLevels[i % securityLevels.length] || 'MEDIUM';
+      const securityLevel =
+        securityLevels[i % securityLevels.length] || 'MEDIUM';
 
       return {
         functionName: funcName,
@@ -229,7 +236,7 @@ class PerformanceTestUtils {
           userId: `load-test-user-${Math.floor(i / 10)}`,
           requestIndex: i,
           timestamp: Date.now(),
-          testData: `test-data-${i}`
+          testData: `test-data-${i}`,
         },
         actionDescription: `Load test operation: ${funcName}`,
         riskLevel,
@@ -243,9 +250,9 @@ class PerformanceTestUtils {
           metadata: {
             loadTest: true,
             batchId: Math.floor(i / 20),
-            scenario: 'performance_validation'
-          }
-        }
+            scenario: 'performance_validation',
+          },
+        },
       };
     });
   }
@@ -255,30 +262,37 @@ class PerformanceTestUtils {
    */
   static validatePerformanceMetrics(
     metrics: DetailedPerformanceMetrics,
-    config: PerformanceTestConfig
+    config: PerformanceTestConfig,
   ): { passed: boolean; violations: string[]; score: number } {
     const violations: string[] = [];
     let score = 100;
 
     // Response time validation
-    if (metrics.latencyMetrics.p95ResponseTime > config.expectedP95ResponseTime) {
+    if (
+      metrics.latencyMetrics.p95ResponseTime > config.expectedP95ResponseTime
+    ) {
       violations.push(
-        `P95 response time ${metrics.latencyMetrics.p95ResponseTime}ms exceeds target ${config.expectedP95ResponseTime}ms`
+        `P95 response time ${metrics.latencyMetrics.p95ResponseTime}ms exceeds target ${config.expectedP95ResponseTime}ms`,
       );
       score -= 20;
     }
 
-    if (metrics.latencyMetrics.p99ResponseTime > config.expectedP99ResponseTime) {
+    if (
+      metrics.latencyMetrics.p99ResponseTime > config.expectedP99ResponseTime
+    ) {
       violations.push(
-        `P99 response time ${metrics.latencyMetrics.p99ResponseTime}ms exceeds target ${config.expectedP99ResponseTime}ms`
+        `P99 response time ${metrics.latencyMetrics.p99ResponseTime}ms exceeds target ${config.expectedP99ResponseTime}ms`,
       );
       score -= 15;
     }
 
     // Throughput validation
-    if (metrics.executionMetrics.actualThroughput < config.expectedThroughput * 0.8) {
+    if (
+      metrics.executionMetrics.actualThroughput <
+      config.expectedThroughput * 0.8
+    ) {
       violations.push(
-        `Throughput ${metrics.executionMetrics.actualThroughput} RPS is below 80% of target ${config.expectedThroughput} RPS`
+        `Throughput ${metrics.executionMetrics.actualThroughput} RPS is below 80% of target ${config.expectedThroughput} RPS`,
       );
       score -= 15;
     }
@@ -286,28 +300,35 @@ class PerformanceTestUtils {
     // Cache hit rate validation
     if (metrics.cacheMetrics.hitRate < config.expectedCacheHitRate) {
       violations.push(
-        `Cache hit rate ${(metrics.cacheMetrics.hitRate * 100).toFixed(1)}% below target ${(config.expectedCacheHitRate * 100).toFixed(1)}%`
+        `Cache hit rate ${(metrics.cacheMetrics.hitRate * 100).toFixed(1)}% below target ${(config.expectedCacheHitRate * 100).toFixed(1)}%`,
       );
       score -= 25;
     }
 
     // Error rate validation
-    const errorRate = metrics.executionMetrics.failedRequests / metrics.executionMetrics.totalRequests;
+    const errorRate =
+      metrics.executionMetrics.failedRequests /
+      metrics.executionMetrics.totalRequests;
     if (errorRate > 0.05) {
-      violations.push(`Error rate ${(errorRate * 100).toFixed(1)}% exceeds 5% threshold`);
+      violations.push(
+        `Error rate ${(errorRate * 100).toFixed(1)}% exceeds 5% threshold`,
+      );
       score -= 20;
     }
 
     // Memory usage validation (prevent memory leaks)
-    if (metrics.resourceMetrics.peakMemoryUsage > 1024 * 1024 * 1024) { // 1GB
-      violations.push(`Peak memory usage ${Math.round(metrics.resourceMetrics.peakMemoryUsage / 1024 / 1024)}MB exceeds 1GB limit`);
+    if (metrics.resourceMetrics.peakMemoryUsage > 1024 * 1024 * 1024) {
+      // 1GB
+      violations.push(
+        `Peak memory usage ${Math.round(metrics.resourceMetrics.peakMemoryUsage / 1024 / 1024)}MB exceeds 1GB limit`,
+      );
       score -= 10;
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      score: Math.max(0, score)
+      score: Math.max(0, score),
     };
   }
 }
@@ -322,17 +343,22 @@ describe('Parlant Performance Comprehensive Testing', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot(),
-        ParlantPerformanceOptimizationModule
-      ],
-      providers: [Logger]
+      imports: [ConfigModule.forRoot(), ParlantPerformanceOptimizationModule],
+      providers: [Logger],
     }).compile();
 
-    parlantService = module.get<ParlantIntegrationService>(ParlantIntegrationService);
-    orchestrator = module.get<ParlantPerformanceOrchestratorService>(ParlantPerformanceOrchestratorService);
-    batchProcessor = module.get<ParlantAsyncBatchProcessorService>(ParlantAsyncBatchProcessorService);
-    cacheService = module.get<ParlantMultiLevelCacheService>(ParlantMultiLevelCacheService);
+    parlantService = module.get<ParlantIntegrationService>(
+      ParlantIntegrationService,
+    );
+    orchestrator = module.get<ParlantPerformanceOrchestratorService>(
+      ParlantPerformanceOrchestratorService,
+    );
+    batchProcessor = module.get<ParlantAsyncBatchProcessorService>(
+      ParlantAsyncBatchProcessorService,
+    );
+    cacheService = module.get<ParlantMultiLevelCacheService>(
+      ParlantMultiLevelCacheService,
+    );
     logger = module.get<Logger>(Logger);
 
     await module.init();
@@ -346,14 +372,23 @@ describe('Parlant Performance Comprehensive Testing', () => {
 
   describe('Comprehensive Load Testing', () => {
     it('should pass baseline performance validation', async () => {
-      const config = PerformanceTestUtils.generateLoadTestScenarios()[0] as PerformanceTestConfig;
-      const requests = PerformanceTestUtils.generateRealisticRequests(config.requestsPerUser);
+      const config =
+        PerformanceTestUtils.generateLoadTestScenarios()[0] as PerformanceTestConfig;
+      const requests = PerformanceTestUtils.generateRealisticRequests(
+        config.requestsPerUser,
+      );
 
-      logger.log(`Starting ${config.name} test with ${config.requestsPerUser} requests`);
+      logger.log(
+        `Starting ${config.name} test with ${config.requestsPerUser} requests`,
+      );
 
       // Warmup phase
       const warmupRequests = requests.slice(0, config.warmupRequests);
-      await Promise.all(warmupRequests.map(req => parlantService.validateFunctionExecution(req)));
+      await Promise.all(
+        warmupRequests.map((req) =>
+          parlantService.validateFunctionExecution(req),
+        ),
+      );
 
       // Measurement phase
       const responseTimes: number[] = [];
@@ -380,16 +415,30 @@ describe('Parlant Performance Comprehensive Testing', () => {
           successfulRequests: requests.length,
           failedRequests: 0,
           totalDurationMs: totalDuration,
-          actualThroughput: (requests.length / totalDuration) * 1000
+          actualThroughput: (requests.length / totalDuration) * 1000,
         },
         latencyMetrics: {
           minResponseTime: sortedTimes[0] || 0,
           maxResponseTime: sortedTimes[sortedTimes.length - 1] || 0,
-          avgResponseTime: responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length,
-          p50ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 50),
-          p95ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 95),
-          p99ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 99),
-          p999ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 99.9)
+          avgResponseTime:
+            responseTimes.reduce((sum, time) => sum + time, 0) /
+            responseTimes.length,
+          p50ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            50,
+          ),
+          p95ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            95,
+          ),
+          p99ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            99,
+          ),
+          p999ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            99.9,
+          ),
         },
         cacheMetrics: {
           hitRate: 0.2, // Baseline cache hit rate
@@ -397,23 +446,26 @@ describe('Parlant Performance Comprehensive Testing', () => {
           l2HitRate: 0.1,
           totalCacheRequests: requests.length,
           cacheWriteLatency: 5,
-          cacheReadLatency: 2
+          cacheReadLatency: 2,
         },
         resourceMetrics: {
           peakMemoryUsage: process.memoryUsage().heapUsed,
           avgCpuUsage: 50,
           dbConnectionPoolUsage: 10,
-          activeWebSocketConnections: 1
+          activeWebSocketConnections: 1,
         },
         errorMetrics: {
           timeoutErrors: 0,
           connectionErrors: 0,
           validationErrors: 0,
-          systemErrors: 0
-        }
+          systemErrors: 0,
+        },
       };
 
-      const validation = PerformanceTestUtils.validatePerformanceMetrics(metrics, config);
+      const validation = PerformanceTestUtils.validatePerformanceMetrics(
+        metrics,
+        config,
+      );
 
       logger.log(`Baseline Performance Results:
         P95: ${metrics.latencyMetrics.p95ResponseTime}ms
@@ -423,20 +475,31 @@ describe('Parlant Performance Comprehensive Testing', () => {
 
       expect(validation.passed).toBe(true);
       expect(validation.violations).toHaveLength(0);
-      expect(metrics.latencyMetrics.p95ResponseTime).toBeLessThan(config.expectedP95ResponseTime);
+      expect(metrics.latencyMetrics.p95ResponseTime).toBeLessThan(
+        config.expectedP95ResponseTime,
+      );
     }, 60000);
 
     it('should handle medium concurrent load efficiently', async () => {
-      const config = PerformanceTestUtils.generateLoadTestScenarios()[2] as PerformanceTestConfig; // Medium Load
+      const config =
+        PerformanceTestUtils.generateLoadTestScenarios()[2] as PerformanceTestConfig; // Medium Load
       const allRequests = PerformanceTestUtils.generateRealisticRequests(
-        config.concurrentUsers * config.requestsPerUser
+        config.concurrentUsers * config.requestsPerUser,
       );
 
-      logger.log(`Starting ${config.name} test with ${config.concurrentUsers} concurrent users`);
+      logger.log(
+        `Starting ${config.name} test with ${config.concurrentUsers} concurrent users`,
+      );
 
       // Warmup with cache population
-      const warmupRequests = PerformanceTestUtils.generateRealisticRequests(config.warmupRequests);
-      await Promise.all(warmupRequests.map(req => parlantService.validateFunctionExecution(req)));
+      const warmupRequests = PerformanceTestUtils.generateRealisticRequests(
+        config.warmupRequests,
+      );
+      await Promise.all(
+        warmupRequests.map((req) =>
+          parlantService.validateFunctionExecution(req),
+        ),
+      );
 
       // Concurrent load testing
       const responseTimes: number[] = [];
@@ -444,26 +507,31 @@ describe('Parlant Performance Comprehensive Testing', () => {
       const startTime = Date.now();
 
       // Simulate concurrent users
-      const userPromises = Array.from({ length: config.concurrentUsers }, async (_, userIndex) => {
-        const userRequests = allRequests.slice(
-          userIndex * config.requestsPerUser,
-          (userIndex + 1) * config.requestsPerUser
-        );
+      const userPromises = Array.from(
+        { length: config.concurrentUsers },
+        async (_, userIndex) => {
+          const userRequests = allRequests.slice(
+            userIndex * config.requestsPerUser,
+            (userIndex + 1) * config.requestsPerUser,
+          );
 
-        for (const request of userRequests) {
-          const requestStart = Date.now();
-          try {
-            await parlantService.validateFunctionExecution(request);
-            responseTimes.push(Date.now() - requestStart);
-          } catch (error) {
-            errors.push(`User ${userIndex}: ${error}`);
-            responseTimes.push(Date.now() - requestStart);
+          for (const request of userRequests) {
+            const requestStart = Date.now();
+            try {
+              await parlantService.validateFunctionExecution(request);
+              responseTimes.push(Date.now() - requestStart);
+            } catch (error) {
+              errors.push(`User ${userIndex}: ${error}`);
+              responseTimes.push(Date.now() - requestStart);
+            }
+
+            // Small delay to simulate realistic user behavior
+            await new Promise((resolve) =>
+              setTimeout(resolve, Math.random() * 100),
+            );
           }
-
-          // Small delay to simulate realistic user behavior
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
-        }
-      });
+        },
+      );
 
       await Promise.all(userPromises);
       const totalDuration = Date.now() - startTime;
@@ -479,16 +547,30 @@ describe('Parlant Performance Comprehensive Testing', () => {
           successfulRequests: allRequests.length - errors.length,
           failedRequests: errors.length,
           totalDurationMs: totalDuration,
-          actualThroughput: (allRequests.length / totalDuration) * 1000
+          actualThroughput: (allRequests.length / totalDuration) * 1000,
         },
         latencyMetrics: {
           minResponseTime: sortedTimes[0] || 0,
           maxResponseTime: sortedTimes[sortedTimes.length - 1] || 0,
-          avgResponseTime: responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length,
-          p50ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 50),
-          p95ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 95),
-          p99ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 99),
-          p999ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 99.9)
+          avgResponseTime:
+            responseTimes.reduce((sum, time) => sum + time, 0) /
+            responseTimes.length,
+          p50ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            50,
+          ),
+          p95ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            95,
+          ),
+          p99ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            99,
+          ),
+          p999ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            99.9,
+          ),
         },
         cacheMetrics: {
           hitRate: cacheStats.overallStats.totalHitRate,
@@ -496,23 +578,26 @@ describe('Parlant Performance Comprehensive Testing', () => {
           l2HitRate: cacheStats.l2Stats?.hitRate || 0,
           totalCacheRequests: allRequests.length,
           cacheWriteLatency: 5,
-          cacheReadLatency: 2
+          cacheReadLatency: 2,
         },
         resourceMetrics: {
           peakMemoryUsage: process.memoryUsage().heapUsed,
           avgCpuUsage: 70,
           dbConnectionPoolUsage: 25,
-          activeWebSocketConnections: config.concurrentUsers
+          activeWebSocketConnections: config.concurrentUsers,
         },
         errorMetrics: {
           timeoutErrors: 0,
           connectionErrors: 0,
           validationErrors: errors.length,
-          systemErrors: 0
-        }
+          systemErrors: 0,
+        },
       };
 
-      const validation = PerformanceTestUtils.validatePerformanceMetrics(metrics, config);
+      const validation = PerformanceTestUtils.validatePerformanceMetrics(
+        metrics,
+        config,
+      );
 
       logger.log(`Medium Load Performance Results:
         P95: ${metrics.latencyMetrics.p95ResponseTime}ms
@@ -523,19 +608,26 @@ describe('Parlant Performance Comprehensive Testing', () => {
         Score: ${validation.score}/100`);
 
       expect(validation.score).toBeGreaterThan(75);
-      expect(metrics.latencyMetrics.p95ResponseTime).toBeLessThan(config.expectedP95ResponseTime);
+      expect(metrics.latencyMetrics.p95ResponseTime).toBeLessThan(
+        config.expectedP95ResponseTime,
+      );
       expect(metrics.cacheMetrics.hitRate).toBeGreaterThan(0.5);
     }, 120000);
 
     it('should achieve 85%+ cache hit rate under sustained load', async () => {
-      const config = PerformanceTestUtils.generateLoadTestScenarios()[3] as PerformanceTestConfig; // High Load
+      const config =
+        PerformanceTestUtils.generateLoadTestScenarios()[3] as PerformanceTestConfig; // High Load
 
       // Generate requests with high repetition for cache optimization
       const baseRequests = PerformanceTestUtils.generateRealisticRequests(50);
       const replicatedRequests: ParlantValidationRequest[] = [];
 
       // Replicate requests to increase cache hit probability
-      for (let i = 0; i < config.concurrentUsers * config.requestsPerUser; i++) {
+      for (
+        let i = 0;
+        i < config.concurrentUsers * config.requestsPerUser;
+        i++
+      ) {
         const baseRequest = baseRequests[i % baseRequests.length];
         if (baseRequest) {
           replicatedRequests.push({
@@ -543,20 +635,26 @@ describe('Parlant Performance Comprehensive Testing', () => {
             operationId: `cache-test-${i}`,
             context: {
               ...baseRequest.context,
-              sessionId: `cache-session-${Math.floor(i / 10)}`
-            }
+              sessionId: `cache-session-${Math.floor(i / 10)}`,
+            },
           });
         }
       }
 
-      logger.log(`Starting cache hit rate validation with ${replicatedRequests.length} requests`);
+      logger.log(
+        `Starting cache hit rate validation with ${replicatedRequests.length} requests`,
+      );
 
       // Extended warmup to populate cache
       const warmupRequests = replicatedRequests.slice(0, config.warmupRequests);
-      await Promise.all(warmupRequests.map(req => parlantService.validateFunctionExecution(req)));
+      await Promise.all(
+        warmupRequests.map((req) =>
+          parlantService.validateFunctionExecution(req),
+        ),
+      );
 
       // Wait for cache to stabilize
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Performance testing phase
       const testRequests = replicatedRequests.slice(config.warmupRequests);
@@ -577,7 +675,7 @@ describe('Parlant Performance Comprehensive Testing', () => {
 
         // Small delay between batches
         if (i + batchSize < testRequests.length) {
-          await new Promise(resolve => setTimeout(resolve, 50));
+          await new Promise((resolve) => setTimeout(resolve, 50));
         }
       }
 
@@ -596,7 +694,9 @@ describe('Parlant Performance Comprehensive Testing', () => {
       expect(cacheStats.l1Stats.hitRate).toBeGreaterThan(0.5);
 
       // Validate that cache improved performance
-      const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+      const avgResponseTime =
+        responseTimes.reduce((sum, time) => sum + time, 0) /
+        responseTimes.length;
       expect(avgResponseTime).toBeLessThan(500); // Should be faster due to caching
     }, 180000);
   });
@@ -605,12 +705,15 @@ describe('Parlant Performance Comprehensive Testing', () => {
 
   describe('Stress Testing and System Limits', () => {
     it('should handle stress load without system failure', async () => {
-      const config = PerformanceTestUtils.generateLoadTestScenarios()[4] as PerformanceTestConfig; // Stress Test
+      const config =
+        PerformanceTestUtils.generateLoadTestScenarios()[4] as PerformanceTestConfig; // Stress Test
       const requests = PerformanceTestUtils.generateRealisticRequests(
-        config.concurrentUsers * config.requestsPerUser
+        config.concurrentUsers * config.requestsPerUser,
       );
 
-      logger.log(`Starting stress test with ${config.concurrentUsers} concurrent users`);
+      logger.log(
+        `Starting stress test with ${config.concurrentUsers} concurrent users`,
+      );
 
       const startTime = Date.now();
       const responseTimes: number[] = [];
@@ -629,7 +732,7 @@ describe('Parlant Performance Comprehensive Testing', () => {
 
         // Minimal delay for stress testing
         if (index % 100 === 0) {
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
         }
       });
 
@@ -644,16 +747,30 @@ describe('Parlant Performance Comprehensive Testing', () => {
           successfulRequests: requests.length - errors.length,
           failedRequests: errors.length,
           totalDurationMs: totalDuration,
-          actualThroughput: (requests.length / totalDuration) * 1000
+          actualThroughput: (requests.length / totalDuration) * 1000,
         },
         latencyMetrics: {
           minResponseTime: sortedTimes[0] || 0,
           maxResponseTime: sortedTimes[sortedTimes.length - 1] || 0,
-          avgResponseTime: responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length,
-          p50ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 50),
-          p95ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 95),
-          p99ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 99),
-          p999ResponseTime: PerformanceTestUtils.calculatePercentile(sortedTimes, 99.9)
+          avgResponseTime:
+            responseTimes.reduce((sum, time) => sum + time, 0) /
+            responseTimes.length,
+          p50ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            50,
+          ),
+          p95ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            95,
+          ),
+          p99ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            99,
+          ),
+          p999ResponseTime: PerformanceTestUtils.calculatePercentile(
+            sortedTimes,
+            99.9,
+          ),
         },
         cacheMetrics: {
           hitRate: cacheService.getCacheStats().overallStats.totalHitRate,
@@ -661,20 +778,25 @@ describe('Parlant Performance Comprehensive Testing', () => {
           l2HitRate: 0,
           totalCacheRequests: requests.length,
           cacheWriteLatency: 10,
-          cacheReadLatency: 5
+          cacheReadLatency: 5,
         },
         resourceMetrics: {
           peakMemoryUsage: process.memoryUsage().heapUsed,
           avgCpuUsage: 90,
           dbConnectionPoolUsage: 80,
-          activeWebSocketConnections: config.concurrentUsers
+          activeWebSocketConnections: config.concurrentUsers,
         },
         errorMetrics: {
-          timeoutErrors: errors.filter(e => e.message.includes('timeout')).length,
-          connectionErrors: errors.filter(e => e.message.includes('connection')).length,
-          validationErrors: errors.filter(e => e.message.includes('validation')).length,
-          systemErrors: errors.length
-        }
+          timeoutErrors: errors.filter((e) => e.message.includes('timeout'))
+            .length,
+          connectionErrors: errors.filter((e) =>
+            e.message.includes('connection'),
+          ).length,
+          validationErrors: errors.filter((e) =>
+            e.message.includes('validation'),
+          ).length,
+          systemErrors: errors.length,
+        },
       };
 
       logger.log(`Stress Test Results:
@@ -687,29 +809,38 @@ describe('Parlant Performance Comprehensive Testing', () => {
         Throughput: ${metrics.executionMetrics.actualThroughput.toFixed(1)} RPS`);
 
       // Under stress, allow higher error rates but system should not crash
-      const errorRate = metrics.executionMetrics.failedRequests / metrics.executionMetrics.totalRequests;
+      const errorRate =
+        metrics.executionMetrics.failedRequests /
+        metrics.executionMetrics.totalRequests;
       expect(errorRate).toBeLessThan(0.2); // Allow up to 20% errors under stress
       expect(metrics.executionMetrics.successfulRequests).toBeGreaterThan(0);
-      expect(metrics.latencyMetrics.p95ResponseTime).toBeLessThan(config.expectedP95ResponseTime);
+      expect(metrics.latencyMetrics.p95ResponseTime).toBeLessThan(
+        config.expectedP95ResponseTime,
+      );
     }, 300000);
 
     it('should recover gracefully from overload conditions', async () => {
-      const burstConfig = PerformanceTestUtils.generateLoadTestScenarios()[5] as PerformanceTestConfig; // Burst Load
+      const burstConfig =
+        PerformanceTestUtils.generateLoadTestScenarios()[5] as PerformanceTestConfig; // Burst Load
       const requests = PerformanceTestUtils.generateRealisticRequests(
-        burstConfig.concurrentUsers * burstConfig.requestsPerUser
+        burstConfig.concurrentUsers * burstConfig.requestsPerUser,
       );
 
-      logger.log(`Starting burst load test with ${burstConfig.concurrentUsers} concurrent users`);
+      logger.log(
+        `Starting burst load test with ${burstConfig.concurrentUsers} concurrent users`,
+      );
 
       // Simulate sudden burst load
       const startTime = Date.now();
-      const allPromises = requests.map(request => parlantService.validateFunctionExecution(request));
+      const allPromises = requests.map((request) =>
+        parlantService.validateFunctionExecution(request),
+      );
 
       const results = await Promise.allSettled(allPromises);
       const totalDuration = Date.now() - startTime;
 
-      const successful = results.filter(r => r.status === 'fulfilled').length;
-      const failed = results.filter(r => r.status === 'rejected').length;
+      const successful = results.filter((r) => r.status === 'fulfilled').length;
+      const failed = results.filter((r) => r.status === 'rejected').length;
 
       logger.log(`Burst Load Results:
         Total Requests: ${requests.length}
@@ -723,9 +854,10 @@ describe('Parlant Performance Comprehensive Testing', () => {
       expect(totalDuration).toBeLessThan(burstConfig.testDurationMs);
 
       // Verify system returns to normal after burst
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      const recoveryRequest = PerformanceTestUtils.generateRealisticRequests(1)[0];
+      const recoveryRequest =
+        PerformanceTestUtils.generateRealisticRequests(1)[0];
       if (recoveryRequest) {
         const recoveryStart = Date.now();
         await parlantService.validateFunctionExecution(recoveryRequest);
@@ -766,7 +898,7 @@ describe('Parlant Performance Comprehensive Testing', () => {
           memorySnapshots.push(process.memoryUsage().heapUsed);
         }
 
-        await new Promise(resolve => setTimeout(resolve, requestInterval));
+        await new Promise((resolve) => setTimeout(resolve, requestInterval));
       }
 
       // Analyze memory growth
@@ -787,7 +919,8 @@ describe('Parlant Performance Comprehensive Testing', () => {
     }, 120000);
 
     it('should handle garbage collection efficiently', async () => {
-      const largeRequestBatch = PerformanceTestUtils.generateRealisticRequests(200);
+      const largeRequestBatch =
+        PerformanceTestUtils.generateRealisticRequests(200);
 
       // Force garbage collection if available
       if (global.gc) {
@@ -797,7 +930,11 @@ describe('Parlant Performance Comprehensive Testing', () => {
       const initialMemory = process.memoryUsage();
 
       // Process large batch
-      await Promise.all(largeRequestBatch.map(req => parlantService.validateFunctionExecution(req)));
+      await Promise.all(
+        largeRequestBatch.map((req) =>
+          parlantService.validateFunctionExecution(req),
+        ),
+      );
 
       // Force garbage collection again
       if (global.gc) {

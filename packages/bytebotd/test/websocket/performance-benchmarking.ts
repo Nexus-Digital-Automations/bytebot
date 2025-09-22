@@ -323,7 +323,8 @@ export class PerformanceBenchmarker extends EventEmitter {
           totalTestPoints: this.config.scalabilityTestPoints.length,
         });
 
-        const testPointResult = await this.executeBenchmarkTestPoint(sessionCount);
+        const testPointResult =
+          await this.executeBenchmarkTestPoint(sessionCount);
         this.benchmarkResults.push(testPointResult);
 
         this.emit('testPointCompleted', {
@@ -348,7 +349,6 @@ export class PerformanceBenchmarker extends EventEmitter {
       });
 
       return results;
-
     } catch (error) {
       this.emit('benchmarkError', {
         timestamp: Date.now(),
@@ -361,7 +361,9 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Execute benchmark test for a specific session count
    */
-  private async executeBenchmarkTestPoint(sessionCount: number): Promise<BenchmarkTestPoint> {
+  private async executeBenchmarkTestPoint(
+    sessionCount: number,
+  ): Promise<BenchmarkTestPoint> {
     const testStartTime = performance.now();
 
     // Initialize monitoring tools for this test point
@@ -388,12 +390,14 @@ export class PerformanceBenchmarker extends EventEmitter {
         sessionIsolationMetrics: measurements.sessionIsolation,
         parlantValidationMetrics: measurements.parlantValidation,
         performanceScore: this.calculatePerformanceScore(measurements),
-        scalabilityEfficiency: this.calculateScalabilityEfficiency(sessionCount, measurements),
+        scalabilityEfficiency: this.calculateScalabilityEfficiency(
+          sessionCount,
+          measurements,
+        ),
         thresholdCompliance: this.evaluateThresholdCompliance(measurements),
       };
 
       return testPoint;
-
     } catch (error) {
       // Return error test point
       return this.createErrorTestPoint(sessionCount, error);
@@ -463,7 +467,10 @@ export class PerformanceBenchmarker extends EventEmitter {
       this.resourceMonitor.startMonitoring();
     }
 
-    if (this.config.enableSessionIsolationValidation && this.sessionIsolationValidator) {
+    if (
+      this.config.enableSessionIsolationValidation &&
+      this.sessionIsolationValidator
+    ) {
       this.sessionIsolationValidator.startValidation();
     }
   }
@@ -506,7 +513,10 @@ export class PerformanceBenchmarker extends EventEmitter {
     });
 
     // Simulate full load and collect metrics
-    const loadPromise = this.simulateLoad(sessionCount, this.config.testDurationPerPoint);
+    const loadPromise = this.simulateLoad(
+      sessionCount,
+      this.config.testDurationPerPoint,
+    );
     const metricsPromise = this.collectPerformanceMetrics(sessionCount);
 
     const [, metrics] = await Promise.all([loadPromise, metricsPromise]);
@@ -523,7 +533,10 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Simulate load for specified session count and duration
    */
-  private async simulateLoad(sessionCount: number, duration: number): Promise<void> {
+  private async simulateLoad(
+    sessionCount: number,
+    duration: number,
+  ): Promise<void> {
     // Implement load simulation based on ramp-up strategy
     const rampUpTime = Math.min(duration * 0.2, 5000); // 20% of duration or 5 seconds max
     const sustainedTime = duration - rampUpTime;
@@ -538,7 +551,10 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Ramp up connections based on strategy
    */
-  private async rampUpConnections(targetSessions: number, rampUpTime: number): Promise<void> {
+  private async rampUpConnections(
+    targetSessions: number,
+    rampUpTime: number,
+  ): Promise<void> {
     const steps = 10;
     const stepDuration = rampUpTime / steps;
 
@@ -550,17 +566,20 @@ export class PerformanceBenchmarker extends EventEmitter {
           currentSessions = Math.floor((targetSessions * step) / steps);
           break;
         case 'exponential':
-          currentSessions = Math.floor(targetSessions * Math.pow(step / steps, 2));
+          currentSessions = Math.floor(
+            targetSessions * Math.pow(step / steps, 2),
+          );
           break;
         case 'stepped':
-          currentSessions = step % 2 === 0 ? Math.floor((targetSessions * step) / steps) : 0;
+          currentSessions =
+            step % 2 === 0 ? Math.floor((targetSessions * step) / steps) : 0;
           break;
         default:
           currentSessions = Math.floor((targetSessions * step) / steps);
       }
 
       // Simulate establishing connections for this step
-      await new Promise(resolve => setTimeout(resolve, stepDuration));
+      await new Promise((resolve) => setTimeout(resolve, stepDuration));
 
       this.emit('rampUpProgress', {
         timestamp: Date.now(),
@@ -575,13 +594,16 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Sustain load for specified duration
    */
-  private async sustainLoad(sessionCount: number, duration: number): Promise<void> {
+  private async sustainLoad(
+    sessionCount: number,
+    duration: number,
+  ): Promise<void> {
     const checkInterval = 1000; // Check every second
     const checks = Math.floor(duration / checkInterval);
 
     for (let check = 0; check < checks; check++) {
       // Simulate sustained load operations
-      await new Promise(resolve => setTimeout(resolve, checkInterval));
+      await new Promise((resolve) => setTimeout(resolve, checkInterval));
 
       this.emit('sustainedLoadProgress', {
         timestamp: Date.now(),
@@ -612,21 +634,31 @@ export class PerformanceBenchmarker extends EventEmitter {
 
     // Collect session isolation metrics
     let sessionIsolationData: SessionIsolationMetrics | undefined;
-    if (this.config.enableSessionIsolationValidation && this.sessionIsolationValidator) {
-      const isolationResults = this.sessionIsolationValidator.analyzeSessionIsolation();
+    if (
+      this.config.enableSessionIsolationValidation &&
+      this.sessionIsolationValidator
+    ) {
+      const isolationResults =
+        this.sessionIsolationValidator.analyzeSessionIsolation();
       sessionIsolationData = {
         violationCount: isolationResults.totalViolations,
         violationRate: isolationResults.totalViolations / sessionCount,
         isolationScore: isolationResults.sessionIsolationScore,
-        crossSessionLeaks: isolationResults.violationsByType.message_routing_leak ?? 0,
-        dataContamination: isolationResults.violationsByType.conversation_contamination ?? 0,
+        crossSessionLeaks:
+          isolationResults.violationsByType.message_routing_leak ?? 0,
+        dataContamination:
+          isolationResults.violationsByType.conversation_contamination ?? 0,
       };
     }
 
     // Collect PARLANT validation metrics
     let parlantValidationData: ParlantValidationMetrics | undefined;
-    if (this.config.enableParlantValidationTesting && this.parlantValidationTester) {
-      const validationMetrics = this.parlantValidationTester.getRealTimeMetrics();
+    if (
+      this.config.enableParlantValidationTesting &&
+      this.parlantValidationTester
+    ) {
+      const validationMetrics =
+        this.parlantValidationTester.getRealTimeMetrics();
       parlantValidationData = {
         validationAccuracy: validationMetrics.accuracy,
         validationLatency: validationMetrics.averageResponseTime,
@@ -689,10 +721,12 @@ export class PerformanceBenchmarker extends EventEmitter {
   private generateThroughputData(sessionCount: number): ThroughputMetrics {
     // Simulate throughput that scales sub-linearly with session count
     const idealThroughput = sessionCount * 10; // 10 ops/sec per session ideally
-    const scalingEfficiency = Math.max(0.3, 1 - (sessionCount / 1000)); // Efficiency degrades with scale
+    const scalingEfficiency = Math.max(0.3, 1 - sessionCount / 1000); // Efficiency degrades with scale
     const actualThroughput = idealThroughput * scalingEfficiency;
 
-    const operationsCompleted = Math.floor(actualThroughput * (this.config.testDurationPerPoint / 1000));
+    const operationsCompleted = Math.floor(
+      actualThroughput * (this.config.testDurationPerPoint / 1000),
+    );
     const operationsFailed = Math.floor(operationsCompleted * 0.02); // 2% failure rate
 
     return {
@@ -709,11 +743,13 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Generate resource utilization data
    */
-  private generateResourceData(sessionCount: number): ResourceUtilizationMetrics {
+  private generateResourceData(
+    sessionCount: number,
+  ): ResourceUtilizationMetrics {
     // Simulate resource usage that increases with session count
     const memoryPerSession = 2 * 1024 * 1024; // 2MB per session
     const cpuPerSession = 1; // 1% CPU per session
-    const networkEfficiency = Math.max(0.5, 1 - (sessionCount / 2000));
+    const networkEfficiency = Math.max(0.5, 1 - sessionCount / 2000);
 
     return {
       memory: {
@@ -730,7 +766,7 @@ export class PerformanceBenchmarker extends EventEmitter {
       },
       network: {
         bandwidth: sessionCount * 1024 * networkEfficiency, // 1KB/s per session
-        latency: 10 + (sessionCount / 100), // Increases with load
+        latency: 10 + sessionCount / 100, // Increases with load
         packetLoss: Math.min(0.01, sessionCount / 100000), // 0-1% packet loss
         efficiency: networkEfficiency,
       },
@@ -756,17 +792,20 @@ export class PerformanceBenchmarker extends EventEmitter {
       successRate: successRate * 100,
       errorRate: (1 - successRate) * 80, // 80% of failures are errors
       timeoutRate: (1 - successRate) * 20, // 20% of failures are timeouts
-      recoveryTime: 100 + (sessionCount / 10), // Recovery time increases with load
+      recoveryTime: 100 + sessionCount / 10, // Recovery time increases with load
       availability: successRate * 100,
       meanTimeBetweenFailures: 300000 / (1 - successRate), // MTBF in ms
-      meanTimeToRecovery: 1000 + (sessionCount / 5), // MTTR in ms
+      meanTimeToRecovery: 1000 + sessionCount / 5, // MTTR in ms
     };
   }
 
   /**
    * Generate latency distribution buckets
    */
-  private generateLatencyDistribution(mean: number, stdDev: number): Array<{
+  private generateLatencyDistribution(
+    mean: number,
+    stdDev: number,
+  ): Array<{
     rangeStart: number;
     rangeEnd: number;
     count: number;
@@ -784,7 +823,10 @@ export class PerformanceBenchmarker extends EventEmitter {
       // Simple normal distribution approximation
       const bucketMidpoint = (rangeStart + rangeEnd) / 2;
       const distance = Math.abs(bucketMidpoint - mean) / stdDev;
-      const count = Math.max(1, Math.floor(100 * Math.exp(-0.5 * distance * distance)));
+      const count = Math.max(
+        1,
+        Math.floor(100 * Math.exp(-0.5 * distance * distance)),
+      );
       const percentage = count / 100;
 
       buckets.push({ rangeStart, rangeEnd, count, percentage });
@@ -797,8 +839,14 @@ export class PerformanceBenchmarker extends EventEmitter {
    * Calculate performance score for test point
    */
   private calculatePerformanceScore(measurements: BenchmarkTestPoint): number {
-    const latencyScore = Math.max(0, 1 - (measurements.latency.percentiles[95] / 1000)); // Penalize >1s P95
-    const throughputScore = Math.min(1, measurements.throughput.throughputEfficiency);
+    const latencyScore = Math.max(
+      0,
+      1 - measurements.latency.percentiles[95] / 1000,
+    ); // Penalize >1s P95
+    const throughputScore = Math.min(
+      1,
+      measurements.throughput.throughputEfficiency,
+    );
     const reliabilityScore = measurements.reliability.successRate / 100;
 
     return (latencyScore + throughputScore + reliabilityScore) / 3;
@@ -807,13 +855,21 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Calculate scalability efficiency
    */
-  private calculateScalabilityEfficiency(sessionCount: number, measurements: BenchmarkTestPoint): number {
+  private calculateScalabilityEfficiency(
+    sessionCount: number,
+    measurements: BenchmarkTestPoint,
+  ): number {
     // Compare actual performance to ideal linear scaling
     const idealThroughputPerSession = 10; // 10 ops/sec per session
-    const actualThroughputPerSession = measurements.throughput.sustainedThroughput / sessionCount;
-    const throughputEfficiency = actualThroughputPerSession / idealThroughputPerSession;
+    const actualThroughputPerSession =
+      measurements.throughput.sustainedThroughput / sessionCount;
+    const throughputEfficiency =
+      actualThroughputPerSession / idealThroughputPerSession;
 
-    const resourceEfficiency = Math.min(1, 1 - (measurements.resource.memory.peak / (sessionCount * 5 * 1024 * 1024))); // 5MB baseline per session
+    const resourceEfficiency = Math.min(
+      1,
+      1 - measurements.resource.memory.peak / (sessionCount * 5 * 1024 * 1024),
+    ); // 5MB baseline per session
 
     return (throughputEfficiency + resourceEfficiency) / 2;
   }
@@ -821,16 +877,26 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Evaluate threshold compliance
    */
-  private evaluateThresholdCompliance(measurements: BenchmarkTestPoint): ThresholdComplianceReport {
+  private evaluateThresholdCompliance(
+    measurements: BenchmarkTestPoint,
+  ): ThresholdComplianceReport {
     const thresholds = this.config.targetPerformanceThresholds;
 
-    const latencyP95Compliant = measurements.latency.percentiles[95] <= thresholds.maxLatencyP95;
-    const latencyP99Compliant = measurements.latency.percentiles[99] <= thresholds.maxLatencyP99;
-    const throughputCompliant = measurements.throughput.sustainedThroughput >= thresholds.minThroughput;
-    const memoryUsageCompliant = measurements.resource.memory.peak <= thresholds.maxMemoryUsage;
-    const cpuUsageCompliant = measurements.resource.cpu.peak <= thresholds.maxCpuUsage;
-    const connectionDropRateCompliant = measurements.resource.connections.dropRate <= thresholds.maxConnectionDropRate;
-    const successRateCompliant = measurements.reliability.successRate >= thresholds.minSuccessRate;
+    const latencyP95Compliant =
+      measurements.latency.percentiles[95] <= thresholds.maxLatencyP95;
+    const latencyP99Compliant =
+      measurements.latency.percentiles[99] <= thresholds.maxLatencyP99;
+    const throughputCompliant =
+      measurements.throughput.sustainedThroughput >= thresholds.minThroughput;
+    const memoryUsageCompliant =
+      measurements.resource.memory.peak <= thresholds.maxMemoryUsage;
+    const cpuUsageCompliant =
+      measurements.resource.cpu.peak <= thresholds.maxCpuUsage;
+    const connectionDropRateCompliant =
+      measurements.resource.connections.dropRate <=
+      thresholds.maxConnectionDropRate;
+    const successRateCompliant =
+      measurements.reliability.successRate >= thresholds.minSuccessRate;
 
     const complianceChecks = [
       latencyP95Compliant,
@@ -842,7 +908,8 @@ export class PerformanceBenchmarker extends EventEmitter {
       successRateCompliant,
     ];
 
-    const complianceScore = complianceChecks.filter(Boolean).length / complianceChecks.length;
+    const complianceScore =
+      complianceChecks.filter(Boolean).length / complianceChecks.length;
     const overallCompliant = complianceScore >= 0.8; // 80% threshold compliance required
 
     return {
@@ -861,7 +928,10 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Create error test point for failed tests
    */
-  private createErrorTestPoint(sessionCount: number, error: unknown): BenchmarkTestPoint {
+  private createErrorTestPoint(
+    sessionCount: number,
+    error: unknown,
+  ): BenchmarkTestPoint {
     return {
       sessionCount,
       testDuration: 0,
@@ -885,7 +955,9 @@ export class PerformanceBenchmarker extends EventEmitter {
       duration: this.config.cooldownDuration,
     });
 
-    await new Promise(resolve => setTimeout(resolve, this.config.cooldownDuration));
+    await new Promise((resolve) =>
+      setTimeout(resolve, this.config.cooldownDuration),
+    );
 
     this.emit('cooldownCompleted', {
       timestamp: Date.now(),
@@ -915,12 +987,15 @@ export class PerformanceBenchmarker extends EventEmitter {
    */
   private generateComprehensiveResults(): PerformanceBenchmarkResults {
     const testDuration = performance.now() - this.testStartTime;
-    const completedTests = this.benchmarkResults.filter(r => r.performanceScore > 0).length;
+    const completedTests = this.benchmarkResults.filter(
+      (r) => r.performanceScore > 0,
+    ).length;
     const failedTests = this.benchmarkResults.length - completedTests;
 
     const scalabilityAnalysis = this.analyzeScalability();
     const performanceTrends = this.analyzePerformanceTrends();
-    const optimizationRecommendations = this.generateOptimizationRecommendations();
+    const optimizationRecommendations =
+      this.generateOptimizationRecommendations();
     const conclusions = this.generateConclusionsAndRecommendations();
 
     return {
@@ -949,18 +1024,28 @@ export class PerformanceBenchmarker extends EventEmitter {
       const current = this.benchmarkResults[i];
       const previous = this.benchmarkResults[i - 1];
 
-      const scalingRatio = current.scalabilityEfficiency / previous.scalabilityEfficiency;
-      if (scalingRatio < 0.9) { // 10% efficiency drop indicates scaling limit
+      const scalingRatio =
+        current.scalabilityEfficiency / previous.scalabilityEfficiency;
+      if (scalingRatio < 0.9) {
+        // 10% efficiency drop indicates scaling limit
         linearScalingLimit = previous.sessionCount;
         break;
       }
     }
 
     // Find optimal operating range
-    const optimalResults = this.benchmarkResults.filter(r => r.thresholdCompliance.overallCompliant);
+    const optimalResults = this.benchmarkResults.filter(
+      (r) => r.thresholdCompliance.overallCompliant,
+    );
     const optimalRange = {
-      minSessions: optimalResults.length > 0 ? Math.min(...optimalResults.map(r => r.sessionCount)) : 0,
-      maxSessions: optimalResults.length > 0 ? Math.max(...optimalResults.map(r => r.sessionCount)) : 0,
+      minSessions:
+        optimalResults.length > 0
+          ? Math.min(...optimalResults.map((r) => r.sessionCount))
+          : 0,
+      maxSessions:
+        optimalResults.length > 0
+          ? Math.max(...optimalResults.map((r) => r.sessionCount))
+          : 0,
       reasoning: `Range where all performance thresholds are met with compliance score >= 80%`,
     };
 
@@ -971,7 +1056,10 @@ export class PerformanceBenchmarker extends EventEmitter {
     const degradationPoints = this.identifyPerformanceDegradationPoints();
 
     // Generate capacity recommendations
-    const capacityRecommendations = this.generateCapacityRecommendations(linearScalingLimit, optimalRange);
+    const capacityRecommendations = this.generateCapacityRecommendations(
+      linearScalingLimit,
+      optimalRange,
+    );
 
     return {
       linearScalingLimit,
@@ -1026,7 +1114,10 @@ export class PerformanceBenchmarker extends EventEmitter {
       }
 
       // Latency bottlenecks
-      if (result.latencyMetrics.percentiles[95] > this.config.targetPerformanceThresholds.maxLatencyP95) {
+      if (
+        result.latencyMetrics.percentiles[95] >
+        this.config.targetPerformanceThresholds.maxLatencyP95
+      ) {
         bottlenecks.push({
           sessionCount: result.sessionCount,
           bottleneckType: 'latency',
@@ -1060,8 +1151,12 @@ export class PerformanceBenchmarker extends EventEmitter {
       const previous = this.benchmarkResults[i - 1];
 
       // Check throughput degradation
-      const throughputDegradation = 1 - (current.throughputMetrics.sustainedThroughput / previous.throughputMetrics.sustainedThroughput);
-      if (throughputDegradation > 0.15) { // 15% degradation
+      const throughputDegradation =
+        1 -
+        current.throughputMetrics.sustainedThroughput /
+          previous.throughputMetrics.sustainedThroughput;
+      if (throughputDegradation > 0.15) {
+        // 15% degradation
         degradationPoints.push({
           sessionCount: current.sessionCount,
           metricType: 'throughput',
@@ -1071,8 +1166,12 @@ export class PerformanceBenchmarker extends EventEmitter {
       }
 
       // Check latency degradation
-      const latencyIncrease = (current.latencyMetrics.percentiles[95] / previous.latencyMetrics.percentiles[95]) - 1;
-      if (latencyIncrease > 0.3) { // 30% increase
+      const latencyIncrease =
+        current.latencyMetrics.percentiles[95] /
+          previous.latencyMetrics.percentiles[95] -
+        1;
+      if (latencyIncrease > 0.3) {
+        // 30% increase
         degradationPoints.push({
           sessionCount: current.sessionCount,
           metricType: 'latency',
@@ -1088,13 +1187,19 @@ export class PerformanceBenchmarker extends EventEmitter {
   /**
    * Generate capacity recommendations
    */
-  private generateCapacityRecommendations(linearLimit: number, optimalRange: { min: number; max: number }): {
+  private generateCapacityRecommendations(
+    linearLimit: number,
+    optimalRange: { min: number; max: number },
+  ): {
     recommendedMaxSessions: number;
     safeOperatingLimit: number;
     emergencyScalingTrigger: number;
     infrastructureRecommendations: string[];
   } {
-    const recommendedMaxSessions = Math.min(linearLimit * 0.8, optimalRange.maxSessions); // 80% of linear limit
+    const recommendedMaxSessions = Math.min(
+      linearLimit * 0.8,
+      optimalRange.maxSessions,
+    ); // 80% of linear limit
     const safeOperatingLimit = recommendedMaxSessions * 0.7; // 70% for safe operation
     const emergencyScalingTrigger = recommendedMaxSessions * 0.9; // 90% triggers scaling
 
@@ -1147,23 +1252,41 @@ export class PerformanceBenchmarker extends EventEmitter {
     const recommendations = [];
 
     // Analyze bottlenecks from all test points
-    const hasMemoryIssues = this.benchmarkResults.some(r => r.resourceMetrics.memory.leakDetected);
-    const hasCpuIssues = this.benchmarkResults.some(r => r.resourceMetrics.cpu.saturationDetected);
-    const hasLatencyIssues = this.benchmarkResults.some(r => !r.thresholdCompliance.latencyP95Compliant);
+    const hasMemoryIssues = this.benchmarkResults.some(
+      (r) => r.resourceMetrics.memory.leakDetected,
+    );
+    const hasCpuIssues = this.benchmarkResults.some(
+      (r) => r.resourceMetrics.cpu.saturationDetected,
+    );
+    const hasLatencyIssues = this.benchmarkResults.some(
+      (r) => !r.thresholdCompliance.latencyP95Compliant,
+    );
 
     if (hasMemoryIssues) {
-      recommendations.push('Implement memory optimization strategies and leak detection');
-      recommendations.push('Consider implementing object pooling for frequently allocated objects');
+      recommendations.push(
+        'Implement memory optimization strategies and leak detection',
+      );
+      recommendations.push(
+        'Consider implementing object pooling for frequently allocated objects',
+      );
     }
 
     if (hasCpuIssues) {
-      recommendations.push('Optimize CPU-intensive operations and implement worker threads');
-      recommendations.push('Consider horizontal scaling for CPU-bound workloads');
+      recommendations.push(
+        'Optimize CPU-intensive operations and implement worker threads',
+      );
+      recommendations.push(
+        'Consider horizontal scaling for CPU-bound workloads',
+      );
     }
 
     if (hasLatencyIssues) {
-      recommendations.push('Optimize message processing pipeline and reduce protocol overhead');
-      recommendations.push('Implement connection pooling and keep-alive strategies');
+      recommendations.push(
+        'Optimize message processing pipeline and reduce protocol overhead',
+      );
+      recommendations.push(
+        'Implement connection pooling and keep-alive strategies',
+      );
     }
 
     return recommendations;
@@ -1183,12 +1306,13 @@ export class PerformanceBenchmarker extends EventEmitter {
     const performanceScore = this.calculateAveragePerformanceScore();
     const scalabilityScore = this.calculateAverageScalabilityScore();
     const reliabilityScore = this.calculateAverageReliabilityScore();
-    const overallScore = (performanceScore + scalabilityScore + reliabilityScore) / 3;
+    const overallScore =
+      (performanceScore + scalabilityScore + reliabilityScore) / 3;
 
     const keyFindings = [
       `System can handle ${this.config.scalabilityTestPoints[this.config.scalabilityTestPoints.length - 1]} concurrent sessions`,
       `Average performance score: ${(performanceScore * 100).toFixed(1)}%`,
-      `Linear scaling maintained up to ${this.benchmarkResults.find(r => r.scalabilityEfficiency < 0.8)?.sessionCount ?? 'maximum tested'} sessions`,
+      `Linear scaling maintained up to ${this.benchmarkResults.find((r) => r.scalabilityEfficiency < 0.8)?.sessionCount ?? 'maximum tested'} sessions`,
       `Overall compliance rate: ${(this.calculateOverallComplianceRate() * 100).toFixed(1)}%`,
     ];
 
@@ -1214,32 +1338,45 @@ export class PerformanceBenchmarker extends EventEmitter {
    * Calculate average performance score
    */
   private calculateAveragePerformanceScore(): number {
-    const scores = this.benchmarkResults.map(r => r.performanceScore);
-    return scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
+    const scores = this.benchmarkResults.map((r) => r.performanceScore);
+    return scores.length > 0
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : 0;
   }
 
   /**
    * Calculate average scalability score
    */
   private calculateAverageScalabilityScore(): number {
-    const scores = this.benchmarkResults.map(r => r.scalabilityEfficiency);
-    return scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
+    const scores = this.benchmarkResults.map((r) => r.scalabilityEfficiency);
+    return scores.length > 0
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : 0;
   }
 
   /**
    * Calculate average reliability score
    */
   private calculateAverageReliabilityScore(): number {
-    const scores = this.benchmarkResults.map(r => r.reliabilityMetrics.successRate / 100);
-    return scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
+    const scores = this.benchmarkResults.map(
+      (r) => r.reliabilityMetrics.successRate / 100,
+    );
+    return scores.length > 0
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : 0;
   }
 
   /**
    * Calculate overall compliance rate
    */
   private calculateOverallComplianceRate(): number {
-    const complianceScores = this.benchmarkResults.map(r => r.thresholdCompliance.complianceScore);
-    return complianceScores.length > 0 ? complianceScores.reduce((sum, score) => sum + score, 0) / complianceScores.length : 0;
+    const complianceScores = this.benchmarkResults.map(
+      (r) => r.thresholdCompliance.complianceScore,
+    );
+    return complianceScores.length > 0
+      ? complianceScores.reduce((sum, score) => sum + score, 0) /
+          complianceScores.length
+      : 0;
   }
 
   /**

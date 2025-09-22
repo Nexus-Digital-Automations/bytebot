@@ -36,8 +36,13 @@ import { Request, Response } from 'express';
 import { UserRole, Permission } from '@bytebot/shared';
 import { ApiSecurityService } from '../../security/api-security.service';
 import { BrowserValidationService } from '../validation.service';
-import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../../parlant/parlant-integration.service';
-import {BROWSER_AUTH_REQUIRED_KEY,
+import {
+  ParlantIntegrationService,
+  ParlantConversationContext,
+  RiskLevel,
+} from '../../parlant/parlant-integration.service';
+import {
+  BROWSER_AUTH_REQUIRED_KEY,
   BROWSER_ROLES_KEY,
   BROWSER_PERMISSIONS_KEY,
   BROWSER_SECURITY_LEVEL_KEY,
@@ -134,7 +139,9 @@ export class BrowserSecurityGuard implements CanActivate {
     // Initialize rate limit cleanup
     setInterval(() => this.cleanupRateLimitTrackers(), 300000); // Every 5 minutes
 
-    this.logger.log('Browser Security Guard initialized', {rateLimitCleanupInterval: '5 minutes',securityIntegration: 'enabled',
+    this.logger.log('Browser Security Guard initialized', {
+      rateLimitCleanupInterval: '5 minutes',
+      securityIntegration: 'enabled',
     });
   }
 
@@ -161,7 +168,9 @@ export class BrowserSecurityGuard implements CanActivate {
 
       request.securityContext = securityContext;
 
-      this.logger.debug(`[${requestId}] Browser security validation started`, {requestId,endpoint: securityContext.endpoint,
+      this.logger.debug(`[${requestId}] Browser security validation started`, {
+        requestId,
+        endpoint: securityContext.endpoint,
         method: securityContext.method,
         securityLevel: securityContext.securityLevel,
         riskLevel: securityContext.riskLevel,
@@ -170,10 +179,13 @@ export class BrowserSecurityGuard implements CanActivate {
 
       // 1. Check if endpoint is public
       if (this.isPublicEndpoint(handler, controller)) {
-        this.logger.debug(`[${requestId}] Public endpoint - skipping authentication`, {
-          requestId,
-          endpoint: securityContext.endpoint,
-        });
+        this.logger.debug(
+          `[${requestId}] Public endpoint - skipping authentication`,
+          {
+            requestId,
+            endpoint: securityContext.endpoint,
+          },
+        );
         return true;
       }
 
@@ -200,21 +212,31 @@ export class BrowserSecurityGuard implements CanActivate {
       }
 
       // 7. Security risk assessment
-      const securityResult = await this.assessSecurityRisk(request, securityContext);
+      const securityResult = await this.assessSecurityRisk(
+        request,
+        securityContext,
+      );
 
       // 8. Apply security response
-      await this.applySecurityResponse(securityResult, securityContext, response);
+      await this.applySecurityResponse(
+        securityResult,
+        securityContext,
+        response,
+      );
 
       // 9. Log security event
       const duration = Date.now() - startTime;
-      this.logSecurityEvent('browser_security_validation_success', securityContext, {
-        duration,
-        riskScore: securityResult.riskScore,
-        recommendedAction: securityResult.recommendedAction,
-      });
+      this.logSecurityEvent(
+        'browser_security_validation_success',
+        securityContext,
+        {
+          duration,
+          riskScore: securityResult.riskScore,
+          recommendedAction: securityResult.recommendedAction,
+        },
+      );
 
       return securityResult.allowed;
-
     } catch (error) {
       const duration = Date.now() - startTime;
 
@@ -229,19 +251,29 @@ export class BrowserSecurityGuard implements CanActivate {
       });
 
       // Log security failure
-      this.logSecurityEvent('browser_security_validation_failed', {requestId,endpoint: request.path,
-        method: request.method,
-        ipAddress: this.extractClientIp(request),
-        userAgent: request.headers['user-agent'],timestamp: new Date(),} as BrowserSecurityContext, {
-        error: error instanceof Error ? error.message : String(error),
-        duration,
-      });
+      this.logSecurityEvent(
+        'browser_security_validation_failed',
+        {
+          requestId,
+          endpoint: request.path,
+          method: request.method,
+          ipAddress: this.extractClientIp(request),
+          userAgent: request.headers['user-agent'],
+          timestamp: new Date(),
+        } as BrowserSecurityContext,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          duration,
+        },
+      );
 
       // Re-throw specific security exceptions
-      if (error instanceof UnauthorizedException ||
-          error instanceof ForbiddenException ||
-          error instanceof TooManyRequestsException ||
-          error instanceof BadRequestException) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException ||
+        error instanceof TooManyRequestsException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
 
@@ -259,30 +291,34 @@ export class BrowserSecurityGuard implements CanActivate {
     controller: Record<string, unknown>,
   ): Promise<BrowserSecurityContext> {
     // Extract metadata from decorators
-    const securityLevel = this.reflector.getAllAndOverride<BrowserSecurityLevel>(
-      BROWSER_SECURITY_LEVEL_KEY,
-      [handler, controller],
-    ) || BrowserSecurityLevel.MEDIUM;
+    const securityLevel =
+      this.reflector.getAllAndOverride<BrowserSecurityLevel>(
+        BROWSER_SECURITY_LEVEL_KEY,
+        [handler, controller],
+      ) || BrowserSecurityLevel.MEDIUM;
 
-    const riskLevel = this.reflector.getAllAndOverride<BrowserRiskLevel>(
-      BROWSER_RISK_LEVEL_KEY,
-      [handler, controller],
-    ) || BrowserRiskLevel._MODERATE;
+    const riskLevel =
+      this.reflector.getAllAndOverride<BrowserRiskLevel>(
+        BROWSER_RISK_LEVEL_KEY,
+        [handler, controller],
+      ) || BrowserRiskLevel._MODERATE;
 
     const rateLimit = this.reflector.getAllAndOverride<RateLimitConfig>(
       BROWSER_RATE_LIMIT_KEY,
       [handler, controller],
     );
 
-    const validationConfig = this.reflector.getAllAndOverride<SecurityValidationConfig>(
-      BROWSER_VALIDATION_KEY,
-      [handler, controller],
-    );
+    const validationConfig =
+      this.reflector.getAllAndOverride<SecurityValidationConfig>(
+        BROWSER_VALIDATION_KEY,
+        [handler, controller],
+      );
 
-    const requiresSession = this.reflector.getAllAndOverride<boolean>(
-      BROWSER_SESSION_REQUIRED_KEY,
-      [handler, controller],
-    ) || false;
+    const requiresSession =
+      this.reflector.getAllAndOverride<boolean>(BROWSER_SESSION_REQUIRED_KEY, [
+        handler,
+        controller,
+      ]) || false;
 
     return {
       requestId,
@@ -301,11 +337,16 @@ export class BrowserSecurityGuard implements CanActivate {
     };
   }
 
-  private isPublicEndpoint(handler: Function, controller: Record<string, unknown>): boolean {
-    return this.reflector.getAllAndOverride<boolean>(BROWSER_PUBLIC_KEY, [
-      handler,
-      controller,
-    ]) || false;
+  private isPublicEndpoint(
+    handler: Function,
+    controller: Record<string, unknown>,
+  ): boolean {
+    return (
+      this.reflector.getAllAndOverride<boolean>(BROWSER_PUBLIC_KEY, [
+        handler,
+        controller,
+      ]) || false
+    );
   }
 
   private async authenticateUser(
@@ -356,7 +397,6 @@ export class BrowserSecurityGuard implements CanActivate {
       });
 
       return user;
-
     } catch (error) {
       this.logger.warn(`[${context.requestId}] Authentication failed`, {
         requestId: context.requestId,
@@ -416,23 +456,26 @@ export class BrowserSecurityGuard implements CanActivate {
     );
 
     if (requiredPermissions && requiredPermissions.length > 0) {
-      const hasAllPermissions = requiredPermissions.every(permission =>
-        user.permissions.includes(permission)
+      const hasAllPermissions = requiredPermissions.every((permission) =>
+        user.permissions.includes(permission),
       );
 
       if (!hasAllPermissions) {
-        const missingPermissions = requiredPermissions.filter(permission =>
-          !user.permissions.includes(permission)
+        const missingPermissions = requiredPermissions.filter(
+          (permission) => !user.permissions.includes(permission),
         );
 
-        this.logger.warn(`[${context.requestId}] Permission authorization failed`, {
-          requestId: context.requestId,
-          userId: user.id,
-          userPermissions: user.permissions,
-          requiredPermissions,
-          missingPermissions,
-          endpoint: context.endpoint,
-        });
+        this.logger.warn(
+          `[${context.requestId}] Permission authorization failed`,
+          {
+            requestId: context.requestId,
+            userId: user.id,
+            userPermissions: user.permissions,
+            requiredPermissions,
+            missingPermissions,
+            endpoint: context.endpoint,
+          },
+        );
 
         throw new ForbiddenException({
           message: 'Insufficient permissions for browser automation',
@@ -503,7 +546,9 @@ export class BrowserSecurityGuard implements CanActivate {
         type: 'rate_limit_exceeded',
         limit: rateLimitConfig.max,
         windowMs: rateLimitConfig.windowMs,
-        retryAfter: Math.ceil((tracker.windowStart + rateLimitConfig.windowMs - now) / 1000),
+        retryAfter: Math.ceil(
+          (tracker.windowStart + rateLimitConfig.windowMs - now) / 1000,
+        ),
         requestId: context.requestId,
       });
     }
@@ -588,7 +633,6 @@ export class BrowserSecurityGuard implements CanActivate {
         warnings: validationResult.warnings.length,
         validationTime: validationResult.validationTime,
       });
-
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
@@ -632,7 +676,10 @@ export class BrowserSecurityGuard implements CanActivate {
 
     // Validate session exists and belongs to user
     // This would integrate with your session service
-    const sessionValid = await this.validateSessionOwnership(sessionId, context.userId);
+    const sessionValid = await this.validateSessionOwnership(
+      sessionId,
+      context.userId,
+    );
 
     if (!sessionValid) {
       throw new ForbiddenException({
@@ -717,7 +764,10 @@ export class BrowserSecurityGuard implements CanActivate {
       riskScore,
       violations,
       recommendedAction,
-      reason: recommendedAction === 'block' ? 'High security risk detected' : undefined,
+      reason:
+        recommendedAction === 'block'
+          ? 'High security risk detected'
+          : undefined,
     };
   }
 
@@ -744,23 +794,32 @@ export class BrowserSecurityGuard implements CanActivate {
     }
 
     if (result.recommendedAction === 'warn') {
-      this.logger.warn(`[${context.requestId}] High-risk request approved with warning`, {
-        requestId: context.requestId,
-        riskScore: result.riskScore,
-        violations: result.violations,
-        userId: context.userId,
-      });
+      this.logger.warn(
+        `[${context.requestId}] High-risk request approved with warning`,
+        {
+          requestId: context.requestId,
+          riskScore: result.riskScore,
+          violations: result.violations,
+          userId: context.userId,
+        },
+      );
     }
   }
 
   // ===== HELPER METHODS =====
 
-  private async validateSessionOwnership(sessionId: string, userId: string): Promise<boolean> {
+  private async validateSessionOwnership(
+    sessionId: string,
+    userId: string,
+  ): Promise<boolean> {
     // Mock implementation - in production, integrate with session service
     return true;
   }
 
-  private async assessUserRisk(user: BrowserUser, context: BrowserSecurityContext): Promise<{ score: number; violations: string[] }> {
+  private async assessUserRisk(
+    user: BrowserUser,
+    context: BrowserSecurityContext,
+  ): Promise<{ score: number; violations: string[] }> {
     const violations: string[] = [];
     let score = 0;
 
@@ -786,13 +845,17 @@ export class BrowserSecurityGuard implements CanActivate {
     return { score, violations };
   }
 
-  private async assessContentRisk(request: BrowserSecurityRequest, context: BrowserSecurityContext): Promise<{ score: number; violations: string[] }> {
+  private async assessContentRisk(
+    request: BrowserSecurityRequest,
+    context: BrowserSecurityContext,
+  ): Promise<{ score: number; violations: string[] }> {
     const violations: string[] = [];
     let score = 0;
 
     // Assess payload size risk
     const payloadSize = JSON.stringify(request.body || {}).length;
-    if (payloadSize > 100000) { // > 100KB
+    if (payloadSize > 100000) {
+      // > 100KB
       score += 10;
       violations.push('large_payload');
     }
@@ -802,11 +865,18 @@ export class BrowserSecurityGuard implements CanActivate {
     const bodyString = JSON.stringify(body).toLowerCase();
 
     const sensitivePatterns = [
-      'password', 'secret', 'token', 'key', 'credential',
-      'admin', 'root', 'system', 'config'
+      'password',
+      'secret',
+      'token',
+      'key',
+      'credential',
+      'admin',
+      'root',
+      'system',
+      'config',
     ];
 
-    sensitivePatterns.forEach(pattern => {
+    sensitivePatterns.forEach((pattern) => {
       if (bodyString.includes(pattern)) {
         score += 5;
         violations.push(`sensitive_content_${pattern}`);
@@ -843,13 +913,20 @@ export class BrowserSecurityGuard implements CanActivate {
     }
 
     if (removedCount > 0) {
-      this.logger.debug(`Cleaned up ${removedCount} expired rate limit trackers`, {
-        remainingTrackers: this.rateLimitTrackers.size,
-      });
+      this.logger.debug(
+        `Cleaned up ${removedCount} expired rate limit trackers`,
+        {
+          remainingTrackers: this.rateLimitTrackers.size,
+        },
+      );
     }
   }
 
-  private logSecurityEvent(eventType: string, context: BrowserSecurityContext, metadata: Record<string, unknown>): void {
+  private logSecurityEvent(
+    eventType: string,
+    context: BrowserSecurityContext,
+    metadata: Record<string, unknown>,
+  ): void {
     this.logger.log(`Browser Security Event: ${eventType}`, {
       eventType,
       requestId: context.requestId,

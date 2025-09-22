@@ -69,7 +69,12 @@ const SECURITY_CONFIG = {
   security: {
     maxJobsPerUser: 100,
     maxJobSize: 10 * 1024 * 1024, // 10MB
-    allowedActions: ['screenshot', 'move_mouse', 'click_mouse', 'get_cursor_position'],
+    allowedActions: [
+      'screenshot',
+      'move_mouse',
+      'click_mouse',
+      'get_cursor_position',
+    ],
     blockedPaths: ['/etc/', '/var/', '/usr/', '/bin/', '/sbin/'],
     maxExecutionTime: 30000,
     auditLogRetention: 90 * 24 * 60 * 60 * 1000, // 90 days
@@ -187,8 +192,12 @@ class SecurityTester {
     const parts = encryptedData.split(':');
 
     return {
-      hasIV: parts.length >= 2 && parts[0].length === SECURITY_CONFIG.encryption.ivLength * 2,
-      hasAuthTag: parts.length >= 3 && parts[1].length === SECURITY_CONFIG.encryption.tagLength * 2,
+      hasIV:
+        parts.length >= 2 &&
+        parts[0].length === SECURITY_CONFIG.encryption.ivLength * 2,
+      hasAuthTag:
+        parts.length >= 3 &&
+        parts[1].length === SECURITY_CONFIG.encryption.tagLength * 2,
       isBase64: /^[A-Za-z0-9+/]*={0,2}$/.test(parts[2] || ''),
       entropy: this.calculateEntropy(encryptedData),
     };
@@ -219,13 +228,18 @@ class SecurityTester {
    * Generate test encryption key
    */
   generateTestKey(): string {
-    return crypto.randomBytes(SECURITY_CONFIG.encryption.keyLength).toString('hex');
+    return crypto
+      .randomBytes(SECURITY_CONFIG.encryption.keyLength)
+      .toString('hex');
   }
 
   /**
    * Attempt to decrypt without proper key
    */
-  attemptUnauthorizedDecryption(encryptedData: string, wrongKey: string): boolean {
+  attemptUnauthorizedDecryption(
+    encryptedData: string,
+    wrongKey: string,
+  ): boolean {
     try {
       const parts = encryptedData.split(':');
       if (parts.length !== 3) return false;
@@ -237,7 +251,7 @@ class SecurityTester {
       const decipher = crypto.createDecipheriv(
         SECURITY_CONFIG.encryption.algorithm,
         Buffer.from(wrongKey, 'hex').subarray(0, 32),
-        iv
+        iv,
       );
       decipher.setAuthTag(authTag);
 
@@ -270,7 +284,9 @@ describe('Job Management Service - Security Tests', () => {
             () => ({
               redis: SECURITY_CONFIG.redis,
               job: {
-                encryptionKey: securityTester?.generateTestKey() || crypto.randomBytes(32).toString('hex'),
+                encryptionKey:
+                  securityTester?.generateTestKey() ||
+                  crypto.randomBytes(32).toString('hex'),
                 defaultTimeout: SECURITY_CONFIG.security.maxExecutionTime,
                 maxRetries: 1,
               },
@@ -279,17 +295,15 @@ describe('Job Management Service - Security Tests', () => {
           ],
         }),
       ],
-      providers: [
-        JobManagementService,
-        JobStorage,
-        ComputerUseService,
-      ],
+      providers: [JobManagementService, JobStorage, ComputerUseService],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    jobManagementService = moduleFixture.get<JobManagementService>(JobManagementService);
+    jobManagementService =
+      moduleFixture.get<JobManagementService>(JobManagementService);
     jobStorage = moduleFixture.get<JobStorage>(JobStorage);
-    computerUseService = moduleFixture.get<ComputerUseService>(ComputerUseService);
+    computerUseService =
+      moduleFixture.get<ComputerUseService>(ComputerUseService);
     configService = moduleFixture.get<ConfigService>(ConfigService);
 
     // Initialize Redis client for security testing
@@ -346,7 +360,9 @@ describe('Job Management Service - Security Tests', () => {
       expect(encryptedData).not.toContain('This should be encrypted');
 
       // Validate encryption properties
-      const encryptionValidation = securityTester.validateEncryption(encryptedData!);
+      const encryptionValidation = securityTester.validateEncryption(
+        encryptedData!,
+      );
 
       console.log(`Encryption validation results:
         - Has IV: ${encryptionValidation.hasIV}
@@ -360,9 +376,12 @@ describe('Job Management Service - Security Tests', () => {
     });
 
     it('should prevent unauthorized data decryption', async () => {
-      const jobId = await jobManagementService.createJob(SECURITY_ACTIONS.safe, {
-        metadata: { userId: 'user1' },
-      });
+      const jobId = await jobManagementService.createJob(
+        SECURITY_ACTIONS.safe,
+        {
+          metadata: { userId: 'user1' },
+        },
+      );
 
       // Get encrypted data
       const redisKey = `bytebot:jobs:${jobId}`;
@@ -372,10 +391,8 @@ describe('Job Management Service - Security Tests', () => {
 
       // Attempt unauthorized decryption with wrong key
       const wrongKey = securityTester.generateTestKey();
-      const unauthorizedDecryption = securityTester.attemptUnauthorizedDecryption(
-        encryptedData!,
-        wrongKey
-      );
+      const unauthorizedDecryption =
+        securityTester.attemptUnauthorizedDecryption(encryptedData!, wrongKey);
 
       expect(unauthorizedDecryption).toBe(false);
 
@@ -384,7 +401,7 @@ describe('Job Management Service - Security Tests', () => {
         const anotherWrongKey = securityTester.generateTestKey();
         const anotherAttempt = securityTester.attemptUnauthorizedDecryption(
           encryptedData!,
-          anotherWrongKey
+          anotherWrongKey,
         );
         expect(anotherAttempt).toBe(false);
       }
@@ -394,14 +411,18 @@ describe('Job Management Service - Security Tests', () => {
 
     it('should handle encryption key rotation securely', async () => {
       // Create job with initial key
-      const jobId1 = await jobManagementService.createJob(SECURITY_ACTIONS.safe);
+      const jobId1 = await jobManagementService.createJob(
+        SECURITY_ACTIONS.safe,
+      );
 
       // Simulate key rotation (in real implementation)
       // Note: This would require service restart or hot key rotation
       const newKey = securityTester.generateTestKey();
 
       // Create job with new key (simulated)
-      const jobId2 = await jobManagementService.createJob(SECURITY_ACTIONS.safe);
+      const jobId2 = await jobManagementService.createJob(
+        SECURITY_ACTIONS.safe,
+      );
 
       // Both jobs should be accessible with proper service
       const status1 = await jobManagementService.getJobStatus(jobId1);
@@ -416,13 +437,19 @@ describe('Job Management Service - Security Tests', () => {
 
   describe('Access Control and Authorization', () => {
     it('should enforce job isolation between users', async () => {
-      const user1JobId = await jobManagementService.createJob(SECURITY_ACTIONS.safe, {
-        metadata: { userId: 'user1' },
-      });
+      const user1JobId = await jobManagementService.createJob(
+        SECURITY_ACTIONS.safe,
+        {
+          metadata: { userId: 'user1' },
+        },
+      );
 
-      const user2JobId = await jobManagementService.createJob(SECURITY_ACTIONS.safe, {
-        metadata: { userId: 'user2' },
-      });
+      const user2JobId = await jobManagementService.createJob(
+        SECURITY_ACTIONS.safe,
+        {
+          metadata: { userId: 'user2' },
+        },
+      );
 
       // User1 should not access User2's job (in a real implementation with proper auth)
       // For testing purposes, we verify job isolation exists
@@ -465,7 +492,7 @@ describe('Job Management Service - Security Tests', () => {
           });
 
           // Wait for processing
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
 
           const status = await jobManagementService.getJobStatus(jobId);
           results.push({
@@ -483,12 +510,14 @@ describe('Job Management Service - Security Tests', () => {
       }
 
       console.log('Privilege escalation prevention results:');
-      results.forEach(result => {
-        console.log(`  - ${result.action}: ${result.blocked ? 'BLOCKED' : 'ALLOWED'}`);
+      results.forEach((result) => {
+        console.log(
+          `  - ${result.action}: ${result.blocked ? 'BLOCKED' : 'ALLOWED'}`,
+        );
       });
 
       // All privilege escalation attempts should be blocked
-      const allBlocked = results.every(result => result.blocked);
+      const allBlocked = results.every((result) => result.blocked);
       expect(allBlocked).toBe(true);
     });
 
@@ -498,9 +527,12 @@ describe('Job Management Service - Security Tests', () => {
 
       // Create jobs for different users
       for (const user of users) {
-        const jobId = await jobManagementService.createJob(SECURITY_ACTIONS.safe, {
-          metadata: { userId: user },
-        });
+        const jobId = await jobManagementService.createJob(
+          SECURITY_ACTIONS.safe,
+          {
+            metadata: { userId: user },
+          },
+        );
         userJobs.set(user, jobId);
       }
 
@@ -540,13 +572,17 @@ describe('Job Management Service - Security Tests', () => {
           const status = await jobManagementService.getJobStatus(jobId);
 
           results.push({
-            payload: payload.substring(0, 50) + (payload.length > 50 ? '...' : ''),
+            payload:
+              payload.substring(0, 50) + (payload.length > 50 ? '...' : ''),
             accepted: true,
-            sanitized: !status.action.content || !status.action.content.includes(payload),
+            sanitized:
+              !status.action.content ||
+              !status.action.content.includes(payload),
           });
         } catch (error) {
           results.push({
-            payload: payload.substring(0, 50) + (payload.length > 50 ? '...' : ''),
+            payload:
+              payload.substring(0, 50) + (payload.length > 50 ? '...' : ''),
             accepted: false,
             sanitized: true,
           });
@@ -555,11 +591,15 @@ describe('Job Management Service - Security Tests', () => {
 
       console.log('Input sanitization results:');
       results.forEach((result, index) => {
-        console.log(`  ${index + 1}. ${result.payload}: ${result.sanitized ? 'SANITIZED' : 'UNSAFE'}`);
+        console.log(
+          `  ${index + 1}. ${result.payload}: ${result.sanitized ? 'SANITIZED' : 'UNSAFE'}`,
+        );
       });
 
       // All inputs should be either rejected or sanitized
-      const allSafe = results.every(result => !result.accepted || result.sanitized);
+      const allSafe = results.every(
+        (result) => !result.accepted || result.sanitized,
+      );
       expect(allSafe).toBe(true);
     });
 
@@ -582,10 +622,11 @@ describe('Job Management Service - Security Tests', () => {
             path: maliciousPath,
           } as ComputerAction;
 
-          const jobId = await jobManagementService.createJob(pathTraversalAction);
+          const jobId =
+            await jobManagementService.createJob(pathTraversalAction);
 
           // Wait for processing
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
 
           const status = await jobManagementService.getJobStatus(jobId);
 
@@ -604,20 +645,22 @@ describe('Job Management Service - Security Tests', () => {
       }
 
       console.log('Path traversal prevention results:');
-      results.forEach(result => {
-        console.log(`  - ${result.path}: ${result.blocked ? 'BLOCKED' : 'ALLOWED'}`);
+      results.forEach((result) => {
+        console.log(
+          `  - ${result.path}: ${result.blocked ? 'BLOCKED' : 'ALLOWED'}`,
+        );
       });
 
       // All path traversal attempts should be blocked
-      const allBlocked = results.every(result => result.blocked);
+      const allBlocked = results.every((result) => result.blocked);
       expect(allBlocked).toBe(true);
     });
 
     it('should enforce size limits and prevent DoS attacks', async () => {
       const oversizedPayloads = [
         'A'.repeat(100 * 1024 * 1024), // 100MB
-        'B'.repeat(50 * 1024 * 1024),  // 50MB
-        'C'.repeat(20 * 1024 * 1024),  // 20MB
+        'B'.repeat(50 * 1024 * 1024), // 50MB
+        'C'.repeat(20 * 1024 * 1024), // 20MB
       ];
 
       const results = [];
@@ -649,13 +692,15 @@ describe('Job Management Service - Security Tests', () => {
       }
 
       console.log('DoS prevention results:');
-      results.forEach(result => {
+      results.forEach((result) => {
         const sizeMB = (result.size / 1024 / 1024).toFixed(1);
-        console.log(`  - ${sizeMB}MB payload: ${result.accepted ? 'ACCEPTED' : 'REJECTED'}`);
+        console.log(
+          `  - ${sizeMB}MB payload: ${result.accepted ? 'ACCEPTED' : 'REJECTED'}`,
+        );
       });
 
       // Large payloads should be rejected or handled efficiently
-      const hasProtection = results.some(result => !result.accepted);
+      const hasProtection = results.some((result) => !result.accepted);
       expect(hasProtection).toBe(true);
     });
   });
@@ -679,12 +724,14 @@ describe('Job Management Service - Security Tests', () => {
         let attempts = 0;
         while (attempts < 20) {
           status = await jobManagementService.getJobStatus(jobId);
-          if (status.status === JobStatus.TIMEOUT ||
-              status.status === JobStatus.FAILED ||
-              status.status === JobStatus.CANCELLED) {
+          if (
+            status.status === JobStatus.TIMEOUT ||
+            status.status === JobStatus.FAILED ||
+            status.status === JobStatus.CANCELLED
+          ) {
             break;
           }
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
           attempts++;
         }
 
@@ -699,7 +746,10 @@ describe('Job Management Service - Security Tests', () => {
         expect(status?.status).toMatch(/timeout|failed|cancelled/);
         expect(executionTime).toBeLessThan(10000); // Should timeout quickly
       } catch (error) {
-        console.log('Job creation rejected (expected for security):', error.message);
+        console.log(
+          'Job creation rejected (expected for security):',
+          error.message,
+        );
       }
     });
 
@@ -726,7 +776,7 @@ describe('Job Management Service - Security Tests', () => {
           const jobId = await jobManagementService.createJob(action);
 
           // Wait for processing
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
 
           const status = await jobManagementService.getJobStatus(jobId);
 
@@ -745,7 +795,7 @@ describe('Job Management Service - Security Tests', () => {
       }
 
       console.log('Environment isolation test results:');
-      results.forEach(result => {
+      results.forEach((result) => {
         console.log(`  - ${result.command}: ${result.status}`);
       });
 
@@ -788,12 +838,14 @@ describe('Job Management Service - Security Tests', () => {
           let attempts = 0;
           while (attempts < 20) {
             status = await jobManagementService.getJobStatus(jobId);
-            if (status.status === JobStatus.COMPLETED ||
-                status.status === JobStatus.FAILED ||
-                status.status === JobStatus.TIMEOUT) {
+            if (
+              status.status === JobStatus.COMPLETED ||
+              status.status === JobStatus.FAILED ||
+              status.status === JobStatus.TIMEOUT
+            ) {
               break;
             }
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
             attempts++;
           }
 
@@ -807,7 +859,9 @@ describe('Job Management Service - Security Tests', () => {
             status: status?.status,
             executionTime,
             memoryDelta,
-            blocked: status?.status === JobStatus.FAILED || status?.status === JobStatus.TIMEOUT,
+            blocked:
+              status?.status === JobStatus.FAILED ||
+              status?.status === JobStatus.TIMEOUT,
           });
         } catch (error) {
           results.push({
@@ -821,12 +875,14 @@ describe('Job Management Service - Security Tests', () => {
       }
 
       console.log('Resource exhaustion prevention results:');
-      results.forEach(result => {
-        console.log(`  - ${result.command}: ${result.blocked ? 'BLOCKED' : 'ALLOWED'}`);
+      results.forEach((result) => {
+        console.log(
+          `  - ${result.command}: ${result.blocked ? 'BLOCKED' : 'ALLOWED'}`,
+        );
       });
 
       // Resource exhaustion should be prevented
-      const hasProtection = results.every(result => result.blocked);
+      const hasProtection = results.every((result) => result.blocked);
       expect(hasProtection).toBe(true);
     });
   });
@@ -839,8 +895,12 @@ describe('Job Management Service - Security Tests', () => {
       // Capture security logs
       console.log = jest.fn().mockImplementation((...args) => {
         const message = args.join(' ');
-        if (message.includes('security') || message.includes('Security') ||
-            message.includes('unauthorized') || message.includes('failed')) {
+        if (
+          message.includes('security') ||
+          message.includes('Security') ||
+          message.includes('unauthorized') ||
+          message.includes('failed')
+        ) {
           securityEvents.push(message);
         }
         originalLog(...args);
@@ -896,14 +956,20 @@ describe('Job Management Service - Security Tests', () => {
 
       // Analyze patterns for anomalies
       const activities = Array.from(accessPatterns.entries());
-      const avgActivity = activities.reduce((sum, [, count]) => sum + count, 0) / activities.length;
+      const avgActivity =
+        activities.reduce((sum, [, count]) => sum + count, 0) /
+        activities.length;
 
-      const anomalies = activities.filter(([, count]) => count > avgActivity * 2);
+      const anomalies = activities.filter(
+        ([, count]) => count > avgActivity * 2,
+      );
 
       console.log('Access pattern analysis:');
       activities.forEach(([user, count]) => {
         const isAnomaly = count > avgActivity * 2;
-        console.log(`  - ${user}: ${count} actions ${isAnomaly ? '(ANOMALY)' : ''}`);
+        console.log(
+          `  - ${user}: ${count} actions ${isAnomaly ? '(ANOMALY)' : ''}`,
+        );
       });
 
       console.log(`Average activity: ${avgActivity.toFixed(1)}`);
@@ -961,13 +1027,16 @@ describe('Job Management Service - Security Tests', () => {
 
     it('should provide data protection controls', async () => {
       // Test data protection measures
-      const sensitiveJobId = await jobManagementService.createJob(SECURITY_ACTIONS.safe, {
-        metadata: {
-          userId: 'test-user',
-          personalData: 'john.doe@example.com',
-          sensitiveInfo: 'SSN: 123-45-6789',
+      const sensitiveJobId = await jobManagementService.createJob(
+        SECURITY_ACTIONS.safe,
+        {
+          metadata: {
+            userId: 'test-user',
+            personalData: 'john.doe@example.com',
+            sensitiveInfo: 'SSN: 123-45-6789',
+          },
         },
-      });
+      );
 
       // Verify data protection
       const redisKey = `bytebot:jobs:${sensitiveJobId}`;

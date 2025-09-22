@@ -22,7 +22,8 @@ describe('Browser-Use Service Layer Integration Tests', () => {
   beforeAll(async () => {
     // Set test environment variables
     process.env.PYTHON_PATH = 'python3';
-    process.env.BROWSER_USE_PATH = '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
+    process.env.BROWSER_USE_PATH =
+      '/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/browser-use';
     process.env.MAX_BROWSER_SESSIONS = '5';
     process.env.ENABLE_SCREENSHOTS = 'true';
     process.env.NODE_ENV = 'test';
@@ -34,8 +35,12 @@ describe('Browser-Use Service Layer Integration Tests', () => {
     // Get service instances
     browserUseService = module.get<BrowserUseService>(BrowserUseService);
     sessionService = module.get<BrowserSessionService>(BrowserSessionService);
-    interactionService = module.get<BrowserInteractionService>(BrowserInteractionService);
-    pythonService = module.get<PythonIntegrationService>(PythonIntegrationService);
+    interactionService = module.get<BrowserInteractionService>(
+      BrowserInteractionService,
+    );
+    pythonService = module.get<PythonIntegrationService>(
+      PythonIntegrationService,
+    );
     errorHandler = module.get<ErrorHandlerService>(ErrorHandlerService);
   });
 
@@ -62,7 +67,10 @@ describe('Browser-Use Service Layer Integration Tests', () => {
 
     it('should validate Python environment', async () => {
       const validation = await pythonService.validateEnvironment();
-      console.log('Python Environment Validation:', JSON.stringify(validation, null, 2));
+      console.log(
+        'Python Environment Validation:',
+        JSON.stringify(validation, null, 2),
+      );
 
       // Note: This might fail in test environment without proper Python setup
       // but we can still test the structure of the response
@@ -87,13 +95,19 @@ describe('Browser-Use Service Layer Integration Tests', () => {
 
       try {
         const result = await sessionService.createSession(sessionConfig);
-        console.log('Session Creation Result:', JSON.stringify(result, null, 2));
+        console.log(
+          'Session Creation Result:',
+          JSON.stringify(result, null, 2),
+        );
 
         expect(result.success).toBe(true);
         expect(result.sessionId).toBeDefined();
         testSessionId = result.sessionId;
       } catch (error) {
-        console.warn('Session creation failed (likely due to test environment):', error.message);
+        console.warn(
+          'Session creation failed (likely due to test environment):',
+          error.message,
+        );
         // In test environment, we might not have browser-use properly configured
         // but we can still test the service structure
         expect(error).toBeDefined();
@@ -187,7 +201,8 @@ describe('Browser-Use Service Layer Integration Tests', () => {
     });
 
     it('should get session tasks', async () => {
-      const sessionTasks = await browserUseService.getSessionTasks('test-session-123');
+      const sessionTasks =
+        await browserUseService.getSessionTasks('test-session-123');
       console.log('Session Tasks:', JSON.stringify(sessionTasks, null, 2));
 
       expect(sessionTasks.success).toBe(true);
@@ -209,7 +224,10 @@ describe('Browser-Use Service Layer Integration Tests', () => {
           expect(info.data).toHaveProperty('status');
         }
       } catch (error) {
-        console.warn('Browser-use info failed (likely due to test environment):', error.message);
+        console.warn(
+          'Browser-use info failed (likely due to test environment):',
+          error.message,
+        );
         // This is expected in test environment without proper Python setup
       }
     }, 30000);
@@ -231,7 +249,10 @@ describe('Browser-Use Service Layer Integration Tests', () => {
           expect(result.stdout).toContain('Hello from Python integration test');
         }
       } catch (error) {
-        console.warn('Python command execution failed (likely due to test environment):', error.message);
+        console.warn(
+          'Python command execution failed (likely due to test environment):',
+          error.message,
+        );
       }
     }, 15000);
 
@@ -254,20 +275,39 @@ describe('Browser-Use Service Layer Integration Tests', () => {
       // Test that interaction methods create proper DTOs
       // Note: These will likely fail in test environment but test the structure
       try {
-        const clickResult = await interactionService.click(mockSessionId, '#test-button');
-        console.log('Click Interaction Structure:', JSON.stringify(clickResult, null, 2));
+        const clickResult = await interactionService.click(
+          mockSessionId,
+          '#test-button',
+        );
+        console.log(
+          'Click Interaction Structure:',
+          JSON.stringify(clickResult, null, 2),
+        );
         expect(clickResult).toHaveProperty('success');
       } catch (error) {
-        console.warn('Click interaction failed (expected in test environment):', error.message);
+        console.warn(
+          'Click interaction failed (expected in test environment):',
+          error.message,
+        );
         expect(error).toBeDefined();
       }
 
       try {
-        const typeResult = await interactionService.type(mockSessionId, '#test-input', 'test text');
-        console.log('Type Interaction Structure:', JSON.stringify(typeResult, null, 2));
+        const typeResult = await interactionService.type(
+          mockSessionId,
+          '#test-input',
+          'test text',
+        );
+        console.log(
+          'Type Interaction Structure:',
+          JSON.stringify(typeResult, null, 2),
+        );
         expect(typeResult).toHaveProperty('success');
       } catch (error) {
-        console.warn('Type interaction failed (expected in test environment):', error.message);
+        console.warn(
+          'Type interaction failed (expected in test environment):',
+          error.message,
+        );
         expect(error).toBeDefined();
       }
     }, 30000);
@@ -280,7 +320,7 @@ describe('Browser-Use Service Layer Integration Tests', () => {
         'TestService',
         'testOperation',
         testError,
-        { testContext: 'error-handling-test' }
+        { testContext: 'error-handling-test' },
       );
 
       console.log('Handled Error:', JSON.stringify(browserError, null, 2));
@@ -317,11 +357,18 @@ describe('Browser-Use Service Layer Integration Tests', () => {
         includeResolved: true,
       });
 
-      console.log('Error Report Summary:', JSON.stringify({
-        success: report.success,
-        totalErrors: report.data?.summary?.totalErrors,
-        services: Object.keys(report.data?.errorsByService || {}),
-      }, null, 2));
+      console.log(
+        'Error Report Summary:',
+        JSON.stringify(
+          {
+            success: report.success,
+            totalErrors: report.data?.summary?.totalErrors,
+            services: Object.keys(report.data?.errorsByService || {}),
+          },
+          null,
+          2,
+        ),
+      );
 
       expect(report.success).toBe(true);
       expect(report.data).toHaveProperty('summary');
@@ -340,24 +387,31 @@ describe('Browser-Use Service Layer Integration Tests', () => {
       const pythonStats = pythonService.getStatistics();
       const errorStats = errorHandler.getErrorStatistics();
 
-      console.log('Integration Status Summary:', JSON.stringify({
-        browserUse: {
-          activeTasks: browserHealthStatus.data.activeTasks,
-          runningProcesses: browserHealthStatus.data.runningProcesses,
-        },
-        sessions: {
-          activeSessions: sessionServiceStatus.data.activeSessions,
-          totalSessions: sessionServiceStatus.data.totalSessions,
-        },
-        python: {
-          runningProcesses: pythonStats.data.runningProcesses,
-          queuedCommands: pythonStats.data.queuedCommands,
-        },
-        errors: {
-          totalErrors: errorStats.data.totalErrors,
-          resolutionRate: errorStats.data.resolutionRate,
-        },
-      }, null, 2));
+      console.log(
+        'Integration Status Summary:',
+        JSON.stringify(
+          {
+            browserUse: {
+              activeTasks: browserHealthStatus.data.activeTasks,
+              runningProcesses: browserHealthStatus.data.runningProcesses,
+            },
+            sessions: {
+              activeSessions: sessionServiceStatus.data.activeSessions,
+              totalSessions: sessionServiceStatus.data.totalSessions,
+            },
+            python: {
+              runningProcesses: pythonStats.data.runningProcesses,
+              queuedCommands: pythonStats.data.queuedCommands,
+            },
+            errors: {
+              totalErrors: errorStats.data.totalErrors,
+              resolutionRate: errorStats.data.resolutionRate,
+            },
+          },
+          null,
+          2,
+        ),
+      );
 
       // 2. Test error handling integration
       const testError = new Error('Integration test error');
@@ -365,7 +419,7 @@ describe('Browser-Use Service Layer Integration Tests', () => {
         'IntegrationTest',
         'serviceIntegration',
         testError,
-        { phase: 'integration-testing' }
+        { phase: 'integration-testing' },
       );
 
       expect(handledError.code).toBeDefined();
@@ -422,18 +476,18 @@ describe('Browser-Use Service Layer Integration Tests', () => {
         () => errorHandler.getErrorStatistics(),
       ];
 
-      const results = await Promise.all(operations.map(op => op()));
+      const results = await Promise.all(operations.map((op) => op()));
       const totalTime = Date.now() - startTime;
 
       console.log(`All service operations completed in ${totalTime}ms`);
       console.log('Performance metrics:', {
         totalOperations: operations.length,
         averageTime: totalTime / operations.length,
-        allSuccessful: results.every(r => r.success),
+        allSuccessful: results.every((r) => r.success),
       });
 
       expect(totalTime).toBeLessThan(1000); // Should complete within 1 second
-      expect(results.every(r => r.success)).toBe(true);
+      expect(results.every((r) => r.success)).toBe(true);
     });
   });
 });

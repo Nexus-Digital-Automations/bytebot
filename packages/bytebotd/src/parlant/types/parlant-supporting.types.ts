@@ -31,7 +31,7 @@ export enum EntityType {
   DOCUMENT = 'DOCUMENT',
   SYSTEM = 'SYSTEM',
   CREDENTIAL = 'CREDENTIAL',
-  IDENTIFIER = 'IDENTIFIER'
+  IDENTIFIER = 'IDENTIFIER',
 }
 
 export enum SensitivityLevel {
@@ -39,7 +39,7 @@ export enum SensitivityLevel {
   INTERNAL = 'INTERNAL',
   CONFIDENTIAL = 'CONFIDENTIAL',
   RESTRICTED = 'RESTRICTED',
-  TOP_SECRET = 'TOP_SECRET'
+  TOP_SECRET = 'TOP_SECRET',
 }
 
 export enum FormalityLevel {
@@ -48,7 +48,7 @@ export enum FormalityLevel {
   FORMAL = 'FORMAL',
   PROFESSIONAL = 'PROFESSIONAL',
   LEGAL = 'LEGAL',
-  TECHNICAL = 'TECHNICAL'
+  TECHNICAL = 'TECHNICAL',
 }
 
 export enum BehaviorType {
@@ -59,7 +59,7 @@ export enum BehaviorType {
   URGENCY = 'URGENCY',
   EVASION = 'EVASION',
   AGGRESSION = 'AGGRESSION',
-  SATISFACTION = 'SATISFACTION'
+  SATISFACTION = 'SATISFACTION',
 }
 
 export enum CustodyAction {
@@ -70,7 +70,7 @@ export enum CustodyAction {
   COPIED = 'COPIED',
   ARCHIVED = 'ARCHIVED',
   DESTROYED = 'DESTROYED',
-  RESTORED = 'RESTORED'
+  RESTORED = 'RESTORED',
 }
 
 export enum TrustLevel {
@@ -79,7 +79,7 @@ export enum TrustLevel {
   MEDIUM = 'MEDIUM',
   HIGH = 'HIGH',
   VERIFIED = 'VERIFIED',
-  CERTIFIED = 'CERTIFIED'
+  CERTIFIED = 'CERTIFIED',
 }
 
 export enum ConfidentialityLevel {
@@ -87,7 +87,7 @@ export enum ConfidentialityLevel {
   INTERNAL = 'INTERNAL',
   CONFIDENTIAL = 'CONFIDENTIAL',
   SECRET = 'SECRET',
-  TOP_SECRET = 'TOP_SECRET'
+  TOP_SECRET = 'TOP_SECRET',
 }
 
 // =============================================================================
@@ -264,7 +264,11 @@ export interface EvidenceSource {
 }
 
 export interface ReliabilityRating {
-  readonly rating: 'UNRELIABLE' | 'QUESTIONABLE' | 'RELIABLE' | 'HIGHLY_RELIABLE';
+  readonly rating:
+    | 'UNRELIABLE'
+    | 'QUESTIONABLE'
+    | 'RELIABLE'
+    | 'HIGHLY_RELIABLE';
   readonly confidence: number;
   readonly basis: string[];
   readonly history: ReliabilityHistory[];
@@ -592,7 +596,11 @@ export interface TimelineDependency {
   readonly dependencyId: string;
   readonly predecessor: string;
   readonly successor: string;
-  readonly type: 'FINISH_TO_START' | 'START_TO_START' | 'FINISH_TO_FINISH' | 'START_TO_FINISH';
+  readonly type:
+    | 'FINISH_TO_START'
+    | 'START_TO_START'
+    | 'FINISH_TO_FINISH'
+    | 'START_TO_FINISH';
   readonly lag: number;
 }
 

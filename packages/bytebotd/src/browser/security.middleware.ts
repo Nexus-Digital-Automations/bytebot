@@ -427,8 +427,22 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     res: Response,
   ): Promise<void> {
     // Add security headers
-    res.setHeader('X-Content-Type-Options', 'nosniff');res.setHeader('X-Frame-Options', 'DENY');res.setHeader('X-XSS-Protection', '1; mode=block');res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');// Add risk score header for monitoringres.setHeader('X-Risk-Score', result.riskScore.toString());// Handle security response based on recommendationswitch (result.recommendedAction) {
-      case 'block':throw new ForbiddenException({message: 'Request blocked due to security policy violation',riskScore: result.riskScore,violations: result.violations.map(v => v.type),
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+    // Add risk score header for monitoring
+    res.setHeader('X-Risk-Score', result.riskScore.toString());
+
+    // Handle security response based on recommendations
+    switch (result.recommendedAction) {
+      case 'block':
+        throw new ForbiddenException({
+          message: 'Request blocked due to security policy violation',
+          riskScore: result.riskScore,
+          violations: result.violations.map(v => v.type),
         });
 
       case 'warn':
@@ -458,22 +472,39 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
 
     // Check for potentially dangerous browser automation patterns
     const payload = req.body;
-    if (payload && typeof payload === 'object') {// Check for dangerous selectorsif (this.containsDangerousSelectors(payload)) {
+    if (payload && typeof payload === 'object') {
+      // Check for dangerous selectors
+      if (this.containsDangerousSelectors(payload)) {
         violations.push({
           type: SecurityViolationType.MALFORMED_REQUEST,
-          severity: 'high',description: 'Potentially dangerous CSS selector or XPath detected',evidence: { payload: JSON.stringify(payload).substring(0, 200) },recommendedAction: 'Sanitize selectors and validate against whitelist',});}
+          severity: 'high',
+          description: 'Potentially dangerous CSS selector or XPath detected',
+          evidence: { payload: JSON.stringify(payload).substring(0, 200) },
+          recommendedAction: 'Sanitize selectors and validate against whitelist',
+        });
+      }
 
       // Check for dangerous URLs
       if (this.containsDangerousUrls(payload)) {
         violations.push({
           type: SecurityViolationType.MALFORMED_REQUEST,
-          severity: 'medium',description: 'Potentially dangerous URL detected',evidence: { payload: JSON.stringify(payload).substring(0, 200) },recommendedAction: 'Validate URLs against whitelist',});}
+          severity: 'medium',
+          description: 'Potentially dangerous URL detected',
+          evidence: { payload: JSON.stringify(payload).substring(0, 200) },
+          recommendedAction: 'Validate URLs against whitelist',
+        });
+      }
 
       // Check for file system access attempts
       if (this.containsFileSystemAccess(payload)) {
         violations.push({
           type: SecurityViolationType.PATH_TRAVERSAL,
-          severity: 'critical',description: 'File system access attempt detected',evidence: { payload: JSON.stringify(payload).substring(0, 200) },recommendedAction: 'Block request and investigate',});}
+          severity: 'critical',
+          description: 'File system access attempt detected',
+          evidence: { payload: JSON.stringify(payload).substring(0, 200) },
+          recommendedAction: 'Block request and investigate',
+        });
+      }
     }
 
     return violations;
@@ -765,8 +796,14 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     }
 
     selectors.forEach(selector => {
-      if (typeof selector !== 'string') return;// Check selector lengthif (selector.length > 1000) {
-        throw new BadRequestException('Selector too long');}// Check for dangerous patterns in selectors
+      if (typeof selector !== 'string') return;
+
+      // Check selector length
+      if (selector.length > 1000) {
+        throw new BadRequestException('Selector too long');
+      }
+
+      // Check for dangerous patterns in selectors
       if (this.containsXssPatterns(selector)) {
         throw new BadRequestException('Invalid selector contains dangerous patterns');
       }

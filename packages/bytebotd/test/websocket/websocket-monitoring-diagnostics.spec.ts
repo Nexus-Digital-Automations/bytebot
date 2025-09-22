@@ -132,7 +132,7 @@ class MonitoringWebSocketClient extends EventEmitter {
   constructor(
     private url: string,
     private clientId: string,
-    private enableDiagnostics = true
+    private enableDiagnostics = true,
   ) {
     super();
     this.metrics = {
@@ -219,13 +219,16 @@ class MonitoringWebSocketClient extends EventEmitter {
             },
           });
 
-          this.emit('disconnected', { clientId: this.clientId, code, reason: reason.toString() });
+          this.emit('disconnected', {
+            clientId: this.clientId,
+            code,
+            reason: reason.toString(),
+          });
         });
 
         this.ws.on('ping', () => {
           this.metrics.lastHeartbeat = Date.now();
         });
-
       } catch (error) {
         reject(error);
       }
@@ -276,7 +279,6 @@ class MonitoringWebSocketClient extends EventEmitter {
         latency,
         totalReceived: this.metrics.messagesReceived,
       });
-
     } catch (error) {
       this.metrics.errors++;
       this.logDiagnosticEvent({
@@ -292,7 +294,10 @@ class MonitoringWebSocketClient extends EventEmitter {
     }
   }
 
-  async sendMonitoringMessage(type: ConversationalMessageType, payload: Record<string, unknown>): Promise<void> {
+  async sendMonitoringMessage(
+    type: ConversationalMessageType,
+    payload: Record<string, unknown>,
+  ): Promise<void> {
     if (!this.connected || !this.ws) {
       throw new Error(`Client ${this.clientId} not connected`);
     }
@@ -353,7 +358,11 @@ class MonitoringWebSocketClient extends EventEmitter {
     });
   }
 
-  private logDiagnosticEvent(event: Omit<DiagnosticEvent, 'id' | 'timestamp' | 'metadata'> & { metadata?: Partial<DiagnosticEvent['metadata']> }): void {
+  private logDiagnosticEvent(
+    event: Omit<DiagnosticEvent, 'id' | 'timestamp' | 'metadata'> & {
+      metadata?: Partial<DiagnosticEvent['metadata']>;
+    },
+  ): void {
     if (!this.enableDiagnostics) return;
 
     const diagnosticEvent: DiagnosticEvent = {
@@ -393,9 +402,11 @@ class MonitoringWebSocketClient extends EventEmitter {
       messagesSent: this.metrics.messagesSent,
       messagesReceived: this.metrics.messagesReceived,
       errors: this.metrics.errors,
-      averageLatency: this.metrics.latencies.length > 0
-        ? this.metrics.latencies.reduce((sum, lat) => sum + lat, 0) / this.metrics.latencies.length
-        : 0,
+      averageLatency:
+        this.metrics.latencies.length > 0
+          ? this.metrics.latencies.reduce((sum, lat) => sum + lat, 0) /
+            this.metrics.latencies.length
+          : 0,
       latencyP95: sortedLatencies[p95Index] || 0,
       lastHeartbeat: this.metrics.lastHeartbeat,
     };
@@ -444,7 +455,11 @@ class WebSocketSystemMonitor extends EventEmitter {
     // Create monitoring clients
     for (let i = 0; i < clientCount; i++) {
       const clientId = `monitor_${i.toString().padStart(3, '0')}`;
-      const client = new MonitoringWebSocketClient(this.baseUrl, clientId, true);
+      const client = new MonitoringWebSocketClient(
+        this.baseUrl,
+        clientId,
+        true,
+      );
 
       client.on('diagnosticEvent', (event: DiagnosticEvent) => {
         this.emit('diagnosticEvent', event);
@@ -468,13 +483,19 @@ class WebSocketSystemMonitor extends EventEmitter {
   private collectMetrics(): void {
     const timestamp = Date.now();
     const allClients = Array.from(this.clients.values());
-    const connectedClients = allClients.filter(client => client.isConnected());
+    const connectedClients = allClients.filter((client) =>
+      client.isConnected(),
+    );
 
     // Collect client metrics
-    const clientMetrics = allClients.map(client => client.getMetricsSummary());
+    const clientMetrics = allClients.map((client) =>
+      client.getMetricsSummary(),
+    );
 
     // Calculate aggregate latency statistics
-    const allLatencies = clientMetrics.flatMap(m => [m.averageLatency]).filter(lat => lat > 0);
+    const allLatencies = clientMetrics
+      .flatMap((m) => [m.averageLatency])
+      .filter((lat) => lat > 0);
     allLatencies.sort((a, b) => a - b);
 
     const p50Index = Math.floor(allLatencies.length * 0.5);
@@ -486,7 +507,10 @@ class WebSocketSystemMonitor extends EventEmitter {
     const cpuUsage = process.cpuUsage();
 
     // Calculate health score
-    const healthMetrics = this.calculateHealthScore(clientMetrics, allLatencies);
+    const healthMetrics = this.calculateHealthScore(
+      clientMetrics,
+      allLatencies,
+    );
 
     const metrics: PerformanceMetrics = {
       timestamp,
@@ -505,9 +529,11 @@ class WebSocketSystemMonitor extends EventEmitter {
       },
       latency: {
         current: allLatencies[allLatencies.length - 1] || 0,
-        average: allLatencies.length > 0
-          ? allLatencies.reduce((sum, lat) => sum + lat, 0) / allLatencies.length
-          : 0,
+        average:
+          allLatencies.length > 0
+            ? allLatencies.reduce((sum, lat) => sum + lat, 0) /
+              allLatencies.length
+            : 0,
         p50: allLatencies[p50Index] || 0,
         p95: allLatencies[p95Index] || 0,
         p99: allLatencies[p99Index] || 0,
@@ -547,25 +573,36 @@ class WebSocketSystemMonitor extends EventEmitter {
     this.emit('metricsCollected', metrics);
   }
 
-  private calculateHealthScore(clientMetrics: any[], latencies: number[]): PerformanceMetrics['health'] {
+  private calculateHealthScore(
+    clientMetrics: any[],
+    latencies: number[],
+  ): PerformanceMetrics['health'] {
     let score = 100;
     const issues: string[] = [];
 
     // Latency check
-    const avgLatency = latencies.length > 0
-      ? latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length
-      : 0;
+    const avgLatency =
+      latencies.length > 0
+        ? latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length
+        : 0;
 
     if (avgLatency > this.alertThresholds.latencyMs) {
-      const penalty = Math.min(30, (avgLatency - this.alertThresholds.latencyMs) / 10);
+      const penalty = Math.min(
+        30,
+        (avgLatency - this.alertThresholds.latencyMs) / 10,
+      );
       score -= penalty;
       issues.push(`High latency: ${avgLatency.toFixed(2)}ms`);
     }
 
     // Error rate check
     const totalErrors = clientMetrics.reduce((sum, m) => sum + m.errors, 0);
-    const totalMessages = clientMetrics.reduce((sum, m) => sum + m.messagesSent + m.messagesReceived, 0);
-    const errorRate = totalMessages > 0 ? (totalErrors / totalMessages) * 100 : 0;
+    const totalMessages = clientMetrics.reduce(
+      (sum, m) => sum + m.messagesSent + m.messagesReceived,
+      0,
+    );
+    const errorRate =
+      totalMessages > 0 ? (totalErrors / totalMessages) * 100 : 0;
 
     if (errorRate > this.alertThresholds.errorRatePercent) {
       score -= Math.min(40, errorRate * 2);
@@ -580,19 +617,23 @@ class WebSocketSystemMonitor extends EventEmitter {
     }
 
     // Connection failure check
-    const connectedCount = clientMetrics.filter(m => m.messagesSent > 0 || m.messagesReceived > 0).length;
-    const connectionFailureRate = ((clientMetrics.length - connectedCount) / clientMetrics.length) * 100;
+    const connectedCount = clientMetrics.filter(
+      (m) => m.messagesSent > 0 || m.messagesReceived > 0,
+    ).length;
+    const connectionFailureRate =
+      ((clientMetrics.length - connectedCount) / clientMetrics.length) * 100;
 
     if (connectionFailureRate > this.alertThresholds.connectionFailurePercent) {
       score -= Math.min(30, connectionFailureRate);
-      issues.push(`High connection failure rate: ${connectionFailureRate.toFixed(2)}%`);
+      issues.push(
+        `High connection failure rate: ${connectionFailureRate.toFixed(2)}%`,
+      );
     }
 
     score = Math.max(0, Math.min(100, score));
 
     const status: PerformanceMetrics['health']['status'] =
-      score >= 80 ? 'healthy' :
-      score >= 60 ? 'degraded' : 'critical';
+      score >= 80 ? 'healthy' : score >= 60 ? 'degraded' : 'critical';
 
     return { score, status, issues };
   }
@@ -604,8 +645,10 @@ class WebSocketSystemMonitor extends EventEmitter {
     const previous = this.metricsHistory[this.metricsHistory.length - 2];
 
     const timeDiff = (recent.timestamp - previous.timestamp) / 1000;
-    const messageDiff = (recent.messages.sent + recent.messages.received) -
-                       (previous.messages.sent + previous.messages.received);
+    const messageDiff =
+      recent.messages.sent +
+      recent.messages.received -
+      (previous.messages.sent + previous.messages.received);
 
     return timeDiff > 0 ? messageDiff / timeDiff : 0;
   }
@@ -614,8 +657,15 @@ class WebSocketSystemMonitor extends EventEmitter {
     if (this.metricsHistory.length < 10) return 0;
 
     const recentMetrics = this.metricsHistory.slice(-10);
-    const totalErrors = recentMetrics.reduce((sum, m) => sum + m.errors.total, 0);
-    const timeSpan = (recentMetrics[recentMetrics.length - 1].timestamp - recentMetrics[0].timestamp) / 1000 / 60;
+    const totalErrors = recentMetrics.reduce(
+      (sum, m) => sum + m.errors.total,
+      0,
+    );
+    const timeSpan =
+      (recentMetrics[recentMetrics.length - 1].timestamp -
+        recentMetrics[0].timestamp) /
+      1000 /
+      60;
 
     return timeSpan > 0 ? totalErrors / timeSpan : 0;
   }
@@ -672,7 +722,12 @@ class WebSocketSystemMonitor extends EventEmitter {
       clients: this.getClientDiagnostics(),
     };
 
-    const reportPath = path.join(process.cwd(), 'development', 'reports', `websocket-diagnostic-${Date.now()}.json`);
+    const reportPath = path.join(
+      process.cwd(),
+      'development',
+      'reports',
+      `websocket-diagnostic-${Date.now()}.json`,
+    );
 
     // Ensure directory exists
     const reportDir = path.dirname(reportPath);
@@ -707,7 +762,7 @@ class WebSocketSystemMonitor extends EventEmitter {
   }
 
   private getClientDiagnostics() {
-    return Array.from(this.clients.values()).map(client => ({
+    return Array.from(this.clients.values()).map((client) => ({
       clientId: client['clientId'],
       connected: client.isConnected(),
       metrics: client.getMetricsSummary(),
@@ -726,8 +781,8 @@ class WebSocketSystemMonitor extends EventEmitter {
     }
 
     const disconnectPromises = Array.from(this.clients.values())
-      .filter(client => client.isConnected())
-      .map(client => client.disconnect());
+      .filter((client) => client.isConnected())
+      .map((client) => client.disconnect());
 
     await Promise.allSettled(disconnectPromises);
     this.clients.clear();
@@ -741,12 +796,12 @@ class WebSocketSystemMonitor extends EventEmitter {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
     };
     return config[key] ?? defaultValue;
   }),
@@ -777,11 +832,15 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
 
     await integrationService.onModuleInit();
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     systemMonitor = new WebSocketSystemMonitor(TEST_URL);
   });
@@ -809,7 +868,7 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       await systemMonitor.startMonitoring(5, 1000); // 5 clients, 1-second intervals
 
       // Wait for several metrics collections
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       expect(metricsCollected).toBeGreaterThan(3);
       expect(collectedMetrics.length).toBeGreaterThan(3);
@@ -827,7 +886,9 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       // Verify health score calculation
       expect(latestMetrics.health.score).toBeGreaterThanOrEqual(0);
       expect(latestMetrics.health.score).toBeLessThanOrEqual(100);
-      expect(['healthy', 'degraded', 'critical']).toContain(latestMetrics.health.status);
+      expect(['healthy', 'degraded', 'critical']).toContain(
+        latestMetrics.health.status,
+      );
 
       console.log('Real-time Monitoring Results:', {
         metricsCollected,
@@ -856,10 +917,13 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       // Generate some activity
       const testClients = Array.from(systemMonitor['clients'].values());
       for (const client of testClients) {
-        await client.sendMonitoringMessage(ConversationalMessageType.HEARTBEAT, { test: true });
+        await client.sendMonitoringMessage(
+          ConversationalMessageType.HEARTBEAT,
+          { test: true },
+        );
       }
 
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       expect(diagnosticEvents.length).toBeGreaterThan(0);
 
@@ -875,8 +939,8 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
 
       console.log('Diagnostic Events Summary:', {
         totalEvents: diagnosticEvents.length,
-        eventTypes: [...new Set(diagnosticEvents.map(e => e.type))],
-        severityLevels: [...new Set(diagnosticEvents.map(e => e.severity))],
+        eventTypes: [...new Set(diagnosticEvents.map((e) => e.type))],
+        severityLevels: [...new Set(diagnosticEvents.map((e) => e.severity))],
       });
     });
 
@@ -898,14 +962,14 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       await systemMonitor.startMonitoring(3, 1000);
 
       // Wait for potential alerts
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       // We expect some alerts due to low thresholds
       expect(alerts.length).toBeGreaterThan(0);
 
       console.log('Alert System Results:', {
         alertsGenerated: alerts.length,
-        alertLevels: [...new Set(alerts.map(a => a.level))],
+        alertLevels: [...new Set(alerts.map((a) => a.level))],
         sampleAlert: alerts[0],
       });
     });
@@ -916,21 +980,26 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       await systemMonitor.startMonitoring(10, 500); // More frequent monitoring
 
       // Run for a period to collect data
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      await new Promise((resolve) => setTimeout(resolve, 10000));
 
       const metricsHistory = systemMonitor.getMetricsHistory();
 
       expect(metricsHistory.length).toBeGreaterThan(15); // Should have many data points
 
       // Analyze connection stability
-      const connectionCounts = metricsHistory.map(m => m.connections.active);
-      const connectionStability = connectionCounts.filter(count => count > 0).length / connectionCounts.length;
+      const connectionCounts = metricsHistory.map((m) => m.connections.active);
+      const connectionStability =
+        connectionCounts.filter((count) => count > 0).length /
+        connectionCounts.length;
 
       expect(connectionStability).toBeGreaterThan(0.8); // 80% stability
 
       // Analyze latency trends
-      const latencies = metricsHistory.map(m => m.latency.average).filter(lat => lat > 0);
-      const averageLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+      const latencies = metricsHistory
+        .map((m) => m.latency.average)
+        .filter((lat) => lat > 0);
+      const averageLatency =
+        latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
 
       expect(averageLatency).toBeLessThan(50); // Target <50ms
 
@@ -948,11 +1017,13 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       const initialMemory = process.memoryUsage().heapUsed;
 
       // Run monitoring for a period
-      await new Promise(resolve => setTimeout(resolve, 8000));
+      await new Promise((resolve) => setTimeout(resolve, 8000));
 
       const metricsHistory = systemMonitor.getMetricsHistory();
-      const memoryUsages = metricsHistory.map(m => m.resources.memory.heapUsed);
-      const cpuUsages = metricsHistory.map(m => m.resources.cpu.total);
+      const memoryUsages = metricsHistory.map(
+        (m) => m.resources.memory.heapUsed,
+      );
+      const cpuUsages = metricsHistory.map((m) => m.resources.cpu.total);
 
       // Analyze memory patterns
       const maxMemory = Math.max(...memoryUsages);
@@ -961,7 +1032,8 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       expect(memoryGrowth).toBeLessThan(2); // Less than 2x growth
 
       // Analyze CPU patterns
-      const averageCpu = cpuUsages.reduce((sum, cpu) => sum + cpu, 0) / cpuUsages.length;
+      const averageCpu =
+        cpuUsages.reduce((sum, cpu) => sum + cpu, 0) / cpuUsages.length;
 
       console.log('Resource Utilization Analysis:', {
         memoryGrowth: `${(memoryGrowth * 100).toFixed(1)}%`,
@@ -977,7 +1049,7 @@ describe('WebSocket Monitoring and Diagnostics Suite', () => {
       await systemMonitor.startMonitoring(5, 1000);
 
       // Run system for a period to collect data
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       const reportPath = await systemMonitor.generateDiagnosticReport();
 

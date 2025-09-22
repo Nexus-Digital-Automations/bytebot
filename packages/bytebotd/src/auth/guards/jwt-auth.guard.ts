@@ -142,12 +142,16 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         userAgent,
         ipAddress: clientIp,
         timestamp: new Date().toISOString(),
-        securityContext: 'computer_control_access',},);
+        securityContext: 'computer_control_access',
+      },
+    );
 
     // Pre-authentication security checks
     if (!this.performPreAuthChecks(request, operationId)) {
       throw new UnauthorizedException(
-        'Pre-authentication security check failed',);}
+        'Pre-authentication security check failed',
+      );
+    }
 
     try {
       // Call parent authentication logic (Passport JWT strategy)
@@ -176,7 +180,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
             authTimeMs: authTime,
             ipAddress: clientIp,
             userAgent,
-            securityLevel: 'enhanced',securityEvent: 'computer_control_auth_success',postAuthChecks: 'passed',
+            securityLevel: 'enhanced',
+            securityEvent: 'computer_control_auth_success',
+            postAuthChecks: 'passed',
           },
         );
       }
@@ -232,7 +238,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     info: JwtAuthInfo | null,
     context: ExecutionContext,
   ): TUser {
-    const operationId = `bytebotd-jwt-handle-${Date.now()}`;const request = context.switchToHttp().getRequest<AuthenticatedRequest>();// Handle authentication errors
+    const operationId = `bytebotd-jwt-handle-${Date.now()}`;
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>(); // Handle authentication errors
     if (err) {
       this.logger.error(
         `[${operationId}] Computer control authentication error`,
@@ -243,7 +250,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           url: request.url,
           method: request.method,
           ipAddress: this.getClientIpAddress(request),
-          securityEvent: 'computer_control_auth_error',},);
+          securityEvent: 'computer_control_auth_error',
+        },
+      );
       throw new UnauthorizedException(
         'Authentication failed for computer control',
       );
@@ -257,7 +266,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         `[${operationId}] Computer control authentication failed - no user`,
         {
           operationId,
-          info: info?.message ?? info?.name ?? (info ? JSON.stringify(info) : 'unknown'),
+          info:
+            info?.message ??
+            info?.name ??
+            (info ? JSON.stringify(info) : 'unknown'),
           url: request.url,
           method: request.method,
           ipAddress: this.getClientIpAddress(request),
@@ -279,7 +291,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         role: user.role,
         url: request.url,
         method: request.method,
-        securityEvent: 'computer_control_auth_handled',},);
+        securityEvent: 'computer_control_auth_handled',
+      },
+    );
 
     return user as TUser;
   }
@@ -294,7 +308,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private getClientIpAddress(request: Request): string {
     return (
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??(request.headers['x-real-ip'] as string) ??request.connection?.remoteAddress ??request.socket?.remoteAddress ??
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ??
+      (request.headers['x-real-ip'] as string) ??
+      request.connection?.remoteAddress ??
+      request.socket?.remoteAddress ??
       'unknown'
     );
   }
@@ -323,19 +340,23 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private analyzeAuthHeader(authHeader?: string): string {
     if (!authHeader) {
-      return 'missing';}if (!authHeader.startsWith('Bearer ')) {
+      return 'missing';
+    }
+    if (!authHeader.startsWith('Bearer ')) {
       return `invalid-format-${authHeader.split(' ')[0] ?? 'no-type'}`;
     }
 
     const token = authHeader.substring(7);
     if (!token) {
-      return 'missing-token';}// Basic JWT format validation
+      return 'missing-token';
+    } // Basic JWT format validation
     const parts = token.split('.');
     if (parts.length !== 3) {
       return `invalid-jwt-parts-${parts.length}`;
     }
 
-    return 'valid-format';}/**
+    return 'valid-format';
+  } /**
    * Extract message information from authentication info object with type safety
    * Safely accesses message and name properties from potentially untyped info object
    *
@@ -345,11 +366,19 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private extractMessageFromInfo(info: unknown): string {
     // Type guard for objects with message property
-    if (info && typeof info === 'object' && 'message' in info) {const messageValue = (info as { message: unknown }).message;if (typeof messageValue === 'string') {return messageValue;}
+    if (info && typeof info === 'object' && 'message' in info) {
+      const messageValue = (info as { message: unknown }).message;
+      if (typeof messageValue === 'string') {
+        return messageValue;
+      }
     }
 
     // Type guard for objects with name property
-    if (info && typeof info === 'object' && 'name' in info) {const nameValue = (info as { name: unknown }).name;if (typeof nameValue === 'string') {return nameValue;}
+    if (info && typeof info === 'object' && 'name' in info) {
+      const nameValue = (info as { name: unknown }).name;
+      if (typeof nameValue === 'string') {
+        return nameValue;
+      }
     }
 
     // Fallback to string conversion of the entire info object
@@ -366,11 +395,26 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private getAuthErrorMessage(info: unknown): string {
     if (!info) {
-      return 'Authentication required for computer control';}const message = String(this.extractMessageFromInfo(info));
+      return 'Authentication required for computer control';
+    }
+    const message = String(this.extractMessageFromInfo(info));
 
     // Common JWT errors with user-friendly messages
     switch (message) {
-      case 'TokenExpiredError':case 'jwt expired':return 'Access token has expired';case 'JsonWebTokenError':case 'invalid token':return 'Invalid access token';case 'NotBeforeError':return 'Token not active yet';case 'No auth token':return 'Access token required for computer control';default:return 'Authentication failed for computer control';}}
+      case 'TokenExpiredError':
+      case 'jwt expired':
+        return 'Access token has expired';
+      case 'JsonWebTokenError':
+      case 'invalid token':
+        return 'Invalid access token';
+      case 'NotBeforeError':
+        return 'Token not active yet';
+      case 'No auth token':
+        return 'Access token required for computer control';
+      default:
+        return 'Authentication failed for computer control';
+    }
+  }
 
   /**
    * Enhanced pre-authentication security checks
@@ -425,7 +469,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         {
           operationId,
           ipAddress: this.getClientIpAddress(request),
-          securityEvent: 'potential_replay_attack',},);
+          securityEvent: 'potential_replay_attack',
+        },
+      );
       return false;
     }
 
@@ -474,7 +520,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
    */
   private isValidAuthHeaderFormat(authHeader: string): boolean {
     // Must be Bearer token format
-    if (!authHeader.startsWith('Bearer ')) {return false;}
+    if (!authHeader.startsWith('Bearer ')) {
+      return false;
+    }
 
     const token = authHeader.substring(7);
 
@@ -484,7 +532,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     // Basic JWT format check (3 parts separated by dots)
-    const parts = token.split('.');if (parts.length !== 3) {return false;
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return false;
     }
 
     // Each part should be base64url encoded (basic check)
@@ -508,7 +558,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   ): boolean {
     try {
       const token = authHeader.substring(7);
-      const tokenParts = token.split('.');if (tokenParts.length !== 3) {return false;
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        return false;
       }
 
       // Decode JWT payload (without verification - just for timing check)
@@ -517,7 +569,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       if (!payloadPart) {
         return false;
       }
-      const base64Payload = payloadPart.replace(/-/g, '+').replace(/_/g, '/');const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString('utf8'),) as StandardJwtPayload;const currentTime = Math.floor(Date.now() / 1000);
+      const base64Payload = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(
+        Buffer.from(base64Payload, 'base64').toString('utf8'),
+      ) as StandardJwtPayload;
+      const currentTime = Math.floor(Date.now() / 1000);
       const tokenIssuedAt = payload.iat;
       const tokenExpiry = payload.exp;
 
@@ -534,7 +590,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     } catch (_error) {
       // If we can't decode the token, let the main JWT validation handle it
       this.logger.debug(
-        `[${operationId}] Could not decode JWT for replay check: ${_error instanceof Error ? _error.message : String(_error)}`,);}
+        `[${operationId}] Could not decode JWT for replay check: ${_error instanceof Error ? _error.message : String(_error)}`,
+      );
+    }
 
     return false;
   }

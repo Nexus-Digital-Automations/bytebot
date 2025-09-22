@@ -133,14 +133,38 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
 
   constructor(private readonly configService: ConfigService) {
     this.config = {
-      enableRetry: this.configService.get<boolean>('ERROR_HANDLING_ENABLE_RETRY', true),
-      maxRetryAttempts: this.configService.get<number>('ERROR_HANDLING_MAX_RETRY_ATTEMPTS', 3),
-      retryDelay: this.configService.get<number>('ERROR_HANDLING_RETRY_DELAY', 1000),
-      timeoutDuration: this.configService.get<number>('ERROR_HANDLING_TIMEOUT', 30000),
-      enableCircuitBreaker: this.configService.get<boolean>('ERROR_HANDLING_CIRCUIT_BREAKER', true),
-      includeStackTrace: this.configService.get<boolean>('ERROR_HANDLING_INCLUDE_STACK', false),
-      logSensitiveData: this.configService.get<boolean>('ERROR_HANDLING_LOG_SENSITIVE', false),
-      enableRecovery: this.configService.get<boolean>('ERROR_HANDLING_ENABLE_RECOVERY', true),
+      enableRetry: this.configService.get<boolean>(
+        'ERROR_HANDLING_ENABLE_RETRY',
+        true,
+      ),
+      maxRetryAttempts: this.configService.get<number>(
+        'ERROR_HANDLING_MAX_RETRY_ATTEMPTS',
+        3,
+      ),
+      retryDelay: this.configService.get<number>(
+        'ERROR_HANDLING_RETRY_DELAY',
+        1000,
+      ),
+      timeoutDuration: this.configService.get<number>(
+        'ERROR_HANDLING_TIMEOUT',
+        30000,
+      ),
+      enableCircuitBreaker: this.configService.get<boolean>(
+        'ERROR_HANDLING_CIRCUIT_BREAKER',
+        true,
+      ),
+      includeStackTrace: this.configService.get<boolean>(
+        'ERROR_HANDLING_INCLUDE_STACK',
+        false,
+      ),
+      logSensitiveData: this.configService.get<boolean>(
+        'ERROR_HANDLING_LOG_SENSITIVE',
+        false,
+      ),
+      enableRecovery: this.configService.get<boolean>(
+        'ERROR_HANDLING_ENABLE_RECOVERY',
+        true,
+      ),
     };
 
     this.logger.log('Error Handling Interceptor initialized');
@@ -176,10 +200,12 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
           retryCount++;
           if (this.shouldRetry(error)) {
             this.logger.warn(
-              `Retrying request ${requestId} (attempt ${retryCount}/${this.config.maxRetryAttempts}): ${error.message}`
+              `Retrying request ${requestId} (attempt ${retryCount}/${this.config.maxRetryAttempts}): ${error.message}`,
             );
             return of(null).pipe(
-              tap(() => setTimeout(() => {}, this.config.retryDelay * retryCount))
+              tap(() =>
+                setTimeout(() => {}, this.config.retryDelay * retryCount),
+              ),
             );
           }
           return throwError(() => error);
@@ -195,7 +221,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
           error,
           request.errorContext,
           processingTime,
-          retryCount
+          retryCount,
         );
 
         // Log the error
@@ -203,18 +229,24 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
 
         // Apply recovery strategies if enabled
         if (this.config.enableRecovery) {
-          const recoveryResult = this.applyRecoveryStrategy(error, standardizedError);
+          const recoveryResult = this.applyRecoveryStrategy(
+            error,
+            standardizedError,
+          );
           if (recoveryResult) {
             return recoveryResult;
           }
         }
 
         // Return standardized error response
-        return throwError(() => new HttpException(
-          standardizedError,
-          this.getHttpStatusFromError(error)
-        ));
-      })
+        return throwError(
+          () =>
+            new HttpException(
+              standardizedError,
+              this.getHttpStatusFromError(error),
+            ),
+        );
+      }),
     );
   }
 
@@ -225,7 +257,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     error: any,
     context: any,
     processingTime: number,
-    retryCount: number
+    retryCount: number,
   ): StandardizedErrorResponse {
     const errorType = this.classifyError(error);
     const severity = this.assessSeverity(error, errorType);
@@ -235,7 +267,9 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
       success: false,
       error: {
         code: this.getErrorCode(error),
-        message: this.sanitizeErrorMessage(error.message || 'An unexpected error occurred'),
+        message: this.sanitizeErrorMessage(
+          error.message || 'An unexpected error occurred',
+        ),
         type: errorType,
         severity,
         timestamp: new Date().toISOString(),
@@ -285,7 +319,10 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     const errorCode = error.code || '';
 
     // Network and connectivity errors
-    if (this.retryableErrors.has(errorCode) || errorMessage.includes('network')) {
+    if (
+      this.retryableErrors.has(errorCode) ||
+      errorMessage.includes('network')
+    ) {
       return ErrorType.NETWORK;
     }
 
@@ -295,24 +332,38 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     }
 
     // Rate limiting errors
-    if (errorMessage.includes('rate limit') || errorMessage.includes('too many requests')) {
+    if (
+      errorMessage.includes('rate limit') ||
+      errorMessage.includes('too many requests')
+    ) {
       return ErrorType.RATE_LIMIT;
     }
 
     // Security violations
-    if (errorMessage.includes('security') || errorMessage.includes('violation') ||
-        errorMessage.includes('suspicious') || errorMessage.includes('injection')) {
+    if (
+      errorMessage.includes('security') ||
+      errorMessage.includes('violation') ||
+      errorMessage.includes('suspicious') ||
+      errorMessage.includes('injection')
+    ) {
       return ErrorType.SECURITY;
     }
 
     // Browser automation specific errors
-    if (errorMessage.includes('browser') || errorMessage.includes('puppeteer') ||
-        errorMessage.includes('playwright') || errorMessage.includes('selenium')) {
+    if (
+      errorMessage.includes('browser') ||
+      errorMessage.includes('puppeteer') ||
+      errorMessage.includes('playwright') ||
+      errorMessage.includes('selenium')
+    ) {
       return ErrorType.BROWSER_AUTOMATION;
     }
 
     // Session management errors
-    if (errorMessage.includes('session') || errorMessage.includes('authentication expired')) {
+    if (
+      errorMessage.includes('session') ||
+      errorMessage.includes('authentication expired')
+    ) {
       return ErrorType.SESSION_MANAGEMENT;
     }
 
@@ -325,25 +376,31 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
    */
   private assessSeverity(error: any, errorType: ErrorType): ErrorSeverity {
     // Critical errors
-    if (errorType === ErrorType.SECURITY ||
-        error instanceof InternalServerErrorException ||
-        error.message?.includes('critical')) {
+    if (
+      errorType === ErrorType.SECURITY ||
+      error instanceof InternalServerErrorException ||
+      error.message?.includes('critical')
+    ) {
       return ErrorSeverity.CRITICAL;
     }
 
     // High severity errors
-    if (errorType === ErrorType.AUTHENTICATION ||
-        errorType === ErrorType.AUTHORIZATION ||
-        errorType === ErrorType.SYSTEM ||
-        error.status >= 500) {
+    if (
+      errorType === ErrorType.AUTHENTICATION ||
+      errorType === ErrorType.AUTHORIZATION ||
+      errorType === ErrorType.SYSTEM ||
+      error.status >= 500
+    ) {
       return ErrorSeverity.HIGH;
     }
 
     // Medium severity errors
-    if (errorType === ErrorType.BUSINESS_LOGIC ||
-        errorType === ErrorType.RATE_LIMIT ||
-        errorType === ErrorType.TIMEOUT ||
-        error.status >= 400) {
+    if (
+      errorType === ErrorType.BUSINESS_LOGIC ||
+      errorType === ErrorType.RATE_LIMIT ||
+      errorType === ErrorType.TIMEOUT ||
+      error.status >= 400
+    ) {
       return ErrorSeverity.MEDIUM;
     }
 
@@ -368,22 +425,46 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
         actions.push('validate_input', 'check_request_format');
         break;
       case ErrorType.NETWORK:
-        actions.push('check_connectivity', 'retry_request', 'use_fallback_endpoint');
+        actions.push(
+          'check_connectivity',
+          'retry_request',
+          'use_fallback_endpoint',
+        );
         break;
       case ErrorType.TIMEOUT:
-        actions.push('retry_with_backoff', 'increase_timeout', 'check_system_load');
+        actions.push(
+          'retry_with_backoff',
+          'increase_timeout',
+          'check_system_load',
+        );
         break;
       case ErrorType.RATE_LIMIT:
-        actions.push('wait_and_retry', 'implement_backoff', 'check_rate_limits');
+        actions.push(
+          'wait_and_retry',
+          'implement_backoff',
+          'check_rate_limits',
+        );
         break;
       case ErrorType.BROWSER_AUTOMATION:
-        actions.push('restart_browser_session', 'check_browser_health', 'fallback_to_api');
+        actions.push(
+          'restart_browser_session',
+          'check_browser_health',
+          'fallback_to_api',
+        );
         break;
       case ErrorType.SESSION_MANAGEMENT:
-        actions.push('refresh_session', 'recreate_session', 'cleanup_stale_sessions');
+        actions.push(
+          'refresh_session',
+          'recreate_session',
+          'cleanup_stale_sessions',
+        );
         break;
       case ErrorType.SECURITY:
-        actions.push('security_review', 'contact_security_team', 'audit_request');
+        actions.push(
+          'security_review',
+          'contact_security_team',
+          'audit_request',
+        );
         break;
       default:
         actions.push('retry_request', 'contact_support');
@@ -395,12 +476,18 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
   /**
    * Apply recovery strategy
    */
-  private applyRecoveryStrategy(error: any, standardizedError: StandardizedErrorResponse): Observable<any> | null {
+  private applyRecoveryStrategy(
+    error: any,
+    standardizedError: StandardizedErrorResponse,
+  ): Observable<any> | null {
     const errorType = standardizedError.error.type;
     const severity = standardizedError.error.severity;
 
     // Don't attempt recovery for critical security errors
-    if (errorType === ErrorType.SECURITY && severity === ErrorSeverity.CRITICAL) {
+    if (
+      errorType === ErrorType.SECURITY &&
+      severity === ErrorSeverity.CRITICAL
+    ) {
       return null;
     }
 
@@ -425,30 +512,42 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
   /**
    * Attempt session recovery
    */
-  private attemptSessionRecovery(errorResponse: StandardizedErrorResponse): Observable<any> | null {
+  private attemptSessionRecovery(
+    errorResponse: StandardizedErrorResponse,
+  ): Observable<any> | null {
     // In a real implementation, this would attempt to refresh the session
     // For now, return null to indicate no recovery available
-    this.logger.warn(`Session recovery attempted for request ${errorResponse.error.requestId}`);
+    this.logger.warn(
+      `Session recovery attempted for request ${errorResponse.error.requestId}`,
+    );
     return null;
   }
 
   /**
    * Attempt browser recovery
    */
-  private attemptBrowserRecovery(errorResponse: StandardizedErrorResponse): Observable<any> | null {
+  private attemptBrowserRecovery(
+    errorResponse: StandardizedErrorResponse,
+  ): Observable<any> | null {
     // In a real implementation, this would attempt to restart the browser session
     // For now, return null to indicate no recovery available
-    this.logger.warn(`Browser recovery attempted for request ${errorResponse.error.requestId}`);
+    this.logger.warn(
+      `Browser recovery attempted for request ${errorResponse.error.requestId}`,
+    );
     return null;
   }
 
   /**
    * Handle rate limit recovery
    */
-  private handleRateLimitRecovery(errorResponse: StandardizedErrorResponse): Observable<any> | null {
+  private handleRateLimitRecovery(
+    errorResponse: StandardizedErrorResponse,
+  ): Observable<any> | null {
     // Add retry-after header information
     errorResponse.error.retryAfter = 60; // 60 seconds
-    this.logger.warn(`Rate limit recovery for request ${errorResponse.error.requestId}: retry after 60 seconds`);
+    this.logger.warn(
+      `Rate limit recovery for request ${errorResponse.error.requestId}: retry after 60 seconds`,
+    );
     return null;
   }
 
@@ -461,7 +560,10 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     }
 
     // Don't retry authentication/authorization errors
-    if (error instanceof UnauthorizedException || error instanceof ForbiddenException) {
+    if (
+      error instanceof UnauthorizedException ||
+      error instanceof ForbiddenException
+    ) {
       return false;
     }
 
@@ -476,10 +578,12 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
     }
 
     // Retry network and transient errors
-    return this.retryableErrors.has(error.code) ||
-           error.message?.includes('timeout') ||
-           error.message?.includes('network') ||
-           error.status >= 500;
+    return (
+      this.retryableErrors.has(error.code) ||
+      error.message?.includes('timeout') ||
+      error.message?.includes('network') ||
+      error.status >= 500
+    );
   }
 
   /**
@@ -533,7 +637,10 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
   /**
    * Get retry-after seconds based on error
    */
-  private getRetryAfter(error: any, severity: ErrorSeverity): number | undefined {
+  private getRetryAfter(
+    error: any,
+    severity: ErrorSeverity,
+  ): number | undefined {
     // Rate limit errors typically include retry-after
     if (error.headers?.['retry-after']) {
       return parseInt(error.headers['retry-after'], 10);
@@ -607,13 +714,22 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
         this.logger.error(`Critical error: ${error.error.message}`, logContext);
         break;
       case ErrorSeverity.HIGH:
-        this.logger.error(`High severity error: ${error.error.message}`, logContext);
+        this.logger.error(
+          `High severity error: ${error.error.message}`,
+          logContext,
+        );
         break;
       case ErrorSeverity.MEDIUM:
-        this.logger.warn(`Medium severity error: ${error.error.message}`, logContext);
+        this.logger.warn(
+          `Medium severity error: ${error.error.message}`,
+          logContext,
+        );
         break;
       case ErrorSeverity.LOW:
-        this.logger.debug(`Low severity error: ${error.error.message}`, logContext);
+        this.logger.debug(
+          `Low severity error: ${error.error.message}`,
+          logContext,
+        );
         break;
       default:
         this.logger.log(`Error: ${error.error.message}`, logContext);

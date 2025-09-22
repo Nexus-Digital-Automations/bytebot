@@ -70,7 +70,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
   constructor(
     private url: string,
     clientIdentifier: string,
-    private options: ProtocolTestOptions = {}
+    private options: ProtocolTestOptions = {},
   ) {
     super();
     this.clientId = `protocol_client_${clientIdentifier}`;
@@ -116,7 +116,10 @@ class ProtocolComplianceTestClient extends EventEmitter {
     return new Promise((resolve, reject) => {
       try {
         // Record initial connection state
-        this.recordConnectionState('CONNECTING', 'Initiating WebSocket connection');
+        this.recordConnectionState(
+          'CONNECTING',
+          'Initiating WebSocket connection',
+        );
 
         this.ws = new WebSocket.WebSocket(this.url, this.options.subprotocols, {
           headers: {
@@ -125,7 +128,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
             'X-Session-ID': this.sessionId,
             'X-Protocol-Test': 'compliance-validation',
             'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
+            Pragma: 'no-cache',
             ...(this.options.headers || {}),
           },
           // Enable compression for testing
@@ -140,12 +143,16 @@ class ProtocolComplianceTestClient extends EventEmitter {
         this.ws.on('open', () => {
           this.connected = true;
           this.protocolMetrics.successfulConnections++;
-          this.protocolMetrics.handshakeTime = performance.now() - connectionStartTime;
+          this.protocolMetrics.handshakeTime =
+            performance.now() - connectionStartTime;
 
           // Validate WebSocket handshake
           this.validateWebSocketHandshake();
 
-          this.recordConnectionState('CONNECTED', 'WebSocket connection established');
+          this.recordConnectionState(
+            'CONNECTED',
+            'WebSocket connection established',
+          );
 
           this.emit('connected', {
             clientId: this.clientId,
@@ -177,7 +184,10 @@ class ProtocolComplianceTestClient extends EventEmitter {
         this.ws.on('error', (error: Error) => {
           this.protocolMetrics.protocolErrors++;
           this.recordProtocolViolation('CONNECTION_ERROR', error.message);
-          this.recordConnectionState('ERROR', `Connection error: ${error.message}`);
+          this.recordConnectionState(
+            'ERROR',
+            `Connection error: ${error.message}`,
+          );
 
           this.emit('error', { clientId: this.clientId, error });
 
@@ -194,7 +204,10 @@ class ProtocolComplianceTestClient extends EventEmitter {
           // Validate close code compliance
           this.validateCloseCode(code, reasonString);
 
-          this.recordConnectionState('DISCONNECTED', `Connection closed: ${code} - ${reasonString}`);
+          this.recordConnectionState(
+            'DISCONNECTED',
+            `Connection closed: ${code} - ${reasonString}`,
+          );
 
           this.emit('disconnected', {
             clientId: this.clientId,
@@ -208,10 +221,9 @@ class ProtocolComplianceTestClient extends EventEmitter {
         this.ws.on('unexpected-response', (request, response) => {
           this.recordProtocolViolation(
             'UNEXPECTED_RESPONSE',
-            `Unexpected response: ${response.statusCode} ${response.statusMessage}`
+            `Unexpected response: ${response.statusCode} ${response.statusMessage}`,
           );
         });
-
       } catch (error) {
         this.protocolMetrics.connectionFailures++;
         reject(error);
@@ -232,14 +244,15 @@ class ProtocolComplianceTestClient extends EventEmitter {
       const extensions = (this.ws as any).extensions;
       if (extensions) {
         this.protocolMetrics.extensionsNegotiated = Object.keys(extensions);
-        this.protocolMetrics.compressionSupported = 'permessage-deflate' in extensions;
+        this.protocolMetrics.compressionSupported =
+          'permessage-deflate' in extensions;
       }
 
       // Validate ready state
       if (this.ws.readyState !== WebSocket.WebSocket.OPEN) {
         this.recordProtocolViolation(
           'INVALID_READY_STATE',
-          `Expected OPEN (1), got ${this.ws.readyState}`
+          `Expected OPEN (1), got ${this.ws.readyState}`,
         );
       }
     }
@@ -258,7 +271,10 @@ class ProtocolComplianceTestClient extends EventEmitter {
 
       // Validate message format
       if (!this.validateMessageFormat(rawMessage)) {
-        this.recordProtocolViolation('INVALID_MESSAGE_FORMAT', 'Message failed format validation');
+        this.recordProtocolViolation(
+          'INVALID_MESSAGE_FORMAT',
+          'Message failed format validation',
+        );
         return;
       }
 
@@ -282,7 +298,6 @@ class ProtocolComplianceTestClient extends EventEmitter {
         protocolCompliant: true,
         receiveTime,
       });
-
     } catch (error) {
       this.protocolMetrics.protocolErrors++;
       this.recordProtocolViolation('MESSAGE_PARSE_ERROR', String(error));
@@ -295,7 +310,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
    */
   async sendMessageWithDeliveryGuarantee(
     message: Partial<ConversationalMessage>,
-    deliveryOptions: MessageDeliveryOptions = {}
+    deliveryOptions: MessageDeliveryOptions = {},
   ): Promise<MessageDeliveryResult> {
     if (!this.ws || !this.connected) {
       throw new Error(`WebSocket not connected for client ${this.clientId}`);
@@ -353,7 +368,12 @@ class ProtocolComplianceTestClient extends EventEmitter {
 
           // Set up acknowledgment handling if required
           if (deliveryOptions.requiresAcknowledgment !== false) {
-            this.setupAcknowledgmentTracking(messageId, deliveryOptions, resolve, reject);
+            this.setupAcknowledgmentTracking(
+              messageId,
+              deliveryOptions,
+              resolve,
+              reject,
+            );
           } else {
             resolve(deliveryResult);
           }
@@ -369,7 +389,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
     messageId: string,
     options: MessageDeliveryOptions,
     resolve: (result: MessageDeliveryResult) => void,
-    reject: (error: Error) => void
+    reject: (error: Error) => void,
   ): void {
     const timeout = options.timeout || 5000;
     const maxRetries = options.maxRetries || 3;
@@ -402,7 +422,11 @@ class ProtocolComplianceTestClient extends EventEmitter {
         this.setupAcknowledgmentTracking(messageId, options, resolve, reject);
       } else {
         this.removeListener('acknowledgment', ackHandler);
-        reject(new Error(`Acknowledgment timeout for message ${messageId} after ${retries} retries`));
+        reject(
+          new Error(
+            `Acknowledgment timeout for message ${messageId} after ${retries} retries`,
+          ),
+        );
       }
     }, timeout);
 
@@ -455,7 +479,12 @@ class ProtocolComplianceTestClient extends EventEmitter {
       },
       violations: this.protocolViolations,
       deliveryMetrics: this.messageDeliveryTracker,
-      overallCompliance: complianceScore >= 0.95 ? 'FULLY_COMPLIANT' : complianceScore >= 0.85 ? 'MOSTLY_COMPLIANT' : 'NON_COMPLIANT',
+      overallCompliance:
+        complianceScore >= 0.95
+          ? 'FULLY_COMPLIANT'
+          : complianceScore >= 0.85
+            ? 'MOSTLY_COMPLIANT'
+            : 'NON_COMPLIANT',
     };
   }
 
@@ -474,7 +503,8 @@ class ProtocolComplianceTestClient extends EventEmitter {
         },
       };
 
-      const deliveryResult = await this.sendMessageWithDeliveryGuarantee(testMessage);
+      const deliveryResult =
+        await this.sendMessageWithDeliveryGuarantee(testMessage);
 
       return {
         testName: 'basic_message_exchange',
@@ -488,14 +518,20 @@ class ProtocolComplianceTestClient extends EventEmitter {
         },
         violations: [],
       };
-
     } catch (error) {
       return {
         testName: 'basic_message_exchange',
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'TEST_EXECUTION_ERROR', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
+        violations: [
+          {
+            type: 'TEST_EXECUTION_ERROR',
+            description: String(error),
+            timestamp: Date.now(),
+            severity: 'HIGH',
+          },
+        ],
       };
     }
   }
@@ -544,16 +580,31 @@ class ProtocolComplianceTestClient extends EventEmitter {
           pingDataSize: pingData.length,
           pongDataSize: pongData?.length || 0,
         },
-        violations: pongReceived ? [] : [{ type: 'PING_PONG_FAILURE', description: 'Pong not received', timestamp: Date.now(), severity: 'MEDIUM' }],
+        violations: pongReceived
+          ? []
+          : [
+              {
+                type: 'PING_PONG_FAILURE',
+                description: 'Pong not received',
+                timestamp: Date.now(),
+                severity: 'MEDIUM',
+              },
+            ],
       };
-
     } catch (error) {
       return {
         testName: 'ping_pong_protocol',
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'PING_PONG_ERROR', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
+        violations: [
+          {
+            type: 'PING_PONG_ERROR',
+            description: String(error),
+            timestamp: Date.now(),
+            severity: 'HIGH',
+          },
+        ],
       };
     }
   }
@@ -578,24 +629,30 @@ class ProtocolComplianceTestClient extends EventEmitter {
           },
         };
 
-        const deliveryResult = await this.sendMessageWithDeliveryGuarantee(testMessage, {
-          guaranteeLevel: 'at-least-once',
-          requiresAcknowledgment: true,
-          timeout: 3000,
-          maxRetries: 2,
-        });
+        const deliveryResult = await this.sendMessageWithDeliveryGuarantee(
+          testMessage,
+          {
+            guaranteeLevel: 'at-least-once',
+            requiresAcknowledgment: true,
+            timeout: 3000,
+            maxRetries: 2,
+          },
+        );
 
         deliveryResults.push(deliveryResult);
 
         // Small delay between messages
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      const successfulDeliveries = deliveryResults.filter(result => result.sent && result.acknowledged);
+      const successfulDeliveries = deliveryResults.filter(
+        (result) => result.sent && result.acknowledged,
+      );
       const deliverySuccessRate = successfulDeliveries.length / messageCount;
 
       this.messageDeliveryTracker.deliverySuccessRate = deliverySuccessRate;
-      this.messageDeliveryTracker.acknowledgmentSuccessRate = deliverySuccessRate;
+      this.messageDeliveryTracker.acknowledgmentSuccessRate =
+        deliverySuccessRate;
 
       return {
         testName: 'message_delivery_guarantees',
@@ -605,19 +662,43 @@ class ProtocolComplianceTestClient extends EventEmitter {
           messagesSent: messageCount,
           successfulDeliveries: successfulDeliveries.length,
           deliverySuccessRate,
-          averageDeliveryTime: successfulDeliveries.reduce((sum, result) => sum + (result.sendTime || 0), 0) / successfulDeliveries.length,
-          averageAckTime: successfulDeliveries.reduce((sum, result) => sum + (result.acknowledgmentTime || 0), 0) / successfulDeliveries.length,
+          averageDeliveryTime:
+            successfulDeliveries.reduce(
+              (sum, result) => sum + (result.sendTime || 0),
+              0,
+            ) / successfulDeliveries.length,
+          averageAckTime:
+            successfulDeliveries.reduce(
+              (sum, result) => sum + (result.acknowledgmentTime || 0),
+              0,
+            ) / successfulDeliveries.length,
         },
-        violations: deliverySuccessRate < 0.95 ? [{ type: 'DELIVERY_GUARANTEE_FAILURE', description: `Only ${(deliverySuccessRate * 100).toFixed(1)}% delivery success rate`, timestamp: Date.now(), severity: 'HIGH' }] : [],
+        violations:
+          deliverySuccessRate < 0.95
+            ? [
+                {
+                  type: 'DELIVERY_GUARANTEE_FAILURE',
+                  description: `Only ${(deliverySuccessRate * 100).toFixed(1)}% delivery success rate`,
+                  timestamp: Date.now(),
+                  severity: 'HIGH',
+                },
+              ]
+            : [],
       };
-
     } catch (error) {
       return {
         testName: 'message_delivery_guarantees',
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'DELIVERY_TEST_ERROR', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
+        violations: [
+          {
+            type: 'DELIVERY_TEST_ERROR',
+            description: String(error),
+            timestamp: Date.now(),
+            severity: 'HIGH',
+          },
+        ],
       };
     }
   }
@@ -645,7 +726,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
       }
 
       // Wait for error handling
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       return {
         testName: 'error_handling',
@@ -658,14 +739,20 @@ class ProtocolComplianceTestClient extends EventEmitter {
         },
         violations: [],
       };
-
     } catch (error) {
       return {
         testName: 'error_handling',
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'ERROR_HANDLING_FAILURE', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
+        violations: [
+          {
+            type: 'ERROR_HANDLING_FAILURE',
+            description: String(error),
+            timestamp: Date.now(),
+            severity: 'HIGH',
+          },
+        ],
       };
     }
   }
@@ -683,7 +770,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
       const connectionOpen = initialState === WebSocket.WebSocket.OPEN;
 
       // Test connection stability
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const finalState = this.ws?.readyState;
       const connectionStable = finalState === WebSocket.WebSocket.OPEN;
@@ -699,16 +786,31 @@ class ProtocolComplianceTestClient extends EventEmitter {
           connectionStable,
           stateHistory: this.connectionStateHistory.slice(-5), // Last 5 states
         },
-        violations: connectionStable ? [] : [{ type: 'CONNECTION_INSTABILITY', description: 'Connection state changed unexpectedly', timestamp: Date.now(), severity: 'MEDIUM' }],
+        violations: connectionStable
+          ? []
+          : [
+              {
+                type: 'CONNECTION_INSTABILITY',
+                description: 'Connection state changed unexpectedly',
+                timestamp: Date.now(),
+                severity: 'MEDIUM',
+              },
+            ],
       };
-
     } catch (error) {
       return {
         testName: 'connection_lifecycle',
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'LIFECYCLE_TEST_ERROR', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
+        violations: [
+          {
+            type: 'LIFECYCLE_TEST_ERROR',
+            description: String(error),
+            timestamp: Date.now(),
+            severity: 'HIGH',
+          },
+        ],
       };
     }
   }
@@ -721,32 +823,53 @@ class ProtocolComplianceTestClient extends EventEmitter {
       const message = JSON.parse(rawMessage);
 
       // Required fields check
-      const requiredFields = ['type', 'messageId', 'sessionId', 'timestamp', 'sequence', 'payload'];
+      const requiredFields = [
+        'type',
+        'messageId',
+        'sessionId',
+        'timestamp',
+        'sequence',
+        'payload',
+      ];
       for (const field of requiredFields) {
         if (!(field in message)) {
-          this.recordProtocolViolation('MISSING_REQUIRED_FIELD', `Missing field: ${field}`);
+          this.recordProtocolViolation(
+            'MISSING_REQUIRED_FIELD',
+            `Missing field: ${field}`,
+          );
           return false;
         }
       }
 
       // Type validation
-      if (typeof message.messageId !== 'string' || message.messageId.length === 0) {
-        this.recordProtocolViolation('INVALID_MESSAGE_ID', 'MessageId must be non-empty string');
+      if (
+        typeof message.messageId !== 'string' ||
+        message.messageId.length === 0
+      ) {
+        this.recordProtocolViolation(
+          'INVALID_MESSAGE_ID',
+          'MessageId must be non-empty string',
+        );
         return false;
       }
 
       if (typeof message.timestamp !== 'number' || message.timestamp <= 0) {
-        this.recordProtocolViolation('INVALID_TIMESTAMP', 'Timestamp must be positive number');
+        this.recordProtocolViolation(
+          'INVALID_TIMESTAMP',
+          'Timestamp must be positive number',
+        );
         return false;
       }
 
       if (typeof message.sequence !== 'number' || message.sequence < 0) {
-        this.recordProtocolViolation('INVALID_SEQUENCE', 'Sequence must be non-negative number');
+        this.recordProtocolViolation(
+          'INVALID_SEQUENCE',
+          'Sequence must be non-negative number',
+        );
         return false;
       }
 
       return true;
-
     } catch (error) {
       this.recordProtocolViolation('INVALID_JSON', 'Message is not valid JSON');
       return false;
@@ -760,18 +883,27 @@ class ProtocolComplianceTestClient extends EventEmitter {
     // Check timestamp freshness (not older than 1 minute)
     const messageAge = Date.now() - message.timestamp;
     if (messageAge > 60000) {
-      this.recordProtocolViolation('STALE_MESSAGE', `Message age: ${messageAge}ms`);
+      this.recordProtocolViolation(
+        'STALE_MESSAGE',
+        `Message age: ${messageAge}ms`,
+      );
     }
 
     // Check sequence ordering
     if (message.sequence <= this.messageSequence - 1) {
-      this.recordProtocolViolation('OUT_OF_ORDER_MESSAGE', `Expected sequence > ${this.messageSequence - 1}, got ${message.sequence}`);
+      this.recordProtocolViolation(
+        'OUT_OF_ORDER_MESSAGE',
+        `Expected sequence > ${this.messageSequence - 1}, got ${message.sequence}`,
+      );
       this.messageDeliveryTracker.outOfOrderMessages++;
     }
 
     // Validate message type
     if (!Object.values(ConversationalMessageType).includes(message.type)) {
-      this.recordProtocolViolation('INVALID_MESSAGE_TYPE', `Unknown message type: ${message.type}`);
+      this.recordProtocolViolation(
+        'INVALID_MESSAGE_TYPE',
+        `Unknown message type: ${message.type}`,
+      );
     }
 
     // Validate payload structure
@@ -781,8 +913,16 @@ class ProtocolComplianceTestClient extends EventEmitter {
 
     // Validate metadata if present
     if (message.metadata) {
-      if (!message.metadata.priority || !['low', 'normal', 'high', 'critical'].includes(message.metadata.priority)) {
-        this.recordProtocolViolation('INVALID_PRIORITY', `Invalid priority: ${message.metadata.priority}`);
+      if (
+        !message.metadata.priority ||
+        !['low', 'normal', 'high', 'critical'].includes(
+          message.metadata.priority,
+        )
+      ) {
+        this.recordProtocolViolation(
+          'INVALID_PRIORITY',
+          `Invalid priority: ${message.metadata.priority}`,
+        );
       }
     }
   }
@@ -794,9 +934,15 @@ class ProtocolComplianceTestClient extends EventEmitter {
     const messageKey = `${message.messageId}_${message.timestamp}`;
 
     if (this.duplicateDetection.has(messageKey)) {
-      this.duplicateDetection.set(messageKey, this.duplicateDetection.get(messageKey)! + 1);
+      this.duplicateDetection.set(
+        messageKey,
+        this.duplicateDetection.get(messageKey)! + 1,
+      );
       this.messageDeliveryTracker.duplicatesDetected++;
-      this.recordProtocolViolation('DUPLICATE_MESSAGE', `Duplicate message: ${message.messageId}`);
+      this.recordProtocolViolation(
+        'DUPLICATE_MESSAGE',
+        `Duplicate message: ${message.messageId}`,
+      );
     } else {
       this.duplicateDetection.set(messageKey, 1);
     }
@@ -838,7 +984,10 @@ class ProtocolComplianceTestClient extends EventEmitter {
   /**
    * Record sent message
    */
-  private recordSentMessage(message: ConversationalMessage, timestamp: number): void {
+  private recordSentMessage(
+    message: ConversationalMessage,
+    timestamp: number,
+  ): void {
     this.sentMessages.set(message.messageId, {
       messageId: message.messageId,
       type: message.type,
@@ -852,7 +1001,10 @@ class ProtocolComplianceTestClient extends EventEmitter {
   /**
    * Record received message
    */
-  private recordReceivedMessage(message: ConversationalMessage, timestamp: number): void {
+  private recordReceivedMessage(
+    message: ConversationalMessage,
+    timestamp: number,
+  ): void {
     this.receivedMessages.set(message.messageId, {
       messageId: message.messageId,
       type: message.type,
@@ -895,16 +1047,19 @@ class ProtocolComplianceTestClient extends EventEmitter {
   /**
    * Get violation severity
    */
-  private getViolationSeverity(type: string): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const severityMap: Record<string, 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'> = {
-      'INVALID_MESSAGE_FORMAT': 'HIGH',
-      'DUPLICATE_MESSAGE': 'MEDIUM',
-      'OUT_OF_ORDER_MESSAGE': 'MEDIUM',
-      'STALE_MESSAGE': 'LOW',
-      'CONNECTION_ERROR': 'CRITICAL',
-      'PROTOCOL_ERROR': 'HIGH',
-      'INVALID_CLOSE_CODE': 'MEDIUM',
-    };
+  private getViolationSeverity(
+    type: string,
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+    const severityMap: Record<string, 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'> =
+      {
+        INVALID_MESSAGE_FORMAT: 'HIGH',
+        DUPLICATE_MESSAGE: 'MEDIUM',
+        OUT_OF_ORDER_MESSAGE: 'MEDIUM',
+        STALE_MESSAGE: 'LOW',
+        CONNECTION_ERROR: 'CRITICAL',
+        PROTOCOL_ERROR: 'HIGH',
+        INVALID_CLOSE_CODE: 'MEDIUM',
+      };
 
     return severityMap[type] || 'MEDIUM';
   }
@@ -914,7 +1069,10 @@ class ProtocolComplianceTestClient extends EventEmitter {
    */
   private validateCloseCode(code: number, reason: string): void {
     if (!this.isValidCloseCode(code)) {
-      this.recordProtocolViolation('INVALID_CLOSE_CODE', `Invalid close code: ${code} - ${reason}`);
+      this.recordProtocolViolation(
+        'INVALID_CLOSE_CODE',
+        `Invalid close code: ${code} - ${reason}`,
+      );
     }
   }
 
@@ -946,11 +1104,21 @@ class ProtocolComplianceTestClient extends EventEmitter {
    * Validate overall protocol compliance
    */
   private validateProtocolCompliance(): ProtocolComplianceValidation {
-    const criticalViolations = this.protocolViolations.filter(v => v.severity === 'CRITICAL').length;
-    const highViolations = this.protocolViolations.filter(v => v.severity === 'HIGH').length;
+    const criticalViolations = this.protocolViolations.filter(
+      (v) => v.severity === 'CRITICAL',
+    ).length;
+    const highViolations = this.protocolViolations.filter(
+      (v) => v.severity === 'HIGH',
+    ).length;
     const totalViolations = this.protocolViolations.length;
 
-    const complianceScore = Math.max(0, 1 - (criticalViolations * 0.5 + highViolations * 0.2 + totalViolations * 0.05));
+    const complianceScore = Math.max(
+      0,
+      1 -
+        (criticalViolations * 0.5 +
+          highViolations * 0.2 +
+          totalViolations * 0.05),
+    );
 
     return {
       compliant: complianceScore >= 0.95,
@@ -971,7 +1139,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
    * Calculate compliance score from test results
    */
   private calculateComplianceScore(testResults: ProtocolTestResult[]): number {
-    const passedTests = testResults.filter(test => test.passed).length;
+    const passedTests = testResults.filter((test) => test.passed).length;
     return passedTests / testResults.length;
   }
 
@@ -995,10 +1163,12 @@ class ProtocolComplianceTestClient extends EventEmitter {
   getDeliveryMetrics(): MessageDeliveryTracker {
     // Update calculated fields
     this.messageDeliveryTracker.deliverySuccessRate =
-      this.messageDeliveryTracker.messagesReceived / this.messageDeliveryTracker.messagesSent;
+      this.messageDeliveryTracker.messagesReceived /
+      this.messageDeliveryTracker.messagesSent;
 
     this.messageDeliveryTracker.acknowledgmentSuccessRate =
-      this.messageDeliveryTracker.messagesAcknowledged / this.messageDeliveryTracker.messagesSent;
+      this.messageDeliveryTracker.messagesAcknowledged /
+      this.messageDeliveryTracker.messagesSent;
 
     return { ...this.messageDeliveryTracker };
   }
@@ -1183,12 +1353,12 @@ interface ProtocolComplianceTestResult {
 const mockConfigService = {
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8081,
-      'PARLANT_WEBSOCKET_PORT': 8080,
-      'CONVERSATIONAL_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'PARLANT_ALLOWED_ORIGINS': 'http://localhost:3000',
-      'CONVERSATIONAL_REQUIRE_HTTPS': false,
-      'PARLANT_REQUIRE_HTTPS': false,
+      CONVERSATIONAL_WEBSOCKET_PORT: 8081,
+      PARLANT_WEBSOCKET_PORT: 8080,
+      CONVERSATIONAL_ALLOWED_ORIGINS: 'http://localhost:3000',
+      PARLANT_ALLOWED_ORIGINS: 'http://localhost:3000',
+      CONVERSATIONAL_REQUIRE_HTTPS: false,
+      PARLANT_REQUIRE_HTTPS: false,
     };
     return config[key] ?? defaultValue;
   }),
@@ -1218,14 +1388,18 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
       ],
     }).compile();
 
-    conversationalService = module.get<ConversationalWebSocketBridgeService>(ConversationalWebSocketBridgeService);
-    integrationService = module.get<ParlantWebSocketIntegrationService>(ParlantWebSocketIntegrationService);
+    conversationalService = module.get<ConversationalWebSocketBridgeService>(
+      ConversationalWebSocketBridgeService,
+    );
+    integrationService = module.get<ParlantWebSocketIntegrationService>(
+      ParlantWebSocketIntegrationService,
+    );
 
     // Initialize services
     await integrationService.onModuleInit();
 
     // Give services time to start
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   afterAll(async () => {
@@ -1239,7 +1413,10 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
 
   describe('WebSocket RFC 6455 Protocol Compliance Validation', () => {
     it('should establish connection with proper WebSocket handshake', async () => {
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'handshake_test');
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'handshake_test',
+      );
 
       const connectionResult = await client.connect();
 
@@ -1263,9 +1440,13 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
     });
 
     it('should support WebSocket compression extensions', async () => {
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'compression_test', {
-        enableCompression: true,
-      });
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'compression_test',
+        {
+          enableCompression: true,
+        },
+      );
 
       await client.connect();
 
@@ -1278,19 +1459,28 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
     });
 
     it('should handle WebSocket subprotocol negotiation', async () => {
-      const testSubprotocols = ['parlant-v1', 'chat-protocol', 'custom-protocol'];
+      const testSubprotocols = [
+        'parlant-v1',
+        'chat-protocol',
+        'custom-protocol',
+      ];
 
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'subprotocol_test', {
-        subprotocols: testSubprotocols,
-      });
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'subprotocol_test',
+        {
+          subprotocols: testSubprotocols,
+        },
+      );
 
       await client.connect();
 
       const metrics = client.getProtocolMetrics();
 
       // Either no subprotocol negotiated (empty string) or one of the requested ones
-      const validSubprotocol = metrics.subprotocolNegotiated === '' ||
-                               testSubprotocols.includes(metrics.subprotocolNegotiated);
+      const validSubprotocol =
+        metrics.subprotocolNegotiated === '' ||
+        testSubprotocols.includes(metrics.subprotocolNegotiated);
 
       expect(validSubprotocol).toBe(true);
 
@@ -1298,7 +1488,10 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
     });
 
     it('should comply with WebSocket close code standards', async () => {
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'close_code_test');
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'close_code_test',
+      );
 
       await client.connect();
 
@@ -1323,7 +1516,10 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
     let testClient: ProtocolComplianceTestClient;
 
     beforeEach(async () => {
-      testClient = new ProtocolComplianceTestClient(TEST_URL, `delivery_${Date.now()}`);
+      testClient = new ProtocolComplianceTestClient(
+        TEST_URL,
+        `delivery_${Date.now()}`,
+      );
       await testClient.connect();
     });
 
@@ -1346,24 +1542,29 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
           },
         };
 
-        const deliveryResult = await testClient.sendMessageWithDeliveryGuarantee(testMessage, {
-          guaranteeLevel: 'at-least-once',
-          requiresAcknowledgment: true,
-          timeout: 5000,
-          maxRetries: 3,
-        });
+        const deliveryResult =
+          await testClient.sendMessageWithDeliveryGuarantee(testMessage, {
+            guaranteeLevel: 'at-least-once',
+            requiresAcknowledgment: true,
+            timeout: 5000,
+            maxRetries: 3,
+          });
 
         deliveryResults.push(deliveryResult);
 
         // Small delay between messages
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
-      const successfulDeliveries = deliveryResults.filter(result => result.sent && result.acknowledged);
+      const successfulDeliveries = deliveryResults.filter(
+        (result) => result.sent && result.acknowledged,
+      );
       const deliverySuccessRate = successfulDeliveries.length / messageCount;
 
       expect(deliverySuccessRate).toBeGreaterThanOrEqual(0.95); // 95% success rate
-      expect(successfulDeliveries.every(result => result.deliveryConfirmed)).toBe(true);
+      expect(
+        successfulDeliveries.every((result) => result.deliveryConfirmed),
+      ).toBe(true);
 
       const deliveryMetrics = testClient.getDeliveryMetrics();
 
@@ -1390,15 +1591,19 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
       const deliveryPromises = [];
       for (let i = 0; i < 5; i++) {
         deliveryPromises.push(
-          testClient.sendMessageWithDeliveryGuarantee(originalMessage, {
-            requiresAcknowledgment: true,
-            timeout: 3000,
-          }).catch(() => null) // Expect some to fail due to duplication
+          testClient
+            .sendMessageWithDeliveryGuarantee(originalMessage, {
+              requiresAcknowledgment: true,
+              timeout: 3000,
+            })
+            .catch(() => null), // Expect some to fail due to duplication
         );
       }
 
       const results = await Promise.allSettled(deliveryPromises);
-      const successfulResults = results.filter(result => result.status === 'fulfilled' && result.value !== null);
+      const successfulResults = results.filter(
+        (result) => result.status === 'fulfilled' && result.value !== null,
+      );
 
       const deliveryMetrics = testClient.getDeliveryMetrics();
 
@@ -1435,7 +1640,7 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
         sequenceNumbers.push(i + 1);
 
         // Very small delay to maintain sequence
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
       }
 
       const deliveryMetrics = testClient.getDeliveryMetrics();
@@ -1462,12 +1667,15 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
 
       const startTime = performance.now();
 
-      const deliveryResult = await testClient.sendMessageWithDeliveryGuarantee(testMessage, {
-        requiresAcknowledgment: true,
-        timeout: 3000,
-        maxRetries: 2,
-        retryOnTimeout: true,
-      });
+      const deliveryResult = await testClient.sendMessageWithDeliveryGuarantee(
+        testMessage,
+        {
+          requiresAcknowledgment: true,
+          timeout: 3000,
+          maxRetries: 2,
+          retryOnTimeout: true,
+        },
+      );
 
       const totalTime = performance.now() - startTime;
 
@@ -1489,21 +1697,32 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
 
   describe('Comprehensive Protocol Compliance Testing', () => {
     it('should pass comprehensive protocol compliance test suite', async () => {
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'comprehensive_compliance');
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'comprehensive_compliance',
+      );
 
       await client.connect();
 
       const complianceTestResult = await client.performProtocolComplianceTest();
 
       expect(complianceTestResult.complianceScore).toBeGreaterThanOrEqual(0.85); // 85% compliance
-      expect(complianceTestResult.overallCompliance).toMatch(/FULLY_COMPLIANT|MOSTLY_COMPLIANT/);
+      expect(complianceTestResult.overallCompliance).toMatch(
+        /FULLY_COMPLIANT|MOSTLY_COMPLIANT/,
+      );
 
       // Validate individual test results
-      const allTestsPassed = Object.values(complianceTestResult.tests).every(test => test.passed);
-      const criticalViolations = complianceTestResult.violations.filter(v => v.severity === 'CRITICAL');
+      const allTestsPassed = Object.values(complianceTestResult.tests).every(
+        (test) => test.passed,
+      );
+      const criticalViolations = complianceTestResult.violations.filter(
+        (v) => v.severity === 'CRITICAL',
+      );
 
       expect(criticalViolations.length).toBe(0); // No critical violations
-      expect(allTestsPassed || complianceTestResult.complianceScore >= 0.9).toBe(true);
+      expect(
+        allTestsPassed || complianceTestResult.complianceScore >= 0.9,
+      ).toBe(true);
 
       await client.disconnect();
 
@@ -1512,21 +1731,44 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
         complianceScore: `${(complianceTestResult.complianceScore * 100).toFixed(1)}%`,
         testDuration: `${complianceTestResult.testDuration.toFixed(2)}ms`,
         testsResults: {
-          basicMessageExchange: complianceTestResult.tests.basicMessageExchange.passed ? '✓' : '✗',
-          pingPongProtocol: complianceTestResult.tests.pingPongProtocol.passed ? '✓' : '✗',
-          messageDeliveryGuarantees: complianceTestResult.tests.messageDeliveryGuarantees.passed ? '✓' : '✗',
-          errorHandling: complianceTestResult.tests.errorHandling.passed ? '✓' : '✗',
-          connectionLifecycle: complianceTestResult.tests.connectionLifecycle.passed ? '✓' : '✗',
+          basicMessageExchange: complianceTestResult.tests.basicMessageExchange
+            .passed
+            ? '✓'
+            : '✗',
+          pingPongProtocol: complianceTestResult.tests.pingPongProtocol.passed
+            ? '✓'
+            : '✗',
+          messageDeliveryGuarantees: complianceTestResult.tests
+            .messageDeliveryGuarantees.passed
+            ? '✓'
+            : '✗',
+          errorHandling: complianceTestResult.tests.errorHandling.passed
+            ? '✓'
+            : '✗',
+          connectionLifecycle: complianceTestResult.tests.connectionLifecycle
+            .passed
+            ? '✓'
+            : '✗',
         },
         violations: {
           total: complianceTestResult.violations.length,
-          critical: complianceTestResult.violations.filter(v => v.severity === 'CRITICAL').length,
-          high: complianceTestResult.violations.filter(v => v.severity === 'HIGH').length,
-          medium: complianceTestResult.violations.filter(v => v.severity === 'MEDIUM').length,
-          low: complianceTestResult.violations.filter(v => v.severity === 'LOW').length,
+          critical: complianceTestResult.violations.filter(
+            (v) => v.severity === 'CRITICAL',
+          ).length,
+          high: complianceTestResult.violations.filter(
+            (v) => v.severity === 'HIGH',
+          ).length,
+          medium: complianceTestResult.violations.filter(
+            (v) => v.severity === 'MEDIUM',
+          ).length,
+          low: complianceTestResult.violations.filter(
+            (v) => v.severity === 'LOW',
+          ).length,
         },
         deliveryMetrics: {
-          messagesExchanged: complianceTestResult.deliveryMetrics.messagesSent + complianceTestResult.deliveryMetrics.messagesReceived,
+          messagesExchanged:
+            complianceTestResult.deliveryMetrics.messagesSent +
+            complianceTestResult.deliveryMetrics.messagesReceived,
           deliverySuccessRate: `${(complianceTestResult.deliveryMetrics.deliverySuccessRate * 100).toFixed(1)}%`,
           acknowledgmentSuccessRate: `${(complianceTestResult.deliveryMetrics.acknowledgmentSuccessRate * 100).toFixed(1)}%`,
         },
@@ -1534,7 +1776,10 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
     });
 
     it('should validate ping/pong protocol implementation', async () => {
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'ping_pong_validation');
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'ping_pong_validation',
+      );
 
       await client.connect();
 
@@ -1561,14 +1806,15 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
         }
 
         // Wait for pong
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         expect(pongReceived).toBe(true);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      const averagePingLatency = pingLatencies.reduce((sum, lat) => sum + lat, 0) / pingLatencies.length;
+      const averagePingLatency =
+        pingLatencies.reduce((sum, lat) => sum + lat, 0) / pingLatencies.length;
 
       expect(pingLatencies.length).toBe(pingCount);
       expect(averagePingLatency).toBeLessThan(100); // <100ms ping/pong latency
@@ -1581,12 +1827,18 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
         averageLatency: `${averagePingLatency.toFixed(2)}ms`,
         minLatency: `${Math.min(...pingLatencies).toFixed(2)}ms`,
         maxLatency: `${Math.max(...pingLatencies).toFixed(2)}ms`,
-        protocolCompliance: pingLatencies.length === pingCount ? 'FULLY_COMPLIANT' : 'NON_COMPLIANT',
+        protocolCompliance:
+          pingLatencies.length === pingCount
+            ? 'FULLY_COMPLIANT'
+            : 'NON_COMPLIANT',
       });
     });
 
     it('should validate error handling and recovery protocols', async () => {
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'error_handling_validation');
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'error_handling_validation',
+      );
 
       await client.connect();
 
@@ -1600,7 +1852,7 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
             if (client['ws']) {
               client['ws'].send('invalid-json-{malformed');
             }
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
           },
         },
         {
@@ -1612,7 +1864,9 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
               payload: { data: largePayload },
             };
             try {
-              await client.sendMessageWithDeliveryGuarantee(largeMessage, { timeout: 1000 });
+              await client.sendMessageWithDeliveryGuarantee(largeMessage, {
+                timeout: 1000,
+              });
             } catch (_error) {
               // Expected to fail for very large messages
             }
@@ -1624,10 +1878,15 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
             const burstPromises = [];
             for (let i = 0; i < 50; i++) {
               burstPromises.push(
-                client.sendMessageWithDeliveryGuarantee({
-                  type: ConversationalMessageType.HEARTBEAT,
-                  payload: { burstIndex: i },
-                }, { timeout: 1000 }).catch(() => {}) // Some may fail due to rate limiting
+                client
+                  .sendMessageWithDeliveryGuarantee(
+                    {
+                      type: ConversationalMessageType.HEARTBEAT,
+                      payload: { burstIndex: i },
+                    },
+                    { timeout: 1000 },
+                  )
+                  .catch(() => {}), // Some may fail due to rate limiting
               );
             }
             await Promise.allSettled(burstPromises);
@@ -1637,7 +1896,7 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
 
       for (const errorTest of errorTests) {
         await errorTest.test();
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Recovery time
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Recovery time
       }
 
       const finalMetrics = client.getProtocolMetrics();
@@ -1647,7 +1906,8 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
       expect(stillConnected).toBe(true);
 
       // Some errors are expected during error testing
-      const errorIncrease = finalMetrics.protocolErrors - initialMetrics.protocolErrors;
+      const errorIncrease =
+        finalMetrics.protocolErrors - initialMetrics.protocolErrors;
 
       await client.disconnect();
 
@@ -1665,13 +1925,17 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
 
   describe('Security and Authentication Compliance', () => {
     it('should validate connection security and authentication', async () => {
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'security_validation', {
-        headers: {
-          'Authorization': 'Bearer test-token',
-          'X-API-Key': 'test-api-key',
-          'X-Client-Version': '1.0.0',
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'security_validation',
+        {
+          headers: {
+            Authorization: 'Bearer test-token',
+            'X-API-Key': 'test-api-key',
+            'X-Client-Version': '1.0.0',
+          },
         },
-      });
+      );
 
       await client.connect();
 
@@ -1693,10 +1957,13 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
         },
       };
 
-      const deliveryResult = await client.sendMessageWithDeliveryGuarantee(secureMessage, {
-        requiresAcknowledgment: true,
-        timeout: 5000,
-      });
+      const deliveryResult = await client.sendMessageWithDeliveryGuarantee(
+        secureMessage,
+        {
+          requiresAcknowledgment: true,
+          timeout: 5000,
+        },
+      );
 
       expect(deliveryResult.sent).toBe(true);
       expect(deliveryResult.acknowledged).toBe(true);
@@ -1711,7 +1978,10 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
     });
 
     it('should validate message integrity and validation protocols', async () => {
-      const client = new ProtocolComplianceTestClient(TEST_URL, 'integrity_validation');
+      const client = new ProtocolComplianceTestClient(
+        TEST_URL,
+        'integrity_validation',
+      );
 
       await client.connect();
 
@@ -1725,26 +1995,33 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
           payload: {
             testType: 'integrity_validation',
             messageIndex: i,
-            checksum: crypto.createHash('sha256').update(`integrity-test-${i}`).digest('hex'),
+            checksum: crypto
+              .createHash('sha256')
+              .update(`integrity-test-${i}`)
+              .digest('hex'),
             timestamp: Date.now(),
           },
         };
 
         try {
-          const result = await client.sendMessageWithDeliveryGuarantee(message, {
-            requiresAcknowledgment: true,
-            timeout: 3000,
-          });
+          const result = await client.sendMessageWithDeliveryGuarantee(
+            message,
+            {
+              requiresAcknowledgment: true,
+              timeout: 3000,
+            },
+          );
 
           integrityResults.push(result.sent && result.acknowledged);
         } catch (error) {
           integrityResults.push(false);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
-      const integritySuccessRate = integrityResults.filter(result => result).length / messageCount;
+      const integritySuccessRate =
+        integrityResults.filter((result) => result).length / messageCount;
 
       expect(integritySuccessRate).toBeGreaterThanOrEqual(0.9); // 90% integrity success
 
@@ -1753,7 +2030,8 @@ describe('PARLANT WebSocket Protocol Compliance and Message Delivery Testing', (
       console.log('Message Integrity Results:', {
         messagesValidated: messageCount,
         integritySuccessRate: `${(integritySuccessRate * 100).toFixed(1)}%`,
-        integrityCompliance: integritySuccessRate >= 0.95 ? 'EXCELLENT' : 'GOOD',
+        integrityCompliance:
+          integritySuccessRate >= 0.95 ? 'EXCELLENT' : 'GOOD',
       });
     });
   });
