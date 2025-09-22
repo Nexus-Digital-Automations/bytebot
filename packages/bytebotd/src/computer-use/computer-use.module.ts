@@ -17,6 +17,9 @@ import { JobCancellationController } from './controllers/job-cancellation-contro
 import { BackgroundJobWorkerService } from './workers/background-job-worker.service';
 import { JobManagementService } from './job-management.service';
 import { JobCancellationTimeoutService } from './services/job-cancellation-timeout.service';
+import { ComprehensiveJobLifecycleService } from './services/comprehensive-job-lifecycle.service';
+import { AdvancedStatusPollingService } from './services/advanced-status-polling.service';
+import { ComprehensiveJobOrchestratorService } from './services/comprehensive-job-orchestrator.service';
 import { ComprehensiveJobManagementModule } from './comprehensive-job-management.module';
 import { NutModule } from '../nut/nut.module';
 import { CacheModule } from '../cache/cache.module';
@@ -52,6 +55,9 @@ import { SecurityModule } from '../common/security/security.module';
     JobStatusResultService, // Comprehensive job status tracking and result management
     PriorityJobQueueService, // Enterprise-grade thread-safe priority queue management
     JobCancellationTimeoutService, // Advanced job cancellation and timeout handling
+    ComprehensiveJobLifecycleService, // Complete job lifecycle management with cancellation
+    AdvancedStatusPollingService, // Advanced status polling with progress tracking
+    ComprehensiveJobOrchestratorService, // Central orchestrator for all job operations
   ],
   exports: [
     ComputerUseService,
@@ -65,6 +71,9 @@ import { SecurityModule } from '../common/security/security.module';
     JobStatusResultService, // Export for use by other modules
     PriorityJobQueueService, // Export for use by other modules
     JobCancellationTimeoutService, // Export advanced cancellation capabilities
+    ComprehensiveJobLifecycleService, // Export job lifecycle management
+    AdvancedStatusPollingService, // Export status polling service
+    ComprehensiveJobOrchestratorService, // Export central orchestrator
   ],
 })
 export class ComputerUseModule {}
