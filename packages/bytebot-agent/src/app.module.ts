@@ -118,12 +118,12 @@ export class AppModule {
     console.log(
       '🚀 Bytebot Agent Application initialized with enterprise-grade security',
     );
-    console.log('🔒 Enterprise Security Features:');
-    console.log('   ✅ Kubernetes secrets management');
-    console.log('   ✅ External secrets provider integration');
+    console.log('🔒 Local-Only Security Features:');
+    console.log('   ✅ Local file-based secrets management');
+    console.log('   ✅ Environment variable encryption');
     console.log('   ✅ Configuration security validation');
-    console.log('   ✅ Secrets rotation and hot-reload');
-    console.log('   ✅ Enterprise secrets audit logging');
+    console.log('   ✅ Local secrets rotation and hot-reload');
+    console.log('   ✅ Comprehensive audit logging');
     console.log('🤖 Parlant Conversational AI Integration:');
     console.log('   ✅ Universal API endpoint validation');
     console.log('   ✅ Real-time conversational security analysis');
