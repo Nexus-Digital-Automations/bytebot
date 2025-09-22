@@ -392,8 +392,8 @@ export class ApiSecurityService {
         await this.analyzeRequestForThreats(requestDetails);
 
       if (
-        threatAnalysis.severity === ApiSecurityRiskLevel._CRITICAL ||
-        threatAnalysis.severity === ApiSecurityRiskLevel._HIGH
+        threatAnalysis.severity === ApiSecurityRiskLevel.CRITICAL ||
+        threatAnalysis.severity === ApiSecurityRiskLevel.HIGH
       ) {
         // HIGH RISK: Validate threat response through Parlant
         const validationRequest: ParlantValidationRequest = {
@@ -647,7 +647,7 @@ export class ApiSecurityService {
     request.scanConfiguration.complianceChecks.forEach((standard) => {
       complianceResults[standard] =
         vulnerabilities.filter(
-          (v) => v.severity === ApiSecurityRiskLevel._CRITICAL,
+          (v) => v.severity === ApiSecurityRiskLevel.CRITICAL,
         ).length === 0;
     });
 
@@ -685,7 +685,7 @@ export class ApiSecurityService {
       vulnerabilities.push({
         id: `vuln${Date.now()}${Math.random().toString(36).substring(7)}`,
         type: ApiThreatType.SECURITY_MISCONFIGURATION,
-        severity: ApiSecurityRiskLevel._MODERATE,
+        severity: ApiSecurityRiskLevel.MEDIUM,
         description: `Security misconfiguration detected in ${endpoint}`,
         affectedEndpoint: endpoint,
         discoveredAt: new Date(),
@@ -708,16 +708,19 @@ export class ApiSecurityService {
 
     // Mock threat analysis - would use ML models and pattern matching
     let threatType = ApiThreatType.SECURITY_MISCONFIGURATION;
-    let severity = ApiSecurityRiskLevel._LOW;
-    const sourceIp = '192.168.1.1'; // Mock IPlet blocked = false;// Simulate threat detection based on suspicious indicators
+    let severity = ApiSecurityRiskLevel.LOW;
+    const sourceIp = '192.168.1.1'; // Mock IP
+    let blocked = false;
+
+    // Simulate threat detection based on suspicious indicators
     if (requestDetails.suspicious) {
       if (requestDetails.headers['user-agent']?.includes('sqlmap')) {
         threatType = ApiThreatType.SQL_INJECTION;
-        severity = ApiSecurityRiskLevel._HIGH;
+        severity = ApiSecurityRiskLevel.HIGH;
         blocked = true;
       } else if (requestDetails.queryParams.toString().includes('<script>')) {
         threatType = ApiThreatType.XSS_ATTACK;
-        severity = ApiSecurityRiskLevel._MODERATE;
+        severity = ApiSecurityRiskLevel.MEDIUM;
         blocked = true;
       }
     }
@@ -786,16 +789,16 @@ export class ApiSecurityService {
 
     vulnerabilities.forEach((vuln) => {
       switch (vuln.severity) {
-        case ApiSecurityRiskLevel._CRITICAL:
+        case ApiSecurityRiskLevel.CRITICAL:
           score -= 20;
           break;
-        case ApiSecurityRiskLevel._HIGH:
+        case ApiSecurityRiskLevel.HIGH:
           score -= 10;
           break;
-        case ApiSecurityRiskLevel._MODERATE:
+        case ApiSecurityRiskLevel.MEDIUM:
           score -= 5;
           break;
-        case ApiSecurityRiskLevel._LOW:
+        case ApiSecurityRiskLevel.LOW:
           score -= 2;
           break;
       }
@@ -824,7 +827,7 @@ export class ApiSecurityService {
       actions.push('Review and update security configuration');
     }
     if (
-      vulnerabilities.some((v) => v.severity === ApiSecurityRiskLevel._CRITICAL)
+      vulnerabilities.some((v) => v.severity === ApiSecurityRiskLevel.CRITICAL)
     ) {
       actions.push('URGENT: Address critical vulnerabilities immediately');
     }

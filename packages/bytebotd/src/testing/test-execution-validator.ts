@@ -182,18 +182,37 @@ export class TestExecutionValidator extends EventEmitter {
 
     try {
       // Start performance monitoring
-      performanceFramework.startMeasurement(suiteName, 'test-execution');// Execute Jest with specific configurationconst jestCommand = this.buildJestCommand(suitePath, config);
-      const jestProcess = spawn('npx', jestCommand, {cwd: process.cwd(),stdio: ['pipe', 'pipe', 'pipe'],env: { ...process.env, NODE_ENV: 'test' }});let jestOutput = '';let jestError = '';jestProcess.stdout?.on('data', (data: Buffer) => {jestOutput += data.toString();// Monitor memory usage during execution
+      performanceFramework.startMeasurement(suiteName, 'test-execution');
+
+      // Execute Jest with specific configuration
+      const jestCommand = this.buildJestCommand(suitePath, config);
+      const jestProcess = spawn('npx', jestCommand, {
+        cwd: process.cwd(),
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: { ...process.env, NODE_ENV: 'test' }
+      });
+
+      let jestOutput = '';
+      let jestError = '';
+
+      jestProcess.stdout?.on('data', (data: Buffer) => {
+        jestOutput += data.toString();
+        // Monitor memory usage during execution
         const currentMemory = process.memoryUsage();
         if (currentMemory.heapUsed > peakMemory.heapUsed) {
           peakMemory = currentMemory;
         }
       });
 
-      jestProcess.stderr?.on('data', (data: Buffer) => {jestError += data.toString();});
+      jestProcess.stderr?.on('data', (data: Buffer) => {
+        jestError += data.toString();
+      });
 
       const exitCode = await new Promise<number>((resolve) => {
-        jestProcess.on('close', (code) => resolve(code ?? 0));});// Parse Jest output for individual test results
+        jestProcess.on('close', (code) => resolve(code ?? 0));
+      });
+
+      // Parse Jest output for individual test results
       const parsedResults = this.parseJestOutput(jestOutput);
       testResults.push(...parsedResults.tests);
 
@@ -368,10 +387,22 @@ export class TestExecutionValidator extends EventEmitter {
     const parallelizationEffectiveness = concurrencyMetrics.parallelizationBenefit;
 
     // Determine performance grade
-    let performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F' = 'F';const scores = [memoryEfficiency, reliabilityScore, Math.min(parallelizationEffectiveness, 100)];const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+    let performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F' = 'F';
+    const scores = [memoryEfficiency, reliabilityScore, Math.min(parallelizationEffectiveness, 100)];
+    const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
 
-    if (averageScore >= 90) performanceGrade = 'A';else if (averageScore >= 80) performanceGrade = 'B';else if (averageScore >= 70) performanceGrade = 'C';else if (averageScore >= 60) performanceGrade = 'D';// Identify bottlenecksconst bottlenecks: Array<{
-      type: 'execution_time' | 'memory_usage' | 'reliability' | 'concurrency';description: string;impact: 'high' | 'medium' | 'low';recommendation: string;}> = [];
+    if (averageScore >= 90) performanceGrade = 'A';
+    else if (averageScore >= 80) performanceGrade = 'B';
+    else if (averageScore >= 70) performanceGrade = 'C';
+    else if (averageScore >= 60) performanceGrade = 'D';
+
+    // Identify bottlenecks
+    const bottlenecks: Array<{
+      type: 'execution_time' | 'memory_usage' | 'reliability' | 'concurrency';
+      description: string;
+      impact: 'high' | 'medium' | 'low';
+      recommendation: string;
+    }> = [];
 
     // Execution time bottlenecks
     const slowSuites = allMetrics.filter(m => m.averageTestTime > 2000);
@@ -379,7 +410,10 @@ export class TestExecutionValidator extends EventEmitter {
       bottlenecks.push({
         type: 'execution_time',
         description: `Suite ${suite.suiteName} has slow average test time: ${suite.averageTestTime.toFixed(2)}ms`,
-        impact: 'high',recommendation: 'Optimize test logic, implement mocking, or reduce test scope'});});
+        impact: 'high',
+        recommendation: 'Optimize test logic, implement mocking, or reduce test scope'
+      });
+    });
 
     // Memory usage bottlenecks
     const memoryIntensiveSuites = allMetrics.filter(m => m.memoryUsage.increase > 50);

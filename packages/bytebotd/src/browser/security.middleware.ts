@@ -23,11 +23,18 @@ import {
   Injectable,
   NestMiddleware,
   BadRequestException,
-  TooManyRequestsException,
+  HttpException,
+  HttpStatus,
   ForbiddenException,
   Logger,
   UnauthorizedException,
-} from '@nestjs/common';import { Request, Response, NextFunction } from 'express';import { ConfigService } from '@nestjs/config';import { ApiSecurityService } from '../security/api-security.service';import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';/*** Security configuration interface
+} from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { ApiSecurityService } from '../security/api-security.service';
+import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';
+
+/** Security configuration interface
  */
 interface SecurityConfig {
   maxRequestSize: number;
@@ -185,7 +192,7 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       });
 
       // Handle specific security exceptions
-      if (error instanceof TooManyRequestsException ||
+      if (error instanceof HttpException && error.getStatus() === HttpStatus.TOO_MANY_REQUESTS ||
           error instanceof BadRequestException ||
           error instanceof ForbiddenException ||
           error instanceof UnauthorizedException) {
@@ -298,12 +305,12 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
         windowMs: this.securityConfig.rateLimitWindow,
       });
 
-      throw new TooManyRequestsException({
+      throw new HttpException({
         message: 'Rate limit exceeded',
         retryAfter: Math.ceil(this.securityConfig.rateLimitWindow / 1000),
         limit: this.securityConfig.rateLimitMax,
         windowMs: this.securityConfig.rateLimitWindow,
-      });
+      }, HttpStatus.TOO_MANY_REQUESTS);
     }
   }
 
@@ -814,7 +821,7 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     const now = Date.now();
     const expiredThreshold = now - (this.securityConfig.rateLimitWindow * 2);
 
-    for (const [key, tracker] of this.rateLimitTracker.entries()) {
+    for (const [key, tracker] of Array.from(this.rateLimitTracker.entries())) {
       if (tracker.windowStart < expiredThreshold) {
         this.rateLimitTracker.delete(key);
       }
@@ -841,7 +848,15 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
 
   private loadSecurityConfig(): SecurityConfig {
     return {
-      maxRequestSize: this.configService.get<number>('BROWSER_SECURITY_MAX_REQUEST_SIZE', 1048576), // 1MBrateLimitWindow: this.configService.get<number>('BROWSER_SECURITY_RATE_LIMIT_WINDOW', 60000), // 1 minuterateLimitMax: this.configService.get<number>('BROWSER_SECURITY_RATE_LIMIT_MAX', 100),enableXssProtection: this.configService.get<boolean>('BROWSER_SECURITY_XSS_PROTECTION', true),enableSqlInjectionProtection: this.configService.get<boolean>('BROWSER_SECURITY_SQL_INJECTION_PROTECTION', true),enablePayloadValidation: this.configService.get<boolean>('BROWSER_SECURITY_PAYLOAD_VALIDATION', true),trustedIpRanges: this.configService.get<string>('BROWSER_SECURITY_TRUSTED_IPS', '').split(',').filter(Boolean),blockedIpRanges: this.configService.get<string>('BROWSER_SECURITY_BLOCKED_IPS', '').split(',').filter(Boolean),suspiciousUserAgentPatterns: this.configService.get<string>('BROWSER_SECURITY_SUSPICIOUS_USER_AGENTS', '').split(',').filter(Boolean),
+      maxRequestSize: this.configService.get<number>('BROWSER_SECURITY_MAX_REQUEST_SIZE', 1048576), // 1MB
+      rateLimitWindow: this.configService.get<number>('BROWSER_SECURITY_RATE_LIMIT_WINDOW', 60000), // 1 minute
+      rateLimitMax: this.configService.get<number>('BROWSER_SECURITY_RATE_LIMIT_MAX', 100),
+      enableXssProtection: this.configService.get<boolean>('BROWSER_SECURITY_XSS_PROTECTION', true),
+      enableSqlInjectionProtection: this.configService.get<boolean>('BROWSER_SECURITY_SQL_INJECTION_PROTECTION', true),
+      enablePayloadValidation: this.configService.get<boolean>('BROWSER_SECURITY_PAYLOAD_VALIDATION', true),
+      trustedIpRanges: this.configService.get<string>('BROWSER_SECURITY_TRUSTED_IPS', '').split(',').filter(Boolean),
+      blockedIpRanges: this.configService.get<string>('BROWSER_SECURITY_BLOCKED_IPS', '').split(',').filter(Boolean),
+      suspiciousUserAgentPatterns: this.configService.get<string>('BROWSER_SECURITY_SUSPICIOUS_USER_AGENTS', '').split(',').filter(Boolean),
     };
   }
 }

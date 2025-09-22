@@ -22,7 +22,9 @@
 import { Module, Logger } from '@nestjs/common';
 import { MetricsController } from './metrics.controller';
 import { BytebotMetricsService } from './metrics.service';
-import { ParlantModule } from '../parlant/parlant.module'; /*** Metrics collection module providing application observability
+import { ParlantModule } from '../parlant/parlant.module';
+
+/*** Metrics collection module providing application observability
  */
 @Module({
   imports: [ParlantModule],
