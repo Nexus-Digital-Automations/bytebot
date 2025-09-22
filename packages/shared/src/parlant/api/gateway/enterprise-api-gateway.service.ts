@@ -163,7 +163,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
     this.logger.log(`Processing API request: ${requestId}`, {
       method: request.method,
       endpoint: request.endpoint,
-      userId: request.userContext.userId,
+      userId: request.userContext?.userId,
       securityLevel: request.securityLevel,
     });
 
@@ -360,7 +360,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       // Analyze routing factors
       const routingFactors = await this.analyzeRoutingFactors({
-        request: request,
+        requestId: request.id,
         availableInstances: instances,
         currentSystemLoad: await this.getCurrentSystemLoad(),
         userAffinityRequirements: await this.getUserAffinityRequirements(
@@ -421,7 +421,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
     this.logger.debug(`Enforcing security policies`, {
       requestId: request.id,
       securityLevel: request.securityLevel,
-      userRole: request.userContext.roles,
+      userRole: request.userContext?.roles,
     });
 
     try {
@@ -505,7 +505,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       // TODO: Integrate with actual Parlant client for conversational validation
       const conversationalValidation =
         await this.performConversationalValidation({
-          request: request,
+          requestId: request.id,
           userContext: request.userContext,
           operationContext: request.operation,
           businessRules: await this.getBusinessRules(request),
@@ -773,7 +773,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       },
       processingTime: performance.now() - startTime,
       routingPath: [],
-      validationResult: { valid: false, errors: [], warnings: [] },
+      validationResult: { isValid: false, valid: false, errors: [], warnings: [] },
       securityEnforcement: security,
     };
   }
@@ -805,7 +805,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       error: { message: "Request rate limit exceeded", details: throttle },
       processingTime: performance.now() - startTime,
       routingPath: [],
-      validationResult: { valid: true, errors: [], warnings: [] },
+      validationResult: { isValid: true, valid: true, errors: [], warnings: [] },
       securityEnforcement: { allowed: true, riskLevel: "LOW" },
     };
   }
@@ -824,7 +824,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       },
       processingTime,
       routingPath: [],
-      validationResult: { valid: false, errors: [], warnings: [] },
+      validationResult: { isValid: false, valid: false, errors: [], warnings: [] },
       securityEnforcement: { allowed: false, riskLevel: "HIGH" },
     };
   }
@@ -854,7 +854,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       data: params.result,
       processingTime: params.processingTime,
       routingPath: [],
-      validationResult: { valid: true, errors: [], warnings: [] },
+      validationResult: { isValid: true, valid: true, errors: [], warnings: [] },
       securityEnforcement: { allowed: true, riskLevel: "LOW" },
     };
   }

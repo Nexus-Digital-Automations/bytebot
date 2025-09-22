@@ -59,7 +59,7 @@ export interface EnhancedParlantErrorResponse extends ParlantErrorResponse {
   /** Recovery session information */
   recoverySession?: {
     sessionId: string;
-    status: 'ACTIVE' | 'COMPLETED' | 'FAILED';
+    status: 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'ESCALATED';
     availableActions: string[];
   };
 
@@ -91,6 +91,25 @@ export interface EnhancedParlantErrorResponse extends ParlantErrorResponse {
     correlationId: string;
     /** Error occurrence timestamp */
     timestamp: string;
+    /** User context if available */
+    userContext?: {
+      userId: string;
+      userRole: string;
+      sessionId: string;
+    };
+    /** Request context */
+    requestContext: {
+      method: string;
+      path: string;
+      userAgent?: string;
+      ipAddress?: string;
+    };
+    /** Error frequency data */
+    frequencyData?: {
+      similarErrorsToday: number;
+      similarErrorsThisWeek: number;
+      lastOccurrence?: string;
+    };
     [key: string]: any;
   };
 }
@@ -217,7 +236,7 @@ export class ParlantErrorHandlingBridge {
       const enhancedResponse: EnhancedParlantErrorResponse = {
         ...legacyResponse,
         conversational: conversationalResponse,
-        recovery: recoverySession ? {
+        recoverySession: recoverySession ? {
           sessionId: recoverySession.sessionId,
           status: recoverySession.status,
           availableActions: this.extractAvailableActions(recoverySession)
@@ -288,11 +307,13 @@ export class ParlantErrorHandlingBridge {
     if (error instanceof HttpException) {
       return {
         statusCode: error.getStatus(),
-        timestamp: new Date().toISOString(),
-        path: ctx.getRequest<Request>().url,
-        method: ctx.getRequest<Request>().method,
         message: error.message,
         error: error.name,
+        details: {
+          category: 'HTTP_EXCEPTION' as any,
+          severity: 'MEDIUM' as any,
+          errorCode: error.getStatus().toString()
+        },
         guidance: {
           explanation: 'Legacy error processing',
           immediateActions: [],
@@ -300,32 +321,30 @@ export class ParlantErrorHandlingBridge {
           preventionTips: [],
           documentationLinks: []
         },
-        conversationalResponse: {
-          tone: 'PROFESSIONAL',
-          complexity: 'MODERATE',
-          supportLevel: 'STANDARD',
-          personalizedSuggestions: [],
-          contextualHelp: [],
-          followUpQuestions: []
+        recovery: {
+          autoRetryAvailable: false,
+          recommendedStrategy: 'MANUAL_INTERVENTION' as any
         },
         metadata: {
-          errorId: `legacy_${Date.now()}`,
-          processingTime: 0,
-          retryable: false,
-          escalationRequired: false,
-          userImpact: 'LOW',
-          systemImpact: 'MINIMAL'
+          correlationId: `legacy_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          requestContext: {
+            method: ctx.getRequest<Request>().method,
+            path: ctx.getRequest<Request>().url
+          }
         }
       };
     }
 
     return {
       statusCode: 500,
-      timestamp: new Date().toISOString(),
-      path: ctx.getRequest<Request>().url,
-      method: ctx.getRequest<Request>().method,
       message: 'Internal server error',
       error: 'InternalServerError',
+      details: {
+        category: 'INTERNAL_ERROR' as any,
+        severity: 'HIGH' as any,
+        errorCode: '500'
+      },
       guidance: {
         explanation: 'An unexpected error occurred',
         immediateActions: [],
@@ -333,21 +352,17 @@ export class ParlantErrorHandlingBridge {
         preventionTips: [],
         documentationLinks: []
       },
-      conversationalResponse: {
-        tone: 'PROFESSIONAL',
-        complexity: 'MODERATE',
-        supportLevel: 'STANDARD',
-        personalizedSuggestions: [],
-        contextualHelp: [],
-        followUpQuestions: []
+      recovery: {
+        autoRetryAvailable: false,
+        recommendedStrategy: 'ESCALATE' as any
       },
       metadata: {
-        errorId: `legacy_${Date.now()}`,
-        processingTime: 0,
-        retryable: false,
-        escalationRequired: true,
-        userImpact: 'HIGH',
-        systemImpact: 'SIGNIFICANT'
+        correlationId: `legacy_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        requestContext: {
+          method: ctx.getRequest<Request>().method,
+          path: ctx.getRequest<Request>().url
+        }
       }
     };
   }

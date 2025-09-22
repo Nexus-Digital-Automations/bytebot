@@ -447,7 +447,7 @@ export class ErrorNaturalLanguageProcessor {
     const words = text.toLowerCase().split(/\s+/).filter(word =>
       word.length > 2 && !commonWords.includes(word)
     );
-    return [...new Set(words)];
+    return Array.from(new Set(words));
   }
 
   /**
