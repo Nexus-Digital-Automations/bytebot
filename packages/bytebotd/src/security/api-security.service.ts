@@ -581,7 +581,7 @@ export class ApiSecurityService {
       vulnerabilitiesFound: vulnerabilities,
       complianceResults,
       securityScore,
-      recommendedActions: this.generateRecommendedActions(vulnerabilities),
+      recommendedActions: this.generateRecommendations(vulnerabilities),
       conversationId,
       validationStatus: 'APPROVED',
     };
@@ -707,7 +707,7 @@ export class ApiSecurityService {
     return Math.max(0, score);
   }
 
-  private generateRecommendedActions(vulnerabilities: ApiSecurityVulnerability[]): string[] {
+  private generateRecommendations(vulnerabilities: ApiSecurityVulnerability[]): string[] {
     const actions: string[] = [];
     
     if (vulnerabilities.some(v => v.type === ApiThreatType.BROKEN_AUTHENTICATION)) {

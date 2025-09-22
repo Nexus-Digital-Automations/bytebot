@@ -20,10 +20,9 @@
 
 import { Injectable, Logger, Inject } from '@nestjs/common';import { CACHE_MANAGER } from '@nestjs/cache-manager';import { Cache } from 'cache-manager';import { CacheKeyGenerator } from './cache-key.generator';import { MetricsService } from '../metrics/metrics.service';/*** Cache operation types for metrics tracking
  */
-type CacheOperation = 'get' | 'set' | 'del' | 'mget' | 'mset' | 'warm';/*** Type guard to check if a value is a valid JSON object
- */
-function _isValidJsonObject(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);}/**
+type CacheOperation = 'get' | 'set' | 'del' | 'mget' | 'mset' | 'warm';
+
+/**
  * Safe JSON parsing with type validation
  */
 function safeJsonParse<T>(jsonString: string): T | null {
@@ -34,13 +33,6 @@ function safeJsonParse<T>(jsonString: string): T | null {
     return null;
   }
 }
-
-/**
- * Type-safe cache value serialization interface
- */
-interface _SerializedCacheValue {
-  data: unknown;
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';timestamp: number;}
 
 /**
  * Cache options for fine-grained control

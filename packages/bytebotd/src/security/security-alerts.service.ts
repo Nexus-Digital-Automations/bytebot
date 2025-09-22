@@ -522,7 +522,7 @@ export class SecurityAlertsService {
       status: AlertStatus.PENDING,
       sourceEvent: request.sourceEvent,
       affectedSystems: request.sourceEvent.affectedResources,
-      recommendedActions: this.generateRecommendedActions(request.sourceEvent),
+      recommendedActions: this.generateRecommendations(request.sourceEvent),
       escalationChain: this.generateEscalationChain(request.alertPriority),
       channels: request.targetChannels,
       conversationId,
@@ -685,7 +685,7 @@ export class SecurityAlertsService {
     return description;
   }
 
-  private generateRecommendedActions(event: SecurityEvent): string[] {
+  private generateRecommendations(event: SecurityEvent): string[] {
     const actions: string[] = [];
 
     switch (event.eventType) {

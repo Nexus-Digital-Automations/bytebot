@@ -12,14 +12,14 @@
  * Jest Mock Function with proper typing
  * Extends basic function type with Jest mock methods
  */
-export type MockFunction<T extends (...args: any[]) => any> = jest.MockedFunction<T>;
+export type MockFunction<T extends (...args: unknown[]) => unknown> = jest.MockedFunction<T>;
 
 /**
  * Jest Mock Object with proper typing
  * Provides complete mock interface for service objects
  */
 export type MockObject<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any
+  [K in keyof T]: T[K] extends (...args: unknown[]) => unknown
     ? MockFunction<T[K]>
     : T[K] extends object
     ? MockObject<T[K]>
@@ -33,17 +33,17 @@ export type MockObject<T> = {
 
 // Mouse component mock interface
 export interface MockMouseInterface {
-  move: MockFunction<(path: any, movementType?: any) => Promise<any>>;
-  setPosition: MockFunction<(coordinates: any) => Promise<any>>;
+  move: MockFunction<(path: unknown, movementType?: unknown) => Promise<unknown>>;
+  setPosition: MockFunction<(coordinates: unknown) => Promise<unknown>>;
   getPosition: MockFunction<() => Promise<{ x: number; y: number }>>;
-  leftClick: MockFunction<() => Promise<any>>;
-  rightClick: MockFunction<() => Promise<any>>;
-  doubleClick: MockFunction<() => Promise<any>>;
-  drag: MockFunction<(from: any, to: any) => Promise<any>>;
-  scrollDown: MockFunction<(amount?: number) => Promise<any>>;
-  scrollUp: MockFunction<(amount?: number) => Promise<any>>;
-  pressButton: MockFunction<(button: any) => Promise<any>>;
-  releaseButton: MockFunction<(button: any) => Promise<any>>;
+  leftClick: MockFunction<() => Promise<unknown>>;
+  rightClick: MockFunction<() => Promise<unknown>>;
+  doubleClick: MockFunction<() => Promise<unknown>>;
+  drag: MockFunction<(from: unknown, to: unknown) => Promise<unknown>>;
+  scrollDown: MockFunction<(amount?: number) => Promise<unknown>>;
+  scrollUp: MockFunction<(amount?: number) => Promise<unknown>>;
+  pressButton: MockFunction<(button: unknown) => Promise<unknown>>;
+  releaseButton: MockFunction<(button: unknown) => Promise<unknown>>;
   config: {
     mouseSpeed: number;
     autoDelayMs: number;
@@ -52,10 +52,10 @@ export interface MockMouseInterface {
 
 // Screen component mock interface
 export interface MockScreenInterface {
-  capture: MockFunction<(region?: any) => Promise<any>>;
-  find: MockFunction<(needle: any, options?: any) => Promise<any>>;
-  waitFor: MockFunction<(needle: any, timeout?: number, region?: any) => Promise<any>>;
-  highlight: MockFunction<(region: any, duration?: number, color?: string) => Promise<void>>;
+  capture: MockFunction<(region?: unknown) => Promise<unknown>>;
+  find: MockFunction<(needle: unknown, options?: unknown) => Promise<unknown>>;
+  waitFor: MockFunction<(needle: unknown, timeout?: number, region?: unknown) => Promise<unknown>>;
+  highlight: MockFunction<(region: unknown, duration?: number, color?: string) => Promise<void>>;
   config: {
     resourceDirectory: string;
     confidence: number;
@@ -64,9 +64,9 @@ export interface MockScreenInterface {
 
 // Keyboard component mock interface
 export interface MockKeyboardInterface {
-  type: MockFunction<(text: string) => Promise<any>>;
-  pressKey: MockFunction<(key: any, ...modifiers: any[]) => Promise<any>>;
-  releaseKey: MockFunction<(key: any, ...modifiers: any[]) => Promise<any>>;
+  type: MockFunction<(text: string) => Promise<unknown>>;
+  pressKey: MockFunction<(key: unknown, ...modifiers: unknown[]) => Promise<unknown>>;
+  releaseKey: MockFunction<(key: unknown, ...modifiers: unknown[]) => Promise<unknown>>;
   config: {
     autoDelayMs: number;
   };
@@ -80,11 +80,11 @@ export interface MockNutInterface {
   Key: Record<string, string>;
   Button: Record<string, number>;
   Point: MockFunction<(x: number, y: number) => { x: number; y: number }>;
-  Region: MockFunction<(x: number, y: number, width: number, height: number) => any>;
-  Image: MockFunction<() => any>;
+  Region: MockFunction<(x: number, y: number, width: number, height: number) => unknown>;
+  Image: MockFunction<() => unknown>;
   sleep: MockFunction<(ms: number) => Promise<void>>;
-  straightTo: MockFunction<(target: any) => any>;
-  linear: MockFunction<(target: any) => any>;
+  straightTo: MockFunction<(target: unknown) => unknown>;
+  linear: MockFunction<(target: unknown) => unknown>;
   PROVIDER: Record<string, string>;
 }
 
@@ -95,20 +95,20 @@ export interface MockNutInterface {
 
 // Computer Use Service mock interface
 export interface MockComputerUseServiceInterface {
-  executeAction: MockFunction<(action: any) => Promise<any>>;
+  executeAction: MockFunction<(action: unknown) => Promise<unknown>>;
   generateTestId: MockFunction<() => string>;
-  executeJob: MockFunction<(job: any) => Promise<any>>;
-  [key: string]: any; // Allow additional properties
+  executeJob: MockFunction<(job: unknown) => Promise<unknown>>;
+  [key: string]: unknown; // Allow additional properties
 }
 
 // NUT Service mock interface
 export interface MockNutServiceInterface {
-  moveMouse: MockFunction<(coordinates: any) => Promise<any>>;
-  clickMouse: MockFunction<(coordinates: any, button?: any) => Promise<any>>;
-  captureScreen: MockFunction<(region?: any) => Promise<any>>;
-  typeText: MockFunction<(text: string) => Promise<any>>;
-  pressKey: MockFunction<(key: any) => Promise<any>>;
-  [key: string]: any; // Allow additional properties
+  moveMouse: MockFunction<(coordinates: unknown) => Promise<unknown>>;
+  clickMouse: MockFunction<(coordinates: unknown, button?: unknown) => Promise<unknown>>;
+  captureScreen: MockFunction<(region?: unknown) => Promise<unknown>>;
+  typeText: MockFunction<(text: string) => Promise<unknown>>;
+  pressKey: MockFunction<(key: unknown) => Promise<unknown>>;
+  [key: string]: unknown; // Allow additional properties
 }
 
 /**
@@ -116,9 +116,9 @@ export interface MockNutServiceInterface {
  */
 export interface ServiceResponse {
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -129,7 +129,7 @@ export interface ServiceResponse {
 /**
  * Creates a properly typed Jest mock function
  */
-export function createMockFunction<T extends (...args: any[]) => any>(): MockFunction<T> {
+export function createMockFunction<T extends (...args: unknown[]) => unknown>(): MockFunction<T> {
   return jest.fn() as unknown as MockFunction<T>;
 }
 
@@ -207,9 +207,9 @@ export interface MockAuthServiceInterface {
 }
 
 export interface MockEnterpriseServiceInterface {
-  executeAction: MockFunction<(action: any) => Promise<ServiceResponse>>;
+  executeAction: MockFunction<(action: unknown) => Promise<ServiceResponse>>;
   generateTestId: MockFunction<() => string>;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   [key: string]: any;
 }
 
@@ -226,7 +226,7 @@ export interface MockPerformanceMetrics {
 
 export interface MockTestingInterface {
   generateTestId: MockFunction<() => string>;
-  mockImplementation: MockFunction<(implementation: any) => void>;
+  mockImplementation: MockFunction<(implementation: unknown) => void>;
   text: string;
   [key: string]: any;
 }

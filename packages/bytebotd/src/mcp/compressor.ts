@@ -23,10 +23,29 @@
  * @since 2024-01-01
  */
 
-import { Logger } from '@nestjs/common';import { CompressionOptions, CompressionResult } from './types';// Initialize logger for compression operationsconst logger = new Logger('Base64ImageCompressor');// Lazy-loaded sharp modulelet sharpModule: typeof import('sharp') | null = null;// Type-safe sharp function call helper with lazy loadingconst createSharp = async (
+import { Logger } from '@nestjs/common';
+import { CompressionOptions, CompressionResult } from './types';
+
+// Initialize logger for compression operations
+const logger = new Logger('Base64ImageCompressor');
+
+// Lazy-loaded sharp module
+let sharpModule: typeof import('sharp') | null = null;
+
+// Type-safe sharp function call helper with lazy loading
+const createSharp = async (
   input: string | Buffer,
-): Promise<ReturnType<typeof import('sharp')>> => {if (!sharpModule) {try {
-      sharpModule = (await import('sharp')).default;logger.log('Sharp module loaded successfully');} catch (error) {logger.error('Failed to load sharp module for image processing', {error: (error as Error).message,fallback: 'Image compression features will be unavailable',});throw new Error(
+): Promise<ReturnType<typeof import('sharp')>> => {
+  if (!sharpModule) {
+    try {
+      sharpModule = (await import('sharp')).default;
+      logger.log('Sharp module loaded successfully');
+    } catch (error) {
+      logger.error('Failed to load sharp module for image processing', {
+        error: (error as Error).message,
+        fallback: 'Image compression features will be unavailable',
+      });
+      throw new Error(
         'Sharp module unavailable: Image compression features disabled',
       );
     }
@@ -176,16 +195,20 @@ class Base64ImageCompressor {
         iterations,
       };
 
-      logger.log(`[${operationId}] Compression completed successfully`, {operationId,finalSizeKB: finalSizeKB.toFixed(2),
+      logger.log(`[${operationId}] Compression completed successfully`, {
+        operationId,
+        finalSizeKB: finalSizeKB.toFixed(2),
         finalSizeMB: finalSizeMB.toFixed(3),
         compressionRatio: compressionRatio.toFixed(3),
-        compressionPercentage: `${((1 - compressionRatio) * 100).toFixed(1)}%`,finalQuality: quality,iterations,
+        compressionPercentage: `${((1 - compressionRatio) * 100).toFixed(1)}%`,
+        finalQuality: quality,
+        iterations,
         optimizationTimeMs: optimizationTime,
         totalTimeMs: totalTime,
         targetAchieved: finalSizeKB <= targetSizeKB,
       });
 
-      return _result;
+      return result;
     } catch (_error) {
       const totalTime = Date.now() - startTime;
       logger.error(`[${operationId}] Compression failed`, {
@@ -259,28 +282,35 @@ class Base64ImageCompressor {
     let result = await this.compressToSize(base64String, compressionOptions);
 
     // If still too large, apply progressive resizing
-    if (_result.sizeKB > targetSizeKB) {
-      const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');const inputBuffer = Buffer.from(base64Data, 'base64');const sharpInstance = await createSharp(inputBuffer);const metadata = await sharpInstance.metadata();
+    if (result.sizeKB > targetSizeKB) {
+      const base64Data = base64String.replace(/^data:image\/\w+;base64,/, '');
+      const inputBuffer = Buffer.from(base64Data, 'base64');
+      const sharpInstance = await createSharp(inputBuffer);
+      const metadata = await sharpInstance.metadata();
       const originalWidth = metadata.width ?? maxWidth;
       const originalHeight = metadata.height ?? maxHeight;
 
       let scale = 0.9; // Start with 90% of original size
 
-      while (_result.sizeKB > targetSizeKB && scale > 0.3) {
+      while (result.sizeKB > targetSizeKB && scale > 0.3) {
         const newWidth = Math.floor(originalWidth * scale);
         const newHeight = Math.floor(originalHeight * scale);
 
         const resizedSharpInstance = await createSharp(inputBuffer);
         const resizedBuffer = await resizedSharpInstance
-          .resize(_newWidth, newHeight, {
-            fit: 'inside',withoutEnlargement: true,})
+          .resize(newWidth, newHeight, {
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
           .toBuffer();
 
-        const resizedBase64 = resizedBuffer.toString('base64');result = await this.compressToSize(resizedBase64, compressionOptions);scale -= 0.1;
+        const resizedBase64 = resizedBuffer.toString('base64');
+        result = await this.compressToSize(resizedBase64, compressionOptions);
+        scale -= 0.1;
       }
     }
 
-    return _result;
+    return result;
   }
 
   /**
@@ -309,14 +339,14 @@ class Base64ImageCompressor {
 export async function compressPngBase64Under1MB(
   base64String: string,
 ): Promise<string> {
-  const result = await Base64ImageCompressor.compressToSize(_base64String, {
+  const result = await Base64ImageCompressor.compressToSize(base64String, {
     targetSizeKB: 1024,
     format: 'png',
     initialQuality: 95,
     minQuality: 10,
   });
 
-  return _result.base64;
+  return result.base64;
 }
 
 // Export the class and types for more control

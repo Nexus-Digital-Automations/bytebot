@@ -804,7 +804,7 @@ export class ParlantPerformanceBenchmarkService {
     
     const regression = degradations.length > 0;
     const summary = this.generateRegressionSummary(improvements, degradations, criticalIssues);
-    const recommendedActions = this.generateRecommendedActions(degradations, criticalIssues);
+    const recommendedActions = this.generateRecommendations(degradations, criticalIssues);
     
     return {
       testId: current.testId,
@@ -826,7 +826,7 @@ export class ParlantPerformanceBenchmarkService {
       return `IMPROVEMENT: ${improvements.length} performance improvements detected. Performance is better than baseline.`;
     }
     
-    return 'STABLE: Performance is within acceptable tolerance of baseline.';}private generateRecommendedActions(degradations: string[], criticalIssues: string[]): string[] {
+    return 'STABLE: Performance is within acceptable tolerance of baseline.';}private generateRecommendations(degradations: string[], criticalIssues: string[]): string[] {
     const actions: string[] = [];
     
     if (criticalIssues.length > 0) {

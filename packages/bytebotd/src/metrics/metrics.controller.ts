@@ -136,9 +136,9 @@ bytebot_parlant_cache_hits_total{operation="metrics_collection"} ${validation.pe
 
       return metricsData + parlantMetrics;
 
-    } catch (_error) {
+    } catch (error) {
       const errorMessage =
-        _error instanceof Error ? _error.message : 'Unknown error';
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
         `[${operationId}] Metrics collection failed: ${errorMessage}`,
         {

@@ -20,7 +20,23 @@
  * @since 2024-01-01
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { Tool } from '@rekog/mcp-nest';import { ComputerUseService } from '../computer-use/computer-use.service';import { compressPngBase64Under1MB } from './compressor';import { McpSchemas, McpToolResponse, MouseMoveParams } from './types';/*** Computer Use Tools Service
+import { Injectable, Logger } from '@nestjs/common';
+import { Tool } from '@rekog/mcp-nest';
+import { ComputerUseService } from '../computer-use/computer-use.service';
+import { compressPngBase64Under1MB } from './compressor';
+import {
+  McpSchemas,
+  McpToolResponse,
+  MouseMoveParams,
+  ComputerUseScreenshotResponse,
+  ComputerUseCursorPositionResponse,
+  ComputerUseFileReadResponse,
+  ComputerUseFileWriteResponse,
+  isScreenshotResponse,
+  isCursorPositionResponse,
+  isFileReadResponse,
+  isFileWriteResponse
+} from './types';/*** Computer Use Tools Service
  *
  * Provides MCP-compatible tool implementations for computer automation operations.
  * All methods include comprehensive logging, error handling, and parameter validation
@@ -51,7 +67,7 @@ export class ComputerUseTools {
    */
   private generateOperationId(): string {
     this.operationCounter = (this.operationCounter + 1) % 10000;
-    return `mcp_op${Date.now()}${this.operationCounter.toString().padStart(4, '0')}';}
+    return `mcp_op${Date.now()}${this.operationCounter.toString().padStart(4, '0')}`;}
 
   /**
    * Logs operation start with comprehensive context
@@ -64,7 +80,9 @@ export class ComputerUseTools {
     toolName: string,
     parameters: Record<string, unknown>,
   ): void {
-    this.logger.log(`[${operationId}] Starting MCP tool execution`, {operationId,toolName,
+    this.logger.log(`[${operationId}] Starting MCP tool execution`, {
+      operationId,
+      toolName,
       parametersSize: JSON.stringify(parameters).length,
       timestamp: new Date().toISOString(),
     });
@@ -85,7 +103,9 @@ export class ComputerUseTools {
   ): void {
     const executionTime = Date.now() - startTime;
     this.logger.log(
-      `[${operationId}] MCP tool execution completed successfully`,{operationId,
+      `[${operationId}] MCP tool execution completed successfully`,
+      {
+        operationId,
         toolName,
         executionTimeMs: executionTime,
         result,
@@ -131,7 +151,10 @@ export class ComputerUseTools {
    * Error Handling: Validates coordinates and handles system-level failures
    */
   @Tool({
-    name: 'computer_move_mouse',description: 'Moves the mouse cursor to the specified coordinates.',parameters: McpSchemas.mouseMove,})
+    name: 'computer_move_mouse',
+    description: 'Moves the mouse cursor to the specified coordinates.',
+    parameters: McpSchemas.mouseMove,
+  })
   async moveMouse({ coordinates }: MouseMoveParams): Promise<McpToolResponse> {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
@@ -145,19 +168,26 @@ export class ComputerUseTools {
       const result = `mouse moved to (${coordinates.x}, ${coordinates.y})`;
       this.logOperationSuccess(
         operationId,
-        'computer_move_mouse',startTime,result,
+        'computer_move_mouse',
+        startTime,
+        result,
       );
 
-      return { content: [{ type: 'text', text: 'mouse moved' }] };} catch (_err) {this.logOperationError(
+      return { content: [{ type: 'text', text: 'mouse moved' }] };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      this.logOperationError(
         operationId,
-        'computer_move_mouse',startTime,_err as Error,
+        'computer_move_mouse',
+        startTime,
+        errorObj,
       );
 
       return {
         content: [
           {
             type: 'text',
-            text: `Error moving mouse: ${_err instanceof Error ? _err.message : String(_err)}`,
+            text: `Error moving mouse: ${errorObj.message}`,
           },
         ],
       };
@@ -203,24 +233,31 @@ export class ComputerUseTools {
         holdKeys,
       });
 
-      const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(`, ')}` : ''}`;
+      const result = `mouse traced along ${path.length} points${holdKeys ? ` with keys: ${holdKeys.join(', ')}` : ""}`;
       this.logOperationSuccess(
         operationId,
-        'computer_trace_mouse',startTime,result,
+        'computer_trace_mouse',
+        startTime,
+        result,
       );
 
       return {
-        content: [{ type: 'text', text: 'mouse traced' }],};} catch (_err) {
+        content: [{ type: 'text', text: 'mouse traced' }],
+      };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
       this.logOperationError(
         operationId,
-        'computer_trace_mouse',startTime,_err as Error,
+        'computer_trace_mouse',
+        startTime,
+        errorObj,
       );
 
       return {
         content: [
           {
             type: 'text',
-            text: `Error tracing mouse: ${(_err as Error).message}`,
+            text: `Error tracing mouse: ${errorObj.message}`,
           },
         ],
       };
@@ -245,12 +282,15 @@ export class ComputerUseTools {
         clickCount,
       });
       return {
-        content: [{ type: 'text', text: 'mouse clicked' }],};} catch (_err) {
+        content: [{ type: 'text', text: 'mouse clicked' }],
+      };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
             type: 'text',
-            text: `Error clicking mouse: ${(_err as Error).message}`,
+            text: `Error clicking mouse: ${errorObj.message}`,
           },
         ],
       };
@@ -271,12 +311,15 @@ export class ComputerUseTools {
         press,
       });
       return {
-        content: [{ type: 'text', text: 'mouse pressed' }],};} catch (_err) {
+        content: [{ type: 'text', text: 'mouse pressed' }],
+      };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
             type: 'text',
-            text: `Error pressing mouse: ${(_err as Error).message}`,
+            text: `Error pressing mouse: ${errorObj.message}`,
           },
         ],
       };
@@ -298,12 +341,15 @@ export class ComputerUseTools {
         holdKeys,
       });
       return {
-        content: [{ type: 'text', text: 'mouse dragged' }],};} catch (_err) {
+        content: [{ type: 'text', text: 'mouse dragged' }],
+      };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
       return {
         content: [
           {
             type: 'text',
-            text: `Error dragging mouse: ${(_err as Error).message}`,
+            text: `Error dragging mouse: ${errorObj.message}`,
           },
         ],
       };
@@ -327,11 +373,14 @@ export class ComputerUseTools {
         scrollCount,
         holdKeys,
       });
-      return { content: [{ type: 'text', text: 'scrolled' }] };} catch (_err) {return {
+      return { content: [{ type: 'text', text: 'scrolled' }] };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
         content: [
           {
             type: 'text',
-            text: `Error scrolling: ${(_err as Error).message}`,
+            text: `Error scrolling: ${errorObj.message}`,
           },
         ],
       };
@@ -370,11 +419,14 @@ V, W, X, Y, Z`,
       await this.computerUseService.action({
         action: 'type_keys',keys,delay,
       });
-      return { content: [{ type: 'text', text: 'keys typed' }] };} catch (_err) {return {
+      return { content: [{ type: 'text', text: 'keys typed' }] };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
         content: [
           {
             type: 'text',
-            text: `Error typing keys: ${(_err as Error).message}`,
+            text: `Error typing keys: ${errorObj.message}`,
           },
         ],
       };
@@ -412,11 +464,14 @@ V, W, X, Y, Z
   async pressKeys({ keys, press }: { keys: string[]; press: 'down' | 'up' }) {try {await this.computerUseService.action({
         action: 'press_keys',keys,press,
       });
-      return { content: [{ type: 'text', text: 'keys pressed' }] };} catch (_err) {return {
+      return { content: [{ type: 'text', text: 'keys pressed' }] };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
         content: [
           {
             type: 'text',
-            text: `Error pressing keys: ${(_err as Error).message}`,
+            text: `Error pressing keys: ${errorObj.message}`,
           },
         ],
       };
@@ -430,11 +485,14 @@ V, W, X, Y, Z
       await this.computerUseService.action({
         action: 'type_text',text,delay,
       });
-      return { content: [{ type: 'text', text: 'text typed' }] };} catch (_err) {return {
+      return { content: [{ type: 'text', text: 'text typed' }] };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
         content: [
           {
             type: 'text',
-            text: `Error typing text: ${(_err as Error).message}`,
+            text: `Error typing text: ${errorObj.message}`,
           },
         ],
       };
@@ -445,11 +503,15 @@ V, W, X, Y, Z
     name: 'computer_paste_text',description:'Copies text to the clipboard and pastes it. Use this tool for typing long text strings or special characters not on the standard keyboard.',parameters: McpSchemas.pasteText,})
   async pasteText({ text }: { text: string }) {
     try {
-      await this.computerUseService.action({ action: 'paste_text', text });return { content: [{ type: 'text', text: 'text pasted' }] };} catch (_err) {return {
+      await this.computerUseService.action({ action: 'paste_text', text });
+      return { content: [{ type: 'text', text: 'text pasted' }] };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
         content: [
           {
             type: 'text',
-            text: `Error pasting text: ${(_err as Error).message}`,
+            text: `Error pasting text: ${errorObj.message}`,
           },
         ],
       };
@@ -460,11 +522,15 @@ V, W, X, Y, Z
     name: 'computer_wait',description: 'Pauses execution for a specified duration.',parameters: McpSchemas.wait,})
   async wait({ duration }: { duration: number }) {
     try {
-      await this.computerUseService.action({ action: 'wait', duration });return { content: [{ type: 'text', text: 'waiting done' }] };} catch (_err) {return {
+      await this.computerUseService.action({ action: 'wait', duration });
+      return { content: [{ type: 'text', text: 'waiting done' }] };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
         content: [
           {
             type: 'text',
-            text: `Error waiting: ${(_err as Error).message}`,
+            text: `Error waiting: ${errorObj.message}`,
           },
         ],
       };
@@ -479,12 +545,17 @@ V, W, X, Y, Z
     application:
       | 'firefox'| '1password'| 'thunderbird'| 'vscode'| 'terminal'| 'desktop'| 'directory';}) {try {
       await this.computerUseService.action({
-        action: 'application',application,});
-      return { content: [{ type: 'text', text: 'application opened' }] };} catch (_err) {return {
+        action: 'application',
+        application,
+      });
+      return { content: [{ type: 'text', text: 'application opened' }] };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
         content: [
           {
             type: 'text',
-            text: `Error opening application: ${(_err as Error).message}`,
+            text: `Error opening application: ${errorObj.message}`,
           },
         ],
       };
@@ -515,13 +586,24 @@ V, W, X, Y, Z
     const startTime = Date.now();
     const screenshotStartTime = Date.now();
 
-    this.logOperationStart(operationId, 'computer_screenshot', {});try {// Capture raw screenshot through computer use service
-      const shot = (await this.computerUseService.action({
+    this.logOperationStart(operationId, 'computer_screenshot', {});
+
+    try {
+      // Capture raw screenshot through computer use service
+      const result = await this.computerUseService.action({
         action: 'screenshot',
-      })) as { image: string };
+      });
+
+      if (!isScreenshotResponse(result)) {
+        throw new Error('Invalid screenshot response format');
+      }
+
+      const shot = result;
 
       const captureTime = Date.now() - screenshotStartTime;
-      this.logger.debug(`[${operationId}] Screenshot captured`, {operationId,captureTimeMs: captureTime,
+      this.logger.debug(`[${operationId}] Screenshot captured`, {
+        operationId,
+        captureTimeMs: captureTime,
         rawImageSize: shot.image.length,
       });
 
@@ -532,33 +614,46 @@ V, W, X, Y, Z
 
       const compressionRatio = compressedImage.length / shot.image.length;
 
-      this.logger.debug(`[${operationId}] Screenshot compressed`, {operationId,compressionTimeMs: compressionTime,
+      this.logger.debug(`[${operationId}] Screenshot compressed`, {
+        operationId,
+        compressionTimeMs: compressionTime,
         originalSize: shot.image.length,
         compressedSize: compressedImage.length,
         compressionRatio: compressionRatio.toFixed(3),
-        compressionPercentage: `${((1 - compressionRatio) * 100).toFixed(1)}%`,});const result = `screenshot captured and compressed (${((1 - compressionRatio) * 100).toFixed(1)}% reduction)`;
+        compressionPercentage: `${((1 - compressionRatio) * 100).toFixed(1)}%`,
+      });
+
+      const resultMessage = `screenshot captured and compressed (${((1 - compressionRatio) * 100).toFixed(1)}% reduction)`;
       this.logOperationSuccess(
         operationId,
-        'computer_screenshot',startTime,result,
+        'computer_screenshot',
+        startTime,
+        resultMessage,
       );
 
       return {
         content: [
           {
-            type: 'image',data: compressedImage,mimeType: 'image/png',},],
+            type: 'image',
+            data: compressedImage,
+            mimeType: 'image/png',
+          },
+        ],
       };
-    } catch (_err) {
-      const error = _err as Error;
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
       this.logOperationError(
         operationId,
-        'computer_screenshot',startTime,error,
+        'computer_screenshot',
+        startTime,
+        errorObj,
       );
 
       return {
         content: [
           {
             type: 'text',
-            text: `Error taking screenshot: ${(_err as Error).message}`,
+            text: `Error taking screenshot: ${errorObj.message}`,
           },
         ],
       };
@@ -566,21 +661,34 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_cursor_position',description: 'Gets the current (x, y) coordinates of the mouse cursor.',})async cursorPosition() {
+    name: 'computer_cursor_position',
+    description: 'Gets the current (x, y) coordinates of the mouse cursor.',
+  })
+  async cursorPosition() {
     try {
-      const pos = (await this.computerUseService.action({
-        action: 'cursor_position',})) as { x: number; y: number };return {
-        content: [
-          {
-            type: 'text',text: JSON.stringify(pos),},
-        ],
-      };
-    } catch (_err) {
+      const result = await this.computerUseService.action({
+        action: 'cursor_position',
+      });
+
+      if (!isCursorPositionResponse(result)) {
+        throw new Error('Invalid cursor position response format');
+      }
+
       return {
         content: [
           {
             type: 'text',
-            text: `Error getting cursor position: ${(_err as Error).message}`,
+            text: JSON.stringify(result),
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error getting cursor position: ${errorObj.message}`,
           },
         ],
       };
@@ -588,26 +696,46 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_write_file',description:'Writes a file to the specified path with base64 encoded data.',parameters: McpSchemas.writeFile,})
+    name: 'computer_write_file',
+    description:'Writes a file to the specified path with base64 encoded data.',
+    parameters: McpSchemas.writeFile,
+  })
   async writeFile({ path, data }: { path: string; data: string }) {
     try {
       const result = await this.computerUseService.action({
-        action: 'write_file',path,data,
+        action: 'write_file',
+        path,
+        data,
       });
 
-      const message = (() => {
-        if (result && typeof result === 'object' && 'message' in result) {const msg = (result as { message: unknown }).message;return typeof msg === 'string' ? msg : 'File operation completed';}return 'File written successfully';})();return {
-        content: [
-          {
-            type: 'text',text: message,},
-        ],
-      };
-    } catch (_err) {
+      // Use type guard to safely check file write response
+      if (isFileWriteResponse(result)) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: result.message,
+            },
+          ],
+        };
+      }
+
+      // Fallback for unknown response format
       return {
         content: [
           {
             type: 'text',
-            text: `Error writing file: ${(_err as Error).message}`,
+            text: 'File written successfully',
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error writing file: ${errorObj.message}`,
           },
         ],
       };
@@ -615,49 +743,64 @@ V, W, X, Y, Z
   }
 
   @Tool({
-    name: 'computer_read_file',description:'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',parameters: McpSchemas.readFile,})
+    name: 'computer_read_file',
+    description:'Reads a file from the specified path and returns it as a document content block with base64 encoded data.',
+    parameters: McpSchemas.readFile,
+  })
   async readFile({ path }: { path: string }) {
     try {
       const result = await this.computerUseService.action({
-        action: 'read_file',path,});
+        action: 'read_file',
+        path,
+      });
 
-      // Type guard to check if result has the expected structure
-      const hasValidResult =
-        result &&
-        typeof result === 'object' &&'success' in result &&'data' in result &&(result as { success: unknown; data: unknown }).success &&(result as { success: unknown; data: unknown }).data;
-
-      if (hasValidResult) {
-        const fileResult = result as {
-          success: boolean;
-          data: string;
-          mediaType?: string;
-          name?: string;
-          size?: number;
-        };
-
-        // Return document content block
+      // Use type guard to safely check file read response
+      if (isFileReadResponse(result) && result.success && result.data) {
+        // Return document content block for successful read
         return {
           content: [
             {
-              type: 'document',source: {type: 'base64',media_type: fileResult.mediaType ?? 'application/octet-stream',data: fileResult.data,},
-              name: fileResult.name ?? 'file',size: fileResult.size ?? 0,},
-          ],
-        };
-      } else {
-        const errorMessage = (() => {
-          if (result && typeof result === 'object' && 'message' in result) {const msg = (result as { message: unknown }).message;return typeof msg === 'string' ? msg : 'Unknown error';}return 'Error reading file';})();return {
-          content: [
-            {
-              type: 'text',text: errorMessage,},
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: result.mediaType ?? 'application/octet-stream',
+                data: result.data,
+              },
+              name: result.name ?? 'file',
+              size: result.size ?? 0,
+            },
           ],
         };
       }
-    } catch (_err) {
+
+      // Handle error response or invalid response format
+      if (isFileReadResponse(result) && result.message) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: result.message,
+            },
+          ],
+        };
+      }
+
+      // Fallback for unknown response format
       return {
         content: [
           {
             type: 'text',
-            text: `Error reading file: ${(_err as Error).message}`,
+            text: 'Error reading file: unknown response format',
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error reading file: ${errorObj.message}`,
           },
         ],
       };

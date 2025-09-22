@@ -659,7 +659,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
       // Execute the validated admin operation
       const startTime = Date.now();
-      const adminResult = this.executeValidatedAdminOperation(adminRequest, validationResult) as any;
+      const adminResult: unknown = this.executeValidatedAdminOperation(adminRequest, validationResult);
       const executionTime = Date.now() - startTime;
 
       this.logger.log(`Admin operation completed successfully: ${operationId} (${executionTime}ms)`);
@@ -752,7 +752,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
       // Retrieve the validated schema
       const startTime = Date.now();
-      const schemaResult = this.getValidatedTableSchema(tableName, options, validationResult) as any;
+      const schemaResult: unknown = this.getValidatedTableSchema(tableName, options, validationResult);
       const executionTime = Date.now() - startTime;
 
       this.logger.log(`Table schema retrieved successfully: ${operationId} (${executionTime}ms)`);

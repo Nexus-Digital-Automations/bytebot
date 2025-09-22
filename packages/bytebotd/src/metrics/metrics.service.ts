@@ -263,16 +263,16 @@ export class BytebotMetricsService {
         `[${operationId}] Prometheus metrics collected successfully`,
       );
       return metrics;
-    } catch (_error) {
+    } catch (error) {
       const errorMessage =
-        _error instanceof Error ? _error.message : 'Unknown error';
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
         `[${operationId}] Failed to collect Prometheus metrics: ${errorMessage}`,
       );
 
       // Ensure we only throw Error objects
-      if (_error instanceof Error) {
-        throw _error;
+      if (error instanceof Error) {
+        throw error;
       } else {
         throw new Error(`Failed to collect Prometheus metrics: ${errorMessage}`);
       }
@@ -686,9 +686,9 @@ export class BytebotMetricsService {
 
       // CPU usage would require additional system monitoring
       // For now, we'll skip CPU metrics to avoid complexity
-    } catch (_error) {
+    } catch (error) {
       const errorMessage =
-        _error instanceof Error ? _error.message : 'Unknown error';
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to update system metrics: ${errorMessage}`);
     }
   }
@@ -714,8 +714,8 @@ export class BytebotMetricsService {
         activeConnections: Math.floor(Math.random() * 200), // Mock active connections
         requestsPerSecond: Math.floor(Math.random() * 300), // Mock RPS
       };
-    } catch (error) {
-      this.logger.error('Failed to get system metrics', error);
+    } catch (_error) {
+      this.logger.error('Failed to get system metrics', _error);
       return {
         cpuUsage: 0,
         memoryUsage: 0,

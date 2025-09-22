@@ -14,11 +14,27 @@
  * @since PARLANT Phase 1 Integration
  */
 
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import Redis from 'ioredis';import * as crypto from 'crypto';import * as jwt from 'jsonwebtoken';import { v4 as uuidv4 } from 'uuid';import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';import { SessionMetadata, SessionState } from './session-management.service';// ===== SESSION SECURITY ENUMS =====/**
+import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import Redis from 'ioredis';
+import * as crypto from 'crypto';
+import * as jwt from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
+import { SecurityAuditService, AuditEventType, AuditSeverity } from '../security/security-audit.service';
+import { SessionMetadata, SessionState } from './session-management.service';
+
+// ===== SESSION SECURITY ENUMS =====
+
+/**
  * Encryption algorithms supported for session security
  */
 export enum EncryptionAlgorithm {
-  AES_256_GCM = 'aes-256-gcm',AES_256_CBC = 'aes-256-cbc',CHACHA20_POLY1305 = 'chacha20-poly1305',AES_128_GCM = 'aes-128-gcm'}/**
+  AES_256_GCM = 'aes-256-gcm',
+  AES_256_CBC = 'aes-256-cbc',
+  CHACHA20_POLY1305 = 'chacha20-poly1305',
+  AES_128_GCM = 'aes-128-gcm'
+}/**
  * Session security levels for different threat scenarios
  */
 export enum SessionSecurityLevel {
@@ -122,7 +138,7 @@ export interface AuthenticationFactorData {
   readonly timestamp: Date;
   readonly verified: boolean;
   readonly confidence: number;
-  readonly metadata: Record<string, any>;
+  readonly metadata: Record<string, unknown>;
 }
 
 /**
@@ -148,11 +164,11 @@ export interface ThreatDetectionResult {
  */
 export interface ThreatIndicator {
   readonly type: string;
-  readonly value: any;
+  readonly value: unknown;
   readonly source: string;
   readonly confidence: number;
   readonly timestamp: Date;
-  readonly context: Record<string, any>;
+  readonly context: Record<string, unknown>;
 }
 
 /**
@@ -184,8 +200,8 @@ export interface SessionLogEntry {
   readonly timestamp: Date;
   readonly action: string;
   readonly resource: string;
-  readonly parameters: Record<string, any>;
-  readonly response: Record<string, any>;
+  readonly parameters: Record<string, unknown>;
+  readonly response: Record<string, unknown>;
   readonly duration: number;
   readonly success: boolean;
   readonly errorCode?: string;
@@ -315,7 +331,7 @@ export interface SystemEventData {
   readonly source: string;
   readonly severity: string;
   readonly message: string;
-  readonly metadata: Record<string, any>;
+  readonly metadata: Record<string, unknown>;
 }
 
 /**
@@ -376,8 +392,8 @@ export interface RegistryChange {
   readonly value: string;
   readonly operation: 'create' | 'modify' | 'delete';
   readonly timestamp: Date;
-  readonly oldData?: any;
-  readonly newData?: any;
+  readonly oldData?: unknown;
+  readonly newData?: unknown;
 }
 
 /**
@@ -426,6 +442,19 @@ export interface TimeoutSettings {
   readonly maxIdleTime: number;
 }
 
+/**
+ * Session validation details
+ */
+export interface SessionValidationDetails {
+  readonly sessionExists: boolean;
+  readonly deviceFingerprint: boolean;
+  readonly geolocation: boolean;
+  readonly authenticationFactors: boolean;
+  readonly behavioralProfile: boolean;
+  readonly threatDetection: ThreatDetectionResult[];
+  readonly complianceChecks: boolean;
+}
+
 // ===== SESSION SECURITY SERVICE =====
 
 /**
@@ -459,9 +488,24 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
   ) {
     // Initialize encryption configuration
     this.defaultEncryptionConfig = {
-      algorithm: this.configService.get<EncryptionAlgorithm>('SESSION_ENCRYPTION_ALGORITHM', EncryptionAlgorithm.AES_256_GCM),keySize: this.configService.get<number>('SESSION_KEY_SIZE', 32),ivSize: this.configService.get<number>('SESSION_IV_SIZE', 16),tagSize: this.configService.get<number>('SESSION_TAG_SIZE', 16),keyDerivationFunction: this.configService.get<'pbkdf2' | 'scrypt' | 'argon2'>('SESSION_KDF', 'pbkdf2'),keyDerivationIterations: this.configService.get<number>('SESSION_KDF_ITERATIONS', 100000),saltSize: this.configService.get<number>('SESSION_SALT_SIZE', 32),compressionEnabled: this.configService.get<boolean>('SESSION_COMPRESSION_ENABLED', true),integrityValidation: this.configService.get<boolean>('SESSION_INTEGRITY_VALIDATION', true)};// Initialize security configuration
-    this.defaultSecurityLevel = this.configService.get<SessionSecurityLevel>('DEFAULT_SECURITY_LEVEL', SessionSecurityLevel.ENHANCED);this.threatDetectionEnabled = this.configService.get<boolean>('THREAT_DETECTION_ENABLED', true);this.behavioralAnalysisEnabled = this.configService.get<boolean>('BEHAVIORAL_ANALYSIS_ENABLED', true);// Initialize multi-factor authentication configurationthis.multiFactorAuthConfig = {
-      requiredFactors: this.configService.get<number>('MFA_REQUIRED_FACTORS', 2),availableFactors: [AuthenticationFactor.PASSWORD, AuthenticationFactor.TOTP, AuthenticationFactor.BIOMETRIC],stepUpConditions: [],
+      algorithm: this.configService.get<EncryptionAlgorithm>('SESSION_ENCRYPTION_ALGORITHM', EncryptionAlgorithm.AES_256_GCM),
+      keySize: this.configService.get<number>('SESSION_KEY_SIZE', 32),
+      ivSize: this.configService.get<number>('SESSION_IV_SIZE', 16),
+      tagSize: this.configService.get<number>('SESSION_TAG_SIZE', 16),
+      keyDerivationFunction: this.configService.get<'pbkdf2' | 'scrypt' | 'argon2'>('SESSION_KDF', 'pbkdf2'),
+      keyDerivationIterations: this.configService.get<number>('SESSION_KDF_ITERATIONS', 100000),
+      saltSize: this.configService.get<number>('SESSION_SALT_SIZE', 32),
+      compressionEnabled: this.configService.get<boolean>('SESSION_COMPRESSION_ENABLED', true),
+      integrityValidation: this.configService.get<boolean>('SESSION_INTEGRITY_VALIDATION', true)};// Initialize security configuration
+    this.defaultSecurityLevel = this.configService.get<SessionSecurityLevel>('DEFAULT_SECURITY_LEVEL', SessionSecurityLevel.ENHANCED);
+    this.threatDetectionEnabled = this.configService.get<boolean>('THREAT_DETECTION_ENABLED', true);
+    this.behavioralAnalysisEnabled = this.configService.get<boolean>('BEHAVIORAL_ANALYSIS_ENABLED', true);
+
+    // Initialize multi-factor authentication configuration
+    this.multiFactorAuthConfig = {
+      requiredFactors: this.configService.get<number>('MFA_REQUIRED_FACTORS', 2),
+      availableFactors: [AuthenticationFactor.PASSWORD, AuthenticationFactor.TOTP, AuthenticationFactor.BIOMETRIC],
+      stepUpConditions: [],
       timeoutSettings: {
         singleFactorTimeout: 300000, // 5 minutes
         multiFactorTimeout: 600000, // 10 minutes
@@ -551,7 +595,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
    */
   async encryptSessionData(
     sessionId: string,
-    data: any,
+    data: unknown,
     config?: Partial<SessionEncryptionConfig>
   ): Promise<EncryptedSessionData> {
     const startTime = Date.now();
@@ -579,7 +623,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
 
       // Encrypt data
       const cipher = crypto.createCipher(encryptionConfig.algorithm, derivedKey);
-      let encryptedData = cipher.update(serializedData, 'utf8', 'hex');encryptedData += cipher.final('hex');// Get authentication tag for GCM modeslet tag = '';if (encryptionConfig.algorithm.includes('gcm')) {tag = (cipher as any).getAuthTag().toString('hex');}// Calculate integrity hash
+      let encryptedData = cipher.update(serializedData, 'utf8', 'hex');encryptedData += cipher.final('hex');// Get authentication tag for GCM modeslet tag = '';if (encryptionConfig.algorithm.includes('gcm')) {tag = (cipher as crypto.CipherGCM).getAuthTag().toString('hex');}// Calculate integrity hash
       const integrityHash = this.calculateIntegrityHash(encryptedData, iv, salt, derivedKey);
 
       const result: EncryptedSessionData = {
@@ -613,7 +657,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
   /**
    * Decrypt session data
    */
-  async decryptSessionData(encryptedSessionData: EncryptedSessionData): Promise<any> {
+  async decryptSessionData(encryptedSessionData: EncryptedSessionData): Promise<unknown> {
     const startTime = Date.now();
 
     try {
@@ -633,7 +677,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
       if (expectedIntegrityHash !== encryptedSessionData.integrityHash) {
         throw new Error('Session data integrity verification failed');}// Decrypt data
       const decipher = crypto.createDecipher(encryptedSessionData.algorithm, derivedKey);
-      if (tag && encryptedSessionData.algorithm.includes('gcm')) {(decipher as any).setAuthTag(tag);}
+      if (tag && encryptedSessionData.algorithm.includes('gcm')) {(decipher as crypto.DecipherGCM).setAuthTag(tag);}
 
       let decryptedData = decipher.update(encryptedSessionData.encryptedData, 'hex', 'utf8');decryptedData += decipher.final('utf8');// Decompress if compression was appliedif (encryptedSessionData.compressionApplied) {
         decryptedData = await this.decompressData(decryptedData);
@@ -679,7 +723,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
   /**
    * Validate session security
    */
-  async validateSession(context: SessionValidationContext): Promise<{ result: ValidationResult; details: any }> {
+  async validateSession(context: SessionValidationContext): Promise<{ result: ValidationResult; details: SessionValidationDetails }> {
     const startTime = Date.now();
 
     try {
@@ -902,7 +946,7 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
   private async validateAuthenticationFactors(context: SessionValidationContext): Promise<boolean> { return true; }
   private async validateBehavioralProfile(context: SessionValidationContext): Promise<boolean> { return true; }
   private async performComplianceChecks(context: SessionValidationContext): Promise<boolean> { return true; }
-  private calculateOverallValidationResult(results: any): ValidationResult { return ValidationResult.VALID; }
+  private calculateOverallValidationResult(results: SessionValidationDetails): ValidationResult { return ValidationResult.VALID; }
   private getValidationSeverity(result: ValidationResult): AuditSeverity { return AuditSeverity.INFO; }
   private async detectBruteForceAttack(context: SessionValidationContext): Promise<ThreatDetectionResult | null> { return null; }
   private async detectSessionHijacking(context: SessionValidationContext): Promise<ThreatDetectionResult | null> { return null; }

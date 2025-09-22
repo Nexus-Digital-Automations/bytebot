@@ -27,37 +27,98 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication 
   TestUtils,
   AssertionHelpers,
   MockDataProviders,
-} from '../../test-utils';/*** MCP Protocol Compliance Validator
+} from '../../test-utils';
+
+/**
+ * MCP message interface
+ */
+interface McpMessage {
+  id?: string | number;
+  method?: string;
+  params?: Record<string, unknown>;
+  result?: Record<string, unknown>;
+  error?: {
+    code: number;
+    message: string;
+    data?: unknown;
+  };
+}
+
+/**
+ * Tool definition interface
+ */
+interface McpTool {
+  name: string;
+  description: string;
+  inputSchema: Record<string, unknown>;
+}
+
+/**
+ * Tool list response interface
+ */
+interface ToolListResponse {
+  tools: McpTool[];
+}
+
+/**
+ * Tool call content item interface
+ */
+interface ToolCallContentItem {
+  type: 'text' | 'image' | 'resource';
+  text?: string;
+  data?: unknown;
+}
+
+/**
+ * Tool call response interface
+ */
+interface ToolCallResponse {
+  result: {
+    content: ToolCallContentItem[];
+  };
+}
+
+/**
+ * Session data interface
+ */
+interface SessionData {
+  sessionId: string;
+  createdAt: Date;
+  capabilities: Record<string, unknown>;
+  clientInfo: Record<string, unknown>;
+}
+
+/*** MCP Protocol Compliance Validator
  */
 class McpComplianceValidator {
   /**
    * Validate MCP initialization handshake
    */
-  static validateInitializationHandshake(messages: any[]) {
+  static validateInitializationHandshake(messages: McpMessage[]) {
     const initRequest = messages.find(m => m.method === 'initialize');const initResponse = messages.find(m => m.result && m.id === initRequest?.id);expect(initRequest).toBeDefined();
     expect(initRequest.params).toHaveProperty('protocolVersion');expect(initRequest.params).toHaveProperty('capabilities');expect(initResponse).toBeDefined();expect(initResponse.result).toHaveProperty('protocolVersion');expect(initResponse.result).toHaveProperty('serverInfo');expect(initResponse.result).toHaveProperty('capabilities');return { initRequest, initResponse };}
 
   /**
    * Validate tool discovery process
    */
-  static validateToolDiscovery(toolListResponse: any) {
-    expect(toolListResponse).toHaveProperty('tools');expect(Array.isArray(toolListResponse.tools)).toBe(true);toolListResponse.tools.forEach((tool: any) => {
+  static validateToolDiscovery(toolListResponse: ToolListResponse) {
+    expect(toolListResponse).toHaveProperty('tools');expect(Array.isArray(toolListResponse.tools)).toBe(true);toolListResponse.tools.forEach((tool: McpTool) => {
       expect(tool).toHaveProperty('name');expect(tool).toHaveProperty('description');expect(tool).toHaveProperty('inputSchema');expect(typeof tool.name).toBe('string');expect(typeof tool.description).toBe('string');expect(typeof tool.inputSchema).toBe('object');});return toolListResponse.tools;
   }
 
   /**
    * Validate tool execution flow
    */
-  static validateToolExecution(callRequest: any, callResponse: any) {
+  static validateToolExecution(callRequest: McpMessage, callResponse: ToolCallResponse) {
     // Validate call request
-    expect(callRequest).toHaveProperty('method', 'tools/call');expect(callRequest).toHaveProperty('params');expect(callRequest.params).toHaveProperty('name');expect(callRequest.params).toHaveProperty('arguments');// Validate call responseexpect(callResponse).toHaveProperty('result');expect(callResponse.result).toHaveProperty('content');expect(Array.isArray(callResponse.result.content)).toBe(true);callResponse.result.content.forEach((item: any) => {
+    expect(callRequest).toHaveProperty('method', 'tools/call');expect(callRequest).toHaveProperty('params');expect(callRequest.params).toHaveProperty('name');expect(callRequest.params).toHaveProperty('arguments');// Validate call responseexpect(callResponse).toHaveProperty('result');expect(callResponse.result).toHaveProperty('content');expect(Array.isArray(callResponse.result.content)).toBe(true);callResponse.result.content.forEach((item: ToolCallContentItem) => {
       expect(item).toHaveProperty('type');expect(['text', 'image', 'resource'].includes(item.type)).toBe(true);});return { callRequest, callResponse };
   }
 
   /**
    * Validate session management
    */
-  static validateSessionManagement(sessionData: any) {
+  static validateSessionManagement(sessionData: SessionData) {
     expect(sessionData).toHaveProperty('sessionId');expect(sessionData).toHaveProperty('createdAt');expect(sessionData).toHaveProperty('capabilities');expect(sessionData).toHaveProperty('clientInfo');
 
     return sessionData;
@@ -71,8 +132,8 @@ class MockMcpClient extends EventEmitter {
   private messageId = 0;
   private pendingRequests = new Map<string | number, { resolve: Function; reject: Function }>();
   private sessionId: string | null = null;
-  private capabilities: any = {};
-  private tools: any[] = [];
+  private capabilities: Record<string, unknown> = {};
+  private tools: McpTool[] = [];
 
   constructor(private serverUrl: string) {
     super();
@@ -439,7 +500,7 @@ describe('MCP Integration and Protocol Compliance', () => {let app: INestApplica
     it('should validate JSON-RPC 2.0 message format compliance', async () => {
       const operationId = `${testId}_jsonrpc_compliance`;console.log(`[${operationId}] Testing JSON-RPC 2.0 message format compliance`);
 
-      const messages: any[] = [];
+      const messages: McpMessage[] = [];
 
       // Capture all messages
       mockClient.on('message', (message) => {messages.push(message);});
@@ -479,7 +540,7 @@ describe('MCP Integration and Protocol Compliance', () => {let app: INestApplica
       });
 
       // Validate tool schema structure
-      tools.forEach((tool: any) => {
+      tools.forEach((tool: McpTool) => {
         expect(tool.inputSchema).toHaveProperty('type', 'object');expect(tool.inputSchema).toHaveProperty('properties');
         
         if (tool.inputSchema.required) {

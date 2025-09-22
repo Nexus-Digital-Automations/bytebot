@@ -217,6 +217,32 @@ export interface BasicOperationResult {
   };
 }
 
+/**
+ * Computer Use Service response types for type-safe API interactions
+ */
+export interface ComputerUseScreenshotResponse {
+  image: string;
+}
+
+export interface ComputerUseCursorPositionResponse {
+  x: number;
+  y: number;
+}
+
+export interface ComputerUseFileReadResponse {
+  success: boolean;
+  data: string;
+  mediaType?: string;
+  name?: string;
+  size?: number;
+  message?: string;
+}
+
+export interface ComputerUseFileWriteResponse {
+  success: boolean;
+  message: string;
+}
+
 // ==========================================
 // Compression Types
 // ==========================================
@@ -397,7 +423,8 @@ export const McpSchemas = {
     keys: z
       .array(z.string())
       .describe(
-        'An array of key names to type in sequence (e.g., ["control", "c"]).",),
+        'An array of key names to type in sequence (e.g., ["control", "c"]).',
+      ),
     delay: z
       .number()
       .optional()
@@ -441,6 +468,66 @@ export function isCompressionResult(
 ): value is CompressionResult {
   return (
     typeof value === 'object' &&value !== null &&'base64' in value &&'originalSizeKB' in value &&'compressedSizeKB' in value
+  );
+}
+
+/**
+ * Type guard to check if a value is a screenshot response
+ */
+export function isScreenshotResponse(
+  value: unknown,
+): value is ComputerUseScreenshotResponse {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'image' in value &&
+    typeof (value as ComputerUseScreenshotResponse).image === 'string'
+  );
+}
+
+/**
+ * Type guard to check if a value is a cursor position response
+ */
+export function isCursorPositionResponse(
+  value: unknown,
+): value is ComputerUseCursorPositionResponse {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'x' in value &&
+    'y' in value &&
+    typeof (value as ComputerUseCursorPositionResponse).x === 'number' &&
+    typeof (value as ComputerUseCursorPositionResponse).y === 'number'
+  );
+}
+
+/**
+ * Type guard to check if a value is a file read response
+ */
+export function isFileReadResponse(
+  value: unknown,
+): value is ComputerUseFileReadResponse {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'success' in value &&
+    typeof (value as ComputerUseFileReadResponse).success === 'boolean'
+  );
+}
+
+/**
+ * Type guard to check if a value is a file write response
+ */
+export function isFileWriteResponse(
+  value: unknown,
+): value is ComputerUseFileWriteResponse {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'success' in value &&
+    'message' in value &&
+    typeof (value as ComputerUseFileWriteResponse).success === 'boolean' &&
+    typeof (value as ComputerUseFileWriteResponse).message === 'string'
   );
 }
 

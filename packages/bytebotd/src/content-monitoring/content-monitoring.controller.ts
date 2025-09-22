@@ -96,8 +96,9 @@ export class ContentMonitoringController {
       return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to create monitor: ${config.id}`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -125,8 +126,9 @@ export class ContentMonitoringController {
       return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to get monitor status: ${monitorId}`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -161,8 +163,9 @@ export class ContentMonitoringController {
       return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to list monitors`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -196,8 +199,9 @@ export class ContentMonitoringController {
       return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Operation ${operation.operation} failed on monitor: ${monitorId}`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -233,8 +237,9 @@ export class ContentMonitoringController {
       return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Bulk operation ${operation.operation} failed`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -287,8 +292,9 @@ export class ContentMonitoringController {
       return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to get change history for monitor: ${monitorId}`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -313,8 +319,9 @@ export class ContentMonitoringController {
       this.logger.log(`Monitor deleted successfully in ${Date.now() - startTime}ms`, {monitorId});
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to delete monitor: ${monitorId}`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -342,8 +349,9 @@ export class ContentMonitoringController {
       return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to trigger check for monitor: ${monitorId}`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -395,11 +403,12 @@ export class ContentMonitoringController {
       return health;
 
     } catch (error) {
-      this.logger.error('Failed to get system health', {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Failed to get system health', {error: errorMessage,duration: Date.now() - startTime
       });
 
       return {
-        status: 'unhealthy',timestamp: new Date().toISOString(),error: error.message,
+        status: 'unhealthy',timestamp: new Date().toISOString(),error: errorMessage,
         requestDuration: Date.now() - startTime
       };
     }

@@ -83,7 +83,8 @@ export class ContentMonitoringService {
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to create monitor: ${config.id}`, {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to create monitor: ${config.id}`, {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -124,7 +125,8 @@ export class ContentMonitoringService {
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to get monitor status: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to get monitor status: ${monitorId}`, {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -190,7 +192,8 @@ export class ContentMonitoringService {
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to list monitors`, {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to list monitors`, {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -251,7 +254,8 @@ export class ContentMonitoringService {
       return response;
 
     } catch (error) {
-      this.logger.error(`Operation failed: ${operation.operation} on monitor: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Operation failed: ${operation.operation} on monitor: ${monitorId}`, {error: errorMessage,duration: Date.now() - startTime
       });
 
       return {
@@ -260,7 +264,7 @@ export class ContentMonitoringService {
         monitorId,
         timestamp: new Date().toISOString(),
         newStatus: this.monitors.get(monitorId)?.status || MonitorStatus.ERROR,
-        errorMessage: error.message,
+        errorMessage,
         metadata: {
           operationDuration: Date.now() - startTime,
           ...operation.metadata
@@ -298,13 +302,14 @@ export class ContentMonitoringService {
         }
 
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         const errorResult: MonitorOperationResponseDto = {
           success: false,
           operation: operation.operation,
           monitorId,
           timestamp: new Date().toISOString(),
           newStatus: MonitorStatus.ERROR,
-          errorMessage: error.message
+          errorMessage
         };
 
         results.push(errorResult);
@@ -393,7 +398,8 @@ export class ContentMonitoringService {
       return response;
 
     } catch (error) {
-      this.logger.error(`Failed to get change history for monitor: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to get change history for monitor: ${monitorId}`, {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -419,7 +425,8 @@ export class ContentMonitoringService {
       this.logger.log(`Monitor deleted successfully in ${Date.now() - startTime}ms`, {monitorId});
 
     } catch (error) {
-      this.logger.error(`Failed to delete monitor: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to delete monitor: ${monitorId}`, {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -453,7 +460,8 @@ export class ContentMonitoringService {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to trigger check for monitor: ${monitorId}`, {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to trigger check for monitor: ${monitorId}`, {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -537,7 +545,8 @@ class MonitorInstance {
       this.status = MonitorStatus.ACTIVE;
       this.logger.log(`Monitor started successfully`);} catch (error) {this.status = MonitorStatus.ERROR;
       this.lastError = error;
-      this.logger.error(`Failed to start monitor`, { error: error.message });throw error;}
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`Failed to start monitor`, { error: errorMessage });throw error;}
   }
 
   async stop(): Promise<void> {
@@ -631,14 +640,15 @@ class MonitorInstance {
             const notification = await this.sendNotification(notificationConfig, changeDetection);
             notifications.push(notification);
           } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             this.logger.error(`Notification failed`, {
               method: notificationConfig.method,
-              error: error.message
+              error: errorMessage
             });
             notifications.push({
               method: notificationConfig.method,
               target: notificationConfig.target || 'unknown',delivered: false,deliveredAt: new Date().toISOString(),
-              errorMessage: error.message,
+              errorMessage,
               attemptNumber: 1
             });
           }
@@ -690,16 +700,16 @@ class MonitorInstance {
           detectedAt: new Date().toISOString(),
           method: this.config.detection.method
         },
-        errorMessage: error.message,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
         metadata: {
           checkCount: this.checkCount,
-          error: error.name
+          error: error instanceof Error ? error.name : 'Unknown'
         }
       };
 
       this.logger.error(`Check failed in ${result.durationMs}ms`, {
         checkId,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
 
       return result;
@@ -867,7 +877,7 @@ class MonitorInstance {
           await this.performCheck();
           this.scheduleNextCheck(); // Schedule next check
         } catch (error) {
-          this.logger.error(`Scheduled check failed`, { error: error.message });
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';\n          this.logger.error(`Scheduled check failed`, { error: errorMessage });
           this.status = MonitorStatus.ERROR;
           this.lastError = error;
         }

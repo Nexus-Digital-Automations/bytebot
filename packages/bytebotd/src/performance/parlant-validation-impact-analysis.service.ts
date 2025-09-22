@@ -35,6 +35,81 @@ export enum ValidationComplexity {
  */
 export enum ValidationCategory {
   PARAMETER_VALIDATION = 'parameter_validation',SECURITY_VALIDATION = 'security_validation',BUSINESS_LOGIC_VALIDATION = 'business_logic_validation',CONTEXTUAL_VALIDATION = 'contextual_validation',COMPLIANCE_VALIDATION = 'compliance_validation',}/**
+ * Current impact metrics structure
+ */
+export interface CurrentImpactMetrics {
+  totalMeasurements: number;
+  averageLatency: number;
+  throughputDecrease: number;
+  cacheHitRate: number;
+  resourceOverhead: number;
+  lastUpdated: Date;
+}
+
+/**
+ * Performance baseline structure
+ */
+export interface PerformanceBaseline {
+  averageLatency: number;
+  throughput: number;
+  resourceUsage: {
+    cpu: number;
+    memory: number;
+    network: number;
+  };
+  establishedAt: Date;
+  measurementCount: number;
+}
+
+/**
+ * Cache efficiency metrics
+ */
+export interface CacheEfficiencyMetrics {
+  hitRate: number;
+  memoryEfficiency: number;
+  evictionRate: number;
+  stalenessRate: number;
+  optimalTTL: number;
+  optimalSize: number;
+  strategy: string;
+}
+
+/**
+ * Impact recommendations structure
+ */
+export interface ImpactRecommendations {
+  optimization: string[];
+  configuration: string[];
+  architecture: string[];
+  caching: string[];
+}
+
+/**
+ * Performance summary structure
+ */
+export interface PerformanceSummary {
+  currentMetrics: CurrentImpactMetrics;
+  trends: {
+    latency: 'improving' | 'stable' | 'degrading';
+    throughput: 'improving' | 'stable' | 'degrading';
+    cache: 'improving' | 'stable' | 'degrading';
+    errors: 'improving' | 'stable' | 'degrading';
+  };
+  forecasts: {
+    latencyIncrease: number;
+    throughputDecrease: number;
+    scalingRequirements: string[];
+  };
+  anomalies: {
+    detected: boolean;
+    types: string[];
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    recommendations: string[];
+  };
+  optimizationUrgency: 'low' | 'medium' | 'high' | 'critical';
+}
+
+/**
  * Individual validation performance measurement
  */
 export interface ValidationPerformanceMeasurement {
@@ -285,11 +360,18 @@ export class ParlantValidationImpactAnalysisService
 
   // Real-time monitoring
   private monitoringInterval?: NodeJS.Timeout;
-  private currentImpactMetrics: any = {};
+  private currentImpactMetrics: CurrentImpactMetrics = {
+    totalMeasurements: 0,
+    averageLatency: 0,
+    throughputDecrease: 0,
+    cacheHitRate: 0,
+    resourceOverhead: 0,
+    lastUpdated: new Date()
+  };
 
   // Performance baselines
-  private baselinePerformance?: any;
-  private validationPerformanceBaseline?: any;
+  private baselinePerformance?: PerformanceBaseline;
+  private validationPerformanceBaseline?: PerformanceBaseline;
 
   // Analysis configuration
   private readonly ANALYSIS_CONFIG = {
@@ -945,27 +1027,27 @@ export class ParlantValidationImpactAnalysisService
 
   // ===== PLACEHOLDER METHODS (to be implemented) =====
 
-  private getBypassedMeasurements(): any[] { return []; }
+  private getBypassedMeasurements(): ValidationPerformanceMeasurement[] { return []; }
   private calculateCacheMemoryEfficiency(): number { return 85; }
   private calculateCacheEvictionRate(): number { return 5; }
   private calculateCacheStalenessRate(): number { return 2; }
   private calculatePotentialHitRateImprovement(hitRate: number): number { return Math.max(0, 90 - hitRate); }
   private calculateOptimalTTL(): number { return 300; } // 5 minutes
   private calculateOptimalCacheSize(): number { return 10000; }
-  private recommendCachingStrategy(hitRate: number, efficiency: any): string { return 'LRU with TTL'; }private calculateBypassOverhead(): number { return 5; }private calculateEmergencyBypassLatency(): number { return 10; }
+  private recommendCachingStrategy(hitRate: number, efficiency: CacheEfficiencyMetrics): string { return 'LRU with TTL'; }private calculateBypassOverhead(): number { return 5; }private calculateEmergencyBypassLatency(): number { return 10; }
   private calculateFalsePositiveRate(): number { return 2; }
   private calculateMissedValidationRate(): number { return 1; }
   private calculateRiskExposure(): number { return 3; }
   private generateBypassThresholdRecommendations(): string[] { return ['Adjust CPU threshold to 85%']; }private generateBypassConditionRecommendations(): string[] { return ['Add memory pressure check']; }private generateEmergencyProtocolRecommendations(): string[] { return ['Implement circuit breaker']; }private getRecentMeasurements(timeframe: number): ValidationPerformanceMeasurement[] { return this.completedMeasurements.slice(-100); }private analyzeThroughputTrend(): 'improving' | 'stable' | 'degrading' { return 'stable'; }private analyzeCacheTrend(measurements: ValidationPerformanceMeasurement[]): 'improving' | 'stable' | 'degrading' { return 'stable'; }private analyzeErrorTrend(measurements: ValidationPerformanceMeasurement[]): 'improving' | 'stable' | 'degrading' { return 'stable'; }private forecastLatencyIncrease(measurements: ValidationPerformanceMeasurement[]): number { return 5; }private forecastThroughputDecrease(): number { return 3; }
-  private forecastScalingRequirements(): string[] { return ['Add 2 more validation instances']; }private assessOptimizationUrgency(trends: any): 'low' | 'medium' | 'high' | 'critical' { return 'medium'; }private detectAnomalies(measurements: ValidationPerformanceMeasurement[]): boolean { return false; }private identifyAnomalyTypes(measurements: ValidationPerformanceMeasurement[]): string[] { return []; }
-  private assessAnomalySeverity(measurements: ValidationPerformanceMeasurement[]): 'low' | 'medium' | 'high' | 'critical' { return 'low'; }private generateAnomalyRecommendations(): string[] { return []; }private generateImpactRecommendations(impact: any): any { return { optimization: [], configuration: [], architecture: [], caching: [] }; }
+  private forecastScalingRequirements(): string[] { return ['Add 2 more validation instances']; }private assessOptimizationUrgency(trends: PerformanceSummary['trends']): 'low' | 'medium' | 'high' | 'critical' { return 'medium'; }private detectAnomalies(measurements: ValidationPerformanceMeasurement[]): boolean { return false; }private identifyAnomalyTypes(measurements: ValidationPerformanceMeasurement[]): string[] { return []; }
+  private assessAnomalySeverity(measurements: ValidationPerformanceMeasurement[]): 'low' | 'medium' | 'high' | 'critical' { return 'low'; }private generateAnomalyRecommendations(): string[] { return []; }private generateImpactRecommendations(impact: ValidationImpactComparison): ImpactRecommendations { return { optimization: [], configuration: [], architecture: [], caching: [] }; }
 
   // ===== PUBLIC API METHODS =====
 
   /**
    * Get current impact metrics
    */
-  getCurrentImpactMetrics(): any {
+  getCurrentImpactMetrics(): CurrentImpactMetrics {
     return { ...this.currentImpactMetrics };
   }
 
@@ -993,22 +1075,74 @@ export class ParlantValidationImpactAnalysisService
   /**
    * Get performance summary
    */
-  getPerformanceSummary(): any {
+  getPerformanceSummary(): PerformanceSummary {
     if (this.completedMeasurements.length === 0) {
-      return { message: 'No measurements available' };
+      return {
+        currentMetrics: {
+          totalMeasurements: 0,
+          averageLatency: 0,
+          throughputDecrease: 0,
+          cacheHitRate: 0,
+          resourceOverhead: 0,
+          lastUpdated: new Date()
+        },
+        trends: {
+          latency: 'stable',
+          throughput: 'stable',
+          cache: 'stable',
+          errors: 'stable'
+        },
+        forecasts: {
+          latencyIncrease: 0,
+          throughputDecrease: 0,
+          scalingRequirements: []
+        },
+        anomalies: {
+          detected: false,
+          types: [],
+          severity: 'low',
+          recommendations: []
+        },
+        optimizationUrgency: 'low'
+      };
     }
 
     const measurements = this.completedMeasurements;
     const cacheHitRate = (measurements.filter(m => m.cache.hit).length / measurements.length) * 100;
     const averageLatency = this.calculateMean(measurements.map(m => m.totalLatency));
-    const errorRate = (measurements.filter(m => m.metadata.errors.length > 0).length / measurements.length) * 100;
 
     return {
-      totalMeasurements: measurements.length,
-      averageLatency: Math.round(averageLatency * 100) / 100,
-      cacheHitRate: Math.round(cacheHitRate * 100) / 100,
-      errorRate: Math.round(errorRate * 100) / 100,
-      lastUpdated: new Date().toISOString(),
+      currentMetrics: {
+        totalMeasurements: measurements.length,
+        averageLatency: Math.round(averageLatency * 100) / 100,
+        throughputDecrease: this.forecastThroughputDecrease(),
+        cacheHitRate: Math.round(cacheHitRate * 100) / 100,
+        resourceOverhead: 0,
+        lastUpdated: new Date()
+      },
+      trends: {
+        latency: this.analyzeThroughputTrend(),
+        throughput: this.analyzeThroughputTrend(),
+        cache: this.analyzeCacheTrend(measurements),
+        errors: this.analyzeErrorTrend(measurements)
+      },
+      forecasts: {
+        latencyIncrease: this.forecastLatencyIncrease(measurements),
+        throughputDecrease: this.forecastThroughputDecrease(),
+        scalingRequirements: this.forecastScalingRequirements()
+      },
+      anomalies: {
+        detected: this.detectAnomalies(measurements),
+        types: this.identifyAnomalyTypes(measurements),
+        severity: this.assessAnomalySeverity(measurements),
+        recommendations: this.generateAnomalyRecommendations()
+      },
+      optimizationUrgency: this.assessOptimizationUrgency({
+        latency: this.analyzeThroughputTrend(),
+        throughput: this.analyzeThroughputTrend(),
+        cache: this.analyzeCacheTrend(measurements),
+        errors: this.analyzeErrorTrend(measurements)
+      })
     };
   }
 }

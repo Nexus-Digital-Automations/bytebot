@@ -633,7 +633,7 @@ export class SecurityThreatDetectorService {
       threatsByType,
       threatsBySeverity,
       highestRiskScore,
-      recommendedActions: this.generateRecommendedActions(validatedThreats),
+      recommendedActions: this.generateRecommendations(validatedThreats),
       conversationId,
       validationStatus: 'APPROVED',
     };
@@ -859,7 +859,7 @@ export class SecurityThreatDetectorService {
     }
   }
 
-  private generateRecommendedActions(threats: SecurityThreat[]): string[] {
+  private generateRecommendations(threats: SecurityThreat[]): string[] {
     const actions: string[] = [];
     const criticalThreats = threats.filter(t => t.severity === ThreatSeverity.CRITICAL);
     const highThreats = threats.filter(t => t.severity === ThreatSeverity.HIGH);

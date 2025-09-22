@@ -80,6 +80,17 @@ interface ApprovalCondition {
 }
 
 /**
+ * Conversation history entry for orchestration
+ */
+interface ConversationHistoryEntry {
+  timestamp: Date;
+  speaker: 'USER' | 'SYSTEM' | 'ORCHESTRATOR';
+  message: string;
+  context: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+/**
  * Service coordination validation request
  */
 interface ServiceCoordinationValidationRequest {
@@ -1094,7 +1105,7 @@ export class OrchestratorParlantService implements OnApplicationShutdown {
     this.validationHistory.set(result.workflowId, history);
   }
 
-  private determineSecurityLevel(context: OrchestrationContext): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {// Implementation for determining security level based on contextreturn 'MEDIUM';}private buildConversationHistory(context: OrchestrationContext): any[] {
+  private determineSecurityLevel(context: OrchestrationContext): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {// Implementation for determining security level based on contextreturn 'MEDIUM';}private buildConversationHistory(context: OrchestrationContext): ConversationHistoryEntry[] {
     // Implementation for building conversation history
     return [];
   }
