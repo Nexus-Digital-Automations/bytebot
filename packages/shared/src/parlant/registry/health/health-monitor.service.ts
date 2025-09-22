@@ -225,7 +225,7 @@ export class HealthMonitorService implements IHealthMonitor {
       return healthStatus;
 
     } catch (error) {
-      this.logger.error(`Health check failed for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Health check failed for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -243,7 +243,7 @@ export class HealthMonitorService implements IHealthMonitor {
           const health = await this.checkHealth(functionId);
           results.set(functionId, health);
         } catch (error) {
-          this.logger.warn(`Health check failed for function ${functionId}: ${error.message}`);
+          this.logger.warn(`Health check failed for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`);
         }
       });
 
@@ -263,7 +263,7 @@ export class HealthMonitorService implements IHealthMonitor {
       return healthCheckResults;
 
     } catch (error) {
-      this.logger.error(`Multiple health check failed: ${error.message}`, error.stack);
+      this.logger.error(`Multiple health check failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -317,7 +317,7 @@ export class HealthMonitorService implements IHealthMonitor {
       return report;
 
     } catch (error) {
-      this.logger.error(`Comprehensive health check failed: ${error.message}`, error.stack);
+      this.logger.error(`Comprehensive health check failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -332,7 +332,7 @@ export class HealthMonitorService implements IHealthMonitor {
       return await this.storage.getHealthHistory(functionId, timeRange);
 
     } catch (error) {
-      this.logger.error(`Failed to get health history for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get health history for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -378,7 +378,7 @@ export class HealthMonitorService implements IHealthMonitor {
       };
 
     } catch (error) {
-      this.logger.error(`Failed to set alert thresholds for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to set alert thresholds for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -393,7 +393,7 @@ export class HealthMonitorService implements IHealthMonitor {
       return await this.storage.getHealthMetrics(functionId, metrics);
 
     } catch (error) {
-      this.logger.error(`Failed to get health metrics for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get health metrics for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -435,7 +435,7 @@ export class HealthMonitorService implements IHealthMonitor {
       return session;
 
     } catch (error) {
-      this.logger.error(`Failed to start monitoring for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to start monitoring for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -481,7 +481,7 @@ export class HealthMonitorService implements IHealthMonitor {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to stop monitoring session ${sessionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to stop monitoring session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -510,7 +510,7 @@ export class HealthMonitorService implements IHealthMonitor {
       this.logger.debug(`Scheduled health checks completed for ${functionIds.length} functions`);
 
     } catch (error) {
-      this.logger.error(`Scheduled health checks failed: ${error.message}`, error.stack);
+      this.logger.error(`Scheduled health checks failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 
@@ -531,7 +531,7 @@ export class HealthMonitorService implements IHealthMonitor {
       this.logger.log('Health data cleanup completed');
 
     } catch (error) {
-      this.logger.error(`Health data cleanup failed: ${error.message}`, error.stack);
+      this.logger.error(`Health data cleanup failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 
@@ -556,7 +556,7 @@ export class HealthMonitorService implements IHealthMonitor {
       this.logger.log(`Health Monitor Service initialized with ${sessions.length} active monitoring sessions`);
 
     } catch (error) {
-      this.logger.error(`Failed to initialize Health Monitor Service: ${error.message}`, error.stack);
+      this.logger.error(`Failed to initialize Health Monitor Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 
@@ -656,7 +656,7 @@ export class HealthMonitorService implements IHealthMonitor {
         }
       }
     } catch (error) {
-      this.logger.warn(`Failed to check thresholds for function ${functionId}: ${error.message}`);
+      this.logger.warn(`Failed to check thresholds for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -698,7 +698,7 @@ export class HealthMonitorService implements IHealthMonitor {
           });
         }
       } catch (error) {
-        this.logger.warn(`Auto-remediation failed for ${functionId}.${indicator.name}: ${error.message}`);
+        this.logger.warn(`Auto-remediation failed for ${functionId}.${indicator.name}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   }
@@ -752,7 +752,7 @@ export class HealthMonitorService implements IHealthMonitor {
       try {
         await this.checkHealth(session.functionId);
       } catch (error) {
-        this.logger.warn(`Monitoring loop failed for session ${session.sessionId}: ${error.message}`);
+        this.logger.warn(`Monitoring loop failed for session ${session.sessionId}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }, session.interval);
 

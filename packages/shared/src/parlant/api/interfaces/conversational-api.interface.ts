@@ -161,6 +161,7 @@ export interface APIOperation {
   currentState: OperationState;
   progress: OperationProgress;
   userContext: UserContext;
+  securityLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 export interface OperationState {
@@ -222,6 +223,7 @@ export interface IntentAnalysis {
   conversationId: string;
   explanation: string;
   alternatives: IntentInterpretation[];
+  extractedParameters?: Record<string, any>;
 }
 
 export interface IntentInterpretation {
@@ -620,3 +622,99 @@ export type ThreatType =
   | "DDOS"
   | "INJECTION";
 export type BiometricLevel = "BASIC" | "ENHANCED" | "MULTI_MODAL";
+
+// Additional interfaces for pre-execution validation
+export interface ValidationResult {
+  valid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
+  conversationalExplanation?: string;
+  suggestedCorrections?: CorrectionSuggestions;
+  validationSummary: string;
+  processingTime?: number;
+}
+
+export interface ValidationError {
+  type: string;
+  message: string;
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  parameter?: string;
+  suggestion?: string;
+}
+
+export interface ValidationWarning {
+  type: string;
+  message: string;
+  parameter?: string;
+  suggestion?: string;
+}
+
+export interface SingleValidationResult {
+  valid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
+}
+
+export interface ParameterContext {
+  name: string;
+  type: string;
+  required: boolean;
+  value?: any;
+  schema?: ParameterSchema;
+}
+
+export interface ParsedInput {
+  originalValue: any;
+  parsedValue: any;
+  confidence: number;
+  errors: ValidationError[];
+  suggestions: string[];
+}
+
+export interface ConversionContext {
+  fromType: string;
+  toType: string;
+  originalValue: any;
+  userIntent: string;
+}
+
+export interface ConversionResult {
+  success: boolean;
+  convertedValue?: any;
+  errors: ValidationError[];
+  confidence: number;
+}
+
+export interface CorrectionSuggestions {
+  suggestions: Correction[];
+  priority: "LOW" | "MEDIUM" | "HIGH";
+}
+
+export interface Correction {
+  type: string;
+  description: string;
+  correctedValue?: any;
+  explanation: string;
+}
+
+export interface ParameterValidationResult extends SingleValidationResult {
+  parameter: string;
+  resolvedValue?: any;
+}
+
+export interface ParameterQuestion {
+  parameter: string;
+  question: string;
+  type: string;
+  required: boolean;
+  suggestions?: string[];
+  examples?: string[];
+}
+
+export interface SecurityAssessment {
+  riskLevel: RiskLevel;
+  threats: DetectedThreat[];
+  recommendations: string[];
+  complianceStatus: string;
+  encryptionRequired: boolean;
+}

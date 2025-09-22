@@ -25,11 +25,38 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as WebSocket from 'ws';import { performance } from 'perf_hooks';import { Worker, isMainThread, parentPort } from 'worker_threads';import * as os from 'os';// import * as pidusage from 'pidusage'; // Using Node.js built-in monitoring insteadimport * as path from 'path';import { promisify } from 'util';// ===== PERFORMANCE BENCHMARKING TYPES =====/**
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter } from 'events';
+import * as WebSocket from 'ws';
+import { performance } from 'perf_hooks';
+import { Worker, isMainThread, parentPort } from 'worker_threads';
+import * as os from 'os';
+// import * as pidusage from 'pidusage'; // Using Node.js built-in monitoring instead
+import * as path from 'path';
+import { promisify } from 'util';
+
+// Polyfill for pidusage functionality
+const pidusage = {
+  cpu: 0,
+};
+
+// ===== PERFORMANCE BENCHMARKING TYPES =====
+
+/**
  * Performance test types for comprehensive benchmarking
  */
 export enum PerformanceTestType {
-  THROUGHPUT_BASELINE = 'throughput_baseline',THROUGHPUT_BURST = 'throughput_burst',LATENCY_MEASUREMENT = 'latency_measurement',SUSTAINED_LOAD = 'sustained_load',RESOURCE_MONITORING = 'resource_monitoring',PARLANT_VALIDATION_IMPACT = 'parlant_validation_impact',REGRESSION_TESTING = 'regression_testing',ENDURANCE_TESTING = 'endurance_testing',BOTTLENECK_ANALYSIS = 'bottleneck_analysis',}/**
+  THROUGHPUT_BASELINE = 'throughput_baseline',
+  THROUGHPUT_BURST = 'throughput_burst',
+  LATENCY_MEASUREMENT = 'latency_measurement',
+  SUSTAINED_LOAD = 'sustained_load',
+  RESOURCE_MONITORING = 'resource_monitoring',
+  PARLANT_VALIDATION_IMPACT = 'parlant_validation_impact',
+  REGRESSION_TESTING = 'regression_testing',
+  ENDURANCE_TESTING = 'endurance_testing',
+  BOTTLENECK_ANALYSIS = 'bottleneck_analysis',
+}/**
  * Comprehensive performance metrics structure
  */
 export interface PerformanceMetrics {
@@ -118,7 +145,9 @@ export interface PerformanceTestConfig {
 
   validationSettings?: {
     enableParlantValidation: boolean;
-    validationComplexity: 'low' | 'medium' | 'high';cacheEnabled: boolean;};
+    validationComplexity: 'low' | 'medium' | 'high';
+    cacheEnabled: boolean;
+  };
 
   enduranceSettings?: {
     targetDuration: number;      // Hours
@@ -170,7 +199,9 @@ export interface BenchmarkResults {
   // Regression analysis
   regression?: {
     detected: boolean;
-    severity: 'low' | 'medium' | 'high' | 'critical';affectedMetrics: string[];recommendedActions: string[];
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    affectedMetrics: string[];
+    recommendedActions: string[];
   };
 }
 
@@ -178,7 +209,9 @@ export interface BenchmarkResults {
  * Worker thread message types for distributed testing
  */
 export interface WorkerMessage {
-  type: 'start' | 'stop' | 'metrics' | 'error';data?: any;workerId?: string;
+  type: 'start' | 'stop' | 'metrics' | 'error';
+  data?: any;
+  workerId?: string;
 }
 
 // ===== PERFORMANCE BENCHMARKING SERVICE =====
@@ -213,8 +246,14 @@ export class WebSocketPerformanceBenchmarkingService
   constructor(
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('🚀 PARLANT Phase 1 WebSocket Performance Benchmarking Service initializing...');}async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing WebSocket Performance Benchmarking Framework');// Initialize worker pool for distributed testingawait this.initializeWorkerPool();
+    this.logger.log('🚀 PARLANT Phase 1 WebSocket Performance Benchmarking Service initializing...');
+  }
+
+  async onModuleInit(): Promise<void> {
+    this.logger.log('Initializing WebSocket Performance Benchmarking Framework');
+
+    // Initialize worker pool for distributed testing
+    await this.initializeWorkerPool();
 
     // Start real-time monitoring
     this.startRealTimeMonitoring();
@@ -222,8 +261,14 @@ export class WebSocketPerformanceBenchmarkingService
     // Load baseline metrics if available
     await this.loadBaselineMetrics();
 
-    this.logger.log('✅ WebSocket Performance Benchmarking Framework initialized successfully');}async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down WebSocket Performance Benchmarking Framework');// Stop all active testsfor (const testId of this.activeTests.keys()) {
+    this.logger.log('✅ WebSocket Performance Benchmarking Framework initialized successfully');
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down WebSocket Performance Benchmarking Framework');
+
+    // Stop all active tests
+    for (const testId of this.activeTests.keys()) {
       await this.stopPerformanceTest(testId);
     }
 
@@ -233,7 +278,10 @@ export class WebSocketPerformanceBenchmarkingService
     // Stop monitoring
     this.stopRealTimeMonitoring();
 
-    this.logger.log('✅ WebSocket Performance Benchmarking Framework shutdown complete');}// ===== THROUGHPUT TESTING =====
+    this.logger.log('✅ WebSocket Performance Benchmarking Framework shutdown complete');
+  }
+
+  // ===== THROUGHPUT TESTING =====
 
   /**
    * Execute comprehensive throughput testing with target validation
@@ -256,7 +304,11 @@ export class WebSocketPerformanceBenchmarkingService
 
       // Execute multi-phase throughput testing
       const results = await this.executeMultiPhaseTest(testId, throughputConfig, [
-        { phase: 'warmup', duration: throughputConfig.warmupDuration },{ phase: 'baseline', duration: throughputConfig.duration / 3 },{ phase: 'peak_load', duration: throughputConfig.duration / 3 },{ phase: 'sustained', duration: throughputConfig.duration / 3 },{ phase: 'cooldown', duration: throughputConfig.cooldownDuration },
+        { phase: 'warmup', duration: throughputConfig.warmupDuration },
+        { phase: 'baseline', duration: throughputConfig.duration / 3 },
+        { phase: 'peak_load', duration: throughputConfig.duration / 3 },
+        { phase: 'sustained', duration: throughputConfig.duration / 3 },
+        { phase: 'cooldown', duration: throughputConfig.cooldownDuration },
       ]);
 
       // Validate throughput targets
@@ -264,7 +316,12 @@ export class WebSocketPerformanceBenchmarkingService
       results.targetsMet.throughputTarget = throughputMet;
 
       if (throughputMet) {
-        this.logger.log(`✅ Throughput target MET: ${results.metrics.throughput.averageThroughput.toFixed(0)} msg/sec (target: ${this.PERFORMANCE_TARGETS.THROUGHPUT_TARGET})`);} else {this.logger.warn(`❌ Throughput target MISSED: ${results.metrics.throughput.averageThroughput.toFixed(0)} msg/sec (target: ${this.PERFORMANCE_TARGETS.THROUGHPUT_TARGET})`);}return results;
+        this.logger.log(`✅ Throughput target MET: ${results.metrics.throughput.averageThroughput.toFixed(0)} msg/sec (target: ${this.PERFORMANCE_TARGETS.THROUGHPUT_TARGET})`);
+      } else {
+        this.logger.warn(`❌ Throughput target MISSED: ${results.metrics.throughput.averageThroughput.toFixed(0)} msg/sec (target: ${this.PERFORMANCE_TARGETS.THROUGHPUT_TARGET})`);
+      }
+
+      return results;
 
     } catch (error) {
       this.logger.error(`Throughput test failed: ${error.message}`, error.stack);
@@ -304,7 +361,10 @@ export class WebSocketPerformanceBenchmarkingService
     config: PerformanceTestConfig
   ): Promise<BenchmarkResults> {
     const testId = this.generateTestId('latency');
-    this.logger.log(`⏱️ Starting latency measurement test: ${testId}`);try {// Configure test for latency optimization
+    this.logger.log(`⏱️ Starting latency measurement test: ${testId}`);
+
+    try {
+      // Configure test for latency optimization
       const latencyConfig: PerformanceTestConfig = {
         ...config,
         testType: PerformanceTestType.LATENCY_MEASUREMENT,
@@ -321,8 +381,18 @@ export class WebSocketPerformanceBenchmarkingService
       results.targetsMet.latencyTarget = p95LatencyMet && p99LatencyMet;
 
       if (p95LatencyMet) {
-        this.logger.log(`✅ P95 Latency target MET: ${results.metrics.latency.p95.toFixed(2)}ms (target: ${this.PERFORMANCE_TARGETS.LATENCY_P95_TARGET}ms)`);} else {this.logger.warn(`❌ P95 Latency target MISSED: ${results.metrics.latency.p95.toFixed(2)}ms (target: ${this.PERFORMANCE_TARGETS.LATENCY_P95_TARGET}ms)`);}if (p99LatencyMet) {
-        this.logger.log(`✅ P99 Latency target MET: ${results.metrics.latency.p99.toFixed(2)}ms (target: ${this.PERFORMANCE_TARGETS.LATENCY_P99_TARGET}ms)`);} else {this.logger.warn(`❌ P99 Latency target MISSED: ${results.metrics.latency.p99.toFixed(2)}ms (target: ${this.PERFORMANCE_TARGETS.LATENCY_P99_TARGET}ms)`);}return results;
+        this.logger.log(`✅ P95 Latency target MET: ${results.metrics.latency.p95.toFixed(2)}ms (target: ${this.PERFORMANCE_TARGETS.LATENCY_P95_TARGET}ms)`);
+      } else {
+        this.logger.warn(`❌ P95 Latency target MISSED: ${results.metrics.latency.p95.toFixed(2)}ms (target: ${this.PERFORMANCE_TARGETS.LATENCY_P95_TARGET}ms)`);
+      }
+
+      if (p99LatencyMet) {
+        this.logger.log(`✅ P99 Latency target MET: ${results.metrics.latency.p99.toFixed(2)}ms (target: ${this.PERFORMANCE_TARGETS.LATENCY_P99_TARGET}ms)`);
+      } else {
+        this.logger.warn(`❌ P99 Latency target MISSED: ${results.metrics.latency.p99.toFixed(2)}ms (target: ${this.PERFORMANCE_TARGETS.LATENCY_P99_TARGET}ms)`);
+      }
+
+      return results;
 
     } catch (error) {
       this.logger.error(`Latency test failed: ${error.message}`, error.stack);
@@ -368,7 +438,10 @@ export class WebSocketPerformanceBenchmarkingService
     config: PerformanceTestConfig
   ): Promise<BenchmarkResults> {
     const testId = this.generateTestId('resources');
-    this.logger.log(`📊 Starting resource monitoring test: ${testId}`);const resourceConfig: PerformanceTestConfig = {...config,
+    this.logger.log(`📊 Starting resource monitoring test: ${testId}`);
+
+    const resourceConfig: PerformanceTestConfig = {
+      ...config,
       testType: PerformanceTestType.RESOURCE_MONITORING,
     };
 
@@ -386,7 +459,9 @@ export class WebSocketPerformanceBenchmarkingService
       results.targetsMet.resourceTarget = cpuUsageMet && memoryStable;
 
       if (cpuUsageMet) {
-        this.logger.log(`✅ CPU usage target MET: ${results.metrics.resources.cpu.usage.toFixed(1)}% (target: <${this.PERFORMANCE_TARGETS.CPU_USAGE_TARGET}%)`);} else {this.logger.warn(`❌ CPU usage target EXCEEDED: ${results.metrics.resources.cpu.usage.toFixed(1)}% (target: <${this.PERFORMANCE_TARGETS.CPU_USAGE_TARGET}%)`);
+        this.logger.log(`✅ CPU usage target MET: ${results.metrics.resources.cpu.usage.toFixed(1)}% (target: <${this.PERFORMANCE_TARGETS.CPU_USAGE_TARGET}%)`);
+      } else {
+        this.logger.warn(`❌ CPU usage target EXCEEDED: ${results.metrics.resources.cpu.usage.toFixed(1)}% (target: <${this.PERFORMANCE_TARGETS.CPU_USAGE_TARGET}%)`);
       }
 
       return results;
@@ -428,8 +503,10 @@ export class WebSocketPerformanceBenchmarkingService
 
       async getCPUUsage(): Promise<number> {
         try {
-          const stats = await pidusage(process.pid);
-          return stats.cpu;
+          // Use Node.js built-in CPU usage monitoring
+          const cpuUsage = process.cpuUsage();
+          const usage = (cpuUsage.user + cpuUsage.system) / 1000000; // Convert to milliseconds
+          return Math.min(usage / 10, 100); // Rough approximation as percentage
         } catch {
           return 0;
         }
@@ -466,7 +543,10 @@ export class WebSocketPerformanceBenchmarkingService
       recommendations: string[];
     };
   }> {
-    this.logger.log('🔍 Starting PARLANT validation impact analysis');// Baseline test without validationconst baselineConfig: PerformanceTestConfig = {
+    this.logger.log('🔍 Starting PARLANT validation impact analysis');
+
+    // Baseline test without validation
+    const baselineConfig: PerformanceTestConfig = {
       testType: PerformanceTestType.PARLANT_VALIDATION_IMPACT,
       duration: 60000,              // 1 minute
       concurrentConnections: 100,
@@ -476,18 +556,24 @@ export class WebSocketPerformanceBenchmarkingService
       cooldownDuration: 5000,
       validationSettings: {
         enableParlantValidation: false,
-        validationComplexity: 'low',cacheEnabled: false,},
+        validationComplexity: 'low',
+        cacheEnabled: false,
+      },
     };
 
     const baseline = await this.executePerformanceTest(
-      this.generateTestId('baseline'),baselineConfig);
+      this.generateTestId('baseline'),
+      baselineConfig
+    );
 
     // Test with PARLANT validation enabled
     const validationConfig: PerformanceTestConfig = {
       ...baselineConfig,
       validationSettings: {
         enableParlantValidation: true,
-        validationComplexity: 'medium',cacheEnabled: true,},
+        validationComplexity: 'medium',
+        cacheEnabled: true,
+      },
     };
 
     const withValidation = await this.executePerformanceTest(
@@ -513,7 +599,10 @@ export class WebSocketPerformanceBenchmarkingService
       ),
     };
 
-    this.logger.log(`📊 PARLANT Validation Impact Analysis:`);this.logger.log(`   Throughput Impact: ${throughputImpact.toFixed(1)}% degradation`);this.logger.log(`   Latency Impact: +${latencyImpact.toFixed(2)}ms`);this.logger.log(`   Resource Impact: +${resourceImpact.toFixed(1)}% CPU usage`);
+    this.logger.log(`📊 PARLANT Validation Impact Analysis:`);
+    this.logger.log(`   Throughput Impact: ${throughputImpact.toFixed(1)}% degradation`);
+    this.logger.log(`   Latency Impact: +${latencyImpact.toFixed(2)}ms`);
+    this.logger.log(`   Resource Impact: +${resourceImpact.toFixed(1)}% CPU usage`);
 
     return {
       baseline,
@@ -531,7 +620,10 @@ export class WebSocketPerformanceBenchmarkingService
     config: PerformanceTestConfig
   ): Promise<BenchmarkResults> {
     const testId = this.generateTestId('sustained');
-    this.logger.log(`⏳ Starting sustained load test: ${testId} (duration: ${config.duration}ms)`);const sustainedConfig: PerformanceTestConfig = {...config,
+    this.logger.log(`⏳ Starting sustained load test: ${testId} (duration: ${config.duration}ms)`);
+
+    const sustainedConfig: PerformanceTestConfig = {
+      ...config,
       testType: PerformanceTestType.SUSTAINED_LOAD,
       enduranceSettings: {
         targetDuration: config.duration,
@@ -574,10 +666,18 @@ export class WebSocketPerformanceBenchmarkingService
     currentResults: BenchmarkResults;
     regressionAnalysis: {
       detected: boolean;
-      severity: 'low' | 'medium' | 'high' | 'critical';affectedMetrics: string[];recommendations: string[];
+      severity: 'low' | 'medium' | 'high' | 'critical';
+      affectedMetrics: string[];
+      recommendations: string[];
     };
   }> {
-    this.logger.log('🔍 Starting performance regression testing');if (!this.baselineMetrics) {throw new Error('No baseline metrics available for regression comparison');}// Execute current performance test
+    this.logger.log('🔍 Starting performance regression testing');
+
+    if (!this.baselineMetrics) {
+      throw new Error('No baseline metrics available for regression comparison');
+    }
+
+    // Execute current performance test
     const config: PerformanceTestConfig = {
       testType: PerformanceTestType.REGRESSION_TESTING,
       duration: 60000,
@@ -602,7 +702,8 @@ export class WebSocketPerformanceBenchmarkingService
     currentResults.regression = regressionAnalysis;
 
     if (regressionAnalysis.detected) {
-      this.logger.warn(`🚨 Performance regression DETECTED (${regressionAnalysis.severity})`);this.logger.warn(`   Affected metrics: ${regressionAnalysis.affectedMetrics.join(`, ')}`);
+      this.logger.warn(`🚨 Performance regression DETECTED (${regressionAnalysis.severity})`);
+      this.logger.warn(`   Affected metrics: ${regressionAnalysis.affectedMetrics.join(', ')}`);
     } else {
       this.logger.log('✅ No performance regression detected');
     }
@@ -622,7 +723,10 @@ export class WebSocketPerformanceBenchmarkingService
     testId: string,
     config: PerformanceTestConfig
   ): Promise<BenchmarkResults> {
-    this.logger.log(`🧪 Executing performance test: ${testId}`);this.activeTests.set(testId, config);const startTime = new Date();
+    this.logger.log(`🧪 Executing performance test: ${testId}`);
+
+    this.activeTests.set(testId, config);
+    const startTime = new Date();
     const latencyMeasurements: number[] = [];
     const throughputMeasurements: number[] = [];
     const realTimeMetrics: RealTimeMetrics[] = [];
@@ -680,10 +784,15 @@ export class WebSocketPerformanceBenchmarkingService
       // Store results for future reference
       this.benchmarkResults.set(testId, results);
 
-      this.logger.log(`✅ Performance test completed: ${testId}`);this.logTestSummary(results);return results;
+      this.logger.log(`✅ Performance test completed: ${testId}`);
+      this.logTestSummary(results);
+
+      return results;
 
     } catch (error) {
-      this.logger.error(`❌ Performance test failed: ${testId}`, error.stack);throw error;} finally {
+      this.logger.error(`❌ Performance test failed: ${testId}`, error.stack);
+      throw error;
+    } finally {
       this.activeTests.delete(testId);
       await this.cleanupTestEnvironment(config);
     }
@@ -697,7 +806,10 @@ export class WebSocketPerformanceBenchmarkingService
     config: PerformanceTestConfig,
     phases: Array<{ phase: string; duration: number }>
   ): Promise<BenchmarkResults> {
-    this.logger.log(`🔄 Executing multi-phase test: ${testId}`);const allLatencies: number[] = [];const allThroughputs: number[] = [];
+    this.logger.log(`🔄 Executing multi-phase test: ${testId}`);
+
+    const allLatencies: number[] = [];
+    const allThroughputs: number[] = [];
     const allRealTime: RealTimeMetrics[] = [];
 
     for (const { phase, duration } of phases) {
@@ -748,14 +860,21 @@ export class WebSocketPerformanceBenchmarkingService
     // Start workers and collect metrics
     const workerPromises = workers.map(async (worker) => {
       return new Promise<void>((resolve, reject) => {
-        worker.on('message', (message: WorkerMessage) => {if (message.type === 'metrics') {latencies.push(...(message.data.latencies || []));throughputs.push(...(message.data.throughputs || []));
+        worker.on('message', (message: WorkerMessage) => {
+          if (message.type === 'metrics') {
+            latencies.push(...(message.data.latencies || []));
+            throughputs.push(...(message.data.throughputs || []));
             realTime.push(...(message.data.realTime || []));
-          } else if (message.type === 'error') {reject(new Error(message.data));}
+          } else if (message.type === 'error') {
+            reject(new Error(message.data));
+          }
         });
 
         // Start worker
         worker.postMessage({
-          type: 'start',data: {phase,
+          type: 'start',
+          data: {
+            phase,
             duration,
             config,
           },
@@ -763,7 +882,9 @@ export class WebSocketPerformanceBenchmarkingService
 
         // Stop worker after duration
         setTimeout(() => {
-          worker.postMessage({ type: 'stop' });resolve();}, duration);
+          worker.postMessage({ type: 'stop' });
+          resolve();
+        }, duration);
       });
     });
 
@@ -944,11 +1065,24 @@ export class WebSocketPerformanceBenchmarkingService
 
     // Analyze throughput bottlenecks
     if (metrics.throughput.averageThroughput < this.PERFORMANCE_TARGETS.THROUGHPUT_TARGET) {
-      bottlenecks.push('Throughput below target');optimizationRecommendations.push('Consider connection pooling optimization');optimizationRecommendations.push('Implement message batching');}// Analyze latency bottlenecks
+      bottlenecks.push('Throughput below target');
+      optimizationRecommendations.push('Consider connection pooling optimization');
+      optimizationRecommendations.push('Implement message batching');
+    }
+
+    // Analyze latency bottlenecks
     if (metrics.latency.p95 > this.PERFORMANCE_TARGETS.LATENCY_P95_TARGET) {
-      bottlenecks.push('P95 latency above target');optimizationRecommendations.push('Optimize message processing pipeline');optimizationRecommendations.push('Consider caching strategies');}// Analyze resource utilization
+      bottlenecks.push('P95 latency above target');
+      optimizationRecommendations.push('Optimize message processing pipeline');
+      optimizationRecommendations.push('Consider caching strategies');
+    }
+
+    // Analyze resource utilization
     if (metrics.resources.cpu.usage > this.PERFORMANCE_TARGETS.CPU_USAGE_TARGET) {
-      bottlenecks.push('High CPU utilization');optimizationRecommendations.push('Optimize CPU-intensive operations');optimizationRecommendations.push('Consider horizontal scaling');}// Calculate performance score (0-100)
+      bottlenecks.push('High CPU utilization');
+      optimizationRecommendations.push('Optimize CPU-intensive operations');
+      optimizationRecommendations.push('Consider horizontal scaling');
+    }// Calculate performance score (0-100)
     const throughputScore = Math.min(100, (metrics.throughput.averageThroughput / this.PERFORMANCE_TARGETS.THROUGHPUT_TARGET) * 100);
     const latencyScore = Math.min(100, (this.PERFORMANCE_TARGETS.LATENCY_P95_TARGET / metrics.latency.p95) * 100);
     const reliabilityScore = metrics.reliability.successRate;

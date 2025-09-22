@@ -252,7 +252,18 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
   private algorithms = new Map<string, CryptoAlgorithmConfig>();
   private keys = new Map<string, CryptoKeyConfig>();
   private hsmConfig: HSMConfig | null = null;
-  private quantumConfig: QuantumResistantConfig;
+  private quantumConfig: QuantumResistantConfig = {
+    enabled: false,
+    dilithium: {
+      enabled: false,
+      securityLevel: 3,
+    },
+    kyber: {
+      enabled: false,
+      securityLevel: 768,
+    },
+    hybridMode: false,
+  };
 
   // Performance monitoring
   private metrics: CryptoMetrics = {
@@ -522,7 +533,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       };
 
       const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
-      const iv = crypto.randomBytes(encConfig.ivSize);
+      const ivBuffer = crypto.randomBytes(encConfig.ivSize);
       const salt = crypto.randomBytes(encConfig.saltSize);
 
       // Derive key if needed
@@ -531,12 +542,12 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
         : crypto.pbkdf2Sync(key.keyMaterial || '', salt, 100000, 32, 'sha256');
 
       // Encrypt data - use createCipheriv with proper IV
-      const iv = crypto.randomBytes(16); // 16 bytes for AES-128 IV
-      const cipher = crypto.createCipheriv(encConfig.algorithm, encryptionKey, iv);
-      cipher.setAAD(encConfig.aad || Buffer.alloc(0));
+      const cipher = crypto.createCipheriv(encConfig.algorithm, encryptionKey, ivBuffer) as crypto.CipherGCM;
+      if (encConfig.aad) {
+        cipher.setAAD(encConfig.aad);
+      }
 
       const encrypted = Buffer.concat([
-        iv, // Prepend IV to encrypted data for decryption
         cipher.update(dataBuffer),
         cipher.final(),
       ]);
@@ -546,7 +557,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       // Combine all components
       const result = Buffer.concat([
         salt,
-        iv,
+        ivBuffer,
         authTag,
         encrypted,
       ]);
@@ -611,32 +622,31 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
         ...config,
       };
 
-      const encryptedBuffer = Buffer.from(encryptedData, 'base64');
+      const encryptedBuffer: Buffer = Buffer.from(encryptedData, 'base64');
 
       // Extract components
       const salt = encryptedBuffer.subarray(0, encConfig.saltSize);
-      const iv = encryptedBuffer.subarray(encConfig.saltSize, encConfig.saltSize + encConfig.ivSize);
+      const ivBuffer = encryptedBuffer.subarray(encConfig.saltSize, encConfig.saltSize + encConfig.ivSize);
       const authTag = encryptedBuffer.subarray(
         encConfig.saltSize + encConfig.ivSize,
         encConfig.saltSize + encConfig.ivSize + encConfig.tagSize,
       );
-      const encrypted = encryptedBuffer.subarray(encConfig.saltSize + encConfig.ivSize + encConfig.tagSize);
+      const encryptedPayload = encryptedBuffer.subarray(encConfig.saltSize + encConfig.ivSize + encConfig.tagSize);
 
       // Derive key
       const decryptionKey = key.keyMaterial
         ? Buffer.from(key.keyMaterial, 'hex')
         : crypto.pbkdf2Sync(key.keyMaterial || '', salt, 100000, 32, 'sha256');
 
-      // Decrypt data - extract IV from beginning of encrypted data
-      const iv = encrypted.slice(0, 16); // Extract 16-byte IV
-      const actualEncrypted = encrypted.slice(16); // Remaining data is the actual encrypted content
-
-      const decipher = crypto.createDecipheriv(encConfig.algorithm, decryptionKey, iv);
+      // Decrypt data
+      const decipher = crypto.createDecipheriv(encConfig.algorithm, decryptionKey, ivBuffer) as crypto.DecipherGCM;
       decipher.setAuthTag(authTag);
-      decipher.setAAD(encConfig.aad || Buffer.alloc(0));
+      if (encConfig.aad) {
+        decipher.setAAD(encConfig.aad);
+      }
 
       const decrypted = Buffer.concat([
-        decipher.update(actualEncrypted),
+        decipher.update(encryptedPayload),
         decipher.final(),
       ]);
 
@@ -979,7 +989,8 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
   private async performScheduledKeyRotation(): Promise<void> {
     const now = new Date();
 
-    for (const [keyId, key] of this.keys.entries()) {
+    const keysArray = Array.from(this.keys.entries());
+    for (const [keyId, key] of keysArray) {
       if (key.rotationInterval && key.createdAt.getTime() + key.rotationInterval < now.getTime()) {
         this.logger.log(`🔄 Scheduled rotation for key: ${keyId}`);
         await this.rotateKey(keyId);
@@ -997,11 +1008,12 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       throw new Error('Private key required for asymmetric signing');
     }
 
-    return jwt.sign(payload, key.privateKey, {
+    const signingOptions: jwt.SignOptions = {
       algorithm: config.algorithm,
-      header: headers,
       ...config.signingOptions,
-    });
+    };
+
+    return jwt.sign(payload, key.privateKey, signingOptions);
   }
 
   private async signSymmetricToken(
@@ -1014,11 +1026,12 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       throw new Error('Key material required for symmetric signing');
     }
 
-    return jwt.sign(payload, key.keyMaterial, {
+    const signingOptions: jwt.SignOptions = {
       algorithm: config.algorithm,
-      header: headers,
       ...config.signingOptions,
-    });
+    };
+
+    return jwt.sign(payload, key.keyMaterial, signingOptions);
   }
 
   private async validateAsymmetricToken(
@@ -1148,7 +1161,8 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
   private getDefaultVerificationKey(algorithm: string): CryptoKeyConfig | null {
     // Find default key for algorithm
-    for (const key of this.keys.values()) {
+    const keysArray = Array.from(this.keys.values());
+    for (const key of keysArray) {
       if (key.algorithm === algorithm && key.metadata.default) {
         return key;
       }
@@ -1216,7 +1230,8 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
   private async securelyDestroyKeys(): Promise<void> {
     // Securely overwrite key material in memory
-    for (const key of this.keys.values()) {
+    const keysArray = Array.from(this.keys.values());
+    for (const key of keysArray) {
       if (key.keyMaterial) {
         // In production, this would use secure memory clearing
         key.keyMaterial = '';

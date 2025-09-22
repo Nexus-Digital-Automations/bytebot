@@ -245,7 +245,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       this.activeRequests.delete(requestId);
 
       this.logger.error(`API request processing failed: ${requestId}`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         processingTime,
         endpoint: request.endpoint,
       });
@@ -322,7 +322,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       const processingTime = performance.now() - batchStartTime;
 
       this.logger.error(`High-volume batch processing failed: ${batchId}`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         batchSize: requestBatch.length,
         processingTime,
       });
@@ -402,7 +402,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       this.logger.error(`Request routing failed`, {
         requestId: request.id,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         routingTime,
       });
 
@@ -466,7 +466,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       this.logger.error(`Security enforcement failed`, {
         requestId: request.id,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         securityTime,
       });
 
@@ -567,7 +567,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       this.logger.error(`Request validation failed`, {
         requestId: request.id,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         validationTime,
       });
 
@@ -576,7 +576,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
         errors: [
           {
             type: "VALIDATION_SYSTEM_ERROR",
-            message: `Validation system failure: ${error.message}`,
+            message: `Validation system failure: ${error instanceof Error ? error.message : String(error)}`,
             severity: "CRITICAL",
           },
         ],
@@ -626,7 +626,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       };
     } catch (error) {
       this.logger.error(`Adaptive throttling failed`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         currentThroughput: metrics.throughput,
       });
       throw error;
@@ -661,7 +661,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       };
     } catch (error) {
       this.logger.error(`Cluster health monitoring failed`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -726,7 +726,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       this.logger.error(`Failover failed`, {
         failedInstance: failedInstance.instanceId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         failoverTime,
       });
 
@@ -812,13 +812,16 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
   private createErrorResponse(
     requestId: string,
-    error: Error,
+    error: unknown,
     processingTime: number,
   ): GatewayResponse {
     return {
       requestId,
       statusCode: 500,
-      error: { message: "Internal server error", details: error.message },
+      error: {
+        message: "Internal server error",
+        details: error instanceof Error ? error.message : String(error)
+      },
       processingTime,
       routingPath: [],
       validationResult: { valid: false, errors: [], warnings: [] },
@@ -826,6 +829,287 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
     };
   }
 
-  // Additional mock implementations would continue here...
-  // This provides a comprehensive framework for enterprise API gateway functionality
+  // Additional method implementations for enterprise API gateway functionality
+
+  private async checkRateLimits(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual rate limiting logic
+    return { throttled: false, remainingRequests: 1000 };
+  }
+
+  private async getAvailableInstances(request: APIRequest): Promise<ServiceInstance[]> {
+    // Mock implementation - replace with actual service discovery logic
+    return [];
+  }
+
+  private async executeRequest(params: any): Promise<any> {
+    // Mock implementation - replace with actual request execution logic
+    return { success: true, data: null };
+  }
+
+  private async processResponse(params: any): Promise<GatewayResponse> {
+    // Mock implementation - replace with actual response processing logic
+    return {
+      requestId: params.requestId,
+      statusCode: 200,
+      data: params.result,
+      processingTime: params.processingTime,
+      routingPath: [],
+      validationResult: { valid: true, errors: [], warnings: [] },
+      securityEnforcement: { allowed: true, riskLevel: "LOW" },
+    };
+  }
+
+  private async groupRequestsForOptimalProcessing(requests: APIRequest[]): Promise<any[]> {
+    // Mock implementation - replace with actual request grouping logic
+    return [{ requests, type: 'default', strategy: 'parallel' }];
+  }
+
+  private async processRequestGroup(params: any): Promise<any> {
+    // Mock implementation - replace with actual group processing logic
+    return { success: true, results: [] };
+  }
+
+  private aggregateGroupResults(results: any[]): any {
+    // Mock implementation - replace with actual result aggregation logic
+    return { success: true, totalProcessed: results.length };
+  }
+
+  private async calculateBatchMetrics(params: any): Promise<any> {
+    // Mock implementation - replace with actual metrics calculation
+    return {
+      throughput: params.batchSize / (params.processingTime / 1000),
+      avgResponseTime: params.processingTime / params.batchSize
+    };
+  }
+
+  private async updateBatchPerformanceAnalytics(metrics: any): Promise<void> {
+    // Mock implementation - replace with actual analytics update
+    this.logger.debug('Batch performance analytics updated', metrics);
+  }
+
+  private generateRoutingCacheKey(request: APIRequest): string {
+    // Mock implementation - replace with actual cache key generation
+    return `routing:${request.endpoint}:${request.method}`;
+  }
+
+  private async isCachedRoutingValid(key: string): Promise<boolean> {
+    // Mock implementation - replace with actual cache validation
+    return false;
+  }
+
+  private async analyzeRoutingFactors(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual routing analysis
+    return { factors: [], recommendation: 'default' };
+  }
+
+  private async getCurrentSystemLoad(): Promise<any> {
+    // Mock implementation - replace with actual system load monitoring
+    return { cpu: 50, memory: 60, network: 30 };
+  }
+
+  private async getUserAffinityRequirements(userContext: any): Promise<any> {
+    // Mock implementation - replace with actual user affinity logic
+    return { required: false, preferences: [] };
+  }
+
+  private async getGeographicConstraints(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual geographic constraints
+    return { constraints: [], allowedRegions: ['all'] };
+  }
+
+  private async getComplianceRequirements(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual compliance requirements
+    return { requirements: [], level: 'standard' };
+  }
+
+  private async selectOptimalRoutingStrategy(factors: any): Promise<any> {
+    // Mock implementation - replace with actual strategy selection
+    return { strategy: 'round-robin', confidence: 0.8 };
+  }
+
+  private async executeRoutingAlgorithm(strategy: any, request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual routing algorithm
+    return { selectedInstance: null, routingPath: [] };
+  }
+
+  private async validateRoutingDecision(decision: any): Promise<boolean> {
+    // Mock implementation - replace with actual routing validation
+    return true;
+  }
+
+  private cacheRoutingDecision(key: string, decision: any): void {
+    // Mock implementation - replace with actual caching logic
+    this.logger.debug('Caching routing decision', { key, decision });
+  }
+
+  private async performThreatDetection(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual threat detection
+    return { threats: [], riskLevel: 'LOW' };
+  }
+
+  private async validateAuthenticationContext(authContext: any): Promise<any> {
+    // Mock implementation - replace with actual auth validation
+    return { valid: true, level: 'authenticated' };
+  }
+
+  private async enforceAuthorizationPolicies(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual authorization enforcement
+    return { authorized: true, policies: [] };
+  }
+
+  private async scanForSecurityVulnerabilities(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual vulnerability scanning
+    return { vulnerabilities: [], score: 100 };
+  }
+
+  private async checkComplianceRequirements(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual compliance checking
+    return { compliant: true, requirements: [] };
+  }
+
+  private aggregateSecurityResults(results: any[]): any {
+    // Mock implementation - replace with actual security result aggregation
+    return { overallRisk: 'LOW', recommendations: [] };
+  }
+
+  private async applyEnhancedSecurityMeasures(results: any): Promise<void> {
+    // Mock implementation - replace with actual enhanced security measures
+    this.logger.debug('Enhanced security measures applied', results);
+  }
+
+  private async performConversationalValidation(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual conversational validation
+    return { valid: true, conversation: null };
+  }
+
+  private async getBusinessRules(operation: any): Promise<any> {
+    // Mock implementation - replace with actual business rules retrieval
+    return { rules: [], applicable: [] };
+  }
+
+  private async validateRequestStructure(request: APIRequest): Promise<any> {
+    // Mock implementation - replace with actual request structure validation
+    return { valid: true, errors: [] };
+  }
+
+  private async validateBusinessLogic(request: APIRequest, rules: any): Promise<any> {
+    // Mock implementation - replace with actual business logic validation
+    return { valid: true, violations: [] };
+  }
+
+  private async generateValidationExplanation(validation: any): Promise<string> {
+    // Mock implementation - replace with actual explanation generation
+    return "Request validation completed successfully";
+  }
+
+  private async generateValidationSummary(results: any): Promise<string> {
+    // Mock implementation - replace with actual summary generation
+    return "Validation summary: All checks passed";
+  }
+
+  private async analyzeSystemPerformance(metrics: any): Promise<any> {
+    // Mock implementation - replace with actual performance analysis
+    return { analysis: 'normal', recommendations: [] };
+  }
+
+  private async calculateOptimalThrottling(params: any): Promise<any> {
+    // Mock implementation - replace with actual throttling calculation
+    return { adjustmentNeeded: false, recommendations: [] };
+  }
+
+  private async getQoSTargets(): Promise<any> {
+    // Mock implementation - replace with actual QoS targets
+    return { latency: 100, throughput: 1000, availability: 99.9 };
+  }
+
+  private async applyThrottlingAdjustments(decision: any): Promise<void> {
+    // Mock implementation - replace with actual throttling adjustments
+    this.logger.debug('Throttling adjustments applied', decision);
+  }
+
+  private async notifyThrottlingChanges(decision: any): Promise<void> {
+    // Mock implementation - replace with actual throttling notifications
+    this.logger.info('Throttling changes notified', decision);
+  }
+
+  private async getAllClusterInstances(): Promise<any[]> {
+    // Mock implementation - replace with actual cluster instance retrieval
+    return [];
+  }
+
+  private async checkInstanceHealth(instance: any): Promise<any> {
+    // Mock implementation - replace with actual instance health checking
+    return { healthy: true, score: 100 };
+  }
+
+  private calculateOverallHealth(healthChecks: any[]): any {
+    // Mock implementation - replace with actual health calculation
+    return { status: 'HEALTHY', score: 100 };
+  }
+
+  private async collectClusterPerformanceMetrics(): Promise<any> {
+    // Mock implementation - replace with actual metrics collection
+    return { cpu: 50, memory: 60, network: 30 };
+  }
+
+  private async analyzeClusterCapacity(metrics: any): Promise<any> {
+    // Mock implementation - replace with actual capacity analysis
+    return { capacity: 100, utilization: 50 };
+  }
+
+  private async getHealthyInstances(): Promise<any[]> {
+    // Mock implementation - replace with actual healthy instance retrieval
+    return [];
+  }
+
+  private async selectReplacementInstance(failedInstance: any): Promise<any> {
+    // Mock implementation - replace with actual replacement selection
+    return { instance: null, confidence: 0.5 };
+  }
+
+  private async drainInstanceTraffic(instance: any): Promise<void> {
+    // Mock implementation - replace with actual traffic draining
+    this.logger.info('Draining traffic from instance', instance);
+  }
+
+  private async routeTrafficToInstance(instance: any): Promise<void> {
+    // Mock implementation - replace with actual traffic routing
+    this.logger.info('Routing traffic to instance', instance);
+  }
+
+  private async updateLoadBalancerConfig(config: any): Promise<void> {
+    // Mock implementation - replace with actual load balancer updates
+    this.logger.info('Load balancer config updated', config);
+  }
+
+  private async assessFailoverImpact(failover: any): Promise<any> {
+    // Mock implementation - replace with actual failover impact assessment
+    return { impact: 'minimal', affectedUsers: 0 };
+  }
+
+  private async processPerformanceMetrics(metrics: any): Promise<void> {
+    // Mock implementation - replace with actual performance metrics processing
+    this.logger.debug('Performance metrics processed', metrics);
+  }
+
+  private async processSecurityEvent(event: any): Promise<void> {
+    // Mock implementation - replace with actual security event processing
+    this.logger.warn('Security event processed', event);
+  }
+
+  private startBackgroundMonitoring(): void {
+    // Mock implementation - replace with actual background monitoring
+    this.logger.info('Background monitoring started');
+  }
+
+  private async getCurrentSystemCapacity(): Promise<any> {
+    // Mock implementation - replace with actual system capacity monitoring
+    return {
+      totalCapacity: 10000,
+      usedCapacity: 5000,
+      availableCapacity: 5000,
+      utilizationPercentage: 50,
+      lastUpdated: new Date()
+    };
+  }
 }

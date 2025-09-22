@@ -70,8 +70,8 @@ import Redis from 'ioredis';@Module({imports: [ConfigModule],
     // Throttler storage for EnterpriseRateLimitGuard
     {
       provide: 'THROTTLER_STORAGE',
-      useValue: {getRecord: async () => ({ totalHits: 0, timeToExpire: 0 }),
-        addRecord: async () => ({ totalHits: 1, timeToExpire: 60000 }),
+      useValue: {getRecord: () => Promise.resolve({ totalHits: 0, timeToExpire: 0 }),
+        addRecord: () => Promise.resolve({ totalHits: 1, timeToExpire: 60000 }),
       },
     },
 

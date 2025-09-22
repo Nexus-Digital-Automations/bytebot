@@ -811,7 +811,7 @@ export class HighPerformanceCachingService {
 
     invalidatedKeys.push(...l1Keys, ...l2Keys, ...l3Keys);
 
-    return [...new Set(invalidatedKeys)]; // Remove duplicates
+    return Array.from(new Set(invalidatedKeys)); // Remove duplicates
   }
 
   private async invalidateByTags(tags: string[]): Promise<string[]> {
@@ -824,7 +824,7 @@ export class HighPerformanceCachingService {
 
     invalidatedKeys.push(...l1Keys, ...l2Keys, ...l3Keys);
 
-    return [...new Set(invalidatedKeys)]; // Remove duplicates
+    return Array.from(new Set(invalidatedKeys)); // Remove duplicates
   }
 
   private async invalidateByDependencies(dependencies: string[]): Promise<string[]> {
@@ -1237,7 +1237,7 @@ export class L1MemoryCache {
   async invalidateByPattern(pattern: RegExp): Promise<string[]> {
     const invalidatedKeys: string[] = [];
 
-    for (const key of this.cache.keys()) {
+    for (const key of Array.from(this.cache.keys())) {
       if (pattern.test(key)) {
         this.cache.delete(key);
         invalidatedKeys.push(key);
@@ -1251,7 +1251,7 @@ export class L1MemoryCache {
   async invalidateByTags(tags: string[]): Promise<string[]> {
     const invalidatedKeys: string[] = [];
 
-    for (const [key, entry] of this.cache.entries()) {
+    for (const [key, entry] of Array.from(this.cache.entries())) {
       if (entry.metadata.tags.some(tag => tags.includes(tag))) {
         this.cache.delete(key);
         invalidatedKeys.push(key);

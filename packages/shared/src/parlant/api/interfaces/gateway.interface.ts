@@ -451,3 +451,120 @@ export interface GeographicLocation {
   city: string;
   datacenter?: string;
 }
+
+// Gateway API Request/Response Interfaces
+export interface APIRequest {
+  id: string;
+  requestId: string;
+  endpoint: string;
+  method: string;
+  headers: Record<string, string>;
+  parameters: Record<string, any>;
+  body?: any;
+  timestamp: Date;
+  userContext?: UserContext;
+  securityLevel: SecurityLevel;
+  operation: APIOperation;
+}
+
+export type SecurityLevel = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
+export interface APIOperation {
+  type: string;
+  id: string;
+  name: string;
+  description: string;
+  baselineExecutionTime: number;
+  currentState: OperationState;
+  progress: OperationProgress;
+  userContext: UserContext;
+  securityLevel: SecurityLevel;
+}
+
+export interface OperationState {
+  phase: "VALIDATION" | "EXECUTION" | "COMPLETION" | "ERROR";
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED" | "CANCELLED";
+  startTime: Date;
+  currentStep: string;
+  totalSteps: number;
+  completedSteps: number;
+}
+
+export interface OperationProgress {
+  percentage: number;
+  estimatedTimeRemaining: number;
+  currentActivity: string;
+  milestones: ProgressMilestone[];
+}
+
+export interface ProgressMilestone {
+  name: string;
+  completed: boolean;
+  timestamp?: Date;
+  duration?: number;
+}
+
+export interface UserContext {
+  userId: string;
+  roles: string[];
+  permissions: string[];
+  sessionId: string;
+  authLevel: 'BASIC' | 'ENHANCED' | 'ENTERPRISE';
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  valid: boolean; // Alias for isValid for compatibility
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
+  metadata?: Record<string, any>;
+}
+
+export interface ValidationError {
+  field: string;
+  message: string;
+  code: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+}
+
+export interface ValidationWarning {
+  field: string;
+  message: string;
+  recommendation?: string;
+}
+
+export interface LoadBalancingStrategy {
+  strategyType: LoadBalancingAlgorithm;
+  weights?: Record<string, number>;
+  affinityRules?: AffinityRule[];
+  healthThreshold: number;
+}
+
+export interface AffinityRule {
+  type: 'SESSION' | 'USER' | 'GEOGRAPHIC' | 'CUSTOM';
+  key: string;
+  duration?: number;
+}
+
+export interface SecurityEnforcement {
+  authenticationRequired: boolean;
+  authorizationPolicies: string[];
+  encryptionLevel: 'NONE' | 'BASIC' | 'ADVANCED' | 'ENTERPRISE';
+  auditLevel: 'MINIMAL' | 'STANDARD' | 'COMPREHENSIVE';
+  allowed: boolean;
+}
+
+export interface PerformanceMetrics {
+  responseTime: number;
+  throughput: number;
+  errorRate: number;
+  resourceUtilization: ResourceUtilization;
+  timestamp: Date;
+}
+
+export interface ResourceUtilization {
+  cpu: number;
+  memory: number;
+  network: number;
+  storage: number;
+}

@@ -42,7 +42,10 @@ import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { CacheService } from '../../cache/cache.service';
 import { BytebotMetricsService as MetricsService } from '../../metrics/metrics.service';
-    // ===== RESOURCE MANAGEMENT TYPE DEFINITIONS =====/**
+
+// ===== RESOURCE MANAGEMENT TYPE DEFINITIONS =====
+
+/**
  * Resource types for allocation and monitoring
  */
 export enum ResourceType {
@@ -51,7 +54,10 @@ export enum ResourceType {
   DISK = 'disk',
   NETWORK = 'network',
   REDIS = 'redis',
-  FILE_HANDLES = 'file_handles',}/**
+  FILE_HANDLES = 'file_handles',
+}
+
+/**
  * Resource allocation configuration
  */
 export interface ResourceLimits {
@@ -106,7 +112,9 @@ export interface ResourceUtilization {
 export interface ResourceAllocationRequest {
   jobId: string;
   userId: string;
-  priority: 'low' | 'normal' | 'high' | 'urgent';estimatedDuration: number; // minutesrequirements: Partial<ResourceLimits>;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  estimatedDuration: number; // minutes
+  requirements: Partial<ResourceLimits>;
   metadata?: Record<string, unknown>;
 }
 
@@ -119,7 +127,9 @@ export interface ResourceAllocation {
   userId: string;
   allocated: ResourceLimits;
   expiresAt: Date;
-  status: 'allocated' | 'active' | 'released' | 'expired';createdAt: Date;releasedAt?: Date;
+  status: 'allocated' | 'active' | 'released' | 'expired';
+  createdAt: Date;
+  releasedAt?: Date;
 }
 
 /**
@@ -139,7 +149,9 @@ export interface CleanupPolicy {
     maxLogFileSize: number; // MB
   };
   cache: {
-    evictionPolicy: 'lru' | 'lfu' | 'ttl';maxMemoryPercentage: number;cleanupIntervalMinutes: number;
+    evictionPolicy: 'lru' | 'lfu' | 'ttl';
+    maxMemoryPercentage: number;
+    cleanupIntervalMinutes: number;
   };
   redis: {
     keyExpirationDays: number;
@@ -208,8 +220,13 @@ export interface ResourceAlert {
   alertId: string;
   resourceType: ResourceType;
   threshold: number;
-  severity: 'info' | 'warning' | 'error' | 'critical';condition: 'above' | 'below' | 'equals';enabled: boolean;actions: Array<{
-    type: 'notification' | 'scaling' | 'cleanup' | 'throttling';configuration: Record<string, unknown>;}>;
+  severity: 'info' | 'warning' | 'error' | 'critical';
+  condition: 'above' | 'below' | 'equals';
+  enabled: boolean;
+  actions: Array<{
+    type: 'notification' | 'scaling' | 'cleanup' | 'throttling';
+    configuration: Record<string, unknown>;
+  }>;
 }
 
 /**
@@ -221,7 +238,11 @@ export interface CapacityRecommendation {
   currentCapacity: number;
   recommendedCapacity: number;
   reasoning: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';estimatedCost?: number;implementationComplexity: 'low' | 'medium' | 'high';expectedBenefit: string;createdAt: Date;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  estimatedCost?: number;
+  implementationComplexity: 'low' | 'medium' | 'high';
+  expectedBenefit: string;
+  createdAt: Date;
 }
 
 /**
@@ -236,9 +257,13 @@ export interface AutoScalingConfig {
   minInstances: number;
   maxInstances: number;
   scaleUpActions: Array<{
-    type: 'worker' | 'redis' | 'cache' | 'storage';configuration: Record<string, unknown>;}>;
+    type: 'worker' | 'redis' | 'cache' | 'storage';
+    configuration: Record<string, unknown>;
+  }>;
   scaleDownActions: Array<{
-    type: 'worker' | 'redis' | 'cache' | 'storage';configuration: Record<string, unknown>;}>;
+    type: 'worker' | 'redis' | 'cache' | 'storage';
+    configuration: Record<string, unknown>;
+  }>;
 }
 
 /**
@@ -312,70 +337,92 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.logger.log('Initializing Job Resource Cleanup Service');
-    // Load configurationthis.config = {
+
+    // Load configuration
+    this.config = {
       redis: {
         host: this.configService.get('REDIS_HOST', 'localhost'),
-  port: this.configService.get('REDIS_PORT', 6379),
-  password: this.configService.get('REDIS_PASSWORD'),
-  db: this.configService.get('REDIS_DB', 0),},
-  resourceLimits: {
+        port: this.configService.get('REDIS_PORT', 6379),
+        password: this.configService.get('REDIS_PASSWORD'),
+        db: this.configService.get('REDIS_DB', 0),
+      },
+      resourceLimits: {
         cpu: {
           cores: this.configService.get('RESOURCE_CPU_CORES', os.cpus().length),
-  percentage: this.configService.get('RESOURCE_CPU_PERCENTAGE', 80),
-  priority: this.configService.get('RESOURCE_CPU_PRIORITY', 0),},
-  memory: {
+          percentage: this.configService.get('RESOURCE_CPU_PERCENTAGE', 80),
+          priority: this.configService.get('RESOURCE_CPU_PRIORITY', 0),
+        },
+        memory: {
           heap: this.configService.get('RESOURCE_MEMORY_HEAP_MB', 1024),
-  resident: this.configService.get('RESOURCE_MEMORY_RESIDENT_MB', 2048),
-  percentage: this.configService.get('RESOURCE_MEMORY_PERCENTAGE', 80),},
-  disk: {
+          resident: this.configService.get('RESOURCE_MEMORY_RESIDENT_MB', 2048),
+          percentage: this.configService.get('RESOURCE_MEMORY_PERCENTAGE', 80),
+        },
+        disk: {
           space: this.configService.get('RESOURCE_DISK_SPACE_MB', 10240),
-  inodes: this.configService.get('RESOURCE_DISK_INODES', 100000),
-  tempFiles: this.configService.get('RESOURCE_DISK_TEMP_FILES', 1000),},
-  network: {
+          inodes: this.configService.get('RESOURCE_DISK_INODES', 100000),
+          tempFiles: this.configService.get('RESOURCE_DISK_TEMP_FILES', 1000),
+        },
+        network: {
           bandwidth: this.configService.get('RESOURCE_NETWORK_BANDWIDTH_MBPS', 100),
-  connections: this.configService.get('RESOURCE_NETWORK_CONNECTIONS', 1000),
-  requests: this.configService.get('RESOURCE_NETWORK_REQUESTS', 10000),},
-  redis: {
+          connections: this.configService.get('RESOURCE_NETWORK_CONNECTIONS', 1000),
+          requests: this.configService.get('RESOURCE_NETWORK_REQUESTS', 10000),
+        },
+        redis: {
           memory: this.configService.get('RESOURCE_REDIS_MEMORY_MB', 512),
-  connections: this.configService.get('RESOURCE_REDIS_CONNECTIONS', 100),
-  keys: this.configService.get('RESOURCE_REDIS_KEYS', 1000000),},
-  fileHandles: {
+          connections: this.configService.get('RESOURCE_REDIS_CONNECTIONS', 100),
+          keys: this.configService.get('RESOURCE_REDIS_KEYS', 1000000),
+        },
+        fileHandles: {
           open: this.configService.get('RESOURCE_FILE_HANDLES_OPEN', 1000),
-  concurrent: this.configService.get('RESOURCE_FILE_HANDLES_CONCURRENT', 100),},},
+          concurrent: this.configService.get('RESOURCE_FILE_HANDLES_CONCURRENT', 100),
+        },
+      },
       cleanupPolicy: {
         jobs: {
           completedRetentionDays: this.configService.get('CLEANUP_JOBS_COMPLETED_RETENTION_DAYS', 7),
-  failedRetentionDays: this.configService.get('CLEANUP_JOBS_FAILED_RETENTION_DAYS', 30),
-  maxJobsPerUser: this.configService.get('CLEANUP_JOBS_MAX_PER_USER', 100),
-  maxTotalJobs: this.configService.get('CLEANUP_JOBS_MAX_TOTAL', 10000),},
-  files: {
+          failedRetentionDays: this.configService.get('CLEANUP_JOBS_FAILED_RETENTION_DAYS', 30),
+          maxJobsPerUser: this.configService.get('CLEANUP_JOBS_MAX_PER_USER', 100),
+          maxTotalJobs: this.configService.get('CLEANUP_JOBS_MAX_TOTAL', 10000),
+        },
+        files: {
           tempFileRetentionHours: this.configService.get('CLEANUP_FILES_TEMP_RETENTION_HOURS', 24),
-  logFileRetentionDays: this.configService.get('CLEANUP_FILES_LOG_RETENTION_DAYS', 30),
-  maxTempFileSize: this.configService.get('CLEANUP_FILES_MAX_TEMP_SIZE_MB', 100),
-  maxLogFileSize: this.configService.get('CLEANUP_FILES_MAX_LOG_SIZE_MB', 500),},
-  cache: {
+          logFileRetentionDays: this.configService.get('CLEANUP_FILES_LOG_RETENTION_DAYS', 30),
+          maxTempFileSize: this.configService.get('CLEANUP_FILES_MAX_TEMP_SIZE_MB', 100),
+          maxLogFileSize: this.configService.get('CLEANUP_FILES_MAX_LOG_SIZE_MB', 500),
+        },
+        cache: {
           evictionPolicy: this.configService.get('CLEANUP_CACHE_EVICTION_POLICY', 'lru') as 'lru',
-  maxMemoryPercentage: this.configService.get('CLEANUP_CACHE_MAX_MEMORY_PERCENTAGE', 75),
-  cleanupIntervalMinutes: this.configService.get('CLEANUP_CACHE_INTERVAL_MINUTES', 15),},
-  redis: {
+          maxMemoryPercentage: this.configService.get('CLEANUP_CACHE_MAX_MEMORY_PERCENTAGE', 75),
+          cleanupIntervalMinutes: this.configService.get('CLEANUP_CACHE_INTERVAL_MINUTES', 15),
+        },
+        redis: {
           keyExpirationDays: this.configService.get('CLEANUP_REDIS_KEY_EXPIRATION_DAYS', 14),
-  memoryThresholdPercentage: this.configService.get('CLEANUP_REDIS_MEMORY_THRESHOLD_PERCENTAGE', 80),
-  compressionThreshold: this.configService.get('CLEANUP_REDIS_COMPRESSION_THRESHOLD_KB', 10),},},
+          memoryThresholdPercentage: this.configService.get('CLEANUP_REDIS_MEMORY_THRESHOLD_PERCENTAGE', 80),
+          compressionThreshold: this.configService.get('CLEANUP_REDIS_COMPRESSION_THRESHOLD_KB', 10),
+        },
+      },
       monitoring: {
         enabled: this.configService.get('MONITORING_ENABLED', true),
-  intervalSeconds: this.configService.get('MONITORING_INTERVAL_SECONDS', 30),
-  alerting: this.configService.get('MONITORING_ALERTING_ENABLED', true),},
-  autoScaling: {
+        intervalSeconds: this.configService.get('MONITORING_INTERVAL_SECONDS', 30),
+        alerting: this.configService.get('MONITORING_ALERTING_ENABLED', true),
+      },
+      autoScaling: {
         enabled: this.configService.get('AUTO_SCALING_ENABLED', false),
-  evaluationIntervalMinutes: this.configService.get('AUTO_SCALING_EVALUATION_INTERVAL_MINUTES', 5),},
-  capacity: {
+        evaluationIntervalMinutes: this.configService.get('AUTO_SCALING_EVALUATION_INTERVAL_MINUTES', 5),
+      },
+      capacity: {
         planningEnabled: this.configService.get('CAPACITY_PLANNING_ENABLED', true),
-  evaluationIntervalHours: this.configService.get('CAPACITY_PLANNING_EVALUATION_INTERVAL_HOURS', 24),
-  retentionDays: this.configService.get('CAPACITY_PLANNING_RETENTION_DAYS', 90),},};
+        evaluationIntervalHours: this.configService.get('CAPACITY_PLANNING_EVALUATION_INTERVAL_HOURS', 24),
+        retentionDays: this.configService.get('CAPACITY_PLANNING_RETENTION_DAYS', 90),
+      },
+    };
   }
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing resource management components');try {// Initialize Redis connection
+    this.logger.log('Initializing resource management components');
+
+    try {
+      // Initialize Redis connection
       await this.initializeRedis();
 
       // Initialize resource pools
@@ -397,19 +444,28 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
 
       this.isInitialized = true;
       this.logger.log('Job Resource Cleanup Service initialized successfully');
-    // Emit initialization eventthis.eventEmitter.emit('resource.service.initialized', {service: 'JobResourceCleanupService',
-  timestamp: new Date(),
-  resourcePools: this.resourcePools.size,
+
+      // Emit initialization event
+      this.eventEmitter.emit('resource.service.initialized', {
+        service: 'JobResourceCleanupService',
+        timestamp: new Date(),
+        resourcePools: this.resourcePools.size,
         alerts: this.resourceAlerts.size,
         autoScaling: this.autoScalingConfigs.size,
       });
 
     } catch (error) {
-      this.logger.error('Failed to initialize Job Resource Cleanup Service', error);throw error;}
+      this.logger.error('Failed to initialize Job Resource Cleanup Service', error);
+      throw error;
+    }
+  }
   }
 
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Job Resource Cleanup Service');this.isShuttingDown = true;try {
+    this.logger.log('Shutting down Job Resource Cleanup Service');
+    this.isShuttingDown = true;
+
+    try {
       // Release all active allocations
       await this.releaseAllAllocations();
 
@@ -424,7 +480,9 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
         await this.redis.quit();
       }
 
-      this.logger.log('Job Resource Cleanup Service shutdown completed');} catch (error) {this.logger.error('Error during service shutdown', error);
+      this.logger.log('Job Resource Cleanup Service shutdown completed');
+    } catch (error) {
+      this.logger.error('Error during service shutdown', error);
     }
   }
 
@@ -435,7 +493,10 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
    */
   async allocateResources(request: ResourceAllocationRequest): Promise<ResourceAllocation> {
     const startTime = Date.now();
-    this.logger.log(`Allocating resources for job ${request.jobId}`);try {// Validate request
+    this.logger.log(`Allocating resources for job ${request.jobId}`);
+
+    try {
+      // Validate request
       this.validateAllocationRequest(request);
 
       // Check resource availability
@@ -467,31 +528,43 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       );
 
       // Update metrics
-      this.metricsService.recordCustomMetric('resource_allocations_total', 1, {user_id: request.userId,
-  priority: request.priority,
-        resource_types: Object.keys(request.requirements).join(','),});this.metricsService.recordCustomMetric('resource_allocation_duration_ms', Date.now() - startTime, {status: 'success',});
-    // Emit allocation event
+      this.metricsService.recordCustomMetric('resource_allocations_total', 1, {
+        user_id: request.userId,
+        priority: request.priority,
+        resource_types: Object.keys(request.requirements).join(','),
+      });
+      this.metricsService.recordCustomMetric('resource_allocation_duration_ms', Date.now() - startTime, {
+        status: 'success',
+      });
+      // Emit allocation event
       this.eventEmitter.emit('resource.allocated', {
         allocation,
         request,
         timestamp: new Date(),
       });
 
-      this.logger.log(`Resources allocated successfully: ${allocation.allocationId}`);return allocation;} catch (error) {
+      this.logger.log(`Resources allocated successfully: ${allocation.allocationId}`);
+      return allocation;
+    } catch (error) {
       this.logger.error(`Failed to allocate resources for job ${request.jobId}`, error);
 
-      this.metricsService.recordCustomMetric('resource_allocation_duration_ms', Date.now() - startTime, {status: 'error',
+      this.metricsService.recordCustomMetric('resource_allocation_duration_ms', Date.now() - startTime, {
+        status: 'error',
       });
 
       throw error;
     }
+  }
   }
 
   /**
    * Release allocated resources
    */
   async releaseResources(allocationId: string): Promise<void> {
-    this.logger.log(`Releasing resources for allocation ${allocationId}`);try {const allocation = this.activeAllocations.get(allocationId);
+    this.logger.log(`Releasing resources for allocation ${allocationId}`);
+
+    try {
+      const allocation = this.activeAllocations.get(allocationId);
       if (!allocation) {
         this.logger.warn(`Allocation not found: ${allocationId}`);
         return;
@@ -511,8 +584,9 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       await this.cacheService.delete(`resource:allocation:${allocationId}`);
 
       // Update metrics
-      this.metricsService.recordCustomMetric('resource_releases_total', 1, {user_id: allocation.userId,
-  duration_minutes: Math.round((allocation.releasedAt!.getTime() - allocation.createdAt.getTime()) / 60000),
+      this.metricsService.recordCustomMetric('resource_releases_total', 1, {
+        user_id: allocation.userId,
+        duration_minutes: Math.round((allocation.releasedAt!.getTime() - allocation.createdAt.getTime()) / 60000),
       });
 
       // Emit release event
@@ -521,9 +595,12 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
         timestamp: new Date(),
       });
 
-      this.logger.log(`Resources released successfully: ${allocationId}`);} catch (error) {this.logger.error(`Failed to release resources for allocation ${allocationId}`, error);
+      this.logger.log(`Resources released successfully: ${allocationId}`);
+    } catch (error) {
+      this.logger.error(`Failed to release resources for allocation ${allocationId}`, error);
       throw error;
     }
+
   }
 
   /**
@@ -540,8 +617,8 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       // CPU utilization
       utilization.push({
         resourceId: 'system-cpu',
-  type: ResourceType.CPU,
-  used: systemHealth.cpu.usage,
+        type: ResourceType.CPU,
+        used: systemHealth.cpu.usage,
         available: 100,
         percentage: systemHealth.cpu.usage,
         timestamp,
@@ -550,8 +627,8 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       // Memory utilization
       utilization.push({
         resourceId: 'system-memory',
-  type: ResourceType.MEMORY,
-  used: systemHealth.memory.used,
+        type: ResourceType.MEMORY,
+        used: systemHealth.memory.used,
         available: systemHealth.memory.total,
         percentage: systemHealth.memory.percentage,
         timestamp,
@@ -560,8 +637,8 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       // Disk utilization
       utilization.push({
         resourceId: 'system-disk',
-  type: ResourceType.DISK,
-  used: systemHealth.disk.used,
+        type: ResourceType.DISK,
+        used: systemHealth.disk.used,
         available: systemHealth.disk.total,
         percentage: systemHealth.disk.percentage,
         timestamp,
@@ -570,8 +647,8 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       // Redis utilization
       utilization.push({
         resourceId: 'system-redis',
-  type: ResourceType.REDIS,
-  used: systemHealth.redis.memory,
+        type: ResourceType.REDIS,
+        used: systemHealth.redis.memory,
         available: this.config.resourceLimits.redis.memory,
         percentage: (systemHealth.redis.memory / this.config.resourceLimits.redis.memory) * 100,
         timestamp,
@@ -580,7 +657,9 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       return utilization;
 
     } catch (error) {
-      this.logger.error('Failed to get resource utilization', error);throw error;}
+      this.logger.error('Failed to get resource utilization', error);
+      throw error;
+    }
   }
 
   // ===== CLEANUP METHODS =====
@@ -662,11 +741,18 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       return;
     }
 
-    this.logger.log('Starting scheduled cleanup operation');try {await this.performCleanup();
+    this.logger.log('Starting scheduled cleanup operation');
+
+    try {
+      await this.performCleanup();
     } catch (error) {
-      this.logger.error('Scheduled cleanup failed', error);this.metricsService.recordCustomMetric('cleanup_operations_total', 1, {type: 'scheduled',
-  status: 'error',});
-}
+      this.logger.error('Scheduled cleanup failed', error);
+      this.metricsService.recordCustomMetric('cleanup_operations_total', 1, {
+        type: 'scheduled',
+        status: 'error',
+      });
+    }
+  }
   }
 
   /**
@@ -696,7 +782,9 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       this.updatePrometheusMetrics(systemHealth);
 
     } catch (error) {
-      this.logger.error('Resource monitoring failed', error);}}
+      this.logger.error('Resource monitoring failed', error);
+    }
+  }
 
   /**
    * Capacity planning evaluation - runs daily
@@ -707,7 +795,10 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       return;
     }
 
-    this.logger.log('Starting capacity planning evaluation');try {const recommendations = await this.generateCapacityRecommendations();
+    this.logger.log('Starting capacity planning evaluation');
+
+    try {
+      const recommendations = await this.generateCapacityRecommendations();
 
       // Store recommendations
       this.capacityRecommendations.push(...recommendations);
@@ -723,7 +814,9 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
 
       // Update metrics
       this.metricsService.recordCustomMetric('capacity_recommendations_total', recommendations.length);
-    // Emit capacity planning eventthis.eventEmitter.emit('capacity.planning.completed', {
+
+      // Emit capacity planning event
+      this.eventEmitter.emit('capacity.planning.completed', {
         recommendations,
         timestamp: new Date(),
       });
@@ -731,7 +824,9 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
       this.logger.log(`Capacity planning completed: ${recommendations.length} recommendations generated`);
 
     } catch (error) {
-      this.logger.error('Capacity planning evaluation failed', error);}}
+      this.logger.error('Capacity planning evaluation failed', error);
+    }
+  }
 
   // ===== MONITORING AND ALERTS =====
 
@@ -759,16 +854,14 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
     availableCapacity: Record<ResourceType, number>;
   }> {
     const utilizationMetrics = await this.getResourceUtilization();
-
-        const availableCapacity: Record<ResourceType, number> = {} as Record<ResourceType, number>;
+    const availableCapacity: Record<ResourceType, number> = {} as Record<ResourceType, number>;
 
     for (const [type, pool] of this.resourcePools) {
       availableCapacity[type] = pool.availableCapacity;
     }
 
     const totalUtilization = utilizationMetrics.reduce((sum, metric) => sum + metric.percentage, 0);
-
-        const averageUtilization = totalUtilization / utilizationMetrics.length;
+    const averageUtilization = totalUtilization / utilizationMetrics.length;
 
     return {
       activeAllocations: this.activeAllocations.size,
@@ -913,10 +1006,15 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
 
   private validateAllocationRequest(request: ResourceAllocationRequest): void {
     if (!request.jobId || !request.userId) {
-      throw new Error('Job ID and User ID are required');}if (!request.requirements || Object.keys(request.requirements).length === 0) {
-      throw new Error('Resource requirements are required');}if (request.estimatedDuration <= 0) {
+      throw new Error('Job ID and User ID are required');
+    }
+    if (!request.requirements || Object.keys(request.requirements).length === 0) {
+      throw new Error('Resource requirements are required');
+    }
+    if (request.estimatedDuration <= 0) {
       throw new Error('Estimated duration must be positive');
     }
+  }
   }
 
   private async checkResourceAvailability(requirements: Partial<ResourceLimits>): Promise<{
@@ -929,13 +1027,14 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
     // Check each required resource
     for (const [resourceKey, resourceRequirement] of Object.entries(requirements)) {
       const resourceType = this.mapResourceKeyToType(resourceKey);
-
-        const pool = this.resourcePools.get(resourceType);
+      const pool = this.resourcePools.get(resourceType);
 
       if (!pool) {
         return {
           available: false,
-          reason: `Resource pool not found: ${resourceType}`,};}
+          reason: `Resource pool not found: ${resourceType}`,
+        };
+      }
 
       const requiredCapacity = this.calculateRequiredCapacity(resourceType, resourceRequirement);
 
@@ -958,10 +1057,22 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
 
   private mapResourceKeyToType(resourceKey: string): ResourceType {
     switch (resourceKey) {
-      case 'cpu':return ResourceType.CPU;case 'memory':return ResourceType.MEMORY;case 'disk':return ResourceType.DISK;case 'network':return ResourceType.NETWORK;case 'redis':return ResourceType.REDIS;case 'fileHandles':
+      case 'cpu':
+        return ResourceType.CPU;
+      case 'memory':
+        return ResourceType.MEMORY;
+      case 'disk':
+        return ResourceType.DISK;
+      case 'network':
+        return ResourceType.NETWORK;
+      case 'redis':
+        return ResourceType.REDIS;
+      case 'fileHandles':
         return ResourceType.FILE_HANDLES;
       default:
-        throw new Error(`Unknown resource key: ${resourceKey}`);}}
+        throw new Error(`Unknown resource key: ${resourceKey}`);
+    }
+  }
 
   private calculateRequiredCapacity(resourceType: ResourceType, requirement: any): number {
     switch (resourceType) {
@@ -1012,7 +1123,10 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
         pool.allocatedCapacity += requiredCapacity;
         pool.allocations.push(allocation);
 
-        this.logger.debug(`Reserved ${requiredCapacity} units of ${resourceType} for allocation ${allocation.allocationId}`);}}
+        this.logger.debug(`Reserved ${requiredCapacity} units of ${resourceType} for allocation ${allocation.allocationId}`);
+      }
+    }
+  }
   }
 
   private async releaseResourcesInPools(allocation: ResourceAllocation): Promise<void> {
@@ -1028,6 +1142,7 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
         this.logger.debug(`Released ${requiredCapacity} units of ${resourceType} for allocation ${allocation.allocationId}`);
       }
     }
+  }
   }
 
   private getRequiredCapacityFromAllocation(allocation: ResourceAllocation, resourceType: ResourceType): number {
@@ -1051,10 +1166,8 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
 
   private async releaseAllAllocations(): Promise<void> {
     this.logger.log('Releasing all active allocations');
-
-        const allocationIds = Array.from(this.activeAllocations.keys());
-
-        const releasePromises = allocationIds.map(id => this.releaseResources(id));
+    const allocationIds = Array.from(this.activeAllocations.keys());
+    const releasePromises = allocationIds.map(id => this.releaseResources(id));
 
     await Promise.all(releasePromises);
     this.logger.log(`Released ${allocationIds.length} allocations`);
@@ -1065,29 +1178,24 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
 
     // CPU metrics
     const cpuUsage = os.loadavg();
-
-        const cpuCount = os.cpus().length;
+    const cpuCount = os.cpus().length;
 
     // Memory metrics
     const totalMemory = os.totalmem();
-
-        const freeMemory = os.freemem();
-
-        const usedMemory = totalMemory - freeMemory;
+    const freeMemory = os.freemem();
+    const usedMemory = totalMemory - freeMemory;
     const memoryPercentage = (usedMemory / totalMemory) * 100;
 
     // Process memory
     const processMemory = process.memoryUsage();
-
-        const heapPercentage = (processMemory.heapUsed / processMemory.heapTotal) * 100;
+    const heapPercentage = (processMemory.heapUsed / processMemory.heapTotal) * 100;
 
     // Redis metrics
     const redisInfo = await this.getRedisInfo();
 
     // Network interfaces
     const networkInterfaces = os.networkInterfaces();
-
-        const interfaces = Object.entries(networkInterfaces).map(([name, interfaces]) => ({
+    const interfaces = Object.entries(networkInterfaces).map(([name, interfaces]) => ({
       name,
       received: 0, // Would need to implement actual network monitoring
       transmitted: 0,
@@ -1142,19 +1250,20 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
   }> {
     try {
       const info = await this.redis.info('memory');
+      const memory = this.parseRedisMemoryInfo(info);
+      const connections = await this.redis.client('list');
+      const dbSize = await this.redis.dbsize();
 
-        const memory = this.parseRedisMemoryInfo(info);
-
-        const connections = await this.redis.client('list');
-
-        const dbSize = await this.redis.dbsize();return {
+      return {
         memory: Math.round(memory / 1024 / 1024), // MB
         connections: Array.isArray(connections) ? connections.length : 0,
         keys: dbSize,
         operations: 0, // Would need to track operations
       };
     } catch (error) {
-      this.logger.error('Failed to get Redis info', error);return {memory: 0,
+      this.logger.error('Failed to get Redis info', error);
+      return {
+        memory: 0,
         connections: 0,
         keys: 0,
         operations: 0,
@@ -1163,7 +1272,12 @@ export class JobResourceCleanupService implements OnModuleInit, OnModuleDestroy 
   }
 
   private parseRedisMemoryInfo(info: string): number {
-    const memoryLine = info.split('\n').find(line => line.startsWith('used_memory:'));if (memoryLine) {return parseInt(memoryLine.split(':')[1], 10);}return 0;
+    const memoryLine = info.split('\n').find(line => line.startsWith('used_memory:'));
+    if (memoryLine) {
+      return parseInt(memoryLine.split(':')[1], 10);
+    }
+    return 0;
+  }
   }
 
   private async checkResourceAlerts(systemHealth: SystemHealth): Promise<void> {

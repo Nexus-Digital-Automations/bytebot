@@ -172,7 +172,7 @@ class RecoveryMetricsTracker {
   faultType: string;
     duration?: number;
     attempt?: number;
-    details?: any;
+    details?: Record<string, unknown>;
   
 }> = [];
 
@@ -221,7 +221,7 @@ _${Math.random().toString(36).substring(7)}`;
     }
   }
 
-  recordRecoverySuccess(failureId: string, details?: any): void {
+  recordRecoverySuccess(failureId: string, details?: Record<string, unknown>): void {
   const failure = this.activeFailures.get(failureId);
     if (failure) {
       const recoveryTime = Date.now() - failure.startTime;
@@ -569,12 +569,14 @@ class ServerFaultSimulator {
   }
 
   simulateServerOverload(): void {
-  this.faults.add('server_overload');// Introduce artificial delaysconst originalSend = WebSocket.prototype.send;
+  this.faults.add('server_overload');
+  // Introduce artificial delays
+  const originalSend = WebSocket.prototype.send;
     WebSocket.prototype.send = function(this: WebSocket.WebSocket, data: WebSocket.Data) {
       if (this.readyState === WebSocket.OPEN) {
         setTimeout(() => {
           try {
-            originalSend.call(this, data);
+            (originalSend as (data: WebSocket.Data) => void).call(this, data);
           
 } catch (error: unknown) {
           // Ignore errors during overload simulation - typed error handling
@@ -618,7 +620,7 @@ class ServerFaultSimulator {
     // Intercept and randomly drop messages
     this.connections.forEach(ws => {
       const originalSend = ws.send.bind(ws);
-      ws.send = function(data: any) {
+      ws.send = function(data: WebSocket.Data) {
         if (Math.random() > lossRate) {
           originalSend(data);
         

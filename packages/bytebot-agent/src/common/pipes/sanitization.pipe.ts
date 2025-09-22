@@ -188,7 +188,7 @@ type SanitizableValue =
 interface SanitizableObject {
   [key: string]: SanitizableValue;
 }
-interface SanitizableArray extends Array<SanitizableValue> {}
+type SanitizableArray = Array<SanitizableValue>;
 
 @Injectable()
 export class SanitizationPipe

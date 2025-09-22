@@ -276,8 +276,8 @@ export class AutoRegistrationService {
       return result;
 
     } catch (error) {
-      this.logger.error(`Auto registration batch ${batchId} failed: ${error.message}`, error.stack);
-      this.eventEmitter.emit('auto-registration.failed', { batchId, error: error.message });
+      this.logger.error(`Auto registration batch ${batchId} failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.eventEmitter.emit('auto-registration.failed', { batchId, error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -334,19 +334,19 @@ export class AutoRegistrationService {
       return registrationResult;
 
     } catch (error) {
-      this.logger.error(`Failed to register function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to register function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
 
       this.eventEmitter.emit('function.registration-failed', {
         functionId,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       });
 
       return {
         success: false,
         functionId,
-        message: `Registration failed: ${error.message}`,
+        message: `Registration failed: ${error instanceof Error ? error.message : String(error)}`,
         warnings: [],
-        metadata: { error: error.message }
+        metadata: { error: error instanceof Error ? error.message : String(error) }
       };
     }
   }
@@ -452,9 +452,9 @@ export class AutoRegistrationService {
       } catch (error) {
         result.failedRegistrations.push({
           functionId,
-          error: error.message,
-          details: { stack: error.stack },
-          retryable: this.isRetryableError(error.message)
+          error: error instanceof Error ? error.message : String(error),
+          details: { stack: error instanceof Error ? error.stack : undefined },
+          retryable: this.isRetryableError(error instanceof Error ? error.message : String(error))
         });
       }
     });
@@ -1079,7 +1079,7 @@ export class AutoRegistrationService {
         try {
           await this.sendNotification(channel, notification);
         } catch (error) {
-          this.logger.warn(`Failed to send notification to ${channel}: ${error.message}`);
+          this.logger.warn(`Failed to send notification to ${channel}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
     }

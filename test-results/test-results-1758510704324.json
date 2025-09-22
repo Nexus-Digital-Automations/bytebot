@@ -1,0 +1,62 @@
+{
+  "success": false,
+  "numTotalTests": 0,
+  "numPassedTests": 0,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTotalTestSuites": 1,
+  "numPassedTestSuites": 0,
+  "numFailedTestSuites": 1,
+  "numPendingTestSuites": 0,
+  "testResults": [
+    {
+      "failureMessage": "  ● Test suite failed to run\n\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m23\u001b[0m:\u001b[93m16\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2664: \u001b[0mInvalid module name in augmentation, module '@jest/expect' cannot be found.\n\n    \u001b[7m23\u001b[0m declare module '@jest/expect' {\n    \u001b[7m  \u001b[0m \u001b[91m               ~~~~~~~~~~~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m189\u001b[0m:\u001b[93m11\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2694: \u001b[0mNamespace 'jest' has no exported member 'CustomMatcherResult'.\n\n    \u001b[7m189\u001b[0m   ): jest.CustomMatcherResult {\n    \u001b[7m   \u001b[0m \u001b[91m          ~~~~~~~~~~~~~~~~~~~\u001b[0m\n",
+      "leaks": false,
+      "numFailingTests": 0,
+      "numPassingTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "openHandles": [],
+      "perfStats": {
+        "end": 0,
+        "runtime": 0,
+        "slow": false,
+        "start": 0
+      },
+      "skipped": false,
+      "snapshot": {
+        "added": 0,
+        "fileDeleted": false,
+        "matched": 0,
+        "unchecked": 0,
+        "uncheckedKeys": [],
+        "unmatched": 0,
+        "updated": 0
+      },
+      "testExecError": {
+        "name": "TSError",
+        "diagnosticText": "\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m23\u001b[0m:\u001b[93m16\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2664: \u001b[0mInvalid module name in augmentation, module '@jest/expect' cannot be found.\n\n\u001b[7m23\u001b[0m declare module '@jest/expect' {\n\u001b[7m  \u001b[0m \u001b[91m               ~~~~~~~~~~~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m189\u001b[0m:\u001b[93m11\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2694: \u001b[0mNamespace 'jest' has no exported member 'CustomMatcherResult'.\n\n\u001b[7m189\u001b[0m   ): jest.CustomMatcherResult {\n\u001b[7m   \u001b[0m \u001b[91m          ~~~~~~~~~~~~~~~~~~~\u001b[0m\n",
+        "diagnosticCodes": [
+          2664,
+          2694
+        ]
+      },
+      "testFilePath": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/parlant/api/parameter-validation/parameter-validation.test.ts",
+      "testResults": []
+    }
+  ],
+  "startTime": 1758510702219,
+  "endTime": 1758510704324,
+  "testDuration": 2105,
+  "analysis": {
+    "testFailures": [],
+    "suiteFailures": [],
+    "coverage": null
+  },
+  "summary": {
+    "passRate": "0%",
+    "suitePassRate": "0.00%",
+    "totalDuration": "2105ms"
+  },
+  "timestamp": "2025-09-22T03:11:44.324Z"
+}

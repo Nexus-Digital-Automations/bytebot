@@ -202,7 +202,7 @@ export class PreExecutionValidatorService {
         `Pre-execution validation failed after ${processingTime.toFixed(2)}ms`,
         {
           validationId,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           processingTime,
         },
       );
@@ -796,7 +796,9 @@ export class PreExecutionValidatorService {
     // Cleanup old cache entries (keep last 1000)
     if (this.validationCache.size > 1000) {
       const firstKey = this.validationCache.keys().next().value;
-      this.validationCache.delete(firstKey);
+      if (firstKey !== undefined) {
+        this.validationCache.delete(firstKey);
+      }
     }
   }
 

@@ -511,8 +511,8 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       await this.updateCommonAttributes(existingMapping);
 
       // Store updated mapping
-      this.identityMappings.set(existingMappingId, existingMapping);
-      this.emailToMappingId.set(primaryEmail, existingMappingId);
+      this.identityMappings.set(existingMappingId!, existingMapping);
+      this.emailToMappingId.set(primaryEmail, existingMappingId!);
 
       // Add to sync history
       existingMapping.metadata.syncHistory.push({
@@ -797,7 +797,7 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
         includeData: false,
         retentionDays: 90,
       },
-      ...this.configService.get('identityMapping', {}),
+      ...(this.configService.get('identityMapping') || {}),
       ...this.mappingConfig,
     };
 

@@ -41,7 +41,12 @@ export class StepExecutionResultDto {
       validationPassed: true
     }
   })
-  result?: any;
+  result?: {
+    success: boolean;
+    data?: Record<string, unknown>;
+    message?: string;
+    details?: Record<string, unknown>;
+  };
 
   @ApiPropertyOptional({
     description: 'Output variables extracted from step',example: {loginSuccess: true,
@@ -53,7 +58,11 @@ export class StepExecutionResultDto {
 
   @ApiPropertyOptional({
     description: 'Detailed error information',example: {errorType: 'ElementNotFoundError',errorCode: 'ELEMENT_NOT_FOUND',stackTrace: 'Error: Element not found...'}})
-  errorDetails?: any;
+  errorDetails?: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
 
   @ApiPropertyOptional({
     description: 'Number of retry attempts made',example: 1})
@@ -91,7 +100,11 @@ export class LoopExecutionInfoDto {
   maxIterations?: number;
 
   @ApiPropertyOptional({
-    description: 'Current iteration data',example: { item: 'Product A', index: 2 }})currentIterationData?: any;
+    description: 'Current iteration data',example: { item: 'Product A', index: 2 }})currentIterationData?: {
+    item: unknown;
+    index: number;
+    total?: number;
+  };
 
   @ApiProperty({
     description: 'Whether loop is still active',example: true})
@@ -222,7 +235,7 @@ export class WorkflowExecutionResponseDto {
   @ApiPropertyOptional({
     description: 'Final workflow output data',example: {extractedProducts: 156,
       processedData: 'data/products_2024-01-15.json',summaryReport: 'reports/summary_2024-01-15.html'}})
-  outputData?: any;
+  outputData?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Final workflow variables state',example: {totalItemsProcessed: 156,
@@ -235,7 +248,11 @@ export class WorkflowExecutionResponseDto {
 
   @ApiPropertyOptional({
     description: 'Detailed error information',example: {errorType: 'NetworkError',failedStep: 'step_3_navigate',errorCode: 'NETWORK_TIMEOUT'}})
-  errorDetails?: any;
+  errorDetails?: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
 
   @ApiPropertyOptional({
     description: 'Workflow execution warnings',example: ['Step timeout increased automatically', 'Rate limiting detected on target site']})warnings?: string[];
@@ -244,7 +261,7 @@ export class WorkflowExecutionResponseDto {
     description: 'Execution configuration used',example: {executionMode: 'sequential',captureScreenshots: true,debugMode: false
     }
   })
-  executionConfig?: any;
+  executionConfig?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Runtime metadata',example: {executedBy: 'user@example.com',executorAgent: 'agent_123',environment: 'production',triggerSource: 'manual'}})
@@ -279,7 +296,11 @@ export class WorkflowValidationResultDto {
     description: 'Dependency graph validation',example: {hasCircularDependencies: false,
       unreachableSteps: [],
       dependencyChains: ['step_1 -> step_2 -> step_3']}})
-  dependencyValidation?: any;
+  dependencyValidation?: {
+    satisfied: boolean;
+    missing?: string[];
+    conflicts?: string[];
+  };
 
   @ApiPropertyOptional({
     description: 'Performance recommendations',example: ['Consider adding parallel execution for steps 4-6','Step 3 timeout may be too short for complex forms']})

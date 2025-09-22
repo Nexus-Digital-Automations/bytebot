@@ -632,9 +632,7 @@ export class FailoverMechanismsService extends EventEmitter implements OnModuleI
   /**
    * Force failover for testing
    */
-  async forceFail
-
-over(serviceName: string, reason: string): Promise<void> {
+  async forceFailover(serviceName: string, reason: string): Promise<void> {
     this.logger.warn(`🔧 Forcing failover for service: ${serviceName} - ${reason}`);
 
     // Mark all endpoints for the service as unhealthy
@@ -693,7 +691,7 @@ over(serviceName: string, reason: string): Promise<void> {
         algorithm: 'response-time',
         stickySession: false,
       },
-      ...this.configService.get('failover', {}),
+      ...(this.configService.get('failover') || {}),
       ...this.failoverConfig,
     };
 

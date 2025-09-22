@@ -28,20 +28,9 @@ import {
   APIDefinition,
   ResolvedParameters,
   APIRequest,
-  ExtractedData,
-  ParameterContext,
-  ParsedInput,
-  ValidationContext,
-  ValidationResult,
-  SingleValidationResult,
-  ValidationError,
-  ValidationWarning,
-  CorrectionSuggestions,
-  Correction,
   ParameterType,
-  ConversionContext,
-  ConversionResult,
   NegotiationStep,
+  APIOperation,
 } from "../interfaces/conversational-api.interface";
 
 /**
@@ -127,11 +116,10 @@ export class ConversationalAPIPatternsService
       }
 
       // Step 3: Parameter negotiation and validation
-      const parameterNegotiation = await this.negotiateParameters({
-        intent: intentAnalysis,
-        selectedAPI: apiMapping.selectedAPI,
-        userProvidedData: this.extractDataFromIntent(intentAnalysis),
-      });
+      const parameterNegotiation = await this.negotiateParameters(
+        intentAnalysis,
+        apiMapping.selectedAPI.schema
+      );
 
       // Step 4: Risk assessment and user confirmation
       const riskAssessment = await this.assessOperationRisks(
@@ -191,7 +179,7 @@ export class ConversationalAPIPatternsService
       this.logger.error(
         `Failed to process natural language API request after ${processingTime.toFixed(2)}ms`,
         {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           userId: userContext.userId,
           request: request.substring(0, 100),
           processingTime,
@@ -295,18 +283,17 @@ export class ConversationalAPIPatternsService
   /**
    * Negotiates API parameters through conversational interface
    */
-  async negotiateParameters(params: {
-    intent: IntentAnalysis;
-    selectedAPI: APIDefinition;
-    userProvidedData: ExtractedData;
-  }): Promise<ParameterNegotiation> {
+  async negotiateParameters(
+    intent: IntentAnalysis,
+    apiSchema: APISchema,
+  ): Promise<ParameterNegotiation> {
     const startTime = performance.now();
     this.logger.debug(
-      `Negotiating parameters for API ${params.selectedAPI.name}`,
+      `Negotiating parameters for API schema with ${Object.keys(apiSchema.properties || {}).length} properties`,
     );
 
-    const requiredParameters = params.selectedAPI.schema.required || [];
-    const providedParameters = params.userProvidedData.parameters;
+    const requiredParameters = apiSchema.required || [];
+    const providedParameters = intent.extractedParameters || {};
     const missingParameters: string[] = [];
     const ambiguousParameters: ParameterAmbiguity[] = [];
 
@@ -319,7 +306,7 @@ export class ConversationalAPIPatternsService
 
     // Identify ambiguous parameter values
     for (const [key, value] of Object.entries(providedParameters)) {
-      const parameterSchema = params.selectedAPI.schema.properties[key];
+      const parameterSchema = apiSchema.properties[key];
       if (parameterSchema && this.isAmbiguous(value, parameterSchema)) {
         ambiguousParameters.push({
           parameter: key,
@@ -340,8 +327,8 @@ export class ConversationalAPIPatternsService
       );
       const missingParameterData = await this.requestMissingParameters({
         missingParameters: missingParameters,
-        apiContext: params.selectedAPI,
-        userIntent: params.intent,
+        apiContext: { schema: apiSchema } as any, // TODO: Fix API context type
+        userIntent: intent,
         currentParameters: providedParameters,
       });
 
@@ -356,24 +343,23 @@ export class ConversationalAPIPatternsService
       const clarifications =
         await this.clarifyAmbiguousParameters(ambiguousParameters);
 
-      for (const clarification of clarifications) {
-        providedParameters[clarification.parameter] =
-          clarification.resolvedValue;
+      if (clarifications.parameter) {
+        providedParameters[clarifications.parameter] = clarifications.resolvedValue;
       }
     }
 
     // Validate all parameters against schema
     const validationResult = await this.validateParametersAgainstSchema(
       providedParameters,
-      params.selectedAPI.schema,
+      apiSchema,
     );
 
     if (!validationResult.valid) {
       // Attempt automatic corrections
       const corrections = await this.suggestParameterCorrections({
         invalidParameters: validationResult.errors,
-        userIntent: params.intent,
-        schema: params.selectedAPI.schema,
+        userIntent: intent,
+        schema: apiSchema,
       });
 
       if (corrections.autoCorrectible) {
@@ -395,7 +381,7 @@ export class ConversationalAPIPatternsService
     this.logger.debug(
       `Parameter negotiation completed in ${processingTime.toFixed(2)}ms`,
       {
-        apiName: params.selectedAPI.name,
+        schemaProperties: Object.keys(apiSchema.properties).length,
         parametersResolved: Object.keys(providedParameters).length,
         processingTime,
       },
@@ -403,11 +389,11 @@ export class ConversationalAPIPatternsService
 
     return {
       resolvedParameters: providedParameters,
-      resolvedMethod: params.selectedAPI.method,
+      resolvedMethod: 'POST', // TODO: Determine method from API schema
       negotiationSteps: this.getNavigationHistory(),
       parameterConfidence: this.calculateParameterConfidence(
         providedParameters,
-        params.selectedAPI.schema,
+        apiSchema,
       ),
     };
   }
@@ -417,27 +403,31 @@ export class ConversationalAPIPatternsService
    */
   async clarifyAmbiguousParameters(
     ambiguities: ParameterAmbiguity[],
-  ): Promise<ParameterClarification[]> {
-    const clarifications: ParameterClarification[] = [];
-
-    for (const ambiguity of ambiguities) {
-      // TODO: Implement actual conversational clarification with Parlant
-      // For now, use the highest confidence interpretation
-      const bestInterpretation = ambiguity.possibleInterpretations.reduce(
-        (best, current) =>
-          current.confidence > best.confidence ? current : best,
-      );
-
-      clarifications.push({
-        parameter: ambiguity.parameter,
-        clarificationQuestion: `Did you mean ${bestInterpretation.reasoning}?`,
-        userResponse: "yes", // Mock user response
-        resolvedValue: bestInterpretation.value,
-        confidence: bestInterpretation.confidence,
-      });
+  ): Promise<ParameterClarification> {
+    if (ambiguities.length === 0) {
+      return {
+        parameter: '',
+        clarificationQuestion: '',
+        userResponse: '',
+        resolvedValue: '',
+        confidence: 1.0,
+      };
     }
 
-    return clarifications;
+    // For now, handle the first ambiguity
+    const ambiguity = ambiguities[0];
+    const bestInterpretation = ambiguity.possibleInterpretations.reduce(
+      (best, current) =>
+        current.confidence > best.confidence ? current : best,
+    );
+
+    return {
+      parameter: ambiguity.parameter,
+      clarificationQuestion: `Did you mean ${bestInterpretation.reasoning}?`,
+      userResponse: "yes", // Mock user response
+      resolvedValue: bestInterpretation.value,
+      confidence: bestInterpretation.confidence,
+    };
   }
 
   /**

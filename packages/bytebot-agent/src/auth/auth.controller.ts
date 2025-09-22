@@ -40,7 +40,8 @@ import {
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor,
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';\nimport { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from './guards/jwt-auth.guard';

@@ -26,11 +26,32 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import * as WebSocket from 'ws';import { performance } from 'perf_hooks';import { Worker as _Worker, isMainThread as _isMainThread, parentPort as _parentPort, workerData as _workerData } from 'worker_threads';import * as crypto from 'crypto';// ===== LATENCY MEASUREMENT TYPES =====/**
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter } from 'events';
+import * as WebSocket from 'ws';
+import { performance } from 'perf_hooks';
+import { Worker as _Worker, isMainThread as _isMainThread, parentPort as _parentPort, workerData as _workerData } from 'worker_threads';
+import * as crypto from 'crypto';
+
+// ===== LATENCY MEASUREMENT TYPES =====
+
+/**
  * Latency measurement test types
  */
 export enum LatencyTestType {
-  BASELINE_LATENCY = 'baseline_latency',ROUND_TRIP_TIME = 'round_trip_time',VARIABLE_PAYLOAD = 'variable_payload_latency',CONNECTION_WARMUP = 'connection_warmup_latency',SUSTAINED_LATENCY = 'sustained_latency',BURST_LATENCY = 'burst_latency_impact',NETWORK_LATENCY = 'network_latency_analysis',APPLICATION_LATENCY = 'application_latency_analysis',PARLANT_VALIDATION_LATENCY = 'parlant_validation_latency',}/**
+  BASELINE_LATENCY = 'baseline_latency',
+  ROUND_TRIP_TIME = 'round_trip_time',
+  VARIABLE_PAYLOAD = 'variable_payload_latency',
+  CONNECTION_WARMUP = 'connection_warmup_latency',
+  SUSTAINED_LATENCY = 'sustained_latency',
+  BURST_LATENCY = 'burst_latency_impact',
+  NETWORK_LATENCY = 'network_latency_analysis',
+  APPLICATION_LATENCY = 'application_latency_analysis',
+  PARLANT_VALIDATION_LATENCY = 'parlant_validation_latency',
+}
+
+/**
  * Latency measurement configuration
  */
 export interface LatencyMeasurementConfig {
@@ -44,7 +65,10 @@ export interface LatencyMeasurementConfig {
 
   // Message configuration
   payloadSize: number;           // Message payload size in bytes
-  messagePattern: 'sequential' | 'random' | 'echo' | 'ping_pong';// Latency targets and thresholdstargets: {
+  messagePattern: 'sequential' | 'random' | 'echo' | 'ping_pong';
+
+  // Latency targets and thresholds
+  targets: {
     p50: number;                 // Target P50 latency (ms)
     p95: number;                 // Target P95 latency (ms) - PRIMARY: 50ms
     p99: number;                 // Target P99 latency (ms)
@@ -60,7 +84,9 @@ export interface LatencyMeasurementConfig {
   // Validation settings (for PARLANT integration testing)
   validationConfig?: {
     enableValidation: boolean;
-    validationComplexity: 'low' | 'medium' | 'high';cacheEnabled: boolean;validationTimeout: number;
+    validationComplexity: 'low' | 'medium' | 'high';
+    cacheEnabled: boolean;
+    validationTimeout: number;
   };
 }
 
@@ -168,7 +194,11 @@ export interface LatencyTestResults {
   insights: {
     bottlenecks: LatencyBottleneck[];
     optimizationRecommendations: string[];
-    performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';latencyProfile: 'excellent' | 'good' | 'acceptable' | 'poor' | 'unacceptable';};// Raw measurement data
+    performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+    latencyProfile: 'excellent' | 'good' | 'acceptable' | 'poor' | 'unacceptable';
+  };
+
+  // Raw measurement data
   measurements: LatencyMeasurement[];
 
   // Comparative analysis
@@ -191,7 +221,10 @@ export interface LatencyTestResults {
  * Latency bottleneck identification
  */
 export interface LatencyBottleneck {
-  type: 'network' | 'server' | 'client' | 'connection' | 'validation';severity: 'low' | 'medium' | 'high' | 'critical';description: string;impact: number;                // Impact on overall latency (ms)
+  type: 'network' | 'server' | 'client' | 'connection' | 'validation';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  impact: number;                // Impact on overall latency (ms)
   frequency: number;             // How often this bottleneck occurs (%)
   recommendation: string;
 }
@@ -248,8 +281,14 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
   constructor(
     private readonly configService: ConfigService,
   ) {
-    this.logger.log('🚀 WebSocket Latency Measurement Service initializing...');}async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing WebSocket Latency Measurement Framework');// Initialize alert thresholdsthis.initializeAlertThresholds();
+    this.logger.log('🚀 WebSocket Latency Measurement Service initializing...');
+  }
+
+  async onModuleInit(): Promise<void> {
+    this.logger.log('Initializing WebSocket Latency Measurement Framework');
+
+    // Initialize alert thresholds
+    this.initializeAlertThresholds();
 
     // Start real-time monitoring
     this.startRealTimeMonitoring();
@@ -257,28 +296,42 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
     // Load baseline results
     await this.loadBaselineResults();
 
-    this.logger.log('✅ WebSocket Latency Measurement Framework ready');}async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down WebSocket Latency Measurement Framework');// Stop all active testsfor (const testId of this.activeTests.keys()) {
+    this.logger.log('✅ WebSocket Latency Measurement Framework ready');
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down WebSocket Latency Measurement Framework');
+
+    // Stop all active tests
+    for (const testId of this.activeTests.keys()) {
       await this.stopLatencyTest(testId);
     }
 
     // Stop monitoring
     this.stopRealTimeMonitoring();
 
-    this.logger.log('✅ WebSocket Latency Measurement Framework shutdown complete');}// ===== BASELINE LATENCY TESTING =====
+    this.logger.log('✅ WebSocket Latency Measurement Framework shutdown complete');
+  }
+
+  // ===== BASELINE LATENCY TESTING =====
 
   /**
    * Execute baseline latency test with standard parameters
    * TARGET: Establish sub-50ms P95 baseline performance
    */
   async executeBaselineLatencyTest(): Promise<LatencyTestResults> {
-    this.logger.log('🧪 Starting baseline latency test (target: <50ms P95)');const config: LatencyMeasurementConfig = {testType: LatencyTestType.BASELINE_LATENCY,
+    this.logger.log('🧪 Starting baseline latency test (target: <50ms P95)');
+
+    const config: LatencyMeasurementConfig = {
+      testType: LatencyTestType.BASELINE_LATENCY,
       duration: 120000,            // 2 minutes
       messageCount: 2000,          // 2000 messages for statistical significance
       concurrentConnections: 50,
       messageInterval: 30,         // 30ms interval between messages
       payloadSize: 1024,           // 1KB standard payload
-      messagePattern: 'ping_pong',targets: {p50: 25,                   // Target P50: 25ms
+      messagePattern: 'ping_pong',
+      targets: {
+        p50: 25,                   // Target P50: 25ms
         p95: this.LATENCY_TARGETS.TARGET_P95,    // Primary target: 50ms
         p99: this.LATENCY_TARGETS.TARGET_P99,    // Target P99: 100ms
         p999: 200,                 // Target P99.9: 200ms
@@ -289,7 +342,10 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 3,
     };
 
-    const results = await this.executeLatencyTest('baseline', config);// Store as baseline for future comparisonsthis.baselineResults = results;
+    const results = await this.executeLatencyTest('baseline', config);
+
+    // Store as baseline for future comparisons
+    this.baselineResults = results;
 
     this.logLatencyResults(results);
     return results;
@@ -299,13 +355,18 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
    * Execute round-trip time measurement
    */
   async executeRoundTripTimeTest(): Promise<LatencyTestResults> {
-    this.logger.log('🔄 Starting round-trip time measurement test');const config: LatencyMeasurementConfig = {testType: LatencyTestType.ROUND_TRIP_TIME,
+    this.logger.log('🔄 Starting round-trip time measurement test');
+
+    const config: LatencyMeasurementConfig = {
+      testType: LatencyTestType.ROUND_TRIP_TIME,
       duration: 60000,             // 1 minute
       messageCount: 1000,
       concurrentConnections: 20,
       messageInterval: 50,         // 50ms interval for precise measurement
       payloadSize: 64,             // Minimal payload for pure RTT
-      messagePattern: 'echo',      // Echo pattern for exact RTTtargets: {p50: 20,
+      messagePattern: 'echo',      // Echo pattern for exact RTT
+      targets: {
+        p50: 20,
         p95: 40,                   // Tighter target for RTT
         p99: 80,
         p999: 150,
@@ -316,7 +377,10 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 2,
     };
 
-    return await this.executeLatencyTest('rtt', config);}/**
+    return await this.executeLatencyTest('rtt', config);
+  }
+
+  /**
    * Execute variable payload latency testing
    */
   async executeVariablePayloadLatencyTest(): Promise<Map<number, LatencyTestResults>> {
@@ -348,7 +412,12 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
         retryAttempts: 2,
       };
 
-      const result = await this.executeLatencyTest(`payload_${payloadSize}`, config);results.set(payloadSize, result);this.logger.log(`Payload ${payloadSize}B - P95: ${result.statistics.p95.toFixed(2)}ms`);}this.analyzePayloadLatencyImpact(results);
+      const result = await this.executeLatencyTest(`payload_${payloadSize}`, config);
+      results.set(payloadSize, result);
+      this.logger.log(`Payload ${payloadSize}B - P95: ${result.statistics.p95.toFixed(2)}ms`);
+    }
+
+    this.analyzePayloadLatencyImpact(results);
     return results;
   }
 
@@ -367,7 +436,9 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       concurrentConnections: 100,
       messageInterval: 60,         // 60ms interval for sustained testing
       payloadSize: 1024,
-      messagePattern: 'ping_pong',targets: {p50: 30,
+      messagePattern: 'ping_pong',
+      targets: {
+        p50: 30,
         p95: this.LATENCY_TARGETS.TARGET_P95,
         p99: this.LATENCY_TARGETS.TARGET_P99,
         p999: 250,
@@ -378,17 +449,25 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 3,
     };
 
-    return await this.executeLatencyTest('sustained', config);}/**
+    return await this.executeLatencyTest('sustained', config);
+  }
+
+  /**
    * Execute burst latency impact test
    */
   async executeBurstLatencyImpactTest(): Promise<LatencyTestResults> {
-    this.logger.log('💥 Starting burst latency impact test');const config: LatencyMeasurementConfig = {testType: LatencyTestType.BURST_LATENCY,
+    this.logger.log('💥 Starting burst latency impact test');
+
+    const config: LatencyMeasurementConfig = {
+      testType: LatencyTestType.BURST_LATENCY,
       duration: 180000,            // 3 minutes
       messageCount: 3000,
       concurrentConnections: 200,  // High connection count for burst testing
       messageInterval: 10,         // High frequency bursts
       payloadSize: 512,
-      messagePattern: 'ping_pong',targets: {p50: 40,                   // Higher targets during burst conditions
+      messagePattern: 'ping_pong',
+      targets: {
+        p50: 40,                   // Higher targets during burst conditions
         p95: 80,
         p99: 150,
         p999: 300,
@@ -399,7 +478,10 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 2,
     };
 
-    return await this.executeLatencyTest('burst', config);}// ===== PARLANT VALIDATION LATENCY TESTING =====
+    return await this.executeLatencyTest('burst', config);
+  }
+
+  // ===== PARLANT VALIDATION LATENCY TESTING =====
 
   /**
    * Execute PARLANT validation latency impact test
@@ -421,7 +503,9 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       concurrentConnections: 50,
       messageInterval: 100,
       payloadSize: 2048,
-      messagePattern: 'ping_pong',targets: {p50: 25,
+      messagePattern: 'ping_pong',
+      targets: {
+        p50: 25,
         p95: this.LATENCY_TARGETS.TARGET_P95,
         p99: this.LATENCY_TARGETS.TARGET_P99,
         p999: 200,
@@ -432,15 +516,22 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       retryAttempts: 2,
       validationConfig: {
         enableValidation: false,
-        validationComplexity: 'low',cacheEnabled: false,validationTimeout: 1000,
+        validationComplexity: 'low',
+        cacheEnabled: false,
+        validationTimeout: 1000,
       },
     };
 
-    const withoutValidation = await this.executeLatencyTest('no_validation', baseConfig);// Test with validation enabledconst validationConfig = {
+    const withoutValidation = await this.executeLatencyTest('no_validation', baseConfig);
+
+    // Test with validation enabled
+    const validationConfig = {
       ...baseConfig,
       validationConfig: {
         enableValidation: true,
-        validationComplexity: 'medium' as const,cacheEnabled: true,validationTimeout: 2000,
+        validationComplexity: 'medium' as const,
+        cacheEnabled: true,
+        validationTimeout: 2000,
       },
     };
 
@@ -461,7 +552,13 @@ export class LatencyMeasurementService implements OnModuleInit, OnModuleDestroy 
       ),
     };
 
-    this.logger.log(`📊 PARLANT Validation Impact:`);this.logger.log(`   Latency Increase: +${latencyIncrease.toFixed(2)}ms`);this.logger.log(`   Percentage Increase: +${percentageIncrease.toFixed(1)}%`);this.logger.log(`   P95 Impact: +${p95Impact.toFixed(2)}ms`);return {withoutValidation,
+    this.logger.log(`📊 PARLANT Validation Impact:`);
+    this.logger.log(`   Latency Increase: +${latencyIncrease.toFixed(2)}ms`);
+    this.logger.log(`   Percentage Increase: +${percentageIncrease.toFixed(1)}%`);
+    this.logger.log(`   P95 Impact: +${p95Impact.toFixed(2)}ms`);
+
+    return {
+      withoutValidation,
       withValidation,
       impactAnalysis,
     };

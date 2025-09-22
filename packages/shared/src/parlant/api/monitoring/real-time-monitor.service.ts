@@ -208,7 +208,7 @@ export class RealTimeMonitorService implements ConversationalAPIMonitor {
           this.logger.error(`Error processing operation event`, {
             operationId,
             eventType: event.type,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       });
@@ -235,7 +235,7 @@ export class RealTimeMonitorService implements ConversationalAPIMonitor {
             this.logger.error(`Error processing performance metric`, {
               operationId,
               metricType: metric.type,
-              error: error.message,
+              error: error instanceof Error ? error.message : String(error),
             });
           }
         },
@@ -272,7 +272,7 @@ export class RealTimeMonitorService implements ConversationalAPIMonitor {
         {
           operationId,
           userId: userContext.userId,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           setupTime,
         },
       );
@@ -388,14 +388,14 @@ export class RealTimeMonitorService implements ConversationalAPIMonitor {
         {
           operationId: operation.id,
           command: command.substring(0, 50),
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           processingTime,
         },
       );
 
       return {
         success: false,
-        reason: `Command processing failed: ${error.message}`,
+        reason: `Command processing failed: ${error instanceof Error ? error.message : String(error)}`,
         alternatives: [
           "Try rephrasing the command",
           "Use specific action words",
@@ -552,7 +552,7 @@ export class RealTimeMonitorService implements ConversationalAPIMonitor {
         this.logger.error(`Error processing intervention command`, {
           operationId: operation.id,
           commandId: command.id,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     });
@@ -575,7 +575,7 @@ export class RealTimeMonitorService implements ConversationalAPIMonitor {
           this.logger.error(`Error generating intervention suggestion`, {
             operationId: operation.id,
             opportunityType: opportunity.type,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       },

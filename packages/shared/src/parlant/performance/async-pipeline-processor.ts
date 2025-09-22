@@ -575,7 +575,7 @@ export class AsyncPipelineProcessor {
           results.push(stageResult);
 
           // Transform data for next stage
-          task.data = stageResult.result;
+          task.data = stageResult.result as T;
           task.stage = stageName;
 
         } catch (stageError) {

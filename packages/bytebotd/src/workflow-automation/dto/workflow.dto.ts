@@ -30,7 +30,7 @@ export class ConditionalLogicDto {
   @ApiPropertyOptional({
     description: 'Value to compare against',example: 10})
   @IsOptional()
-  value?: any;
+  value?: unknown;
 
   @ApiPropertyOptional({
     description: 'Nested conditional logic (AND/OR operations)',type: [ConditionalLogicDto]})

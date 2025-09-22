@@ -192,7 +192,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       return defaultConfig;
 
     } catch (error) {
-      this.logger.error(`Failed to get configuration for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -266,7 +266,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       };
 
     } catch (error) {
-      this.logger.error(`Failed to update configuration for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to update configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -321,7 +321,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       };
 
     } catch (error) {
-      this.logger.error(`Failed to reset configuration for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to reset configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -347,7 +347,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       return globalConfig;
 
     } catch (error) {
-      this.logger.error(`Failed to get global configuration: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get global configuration: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -404,7 +404,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       };
 
     } catch (error) {
-      this.logger.error(`Failed to update global configuration: ${error.message}`, error.stack);
+      this.logger.error(`Failed to update global configuration: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -453,10 +453,10 @@ export class ConfigurationManagerService implements IConfigurationManager {
       };
 
     } catch (error) {
-      this.logger.error(`Configuration validation failed: ${error.message}`, error.stack);
+      this.logger.error(`Configuration validation failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       errors.push({
         field: 'general',
-        message: `Validation error: ${error.message}`,
+        message: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
         code: 'VALIDATION_ERROR'
       });
 
@@ -530,7 +530,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       };
 
     } catch (error) {
-      this.logger.error(`Failed to apply template ${templateName} to function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to apply template ${templateName} to function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -558,7 +558,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       return templates;
 
     } catch (error) {
-      this.logger.error(`Failed to get templates: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get templates: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -583,7 +583,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
       this.logger.log('Configuration Manager Service initialized successfully');
 
     } catch (error) {
-      this.logger.error(`Failed to initialize Configuration Manager Service: ${error.message}`, error.stack);
+      this.logger.error(`Failed to initialize Configuration Manager Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 

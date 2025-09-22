@@ -34,17 +34,19 @@ import { performance } from 'perf_hooks';
 import { createHash } from 'crypto';
 import { gzip, gunzip } from 'zlib';
 import { promisify } from 'util';
-import {RedisClusterCacheService,
+import {
+  RedisClusterCacheService,
   CacheOperationResult,
   RedisCacheEntry,
 } from '../../parlant/caching/redis-cluster-cache.service';
-import {JobStatus,
+import {
+  JobStatus,
   JobPriority,
 } from '../dto/async-job.dto';
 import { ComputerActionDto } from '../dto/computer-action.dto';
-    const gzipAsync = promisify(gzip);
 
-        const gunzipAsync = promisify(gunzip);
+const gzipAsync = promisify(gzip);
+const gunzipAsync = promisify(gunzip);
 
 // ===== REDIS JOB PERSISTENCE INTERFACES =====
 
@@ -211,8 +213,9 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
     this.config = this.loadJobPersistenceConfig();
     this.redisCache = redisClusterCacheService;
 
-    this.logger.log('Redis Job Persistence Service initializing...', {enabled: this.config.enabled,
-  keyPrefix: this.config.keyPrefix,
+    this.logger.log('Redis Job Persistence Service initializing...', {
+      enabled: this.config.enabled,
+      keyPrefix: this.config.keyPrefix,
       compressionThreshold: this.config.compressionThreshold,
       indexingEnabled: this.config.indexingEnabled,
       shardingEnabled: this.config.shardingEnabled,
@@ -226,8 +229,12 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       return;
     }
 
-    const operationId = `job_persistence_init_${Date.now()}`;try {this.logger.log(`[${operationId}] Initializing Redis Job Persistence Service...`);
-    // Verify Redis cluster connectivityawait this.verifyRedisConnectivity();
+    const operationId = `job_persistence_init_${Date.now()}`;
+    try {
+      this.logger.log(`[${operationId}] Initializing Redis Job Persistence Service...`);
+
+      // Verify Redis cluster connectivity
+      await this.verifyRedisConnectivity();
 
       // Initialize job indexing if enabled
       if (this.config.indexingEnabled) {
@@ -242,10 +249,12 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
         this.startMetricsMonitoring();
       }
 
-      this.logger.log(`[${operationId}] Redis Job Persistence Service initialized successfully`, {indexingEnabled: this.config.indexingEnabled,
-  cleanupInterval: `${this.config.cleanupIntervalMs}ms`,
-  retentionPeriod: `${this.config.retentionDays} days`,
-  metricsEnabled: this.config.monitoring.metricsEnabled,});
+      this.logger.log(`[${operationId}] Redis Job Persistence Service initialized successfully`, {
+        indexingEnabled: this.config.indexingEnabled,
+        cleanupInterval: `${this.config.cleanupIntervalMs}ms`,
+        retentionPeriod: `${this.config.retentionDays} days`,
+        metricsEnabled: this.config.monitoring.metricsEnabled,
+      });
 
     } catch (error) {
       this.logger.error(`[${operationId}] Redis Job Persistence initialization failed:`, error);
@@ -255,8 +264,12 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
   }
 
   async onModuleDestroy(): Promise<void> {
-    const operationId = `job_persistence_shutdown_${Date.now()}`;try {this.logger.log(`[${operationId}] Shutting down Redis Job Persistence Service...`);
-    // Stop timersif (this.cleanupTimer) {
+    const operationId = `job_persistence_shutdown_${Date.now()}`;
+    try {
+      this.logger.log(`[${operationId}] Shutting down Redis Job Persistence Service...`);
+
+      // Stop timers
+      if (this.cleanupTimer) {
         clearInterval(this.cleanupTimer);
       }
       if (this.metricsTimer) {
@@ -266,7 +279,11 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       // Log final metrics
       this.logFinalMetrics();
 
-      this.logger.log(`[${operationId}] Redis Job Persistence Service shutdown completed`);} catch (error) {this.logger.error(`[${operationId}] Redis Job Persistence shutdown error:`, error);}}
+      this.logger.log(`[${operationId}] Redis Job Persistence Service shutdown completed`);
+    } catch (error) {
+      this.logger.error(`[${operationId}] Redis Job Persistence shutdown error:`, error);
+    }
+  }
 
   // ===== PUBLIC JOB PERSISTENCE API =====
 
@@ -275,7 +292,8 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
    */
   async saveJob(jobData: RedisJobData): Promise<CacheOperationResult<void>> {
     const operationId = `save_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = performance.now();try {
+    const startTime = performance.now();
+    try {
       this.metrics.operations.total++;
       this.metrics.operations.saves++;
 
@@ -286,8 +304,7 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
       // Determine compression strategy
       const jobSize = this.calculateJobSize(jobData);
-
-        const shouldCompress = jobSize > this.config.compressionThreshold;
+      const shouldCompress = jobSize > this.config.compressionThreshold;
 
       // Prepare persistence data
       const persistenceData = await this.prepareJobForPersistence(jobData, shouldCompress);
@@ -299,16 +316,25 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const result = await this.performBatchJobSave(keys, persistenceData, jobData.ttlSeconds);
 
       if (!result.success) {
-        throw new Error(result.error || 'Failed to save job to Redis');}// Update indexes if enabled
+        throw new Error(result.error || 'Failed to save job to Redis');
+      }
+
+      // Update indexes if enabled
       if (this.config.indexingEnabled) {
-        await this.updateJobIndexes(jobData, 'save');}const latency = performance.now() - startTime;
+        await this.updateJobIndexes(jobData, 'save');
+      }
+
+      const latency = performance.now() - startTime;
       this.recordOperationSuccess('SAVE', latency);
 
       this.logger.debug(`[${operationId}] Job saved successfully: ${jobData.jobId} (${latency.toFixed(2)}ms)`, {
         compressed: shouldCompress,
         originalSize: jobSize,
         compressedSize: shouldCompress ? persistenceData.compressedSize : jobSize,
-        compressionRatio: shouldCompress ? (jobSize / (persistenceData.compressedSize || jobSize)).toFixed(2) : 'N/A',});return {
+        compressionRatio: shouldCompress ? (jobSize / (persistenceData.compressedSize || jobSize)).toFixed(2) : 'N/A',
+      });
+
+      return {
         success: true,
         metadata: {
           latency,
@@ -323,9 +349,13 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const latency = performance.now() - startTime;
       this.recordOperationError('SAVE', latency, error);
 
-      this.logger.error(`[${operationId}] Failed to save job:`, {jobId: jobData.jobId,
-  error: error instanceof Error ? error.message : String(error),
-        latency: `${latency.toFixed(2)}ms`,});return {
+      this.logger.error(`[${operationId}] Failed to save job:`, {
+        jobId: jobData.jobId,
+        error: error instanceof Error ? error.message : String(error),
+        latency: `${latency.toFixed(2)}ms`,
+      });
+
+      return {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         metadata: {
@@ -343,7 +373,8 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
    */
   async loadJob(jobId: string, options: JobQueryOptions = {}): Promise<CacheOperationResult<RedisJobData>> {
     const operationId = `load_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = performance.now();try {
+    const startTime = performance.now();
+    try {
       this.metrics.operations.total++;
       this.metrics.operations.loads++;
 
@@ -360,7 +391,9 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
       if (!result.success || !result.data) {
         const latency = performance.now() - startTime;
-        this.recordOperationSuccess('LOAD_MISS', latency);return {success: true,
+        this.recordOperationSuccess('LOAD_MISS', latency);
+        return {
+          success: true,
           data: undefined,
           metadata: {
             latency,
@@ -375,7 +408,10 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const jobData = await this.parseJobFromPersistence(result.data);
 
       if (!jobData) {
-        throw new Error('Failed to parse job data from Redis');}const latency = performance.now() - startTime;
+        throw new Error('Failed to parse job data from Redis');
+      }
+
+      const latency = performance.now() - startTime;
       this.recordOperationSuccess('LOAD', latency);
 
       this.logger.debug(`[${operationId}] Job loaded successfully: ${jobId} (${latency.toFixed(2)}ms)`, {
@@ -399,9 +435,13 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const latency = performance.now() - startTime;
       this.recordOperationError('LOAD', latency, error);
 
-      this.logger.error(`[${operationId}] Failed to load job:`, {jobId,
-  error: error instanceof Error ? error.message : String(error),
-        latency: `${latency.toFixed(2)}ms`,});return {
+      this.logger.error(`[${operationId}] Failed to load job:`, {
+        jobId,
+        error: error instanceof Error ? error.message : String(error),
+        latency: `${latency.toFixed(2)}ms`,
+      });
+
+      return {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         metadata: {
@@ -419,7 +459,8 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
    */
   async deleteJob(jobId: string): Promise<CacheOperationResult<void>> {
     const operationId = `delete_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = performance.now();try {
+    const startTime = performance.now();
+    try {
       this.metrics.operations.total++;
       this.metrics.operations.deletes++;
 
@@ -439,9 +480,15 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const result = await this.redisCache.del(jobKey);
 
       if (!result.success) {
-        throw new Error(result.error || 'Failed to delete job from Redis');}// Update indexes if enabled and job data was found
+        throw new Error(result.error || 'Failed to delete job from Redis');
+      }
+
+      // Update indexes if enabled and job data was found
       if (this.config.indexingEnabled && jobData) {
-        await this.updateJobIndexes(jobData, 'delete');}const latency = performance.now() - startTime;
+        await this.updateJobIndexes(jobData, 'delete');
+      }
+
+      const latency = performance.now() - startTime;
       this.recordOperationSuccess('DELETE', latency);
 
       this.logger.debug(`[${operationId}] Job deleted successfully: ${jobId} (${latency.toFixed(2)}ms)`);
@@ -460,9 +507,13 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const latency = performance.now() - startTime;
       this.recordOperationError('DELETE', latency, error);
 
-      this.logger.error(`[${operationId}] Failed to delete job:`, {jobId,
-  error: error instanceof Error ? error.message : String(error),
-        latency: `${latency.toFixed(2)}ms`,});return {
+      this.logger.error(`[${operationId}] Failed to delete job:`, {
+        jobId,
+        error: error instanceof Error ? error.message : String(error),
+        latency: `${latency.toFixed(2)}ms`,
+      });
+
+      return {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         metadata: {
@@ -480,14 +531,18 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
    */
   async queryJobs(options: JobQueryOptions = {}): Promise<CacheOperationResult<RedisJobData[]>> {
     const operationId = `query_jobs_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = performance.now();try {
+    const startTime = performance.now();
+    try {
       this.metrics.operations.total++;
       this.metrics.operations.queries++;
 
       this.logger.debug(`[${operationId}] Querying jobs with options:`, options);
 
       if (!this.config.indexingEnabled) {
-        throw new Error('Job indexing is disabled - queries not supported');}// Build query based on options
+        throw new Error('Job indexing is disabled - queries not supported');
+      }
+
+      // Build query based on options
       const indexKeys = this.buildQueryIndexKeys(options);
 
       // Execute query with Redis set operations
@@ -496,7 +551,7 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       // Load job data for matching IDs
       const jobs = await this.loadJobsBatch(jobIds, options);
 
-        const latency = performance.now() - startTime;
+      const latency = performance.now() - startTime;
       this.recordOperationSuccess('QUERY', latency);
 
       this.logger.debug(`[${operationId}] Job query completed: ${jobs.length} jobs found (${latency.toFixed(2)}ms)`, {
@@ -519,9 +574,13 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const latency = performance.now() - startTime;
       this.recordOperationError('QUERY', latency, error);
 
-      this.logger.error(`[${operationId}] Failed to query jobs:`, {options,
-  error: error instanceof Error ? error.message : String(error),
-        latency: `${latency.toFixed(2)}ms`,});return {
+      this.logger.error(`[${operationId}] Failed to query jobs:`, {
+        options,
+        error: error instanceof Error ? error.message : String(error),
+        latency: `${latency.toFixed(2)}ms`,
+      });
+
+      return {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         data: [],
@@ -540,8 +599,12 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
    */
   async bulkSaveJobs(jobs: RedisJobData[]): Promise<BulkJobOperationResult> {
     const operationId = `bulk_save_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = performance.now();try {
-      this.logger.log(`[${operationId}] Starting bulk save: ${jobs.length} jobs`);if (jobs.length > this.config.batchSize) {throw new Error(`Batch size ${jobs.length} exceeds maximum ${this.config.batchSize}`);
+    const startTime = performance.now();
+    try {
+      this.logger.log(`[${operationId}] Starting bulk save: ${jobs.length} jobs`);
+
+      if (jobs.length > this.config.batchSize) {
+        throw new Error(`Batch size ${jobs.length} exceeds maximum ${this.config.batchSize}`);
       }
 
       let successCount = 0;
@@ -575,7 +638,7 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
       await Promise.all(batchPromises);
 
-        const latency = performance.now() - startTime;
+      const latency = performance.now() - startTime;
 
       this.logger.log(`[${operationId}] Bulk save completed: ${successCount}/${jobs.length} successful (${latency.toFixed(2)}ms)`, {
         successCount,
@@ -594,7 +657,8 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
         latency,
         metadata: {
           operationType: 'BULK_SAVE',
-  batchSize: jobs.length,compressionUsed,
+          batchSize: jobs.length,
+          compressionUsed,
           nodeDistribution,
         },
       };
@@ -603,8 +667,9 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const latency = performance.now() - startTime;
       this.recordOperationError('BULK_SAVE', latency, error);
 
-      this.logger.error(`[${operationId}] Bulk save failed:`, {jobCount: jobs.length,
-  error: error instanceof Error ? error.message : String(error),
+      this.logger.error(`[${operationId}] Bulk save failed:`, {
+        jobCount: jobs.length,
+        error: error instanceof Error ? error.message : String(error),
         latency: `${latency.toFixed(2)}ms`,
       });
 
@@ -613,8 +678,9 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
         processedCount: 0,
         successCount: 0,
         failureCount: jobs.length,
-        errors: [{ jobId: 'BULK_OPERATION', error: error instanceof Error ? error.message : String(error) }],latency,
-  metadata: {
+        errors: [{ jobId: 'BULK_OPERATION', error: error instanceof Error ? error.message : String(error) }],
+        latency,
+        metadata: {
           operationType: 'BULK_SAVE',
           batchSize: jobs.length,
           compressionUsed: false,
@@ -629,7 +695,8 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
    */
   async cleanupExpiredJobs(): Promise<CacheOperationResult<number>> {
     const operationId = `cleanup_jobs_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const startTime = performance.now();try {
+    const startTime = performance.now();
+    try {
       this.metrics.operations.total++;
       this.metrics.operations.cleanup++;
 
@@ -651,8 +718,7 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
       // Find expired jobs using date indexes
       const cutoffDate = new Date(Date.now() - (this.config.retentionDays * 24 * 60 * 60 * 1000));
-
-        const expiredJobIds = await this.findExpiredJobs(cutoffDate);
+      const expiredJobIds = await this.findExpiredJobs(cutoffDate);
 
       if (expiredJobIds.length === 0) {
         this.logger.debug(`[${operationId}] No expired jobs found`);
@@ -707,8 +773,9 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       const latency = performance.now() - startTime;
       this.recordOperationError('CLEANUP', latency, error);
 
-      this.logger.error(`[${operationId}] Job cleanup failed:`, {error: error instanceof Error ? error.message : String(error),
-  latency: `${latency.toFixed(2)}ms`,
+      this.logger.error(`[${operationId}] Job cleanup failed:`, {
+        error: error instanceof Error ? error.message : String(error),
+        latency: `${latency.toFixed(2)}ms`,
       });
 
       return {
@@ -736,13 +803,12 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
   } {
     this.updateMetrics();
 
-        const healthy = this.metrics.health.errorRate < this.config.monitoring.alertThresholds.errorRatePercent &&
+    const healthy = this.metrics.health.errorRate < this.config.monitoring.alertThresholds.errorRatePercent &&
       this.metrics.performance.avgLatency < this.config.monitoring.alertThresholds.latencyMs &&
       this.metrics.storage.storageUtilization < this.config.monitoring.alertThresholds.storageUtilizationPercent;
 
     const recommendations = this.generateRecommendations();
-
-        const alerts = this.generateAlerts();
+    const alerts = this.generateAlerts();
 
     return {
       healthy,
@@ -757,15 +823,21 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
   private loadJobPersistenceConfig(): RedisJobPersistenceConfig {
     return {
       enabled: this.configService.get<boolean>('REDIS_JOB_PERSISTENCE_ENABLED', true),
-  keyPrefix: this.configService.get<string>('REDIS_JOB_KEY_PREFIX', 'job'),
-  defaultTtlSeconds: this.configService.get<number>('REDIS_JOB_DEFAULT_TTL', 86400), // 24 hoursindexingEnabled: this.configService.get<boolean>('REDIS_JOB_INDEXING_ENABLED', true),
-  compressionThreshold: this.configService.get<number>('REDIS_JOB_COMPRESSION_THRESHOLD', 1024), // 1KBcleanupIntervalMs: this.configService.get<number>('REDIS_JOB_CLEANUP_INTERVAL', 3600000), // 1 hourretentionDays: this.configService.get<number>('REDIS_JOB_RETENTION_DAYS', 7),
-  shardingEnabled: this.configService.get<boolean>('REDIS_JOB_SHARDING_ENABLED', true),
-  maxJobSize: this.configService.get<number>('REDIS_JOB_MAX_SIZE', 10485760), // 10MBbatchSize: this.configService.get<number>('REDIS_JOB_BATCH_SIZE', 100),
-  monitoring: {metricsEnabled: this.configService.get<boolean>('REDIS_JOB_METRICS_ENABLED', true),
-  alertThresholds: {latencyMs: this.configService.get<number>('REDIS_JOB_ALERT_LATENCY', 20),
-  errorRatePercent: this.configService.get<number>('REDIS_JOB_ALERT_ERROR_RATE', 5),
-  storageUtilizationPercent: this.configService.get<number>('REDIS_JOB_ALERT_STORAGE', 85),
+      keyPrefix: this.configService.get<string>('REDIS_JOB_KEY_PREFIX', 'job'),
+      defaultTtlSeconds: this.configService.get<number>('REDIS_JOB_DEFAULT_TTL', 86400), // 24 hours
+      indexingEnabled: this.configService.get<boolean>('REDIS_JOB_INDEXING_ENABLED', true),
+      compressionThreshold: this.configService.get<number>('REDIS_JOB_COMPRESSION_THRESHOLD', 1024), // 1KB
+      cleanupIntervalMs: this.configService.get<number>('REDIS_JOB_CLEANUP_INTERVAL', 3600000), // 1 hour
+      retentionDays: this.configService.get<number>('REDIS_JOB_RETENTION_DAYS', 7),
+      shardingEnabled: this.configService.get<boolean>('REDIS_JOB_SHARDING_ENABLED', true),
+      maxJobSize: this.configService.get<number>('REDIS_JOB_MAX_SIZE', 10485760), // 10MB
+      batchSize: this.configService.get<number>('REDIS_JOB_BATCH_SIZE', 100),
+      monitoring: {
+        metricsEnabled: this.configService.get<boolean>('REDIS_JOB_METRICS_ENABLED', true),
+        alertThresholds: {
+          latencyMs: this.configService.get<number>('REDIS_JOB_ALERT_LATENCY', 20),
+          errorRatePercent: this.configService.get<number>('REDIS_JOB_ALERT_ERROR_RATE', 5),
+          storageUtilizationPercent: this.configService.get<number>('REDIS_JOB_ALERT_STORAGE', 85),
         },
       },
     };
@@ -777,15 +849,29 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
     const setResult = await this.redisCache.set(testKey, testValue, { ttlSeconds: 60 });
     if (!setResult.success) {
-      throw new Error('Redis connectivity test failed: SET operation failed');}const getResult = await this.redisCache.get(testKey);
+      throw new Error('Redis connectivity test failed: SET operation failed');
+    }
+
+    const getResult = await this.redisCache.get(testKey);
     if (!getResult.success || !getResult.data) {
-      throw new Error('Redis connectivity test failed: GET operation failed');}await this.redisCache.del(testKey);
-    this.logger.debug('Redis connectivity verified successfully');}private async initializeJobIndexes(): Promise<void> {
+      throw new Error('Redis connectivity test failed: GET operation failed');
+    }
+
+    await this.redisCache.del(testKey);
+    this.logger.debug('Redis connectivity verified successfully');
+  }  private async initializeJobIndexes(): Promise<void> {
     this.logger.debug('Initializing job indexes...');
 
     // Create index keys for common queries
     const indexKeys = [
-      `${this.config.keyPrefix}:index:status:${JobStatus.PENDING}`,`${this.config.keyPrefix}:index:status:${JobStatus.IN_PROGRESS}`,`${this.config.keyPrefix}:index:status:${JobStatus.COMPLETED}`,`${this.config.keyPrefix}:index:status:${JobStatus.FAILED}`,`${this.config.keyPrefix}:index:priority:${JobPriority.URGENT}`,`${this.config.keyPrefix}:index:priority:${JobPriority.HIGH}`,`${this.config.keyPrefix}:index:priority:${JobPriority.NORMAL}`,`${this.config.keyPrefix}:index:priority:${JobPriority.LOW}`,
+      `${this.config.keyPrefix}:index:status:${JobStatus.PENDING}`,
+      `${this.config.keyPrefix}:index:status:${JobStatus.IN_PROGRESS}`,
+      `${this.config.keyPrefix}:index:status:${JobStatus.COMPLETED}`,
+      `${this.config.keyPrefix}:index:status:${JobStatus.FAILED}`,
+      `${this.config.keyPrefix}:index:priority:${JobPriority.URGENT}`,
+      `${this.config.keyPrefix}:index:priority:${JobPriority.HIGH}`,
+      `${this.config.keyPrefix}:index:priority:${JobPriority.NORMAL}`,
+      `${this.config.keyPrefix}:index:priority:${JobPriority.LOW}`,
     ];
 
     // Initialize empty sets for indexes (this would be a no-op in Redis but ensures they exist)
@@ -793,14 +879,21 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       await this.redisCache.set(indexKey, new Set(), { ttlSeconds: this.config.defaultTtlSeconds * 2 });
     }
 
-    this.logger.debug('Job indexes initialized successfully');}private validateJobData(jobData: RedisJobData): void {
+    this.logger.debug('Job indexes initialized successfully');
+  }  private validateJobData(jobData: RedisJobData): void {
     if (!jobData.jobId) {
       throw new Error('Job ID is required');
     }
 
     if (!Object.values(JobStatus).includes(jobData.status)) {
-      throw new Error(`Invalid job status: ${jobData.status}`);}if (!Object.values(JobPriority).includes(jobData.priority)) {
-      throw new Error(`Invalid job priority: ${jobData.priority}`);}const jobSize = this.calculateJobSize(jobData);
+      throw new Error(`Invalid job status: ${jobData.status}`);
+    }
+
+    if (!Object.values(JobPriority).includes(jobData.priority)) {
+      throw new Error(`Invalid job priority: ${jobData.priority}`);
+    }
+
+    const jobSize = this.calculateJobSize(jobData);
     if (jobSize > this.config.maxJobSize) {
       throw new Error(`Job size ${jobSize} exceeds maximum ${this.config.maxJobSize} bytes`);
     }
@@ -808,7 +901,9 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
   private calculateJobSize(jobData: RedisJobData): number {
     try {
-      return Buffer.byteLength(JSON.stringify(jobData), 'utf8');} catch (error) {this.logger.warn('Failed to calculate job size, using estimate', error);
+      return Buffer.byteLength(JSON.stringify(jobData), 'utf8');
+    } catch (error) {
+      this.logger.warn('Failed to calculate job size, using estimate', error);
       return 1024; // Default estimate
     }
   }
@@ -851,14 +946,24 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
     if (this.config.indexingEnabled) {
       indexKeys.push(
-        `${this.config.keyPrefix}:index:status:${jobData.status}`,`${this.config.keyPrefix}:index:priority:${jobData.priority}`);if (jobData.userId) {
-        indexKeys.push(`${this.config.keyPrefix}:index:user:${jobData.userId}`);}if (jobData.sessionId) {
+        `${this.config.keyPrefix}:index:status:${jobData.status}`,
+        `${this.config.keyPrefix}:index:priority:${jobData.priority}`
+      );
+
+      if (jobData.userId) {
+        indexKeys.push(`${this.config.keyPrefix}:index:user:${jobData.userId}`);
+      }
+
+      if (jobData.sessionId) {
         indexKeys.push(`${this.config.keyPrefix}:index:session:${jobData.sessionId}`);
       }
 
       // Date-based indexes for cleanup
       const dateKey = jobData.submittedAt.toISOString().split('T')[0]; // YYYY-MM-DD
-      indexKeys.push(`${this.config.keyPrefix}:index:date:${dateKey}`);}return { jobKey, indexKeys };
+      indexKeys.push(`${this.config.keyPrefix}:index:date:${dateKey}`);
+    }
+
+    return { jobKey, indexKeys };
   }
 
   private generateJobKey(jobId: string): string {
@@ -868,8 +973,7 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
   private calculateShardNode(jobId: string): string {
     // Simple consistent hashing for node affinity
     const hash = createHash('md5').update(jobId).digest('hex');
-
-        const nodeIndex = parseInt(hash.substring(0, 8), 16) % 3; // Assume 3 nodes
+    const nodeIndex = parseInt(hash.substring(0, 8), 16) % 3; // Assume 3 nodes
     return `node_${nodeIndex}`;
   }
 
@@ -899,10 +1003,14 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
       return data as RedisJobData;
     } catch (error) {
-      this.logger.error('Failed to parse job from persistence:', error);return null;}
+      this.logger.error('Failed to parse job from persistence:', error);
+      return null;
+    }
   }
 
-  private async updateJobIndexes(jobData: RedisJobData, operation: 'save' | 'delete'): Promise<void> {if (!this.config.indexingEnabled) return;
+  private async updateJobIndexes(jobData: RedisJobData, operation: 'save' | 'delete'): Promise<void> {
+    if (!this.config.indexingEnabled) return;
+
     const keys = this.generateJobKeys(jobData);
 
     // Update index sets (this would use Redis SET operations in real implementation)
@@ -910,17 +1018,29 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       if (operation === 'save') {
         // SADD operation to add job ID to index set
         await this.redisCache.set(`${indexKey}:${jobData.jobId}`, true, { ttlSeconds: this.config.defaultTtlSeconds });
-} else {// SREM operation to remove job ID from index set
-        await this.redisCache.del(`${indexKey}:${jobData.jobId}`);}}
+      } else {
+        // SREM operation to remove job ID from index set
+        await this.redisCache.del(`${indexKey}:${jobData.jobId}`);
+      }
+    }
   }
 
   private buildQueryIndexKeys(options: JobQueryOptions): string[] {
     const indexKeys: string[] = [];
 
     if (options.status) {
-      indexKeys.push(`${this.config.keyPrefix}:index:status:${options.status}`);}if (options.priority) {
-      indexKeys.push(`${this.config.keyPrefix}:index:priority:${options.priority}`);}if (options.userId) {
-      indexKeys.push(`${this.config.keyPrefix}:index:user:${options.userId}`);}return indexKeys;
+      indexKeys.push(`${this.config.keyPrefix}:index:status:${options.status}`);
+    }
+
+    if (options.priority) {
+      indexKeys.push(`${this.config.keyPrefix}:index:priority:${options.priority}`);
+    }
+
+    if (options.userId) {
+      indexKeys.push(`${this.config.keyPrefix}:index:user:${options.userId}`);
+    }
+
+    return indexKeys;
   }
 
   private async executeJobQuery(indexKeys: string[], options: JobQueryOptions): Promise<string[]> {
@@ -932,7 +1052,10 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
     // Simulate query execution
     const allJobIds: string[] = [];
     for (let i = 0; i < limit + offset; i++) {
-      allJobIds.push(`job${Date.now()}_${i}`);}return allJobIds.slice(offset, offset + limit);
+      allJobIds.push(`job${Date.now()}_${i}`);
+    }
+
+    return allJobIds.slice(offset, offset + limit);
   }
 
   private async loadJobsBatch(jobIds: string[], options: JobQueryOptions): Promise<RedisJobData[]> {
@@ -941,10 +1064,8 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
     for (let i = 0; i < jobIds.length; i += batchSize) {
       const batch = jobIds.slice(i, i + batchSize);
-
-        const loadPromises = batch.map(jobId => this.loadJob(jobId, options));
-
-        const results = await Promise.all(loadPromises);
+      const loadPromises = batch.map(jobId => this.loadJob(jobId, options));
+      const results = await Promise.all(loadPromises);
 
       for (const result of results) {
         if (result.success && result.data) {
@@ -963,7 +1084,10 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
     // Simulate expired job discovery
     for (let i = 0; i < 10; i++) {
-      expiredJobIds.push(`expired_job_${Date.now()}_${i}`);}return expiredJobIds;
+      expiredJobIds.push(`expired_job_${Date.now()}_${i}`);
+    }
+
+    return expiredJobIds;
   }
 
   // Performance tracking methods
@@ -991,8 +1115,10 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
     this.metrics.health.recoveryCount++;
     this.trimHistories();
 
-    this.logger.debug(`Operation error recorded: ${type}`, {latency: `${latency.toFixed(2)}ms`,
-  error: error instanceof Error ? error.message : String(error),});
+    this.logger.debug(`Operation error recorded: ${type}`, {
+      latency: `${latency.toFixed(2)}ms`,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 
   private updateLatencyMetrics(): void {
@@ -1009,8 +1135,7 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
 
     // Calculate throughput (operations per second)
     const now = Date.now();
-
-        const timeWindowMs = 60000; // 1 minute window
+    const timeWindowMs = 60000; // 1 minute window
     const recentOps = this.operationHistory.filter(op => now - op.timestamp < timeWindowMs);
     this.metrics.performance.throughput = recentOps.length;
 
@@ -1052,15 +1177,24 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
     }
 
     if (this.metrics.health.errorRate > 2) {
-      recommendations.push(`Error rate ${this.metrics.health.errorRate.toFixed(2)}% is elevated - investigate Redis connectivity`);}return recommendations;
+      recommendations.push(`Error rate ${this.metrics.health.errorRate.toFixed(2)}% is elevated - investigate Redis connectivity`);
+    }
+
+    return recommendations;
   }
 
   private generateAlerts(): string[] {
     const alerts: string[] = [];
 
     if (this.metrics.performance.avgLatency > this.config.monitoring.alertThresholds.latencyMs) {
-      alerts.push(`CRITICAL: Average latency ${this.metrics.performance.avgLatency.toFixed(2)}ms exceeds threshold`);}if (this.metrics.health.errorRate > this.config.monitoring.alertThresholds.errorRatePercent) {
-      alerts.push(`CRITICAL: Error rate ${this.metrics.health.errorRate.toFixed(2)}% exceeds threshold`);}if (this.metrics.storage.storageUtilization > this.config.monitoring.alertThresholds.storageUtilizationPercent) {
+      alerts.push(`CRITICAL: Average latency ${this.metrics.performance.avgLatency.toFixed(2)}ms exceeds threshold`);
+    }
+
+    if (this.metrics.health.errorRate > this.config.monitoring.alertThresholds.errorRatePercent) {
+      alerts.push(`CRITICAL: Error rate ${this.metrics.health.errorRate.toFixed(2)}% exceeds threshold`);
+    }
+
+    if (this.metrics.storage.storageUtilization > this.config.monitoring.alertThresholds.storageUtilizationPercent) {
       alerts.push(`WARNING: Storage utilization ${this.metrics.storage.storageUtilization.toFixed(2)}% is high`);
     }
 
@@ -1073,23 +1207,24 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       try {
         await this.cleanupExpiredJobs();
       } catch (error) {
-        this.logger.error('Scheduled cleanup failed:', error);}}, this.config.cleanupIntervalMs);
+        this.logger.error('Scheduled cleanup failed:', error);
+      }
+    }, this.config.cleanupIntervalMs);
   }
 
   private startMetricsMonitoring(): void {
     this.metricsTimer = setInterval(() => {
       this.updateMetrics();
-
-        const health = this.getMetrics();
+      const health = this.getMetrics();
 
       this.logger.log('Redis Job Persistence Performance Report', {
         healthy: health.healthy,
         totalJobs: health.metrics.storage.totalJobs,
         avgLatency: `${health.metrics.performance.avgLatency.toFixed(2)}ms`,
-  p95Latency: `${health.metrics.performance.p95Latency.toFixed(2)}ms`,
-  throughput: `${health.metrics.performance.throughput} ops/sec`,
-  errorRate: `${health.metrics.health.errorRate.toFixed(2)}%`,
-  compressionRatio: `${(health.metrics.storage.compressionRatio * 100).toFixed(1)}%`,
+        p95Latency: `${health.metrics.performance.p95Latency.toFixed(2)}ms`,
+        throughput: `${health.metrics.performance.throughput} ops/sec`,
+        errorRate: `${health.metrics.health.errorRate.toFixed(2)}%`,
+        compressionRatio: `${(health.metrics.storage.compressionRatio * 100).toFixed(1)}%`,
         totalOperations: health.metrics.operations.total,
       });
     }, 5 * 60 * 1000); // 5 minutes
@@ -1101,9 +1236,9 @@ export class RedisJobPersistenceService implements OnModuleInit, OnModuleDestroy
       totalOperations: this.metrics.operations.total,
       totalJobs: this.metrics.storage.totalJobs,
       avgLatency: `${this.metrics.performance.avgLatency.toFixed(2)}ms`,
-  uptime: `${Math.floor(this.metrics.health.uptime / 1000)}s`,
-  totalErrors: this.metrics.health.recoveryCount,
-  compressionRatio: `${(this.metrics.storage.compressionRatio * 100).toFixed(1)}%`,
+      uptime: `${Math.floor(this.metrics.health.uptime / 1000)}s`,
+      totalErrors: this.metrics.health.recoveryCount,
+      compressionRatio: `${(this.metrics.storage.compressionRatio * 100).toFixed(1)}%`,
     });
   }
 }

@@ -205,7 +205,7 @@ export class DependencyTrackerService implements IDependencyTracker {
       return analysis;
 
     } catch (error) {
-      this.logger.error(`Failed to analyze dependencies for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to analyze dependencies for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -238,7 +238,7 @@ export class DependencyTrackerService implements IDependencyTracker {
       return graph;
 
     } catch (error) {
-      this.logger.error(`Failed to build dependency graph: ${error.message}`, error.stack);
+      this.logger.error(`Failed to build dependency graph: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -296,7 +296,7 @@ export class DependencyTrackerService implements IDependencyTracker {
       return analysis;
 
     } catch (error) {
-      this.logger.error(`Failed to find circular dependencies: ${error.message}`, error.stack);
+      this.logger.error(`Failed to find circular dependencies: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -354,7 +354,7 @@ export class DependencyTrackerService implements IDependencyTracker {
       return analysis;
 
     } catch (error) {
-      this.logger.error(`Failed to analyze impact for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to analyze impact for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -420,7 +420,7 @@ export class DependencyTrackerService implements IDependencyTracker {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to update dependencies for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to update dependencies for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -468,7 +468,7 @@ export class DependencyTrackerService implements IDependencyTracker {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to validate dependency consistency: ${error.message}`, error.stack);
+      this.logger.error(`Failed to validate dependency consistency: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -521,7 +521,7 @@ export class DependencyTrackerService implements IDependencyTracker {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to optimize dependency resolution: ${error.message}`, error.stack);
+      this.logger.error(`Failed to optimize dependency resolution: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -548,7 +548,7 @@ export class DependencyTrackerService implements IDependencyTracker {
       this.logger.log(`Dependency Tracker Service initialized with ${circularDependencies.length} cached circular dependencies`);
 
     } catch (error) {
-      this.logger.error(`Failed to initialize Dependency Tracker Service: ${error.message}`, error.stack);
+      this.logger.error(`Failed to initialize Dependency Tracker Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 

@@ -1,0 +1,76 @@
+{
+  "success": false,
+  "numTotalTests": 0,
+  "numPassedTests": 0,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTotalTestSuites": 1,
+  "numPassedTestSuites": 0,
+  "numFailedTestSuites": 1,
+  "numPendingTestSuites": 0,
+  "testResults": [
+    {
+      "failureMessage": "  ● Test suite failed to run\n\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m22\u001b[0m:\u001b[93m37\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n    \u001b[7m22\u001b[0m   toBeSanitized(received: unknown): jest.CustomMatcherResult {\n    \u001b[7m  \u001b[0m \u001b[91m                                    ~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m61\u001b[0m:\u001b[93m47\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n    \u001b[7m61\u001b[0m   toBeValidSecurityResult(received: unknown): jest.CustomMatcherResult {\n    \u001b[7m  \u001b[0m \u001b[91m                                              ~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m71\u001b[0m:\u001b[93m20\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS18046: \u001b[0m'result' is of type 'unknown'.\n\n    \u001b[7m71\u001b[0m       \"isValid\" in result && typeof result.isValid === \"boolean\";\n    \u001b[7m  \u001b[0m \u001b[91m                   ~~~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m72\u001b[0m:\u001b[93m37\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS18046: \u001b[0m'result' is of type 'unknown'.\n\n    \u001b[7m72\u001b[0m     const hasThreats = \"threats\" in result && Array.isArray(result.threats);\n    \u001b[7m  \u001b[0m \u001b[91m                                    ~~~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m74\u001b[0m:\u001b[93m21\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS18046: \u001b[0m'result' is of type 'unknown'.\n\n    \u001b[7m74\u001b[0m       \"severity\" in result && typeof result.severity === \"string\";\n    \u001b[7m  \u001b[0m \u001b[91m                    ~~~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m95\u001b[0m:\u001b[93m43\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n    \u001b[7m95\u001b[0m   toBeValidEncryption(received: unknown): jest.CustomMatcherResult {\n    \u001b[7m  \u001b[0m \u001b[91m                                          ~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m132\u001b[0m:\u001b[93m47\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n    \u001b[7m132\u001b[0m   toBeValidTypeDefinition(received: unknown): jest.CustomMatcherResult {\n    \u001b[7m   \u001b[0m \u001b[91m                                              ~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m173\u001b[0m:\u001b[93m6\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n    \u001b[7m173\u001b[0m   ): jest.CustomMatcherResult {\n    \u001b[7m   \u001b[0m \u001b[91m     ~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m198\u001b[0m:\u001b[93m74\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'error'.\n\n    \u001b[7m198\u001b[0m           `Expected function to execute successfully, but threw error: ${error}`,\n    \u001b[7m   \u001b[0m \u001b[91m                                                                         ~~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m245\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'beforeEach'.\n\n    \u001b[7m245\u001b[0m beforeEach(() => {\n    \u001b[7m   \u001b[0m \u001b[91m~~~~~~~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m250\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'afterEach'.\n\n    \u001b[7m250\u001b[0m afterEach(() => {\n    \u001b[7m   \u001b[0m \u001b[91m~~~~~~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m324\u001b[0m:\u001b[93m5\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2322: \u001b[0mType '{ plaintext: string; keys?: { valid: string[]; invalid: string[]; } | undefined; algorithms?: string[] | undefined; key: string; invalidKeys: string[]; sensitiveData: { password: string; token: string; apiKey: string; }; }' is not assignable to type 'CryptoTestData'.\n      Types of property 'keys' are incompatible.\n        Type '{ valid: string[]; invalid: string[]; } | undefined' is not assignable to type '{ valid: string[]; invalid: string[]; }'.\n          Type 'undefined' is not assignable to type '{ valid: string[]; invalid: string[]; }'.\n\n    \u001b[7m324\u001b[0m     return {\n    \u001b[7m   \u001b[0m \u001b[91m    ~~~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m432\u001b[0m:\u001b[93m60\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n    \u001b[7m432\u001b[0m   createMock: <T extends Record<string, unknown>>(obj: T): jest.Mocked<T> => {\n    \u001b[7m   \u001b[0m \u001b[91m                                                           ~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m433\u001b[0m:\u001b[93m24\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n    \u001b[7m433\u001b[0m     const mock = {} as jest.Mocked<T>;\n    \u001b[7m   \u001b[0m \u001b[91m                       ~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m437\u001b[0m:\u001b[93m21\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'jest'.\n\n    \u001b[7m437\u001b[0m         mock[key] = jest.fn();\n    \u001b[7m   \u001b[0m \u001b[91m                    ~~~~\u001b[0m\n    \u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m439\u001b[0m:\u001b[93m42\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2345: \u001b[0mArgument of type 'T[Extract<keyof T, string>] & object' is not assignable to parameter of type 'Record<string, unknown>'.\n      Index signature for type 'string' is missing in type '{}'.\n\n    \u001b[7m439\u001b[0m         mock[key] = TestUtils.createMock(obj[key]);\n    \u001b[7m   \u001b[0m \u001b[91m                                         ~~~~~~~~\u001b[0m\n",
+      "leaks": false,
+      "numFailingTests": 0,
+      "numPassingTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "openHandles": [],
+      "perfStats": {
+        "end": 0,
+        "runtime": 0,
+        "slow": false,
+        "start": 0
+      },
+      "skipped": false,
+      "snapshot": {
+        "added": 0,
+        "fileDeleted": false,
+        "matched": 0,
+        "unchecked": 0,
+        "uncheckedKeys": [],
+        "unmatched": 0,
+        "updated": 0
+      },
+      "testExecError": {
+        "name": "TSError",
+        "diagnosticText": "\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m22\u001b[0m:\u001b[93m37\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n\u001b[7m22\u001b[0m   toBeSanitized(received: unknown): jest.CustomMatcherResult {\n\u001b[7m  \u001b[0m \u001b[91m                                    ~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m61\u001b[0m:\u001b[93m47\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n\u001b[7m61\u001b[0m   toBeValidSecurityResult(received: unknown): jest.CustomMatcherResult {\n\u001b[7m  \u001b[0m \u001b[91m                                              ~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m71\u001b[0m:\u001b[93m20\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS18046: \u001b[0m'result' is of type 'unknown'.\n\n\u001b[7m71\u001b[0m       \"isValid\" in result && typeof result.isValid === \"boolean\";\n\u001b[7m  \u001b[0m \u001b[91m                   ~~~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m72\u001b[0m:\u001b[93m37\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS18046: \u001b[0m'result' is of type 'unknown'.\n\n\u001b[7m72\u001b[0m     const hasThreats = \"threats\" in result && Array.isArray(result.threats);\n\u001b[7m  \u001b[0m \u001b[91m                                    ~~~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m74\u001b[0m:\u001b[93m21\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS18046: \u001b[0m'result' is of type 'unknown'.\n\n\u001b[7m74\u001b[0m       \"severity\" in result && typeof result.severity === \"string\";\n\u001b[7m  \u001b[0m \u001b[91m                    ~~~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m95\u001b[0m:\u001b[93m43\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n\u001b[7m95\u001b[0m   toBeValidEncryption(received: unknown): jest.CustomMatcherResult {\n\u001b[7m  \u001b[0m \u001b[91m                                          ~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m132\u001b[0m:\u001b[93m47\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n\u001b[7m132\u001b[0m   toBeValidTypeDefinition(received: unknown): jest.CustomMatcherResult {\n\u001b[7m   \u001b[0m \u001b[91m                                              ~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m173\u001b[0m:\u001b[93m6\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n\u001b[7m173\u001b[0m   ): jest.CustomMatcherResult {\n\u001b[7m   \u001b[0m \u001b[91m     ~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m198\u001b[0m:\u001b[93m74\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'error'.\n\n\u001b[7m198\u001b[0m           `Expected function to execute successfully, but threw error: ${error}`,\n\u001b[7m   \u001b[0m \u001b[91m                                                                         ~~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m245\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'beforeEach'.\n\n\u001b[7m245\u001b[0m beforeEach(() => {\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m250\u001b[0m:\u001b[93m1\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'afterEach'.\n\n\u001b[7m250\u001b[0m afterEach(() => {\n\u001b[7m   \u001b[0m \u001b[91m~~~~~~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m324\u001b[0m:\u001b[93m5\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2322: \u001b[0mType '{ plaintext: string; keys?: { valid: string[]; invalid: string[]; } | undefined; algorithms?: string[] | undefined; key: string; invalidKeys: string[]; sensitiveData: { password: string; token: string; apiKey: string; }; }' is not assignable to type 'CryptoTestData'.\n  Types of property 'keys' are incompatible.\n    Type '{ valid: string[]; invalid: string[]; } | undefined' is not assignable to type '{ valid: string[]; invalid: string[]; }'.\n      Type 'undefined' is not assignable to type '{ valid: string[]; invalid: string[]; }'.\n\n\u001b[7m324\u001b[0m     return {\n\u001b[7m   \u001b[0m \u001b[91m    ~~~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m432\u001b[0m:\u001b[93m60\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n\u001b[7m432\u001b[0m   createMock: <T extends Record<string, unknown>>(obj: T): jest.Mocked<T> => {\n\u001b[7m   \u001b[0m \u001b[91m                                                           ~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m433\u001b[0m:\u001b[93m24\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2503: \u001b[0mCannot find namespace 'jest'.\n\n\u001b[7m433\u001b[0m     const mock = {} as jest.Mocked<T>;\n\u001b[7m   \u001b[0m \u001b[91m                       ~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m437\u001b[0m:\u001b[93m21\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2304: \u001b[0mCannot find name 'jest'.\n\n\u001b[7m437\u001b[0m         mock[key] = jest.fn();\n\u001b[7m   \u001b[0m \u001b[91m                    ~~~~\u001b[0m\n\u001b[96mpackages/shared/src/test-utils/setupAfterEnv.ts\u001b[0m:\u001b[93m439\u001b[0m:\u001b[93m42\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2345: \u001b[0mArgument of type 'T[Extract<keyof T, string>] & object' is not assignable to parameter of type 'Record<string, unknown>'.\n  Index signature for type 'string' is missing in type '{}'.\n\n\u001b[7m439\u001b[0m         mock[key] = TestUtils.createMock(obj[key]);\n\u001b[7m   \u001b[0m \u001b[91m                                         ~~~~~~~~\u001b[0m\n",
+        "diagnosticCodes": [
+          2503,
+          2503,
+          18046,
+          18046,
+          18046,
+          2503,
+          2503,
+          2503,
+          2304,
+          2304,
+          2304,
+          2322,
+          2503,
+          2503,
+          2304,
+          2345
+        ]
+      },
+      "testFilePath": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/parlant/api/parameter-validation/parameter-validation.test.ts",
+      "testResults": []
+    }
+  ],
+  "startTime": 1758510515501,
+  "endTime": 1758510517659,
+  "testDuration": 2158,
+  "analysis": {
+    "testFailures": [],
+    "suiteFailures": [],
+    "coverage": null
+  },
+  "summary": {
+    "passRate": "0%",
+    "suitePassRate": "0.00%",
+    "totalDuration": "2158ms"
+  },
+  "timestamp": "2025-09-22T03:08:37.659Z"
+}

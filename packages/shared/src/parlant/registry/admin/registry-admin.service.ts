@@ -366,7 +366,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       return metrics;
 
     } catch (error) {
-      this.logger.error(`Failed to get registry metrics: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get registry metrics: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -420,7 +420,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to configure registry: ${error.message}`, error.stack);
+      this.logger.error(`Failed to configure registry: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -448,7 +448,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       return auditLog;
 
     } catch (error) {
-      this.logger.error(`Failed to get audit log: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get audit log: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -495,7 +495,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to purge inactive functions: ${error.message}`, error.stack);
+      this.logger.error(`Failed to purge inactive functions: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -535,7 +535,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to rebuild indices: ${error.message}`, error.stack);
+      this.logger.error(`Failed to rebuild indices: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -560,7 +560,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       return status;
 
     } catch (error) {
-      this.logger.error(`Failed to get registry status: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get registry status: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -586,7 +586,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       this.logger.log('Scheduled maintenance completed successfully');
 
     } catch (error) {
-      this.logger.error(`Scheduled maintenance failed: ${error.message}`, error.stack);
+      this.logger.error(`Scheduled maintenance failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 
@@ -611,7 +611,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       this.logger.log('Weekly comprehensive maintenance completed successfully');
 
     } catch (error) {
-      this.logger.error(`Weekly comprehensive maintenance failed: ${error.message}`, error.stack);
+      this.logger.error(`Weekly comprehensive maintenance failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 
@@ -639,7 +639,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       this.logger.log('Automated backup completed successfully');
 
     } catch (error) {
-      this.logger.error(`Automated backup failed: ${error.message}`, error.stack);
+      this.logger.error(`Automated backup failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 
@@ -658,7 +658,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       this.logger.log('Registry Admin Service initialized successfully');
 
     } catch (error) {
-      this.logger.error(`Failed to initialize Registry Admin Service: ${error.message}`, error.stack);
+      this.logger.error(`Failed to initialize Registry Admin Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 
@@ -698,7 +698,7 @@ export class RegistryAdminService implements IRegistryAdmin {
         name: 'cleanup_stale_data',
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to cleanup stale data: ${error.message}`
+        details: `Failed to cleanup stale data: ${error instanceof Error ? error.message : String(error)}`
       };
     }
   }
@@ -724,7 +724,7 @@ export class RegistryAdminService implements IRegistryAdmin {
         name: 'rebuild_indices',
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to rebuild indices: ${error.message}`
+        details: `Failed to rebuild indices: ${error instanceof Error ? error.message : String(error)}`
       };
     }
   }
@@ -750,7 +750,7 @@ export class RegistryAdminService implements IRegistryAdmin {
         name: 'compact_storage',
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to compact storage: ${error.message}`
+        details: `Failed to compact storage: ${error instanceof Error ? error.message : String(error)}`
       };
     }
   }
@@ -786,7 +786,7 @@ export class RegistryAdminService implements IRegistryAdmin {
         name: 'validate_integrity',
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to validate integrity: ${error.message}`
+        details: `Failed to validate integrity: ${error instanceof Error ? error.message : String(error)}`
       };
     }
   }
@@ -812,7 +812,7 @@ export class RegistryAdminService implements IRegistryAdmin {
         name: 'optimize_performance',
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to optimize performance: ${error.message}`
+        details: `Failed to optimize performance: ${error instanceof Error ? error.message : String(error)}`
       };
     }
   }
@@ -1016,7 +1016,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       }
 
     } catch (error) {
-      this.logger.warn(`Failed to cleanup old backups: ${error.message}`);
+      this.logger.warn(`Failed to cleanup old backups: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 }

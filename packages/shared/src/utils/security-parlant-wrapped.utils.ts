@@ -558,7 +558,7 @@ export const detectAdvancedXSS = parlantWrapper(
  * HIGH security function for contextual sanitization
  */
 export const sanitizeContentByContext = parlantWrapper(
-  SecurityUtils.sanitizeContentByContext,
+  ((...args: unknown[]) => SecurityUtils.sanitizeContentByContext(args[0] as string, args[1] as any, args[2] as any)),
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -575,7 +575,7 @@ export const sanitizeContentByContext = parlantWrapper(
  * HIGH security function for Content Security Policy generation
  */
 export const generateCSPHeader = parlantWrapper(
-  SecurityUtils.generateCSPHeader,
+  ((...args: unknown[]) => SecurityUtils.generateCSPHeader(args[0] as any)),
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -592,7 +592,7 @@ export const generateCSPHeader = parlantWrapper(
  * HIGH security function for sophisticated command injection analysis
  */
 export const detectCommandInjectionAdvanced = parlantWrapper(
-  SecurityUtils.detectCommandInjectionAdvanced,
+  ((...args: unknown[]) => SecurityUtils.detectCommandInjectionAdvanced(args[0] as string)),
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -609,7 +609,7 @@ export const detectCommandInjectionAdvanced = parlantWrapper(
  * HIGH security function for template injection prevention
  */
 export const detectTemplateInjection = parlantWrapper(
-  SecurityUtils.detectTemplateInjection,
+  ((...args: unknown[]) => SecurityUtils.detectTemplateInjection(args[0] as string)),
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -626,7 +626,7 @@ export const detectTemplateInjection = parlantWrapper(
  * HIGH security function for LDAP injection prevention
  */
 export const detectLDAPInjection = parlantWrapper(
-  SecurityUtils.detectLDAPInjection,
+  ((...args: unknown[]) => SecurityUtils.detectLDAPInjection(args[0] as string)),
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -643,7 +643,7 @@ export const detectLDAPInjection = parlantWrapper(
  * HIGH security function for XML injection prevention
  */
 export const detectXMLInjection = parlantWrapper(
-  SecurityUtils.detectXMLInjection,
+  ((...args: unknown[]) => SecurityUtils.detectXMLInjection(args[0] as string)),
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -660,7 +660,7 @@ export const detectXMLInjection = parlantWrapper(
  * HIGH security function for NoSQL injection prevention
  */
 export const detectNoSQLInjection = parlantWrapper(
-  SecurityUtils.detectNoSQLInjection,
+  ((...args: unknown[]) => SecurityUtils.detectNoSQLInjection(args[0] as string)),
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -677,7 +677,7 @@ export const detectNoSQLInjection = parlantWrapper(
  * CRITICAL security function for comprehensive threat analysis
  */
 export const detectComprehensiveMaliciousPatterns = parlantWrapper(
-  SecurityUtils.detectComprehensiveMaliciousPatterns,
+  ((...args: unknown[]) => SecurityUtils.detectComprehensiveMaliciousPatterns(args[0] as string)),
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -694,7 +694,7 @@ export const detectComprehensiveMaliciousPatterns = parlantWrapper(
  * MEDIUM security function for backward compatibility
  */
 export const detectSQLInjectionLegacy = parlantWrapper(
-  SecurityUtils.detectSQLInjectionLegacy,
+  ((...args: unknown[]) => SecurityUtils.detectSQLInjectionLegacy(args[0] as string)),
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -860,21 +860,17 @@ export function registerParlantSecurityFunctions(): void {
     },
     {
       name: "sanitizeContentByContext",
-      func: sanitizeContentByContext as (
-        ...args: unknown[]
-      ) => Promise<unknown>,
+      func: ((...args) => Promise.resolve(sanitizeContentByContext(args[0] as string, args[1] as any, args[2] as any))) as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "generateCSPHeader",
-      func: generateCSPHeader as (...args: unknown[]) => Promise<unknown>,
+      func: ((...args) => Promise.resolve(generateCSPHeader(args[0] as any))) as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "detectCommandInjectionAdvanced",
-      func: detectCommandInjectionAdvanced as (
-        ...args: unknown[]
-      ) => Promise<unknown>,
+      func: ((...args) => Promise.resolve(detectCommandInjectionAdvanced(args[0] as string))) as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {

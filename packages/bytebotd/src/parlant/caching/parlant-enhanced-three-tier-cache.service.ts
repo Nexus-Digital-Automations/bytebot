@@ -22,7 +22,18 @@
  * @created 2025-09-19
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Inject } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { CACHE_MANAGER } from '@nestjs/cache-manager';import { Cache } from 'cache-manager';import { createHash } from 'crypto';import { performance } from 'perf_hooks';import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';import { CacheService } from '../../cache/cache.service';// ===== ENHANCED 3-TIER CACHE INTERFACES =====/**
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy, Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { createHash } from 'crypto';
+import { performance } from 'perf_hooks';
+import { ParlantValidationRequest, ParlantValidationResponse, RiskLevel } from '../parlant-integration.service';
+import { CacheService } from '../../cache/cache.service';
+
+// ===== ENHANCED 3-TIER CACHE INTERFACES =====
+
+/**
  * L1 Cache Configuration - In-Memory Ultra-Fast Access
  */
 export interface L1CacheConfig {
@@ -30,7 +41,8 @@ export interface L1CacheConfig {
   readonly maxSize: number;           // 50,000 entries for high capacity
   readonly ttlSeconds: number;        // 5-30s adaptive TTL based on usage
   readonly evictionPolicy: 'LRU' | 'LFU';
-  readonly compressionThreshold: number;  // Compress entries > 10KBreadonly memoryLimitMB: number;     // 512MB memory limit
+  readonly compressionThreshold: number;  // Compress entries > 10KB
+  readonly memoryLimitMB: number;     // 512MB memory limit
 }
 
 /**
@@ -44,7 +56,8 @@ export interface L2CacheConfig {
   readonly compression: {
     readonly enabled: boolean;
     readonly algorithm: 'gzip' | 'lz4';
-  readonly level: number;           // 1-9 compression level};
+    readonly level: number;           // 1-9 compression level
+  };
   readonly retry: {
     readonly maxAttempts: number;
     readonly delayMs: number;
@@ -62,7 +75,8 @@ export interface L2CacheConfig {
 export interface L3CacheConfig {
   readonly enabled: boolean;
   readonly database: 'postgresql' | 'sqlite' | 'mongodb';
-  readonly ttlHours: number;          // 1+ hour persistent storagereadonly tableName: string;
+  readonly ttlHours: number;          // 1+ hour persistent storage
+  readonly tableName: string;
   readonly indexing: {
     readonly functionName: boolean;
     readonly riskLevel: boolean;
@@ -234,7 +248,10 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly cacheService: CacheService
   ) {
-    const operationId = `enhanced_cache_init${Date.now()}`;// Load configurationsthis.l1Config = this.loadL1Config();
+    const operationId = `enhanced_cache_init_${Date.now()}`;
+
+    // Load configurations
+    this.l1Config = this.loadL1Config();
     this.l2Config = this.loadL2Config();
     this.l3Config = this.loadL3Config();
     this.warmingConfig = this.loadWarmingConfig();
@@ -245,10 +262,17 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
       l3Enabled: this.l3Config.enabled,
       warmingEnabled: this.warmingConfig.enabled,
       targetHitRate: '85%+',
-      memoryLimit: `${this.l1Config.memoryLimitMB}MB`,});}
+      memoryLimit: `${this.l1Config.memoryLimitMB}MB`,
+    });
+  }
 
   async onModuleInit(): Promise<void> {
-    const operationId = `enhanced_cache_startup${Date.now()}`;try {this.logger.log(`[${operationId}] Starting Enhanced 3-Tier Cache initialization...`);// Initialize L2 Redis cacheif (this.l2Config.enabled) {
+    const operationId = `enhanced_cache_startup_${Date.now()}`;
+    try {
+      this.logger.log(`[${operationId}] Starting Enhanced 3-Tier Cache initialization...`);
+
+      // Initialize L2 Redis cache
+      if (this.l2Config.enabled) {
         await this.initializeL2Cache();
       }
 
@@ -268,17 +292,27 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
       // Start performance monitoring
       this.startPerformanceMonitoring();
 
-      this.logger.log(`[${operationId}] Enhanced 3-Tier Cache Service initialized successfully`, {l1MaxSize: this.l1Config.maxSize,l2Cluster: this.l2Config.clusterEnabled,
+      this.logger.log(`[${operationId}] Enhanced 3-Tier Cache Service initialized successfully`, {
+        l1MaxSize: this.l1Config.maxSize,
+        l2Cluster: this.l2Config.clusterEnabled,
         l3Database: this.l3Config.database,
         analyticsEnabled: true,
       });
 
     } catch (error) {
-      this.logger.error(`[${operationId}] Cache initialization failed:`, error);throw error;}
+      this.logger.error(`[${operationId}] Cache initialization failed:`, error);
+      throw error;
+    }
+  }
   }
 
   async onModuleDestroy(): Promise<void> {
-    const operationId = `enhanced_cache_shutdown${Date.now()}`;try {this.logger.log(`[${operationId}] Shutting down Enhanced 3-Tier Cache Service...`);// Close Redis connectionsif (this.redisClient) {
+    const operationId = `enhanced_cache_shutdown_${Date.now()}`;
+    try {
+      this.logger.log(`[${operationId}] Shutting down Enhanced 3-Tier Cache Service...`);
+
+      // Close Redis connections
+      if (this.redisClient) {
         // await this.redisClient.quit();
       }
 
@@ -290,7 +324,11 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
       // Log final performance statistics
       this.logFinalPerformanceReport();
 
-      this.logger.log(`[${operationId}] Enhanced 3-Tier Cache Service shut down successfully`);} catch (error) {this.logger.error(`[${operationId}] Cache shutdown error:`, error);}}
+      this.logger.log(`[${operationId}] Enhanced 3-Tier Cache Service shut down successfully`);
+    } catch (error) {
+      this.logger.error(`[${operationId}] Cache shutdown error:`, error);
+    }
+  }
 
   // ===== PUBLIC CACHE INTERFACE =====
 
@@ -299,7 +337,10 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
    * Target: <5ms L1, <15ms L2, <50ms L3
    */
   async getCachedValidation(request: ParlantValidationRequest): Promise<ParlantValidationResponse | null> {
-    const operationId = `cache_get${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = performance.now();try {
+    const operationId = `cache_get_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = performance.now();
+
+    try {
       const cacheKey = this.generateIntelligentCacheKey(request);
       this.recordAccessPattern(request.functionName);
       this.updatePopularFunction(request.functionName);
@@ -345,15 +386,24 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
           }
           await this.setInL1Cache(cacheKey, l3Result, request);
           this.recordCacheHit('L3', l3Duration, operationId);
-          this.logger.debug(`[${operationId}] L3 Cache HIT: ${cacheKey} (${l3Duration.toFixed(2)}ms)`);return l3Result;}
+          this.logger.debug(`[${operationId}] L3 Cache HIT: ${cacheKey} (${l3Duration.toFixed(2)}ms)`);
+          return l3Result;
+        }
       }
 
       // Cache miss across all tiers
       const totalDuration = performance.now() - startTime;
       this.recordCacheMiss(totalDuration, operationId);
-      this.logger.debug(`[${operationId}] Cache MISS: ${cacheKey} (${totalDuration.toFixed(2)}ms)`);return null;} catch (error) {
+      this.logger.debug(`[${operationId}] Cache MISS: ${cacheKey} (${totalDuration.toFixed(2)}ms)`);
+      return null;
+
+    } catch (error) {
       const totalDuration = performance.now() - startTime;
-      this.logger.error(`[${operationId}] Cache lookup error:`, {error: error instanceof Error ? error.message : String(error),duration: `${totalDuration.toFixed(2)}ms`,request: {functionName: request.functionName,
+      this.logger.error(`[${operationId}] Cache lookup error:`, {
+        error: error instanceof Error ? error.message : String(error),
+        duration: `${totalDuration.toFixed(2)}ms`,
+        request: {
+          functionName: request.functionName,
           riskLevel: request.riskLevel,
           operationId: request.operationId,
         },
@@ -371,17 +421,24 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
     request: ParlantValidationRequest,
     response: ParlantValidationResponse
   ): Promise<void> {
-    const operationId = `cache_set${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = performance.now();try {
+    const operationId = `cache_set_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = performance.now();
+
+    try {
       const cacheKey = this.generateIntelligentCacheKey(request);
 
-      this.logger.debug(`[${operationId}] Setting cached validation: ${cacheKey}`, {functionName: request.functionName,riskLevel: request.riskLevel,
+      this.logger.debug(`[${operationId}] Setting cached validation: ${cacheKey}`, {
+        functionName: request.functionName,
+        riskLevel: request.riskLevel,
         approved: response.approved,
       });
 
       // Determine cache placement strategy based on risk level and success
       const shouldCache = this.shouldCacheResponse(request, response);
       if (!shouldCache) {
-        this.logger.debug(`[${operationId}] Skipping cache for: ${cacheKey} (policy decision)`);return;}
+        this.logger.debug(`[${operationId}] Skipping cache for: ${cacheKey} (policy decision)`);
+        return;
+      }
 
       // Set in L1 cache (always for approved responses)
       if (this.l1Config.enabled) {
@@ -399,7 +456,10 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
       }
 
       const totalDuration = performance.now() - startTime;
-      this.logger.debug(`[${operationId}] Cache set completed: ${cacheKey} (${totalDuration.toFixed(2)}ms)`);} catch (error) {this.logger.error(`[${operationId}] Cache set error:`, {
+      this.logger.debug(`[${operationId}] Cache set completed: ${cacheKey} (${totalDuration.toFixed(2)}ms)`);
+
+    } catch (error) {
+      this.logger.error(`[${operationId}] Cache set error:`, {
         error: error instanceof Error ? error.message : String(error),
         request: {
           functionName: request.functionName,
@@ -417,8 +477,14 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
     pattern: string,
     strategy: InvalidationStrategy = { type: 'immediate', patterns: [pattern], conditions: {} }
   ): Promise<number> {
-    const operationId = `cache_invalidate${Date.now()}_${Math.random().toString(36).substring(7)}`;let invalidatedCount = 0;try {
-      this.logger.log(`[${operationId}] Starting cache invalidation for pattern: ${pattern}`);// L1 Cache invalidationif (this.l1Config.enabled) {
+    const operationId = `cache_invalidate_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    let invalidatedCount = 0;
+
+    try {
+      this.logger.log(`[${operationId}] Starting cache invalidation for pattern: ${pattern}`);
+
+      // L1 Cache invalidation
+      if (this.l1Config.enabled) {
         const l1Count = await this.invalidateL1CacheByPattern(pattern);
         invalidatedCount += l1Count;
       }
@@ -435,8 +501,14 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
         invalidatedCount += l3Count;
       }
 
-      this.logger.log(`[${operationId}] Cache invalidation completed: ${invalidatedCount} entries invalidated`);return invalidatedCount;} catch (error) {
-      this.logger.error(`[${operationId}] Cache invalidation error:`, error);return invalidatedCount;}
+      this.logger.log(`[${operationId}] Cache invalidation completed: ${invalidatedCount} entries invalidated`);
+      return invalidatedCount;
+
+    } catch (error) {
+      this.logger.error(`[${operationId}] Cache invalidation error:`, error);
+      return invalidatedCount;
+    }
+  }
   }
 
   /**
@@ -447,7 +519,10 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
       return;
     }
 
-    const operationId = `cache_warm${Date.now()}_${Math.random().toString(36).substring(7)}`;this.warmingInProgress = true;try {
+    const operationId = `cache_warm_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    this.warmingInProgress = true;
+
+    try {
       this.logger.log(`[${operationId}] Starting intelligent cache warming...`);
 
       let warmedCount = 0;
@@ -455,11 +530,15 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
       const startTime = performance.now();
 
       // Strategy 1: Popular functions warming
-      if (this.warmingConfig.strategies.includes('popular_functions')) {const popularCount = await this.warmPopularFunctions(maxOperations - warmedCount);warmedCount += popularCount;
+      if (this.warmingConfig.strategies.includes('popular_functions')) {
+        const popularCount = await this.warmPopularFunctions(maxOperations - warmedCount);
+        warmedCount += popularCount;
       }
 
       // Strategy 2: Recent patterns warming
-      if (this.warmingConfig.strategies.includes('recent_patterns') && warmedCount < maxOperations) {const patternsCount = await this.warmRecentPatterns(maxOperations - warmedCount);warmedCount += patternsCount;
+      if (this.warmingConfig.strategies.includes('recent_patterns') && warmedCount < maxOperations) {
+        const patternsCount = await this.warmRecentPatterns(maxOperations - warmedCount);
+        warmedCount += patternsCount;
       }
 
       // Strategy 3: Predictive warming
@@ -469,7 +548,10 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
       }
 
       const duration = performance.now() - startTime;
-      this.logger.log(`[${operationId}] Cache warming completed: ${warmedCount} operations warmed (${duration.toFixed(2)}ms)`);} catch (error) {this.logger.error(`[${operationId}] Cache warming error:`, error);
+      this.logger.log(`[${operationId}] Cache warming completed: ${warmedCount} operations warmed (${duration.toFixed(2)}ms)`);
+
+    } catch (error) {
+      this.logger.error(`[${operationId}] Cache warming error:`, error);
     } finally {
       this.warmingInProgress = false;
     }
@@ -505,15 +587,35 @@ export class ParlantEnhanced3TierCacheService implements OnModuleInit, OnModuleD
 
   private loadL2Config(): L2CacheConfig {
     return {
-      enabled: this.configService.get<boolean>('PARLANT_L2_CACHE_ENABLED', true),clusterEnabled: this.configService.get<boolean>('PARLANT_REDIS_CLUSTER_ENABLED', false),nodes: this.configService.get<string>('PARLANT_REDIS_NODES', 'localhost:6379').split(','),ttlMinutes: this.configService.get<number>('PARLANT_L2_CACHE_TTL_MINUTES', 60),compression: {enabled: this.configService.get<boolean>('PARLANT_L2_COMPRESSION_ENABLED', true),algorithm: 'gzip',level: this.configService.get<number>('PARLANT_L2_COMPRESSION_LEVEL', 6),},retry: {
-        maxAttempts: this.configService.get<number>('PARLANT_L2_RETRY_MAX_ATTEMPTS', 3),delayMs: this.configService.get<number>('PARLANT_L2_RETRY_DELAY_MS', 100),exponentialBackoff: true,},
+      enabled: this.configService.get<boolean>('PARLANT_L2_CACHE_ENABLED', true),
+      clusterEnabled: this.configService.get<boolean>('PARLANT_REDIS_CLUSTER_ENABLED', false),
+      nodes: this.configService.get<string>('PARLANT_REDIS_NODES', 'localhost:6379').split(','),
+      ttlMinutes: this.configService.get<number>('PARLANT_L2_CACHE_TTL_MINUTES', 60),
+      compression: {
+        enabled: this.configService.get<boolean>('PARLANT_L2_COMPRESSION_ENABLED', true),
+        algorithm: 'gzip',
+        level: this.configService.get<number>('PARLANT_L2_COMPRESSION_LEVEL', 6),
+      },
+      retry: {
+        maxAttempts: this.configService.get<number>('PARLANT_L2_RETRY_MAX_ATTEMPTS', 3),
+        delayMs: this.configService.get<number>('PARLANT_L2_RETRY_DELAY_MS', 100),
+        exponentialBackoff: true,
+      },
       pipeline: {
-        enabled: this.configService.get<boolean>('PARLANT_L2_PIPELINE_ENABLED', true),batchSize: this.configService.get<number>('PARLANT_L2_PIPELINE_BATCH_SIZE', 100),},};
+        enabled: this.configService.get<boolean>('PARLANT_L2_PIPELINE_ENABLED', true),
+        batchSize: this.configService.get<number>('PARLANT_L2_PIPELINE_BATCH_SIZE', 100),
+      },
+    };
   }
 
   private loadL3Config(): L3CacheConfig {
     return {
-      enabled: this.configService.get<boolean>('PARLANT_L3_CACHE_ENABLED', true),database: this.configService.get<'postgresql' | 'sqlite' | 'mongodb'>('PARLANT_L3_DATABASE', 'postgresql'),ttlHours: this.configService.get<number>('PARLANT_L3_CACHE_TTL_HOURS', 24),tableName: this.configService.get<string>('PARLANT_L3_TABLE_NAME', 'parlant_cache_entries'),indexing: {functionName: true,
+      enabled: this.configService.get<boolean>('PARLANT_L3_CACHE_ENABLED', true),
+      database: this.configService.get<'postgresql' | 'sqlite' | 'mongodb'>('PARLANT_L3_DATABASE', 'postgresql'),
+      ttlHours: this.configService.get<number>('PARLANT_L3_CACHE_TTL_HOURS', 24),
+      tableName: this.configService.get<string>('PARLANT_L3_TABLE_NAME', 'parlant_cache_entries'),
+      indexing: {
+        functionName: true,
         riskLevel: true,
         userId: true,
         timestamp: true,

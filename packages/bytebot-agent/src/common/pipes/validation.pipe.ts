@@ -102,7 +102,7 @@ type ValidatableValue =
 interface ValidatableObject {
   [key: string]: ValidatableValue;
 }
-interface ValidatableArray extends Array<ValidatableValue> {}
+type ValidatableArray = Array<ValidatableValue>;
 
 @Injectable()
 export class GlobalValidationPipe

@@ -1,4 +1,8 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { v4 as uuidv4 } from 'uuid';import {CreateBrowserSessionDto,
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  CreateBrowserSessionDto,
   BrowserSessionDto,
   BrowserSessionStatus,
   SessionHealthCheckDto,
@@ -6,7 +10,10 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';import { Co
   SessionConfigUpdateDto,
   BulkSessionOperationDto,
   BulkSessionResultDto,
-} from '../browser-use/dto/browser-session.dto';import { BrowserSessionService } from '../browser-use/browser-session.service';/*** Resource limits interface
+} from '../browser-use/dto/browser-session.dto';
+import { BrowserSessionService } from '../browser-use/browser-session.service';
+
+/*** Resource limits interface
  */
 interface ResourceLimits {
   maxSessions: number;
@@ -47,7 +54,10 @@ interface PaginationOptions {
   limit: number;
   offset: number;
   sortBy: string;
-  sortOrder: 'asc' | 'desc';}/**
+  sortOrder: 'asc' | 'desc';
+}
+
+/**
  * Session metric entry
  */
 interface SessionMetricEntry {
@@ -106,10 +116,19 @@ export class SessionService implements OnModuleDestroy {
   ) {
     // Initialize resource limits from configuration
     this.resourceLimits = {
-      maxSessions: this.configService.get<number>('MAX_BROWSER_SESSIONS', 50),maxMemoryMB: this.configService.get<number>('MAX_BROWSER_MEMORY_MB', 8192),maxProcesses: this.configService.get<number>('MAX_BROWSER_PROCESSES', 100),maxSessionLifetimeMs: this.configService.get<number>('MAX_SESSION_LIFETIME_MS', 7200000), // 2 hoursmaxInactiveMs: this.configService.get<number>('MAX_SESSION_INACTIVE_MS', 1800000), // 30 minutes};// Start system monitoring
+      maxSessions: this.configService.get<number>('MAX_BROWSER_SESSIONS', 50),
+      maxMemoryMB: this.configService.get<number>('MAX_BROWSER_MEMORY_MB', 8192),
+      maxProcesses: this.configService.get<number>('MAX_BROWSER_PROCESSES', 100),
+      maxSessionLifetimeMs: this.configService.get<number>('MAX_SESSION_LIFETIME_MS', 7200000), // 2 hours
+      maxInactiveMs: this.configService.get<number>('MAX_SESSION_INACTIVE_MS', 1800000), // 30 minutes
+    };
+
+    // Start system monitoring
     this.monitoringInterval = setInterval(() => {
       this.performSystemMonitoring().catch((err) => {
-        this.logger.error('System monitoring failed', err);});}, 30000); // Monitor every 30 seconds
+        this.logger.error('System monitoring failed', err);
+      });
+    }, 30000); // Monitor every 30 seconds
 
     this.logger.log('Enhanced Browser Session Service initialized', {
       resourceLimits: this.resourceLimits,
@@ -128,13 +147,18 @@ export class SessionService implements OnModuleDestroy {
     const startTime = Date.now();
     const sessionId = uuidv4();
 
-    this.logger.log(`Creating enhanced session: ${sessionId}`, {sessionId,name: dto.name,
+    this.logger.log(`Creating enhanced session: ${sessionId}`, {
+      sessionId,
+      name: dto.name,
       headless: dto.headless,
-      viewport: `${dto.viewportWidth}x${dto.viewportHeight}`,});try {
+      viewport: `${dto.viewportWidth}x${dto.viewportHeight}`,
+    });
+
+    try {
       // Validate resource limits
       const resourceCheck = await this.validateResourceLimits();
       if (!resourceCheck.allowed) {
-        throw new Error(`Resource limits exceeded: ${resourceCheck.violations?.join(`, ')}`);
+        throw new Error(`Resource limits exceeded: ${resourceCheck.violations?.join(', ')}`);
       }
 
       // Create session using base service
@@ -145,7 +169,9 @@ export class SessionService implements OnModuleDestroy {
 
       // Record session creation
       this.recordSessionMetric(session.sessionId, {
-        type: 'session_created',timestamp: new Date(),data: {
+        type: 'session_created',
+        timestamp: new Date(),
+        data: {
           creationTimeMs: Date.now() - startTime,
           config: session.config,
           resourceUsage: await this.getCurrentResourceUsage(),
@@ -157,11 +183,15 @@ export class SessionService implements OnModuleDestroy {
       this.performanceCounters.totalCreationTimeMs += Date.now() - startTime;
 
       // Log session creation event (in production would emit event)
-      this.logger.debug('Session creation event', {sessionId: session.sessionId,creationTimeMs: Date.now() - startTime,
+      this.logger.debug('Session creation event', {
+        sessionId: session.sessionId,
+        creationTimeMs: Date.now() - startTime,
         event: 'session.created',
       });
 
-      this.logger.log(`Enhanced session created: ${session.sessionId}`, {sessionId: session.sessionId,creationTimeMs: Date.now() - startTime,
+      this.logger.log(`Enhanced session created: ${session.sessionId}`, {
+        sessionId: session.sessionId,
+        creationTimeMs: Date.now() - startTime,
         status: session.status,
       });
 
@@ -170,7 +200,9 @@ export class SessionService implements OnModuleDestroy {
       this.logger.error(`Enhanced session creation failed: ${sessionId}`, error);
 
       // Log session creation failure event (in production would emit event)
-      this.logger.debug('Session creation failure event', {sessionId,error: error instanceof Error ? error.message : String(error),
+      this.logger.debug('Session creation failure event', {
+        sessionId,
+        error: error instanceof Error ? error.message : String(error),
         creationTimeMs: Date.now() - startTime,
         event: 'session.creation_failed',
       });
@@ -213,7 +245,11 @@ export class SessionService implements OnModuleDestroy {
     limit: number;
     offset: number;
   }> {
-    this.logger.debug('Retrieving sessions with pagination', options);let sessions = this.browserSessionService.getAllSessions();// Apply status filter
+    this.logger.debug('Retrieving sessions with pagination', options);
+
+    let sessions = this.browserSessionService.getAllSessions();
+
+    // Apply status filter
     if (options.status) {
       sessions = sessions.filter(session => session.status === options.status);
     }
@@ -315,7 +351,9 @@ export class SessionService implements OnModuleDestroy {
       if (!options.force) {
         const hasRunningTasks = await this.hasRunningTasks(sessionId);
         if (hasRunningTasks) {
-          throw new Error('Session has running tasks');}}
+          throw new Error('Session has running tasks');
+        }
+      }
 
       // Get session info before closing for metrics
       const session = this.browserSessionService.getSession(sessionId);
@@ -330,7 +368,9 @@ export class SessionService implements OnModuleDestroy {
       // Record session closure
       if (session) {
         this.recordSessionMetric(sessionId, {
-          type: 'session_closed',timestamp: new Date(),data: {
+          type: 'session_closed',
+          timestamp: new Date(),
+          data: {
             cleanupTimeMs: Date.now() - startTime,
             force: options.force,
             sessionDurationMs: Date.now() - session.createdAt.getTime(),
@@ -348,19 +388,25 @@ export class SessionService implements OnModuleDestroy {
       this.sessionMetrics.delete(sessionId);
 
       // Log session closure event (in production would emit event)
-      this.logger.debug('Session closure event', {sessionId,cleanupTimeMs: Date.now() - startTime,
+      this.logger.debug('Session closure event', {
+        sessionId,
+        cleanupTimeMs: Date.now() - startTime,
         force: options.force,
         event: 'session.closed',
       });
 
-      this.logger.log(`Session closed with cleanup: ${sessionId}`, {sessionId,cleanupTimeMs: Date.now() - startTime,
+      this.logger.log(`Session closed with cleanup: ${sessionId}`, {
+        sessionId,
+        cleanupTimeMs: Date.now() - startTime,
         force: options.force,
       });
     } catch (error) {
       this.logger.error(`Session cleanup failed: ${sessionId}`, error);
 
       // Log session cleanup failure event (in production would emit event)
-      this.logger.debug('Session cleanup failure event', {sessionId,error: error instanceof Error ? error.message : String(error),
+      this.logger.debug('Session cleanup failure event', {
+        sessionId,
+        error: error instanceof Error ? error.message : String(error),
         cleanupTimeMs: Date.now() - startTime,
         event: 'session.cleanup_failed',
       });
@@ -382,11 +428,20 @@ export class SessionService implements OnModuleDestroy {
 
     // Check session count limit
     if (current.sessions >= this.resourceLimits.maxSessions) {
-      violations.push(`Session count (${current.sessions}) exceeds limit (${this.resourceLimits.maxSessions})`);}// Check memory usage limit
+      violations.push(`Session count (${current.sessions}) exceeds limit (${this.resourceLimits.maxSessions})`);
+    }
+
+    // Check memory usage limit
     if (current.memoryMB >= this.resourceLimits.maxMemoryMB) {
-      violations.push(`Memory usage (${current.memoryMB}MB) exceeds limit (${this.resourceLimits.maxMemoryMB}MB)`);}// Check process count limit
+      violations.push(`Memory usage (${current.memoryMB}MB) exceeds limit (${this.resourceLimits.maxMemoryMB}MB)`);
+    }
+
+    // Check process count limit
     if (current.processes >= this.resourceLimits.maxProcesses) {
-      violations.push(`Process count (${current.processes}) exceeds limit (${this.resourceLimits.maxProcesses})`);}return {
+      violations.push(`Process count (${current.processes}) exceeds limit (${this.resourceLimits.maxProcesses})`);
+    }
+
+    return {
       allowed: violations.length === 0,
       limits: this.resourceLimits,
       current,
@@ -508,7 +563,10 @@ export class SessionService implements OnModuleDestroy {
    * Perform comprehensive health check
    */
   async performHealthCheck(sessionId: string): Promise<SessionHealthCheckDto | null> {
-    this.logger.debug(`Performing health check: ${sessionId}`);const session = this.browserSessionService.getSession(sessionId);if (!session) {
+    this.logger.debug(`Performing health check: ${sessionId}`);
+
+    const session = this.browserSessionService.getSession(sessionId);
+    if (!session) {
       return null;
     }
 
@@ -520,12 +578,16 @@ export class SessionService implements OnModuleDestroy {
       // Check browser process health
       const processHealth = await this.checkProcessHealth(session.browserPid);
       if (!processHealth.healthy) {
-        issues.push(`Browser process unhealthy: ${processHealth.reason}`);healthScore -= 30;}
+        issues.push(`Browser process unhealthy: ${processHealth.reason}`);
+        healthScore -= 30;
+      }
 
       // Check memory usage
       const resourceUsage = await this.getSessionResourceUsage(sessionId);
       if (resourceUsage.memoryMB > 1024) { // 1GB threshold
-        issues.push(`High memory usage: ${resourceUsage.memoryMB}MB`);healthScore -= 20;}
+        issues.push(`High memory usage: ${resourceUsage.memoryMB}MB`);
+        healthScore -= 20;
+      }
 
       // Check session activity
       const inactiveTime = Date.now() - session.lastActivityAt.getTime();
@@ -542,7 +604,16 @@ export class SessionService implements OnModuleDestroy {
       }
 
       // Determine overall health status
-      let status: 'healthy' | 'warning' | 'critical';if (healthScore >= 80) {status = 'healthy';} else if (healthScore >= 50) {status = 'warning';} else {status = 'critical';}const healthCheck: SessionHealthCheckDto = {
+      let status: 'healthy' | 'warning' | 'critical';
+      if (healthScore >= 80) {
+        status = 'healthy';
+      } else if (healthScore >= 50) {
+        status = 'warning';
+      } else {
+        status = 'critical';
+      }
+
+      const healthCheck: SessionHealthCheckDto = {
         sessionId,
         status,
         healthScore: Math.max(0, healthScore),

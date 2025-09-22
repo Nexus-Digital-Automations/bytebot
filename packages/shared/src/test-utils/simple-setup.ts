@@ -9,6 +9,7 @@
  */
 
 import "reflect-metadata";
+import { jest } from "@jest/globals";
 
 // Set test environment for Shared utilities
 process.env.NODE_ENV = "test";

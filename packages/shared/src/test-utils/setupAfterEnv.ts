@@ -12,14 +12,36 @@
  * @version 2.0.0
  */
 
-import { expect } from "@jest/globals";
+import { expect, jest } from "@jest/globals";
+
+// Global test hooks
+declare const beforeEach: (fn: () => void) => void;
+declare const afterEach: (fn: () => void) => void;
+
+// Type declarations for Jest custom matchers
+interface CustomMatcherResult {
+  pass: boolean;
+  message: () => string;
+}
+
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeSanitized(): R;
+      toBeValidSecurityResult(): R;
+      toBeValidEncryption(): R;
+      toBeValidTypeDefinition(): R;
+      toExecuteWithinTime(maxMs?: number): R;
+    }
+  }
+}
 
 // Custom Jest matchers for Shared utilities domain
 expect.extend({
   /**
    * Validates that input has been properly sanitized
    */
-  toBeSanitized(received: unknown): jest.CustomMatcherResult {
+  toBeSanitized(received: unknown): CustomMatcherResult {
     if (typeof received !== "string") {
       return {
         message: () => `Expected ${received} to be a string`,
@@ -58,7 +80,7 @@ expect.extend({
   /**
    * Validates security validation result structure
    */
-  toBeValidSecurityResult(received: unknown): jest.CustomMatcherResult {
+  toBeValidSecurityResult(received: unknown): CustomMatcherResult {
     if (typeof received !== "object" || received === null) {
       return {
         message: () => `Expected ${received} to be an object`,
@@ -66,7 +88,7 @@ expect.extend({
       };
     }
 
-    const result = received as unknown;
+    const result = received as Record<string, unknown>;
     const hasIsValid =
       "isValid" in result && typeof result.isValid === "boolean";
     const hasThreats = "threats" in result && Array.isArray(result.threats);
@@ -92,7 +114,7 @@ expect.extend({
   /**
    * Validates encryption/decryption operations
    */
-  toBeValidEncryption(received: unknown): jest.CustomMatcherResult {
+  toBeValidEncryption(received: unknown): CustomMatcherResult {
     if (typeof received !== "string") {
       return {
         message: () => `Expected ${received} to be a string`,
@@ -129,7 +151,7 @@ expect.extend({
   /**
    * Validates type definition structure
    */
-  toBeValidTypeDefinition(received: unknown): jest.CustomMatcherResult {
+  toBeValidTypeDefinition(received: unknown): CustomMatcherResult {
     if (typeof received !== "object" || received === null) {
       return {
         message: () => `Expected ${received} to be an object`,
@@ -170,7 +192,7 @@ expect.extend({
   toExecuteWithinTime(
     received: () => unknown,
     maxMs: number = 10,
-  ): jest.CustomMatcherResult {
+  ): CustomMatcherResult {
     const startTime = performance.now();
 
     try {
@@ -195,7 +217,7 @@ expect.extend({
     } catch (err) {
       return {
         message: () =>
-          `Expected function to execute successfully, but threw error: ${error}`,
+          `Expected function to execute successfully, but threw error: ${err}`,
         pass: false,
       };
     }
@@ -266,11 +288,18 @@ interface SecurityTestData {
 
 interface CryptoTestData {
   plaintext: string;
-  keys: {
+  key: string;
+  keys?: {
     valid: string[];
     invalid: string[];
   };
-  algorithms: string[];
+  algorithms?: string[];
+  invalidKeys: string[];
+  sensitiveData: {
+    password: string;
+    token: string;
+    apiKey: string;
+  };
   [key: string]: unknown;
 }
 
@@ -429,16 +458,16 @@ export const TestUtils = {
   /**
    * Creates a mock implementation
    */
-  createMock: <T extends Record<string, unknown>>(obj: T): jest.Mocked<T> => {
-    const mock = {} as jest.Mocked<T>;
+  createMock: <T extends Record<string, unknown>>(obj: T): T => {
+    const mock = {} as T;
 
     for (const key in obj) {
       if (typeof obj[key] === "function") {
-        mock[key] = jest.fn();
+        (mock as any)[key] = jest.fn();
       } else if (typeof obj[key] === "object" && obj[key] !== null) {
-        mock[key] = TestUtils.createMock(obj[key]);
+        (mock as any)[key] = TestUtils.createMock(obj[key] as Record<string, unknown>);
       } else {
-        mock[key] = obj[key];
+        (mock as any)[key] = obj[key];
       }
     }
 

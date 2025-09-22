@@ -320,7 +320,7 @@ export class MetadataManagerService {
       };
 
     } catch (error) {
-      this.logger.error(`Failed to extract metadata for function ${functionEntry.name}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to extract metadata for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -360,7 +360,7 @@ export class MetadataManagerService {
       return documentation;
 
     } catch (error) {
-      this.logger.error(`Failed to generate documentation for function ${functionEntry.name}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to generate documentation for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -403,7 +403,7 @@ export class MetadataManagerService {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to analyze performance for function ${functionEntry.name}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to analyze performance for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -455,7 +455,7 @@ export class MetadataManagerService {
       return result;
 
     } catch (error) {
-      this.logger.error(`Failed to analyze semantics for function ${functionEntry.name}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to analyze semantics for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -492,7 +492,7 @@ export class MetadataManagerService {
       this.logger.log(`Metadata updated for function: ${functionId}`);
 
     } catch (error) {
-      this.logger.error(`Failed to update metadata for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to update metadata for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -514,7 +514,7 @@ export class MetadataManagerService {
       this.logger.log('Metadata Manager Service initialized successfully');
 
     } catch (error) {
-      this.logger.error(`Failed to initialize Metadata Manager Service: ${error.message}`, error.stack);
+      this.logger.error(`Failed to initialize Metadata Manager Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 
@@ -529,7 +529,7 @@ export class MetadataManagerService {
     try {
       return await fs.readFile(filePath, 'utf-8');
     } catch (error) {
-      this.logger.warn(`Could not read source file ${filePath}: ${error.message}`);
+      this.logger.warn(`Could not read source file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
       return '';
     }
   }

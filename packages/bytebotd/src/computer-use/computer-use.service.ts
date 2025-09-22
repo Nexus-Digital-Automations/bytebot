@@ -230,7 +230,11 @@ export class ComputerUseService {
    * @param nutService - Native automation service for low-level computer control
    */
   constructor(private readonly nutService: NutService) {
-    const operationId = `init${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Initializing Computer Use Service`, {hasNutService: !!this.nutService,});
+    const operationId = `init${Date.now()}${Math.random().toString(36).substring(7)}`;
+
+    this.logger.log(`[${operationId}] Initializing Computer Use Service`, {
+      hasNutService: !!this.nutService,
+    });
 
     this.logger.log(
       `[${operationId}] Computer Use Service initialized successfully`,{availableFeatures: {
@@ -336,7 +340,9 @@ export class ComputerUseService {
 
       const duration = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Computer action completed successfully`,{operationId,
+        `[${operationId}] Computer action completed successfully`,
+        {
+          operationId,
           actionType: params.action,
           processingTimeMs: duration,
           hasResult: !!result,
@@ -393,7 +399,9 @@ export class ComputerUseService {
 
       this.logger.log(`[${operationId}] Mouse movement completed successfully`);} catch (_error) {const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
-        `[${operationId}] Mouse movement failed: ${errorMessage}`,{operationId,
+        `[${operationId}] Mouse movement failed: ${errorMessage}`,
+        {
+          operationId,
           targetCoordinates: action.coordinates,
           error: errorMessage,
         },
@@ -433,7 +441,8 @@ export class ComputerUseService {
       // Hold keys if provided
       if (holdKeys && holdKeys.length > 0) {
         this.logger.log(
-          `[${operationId}] Holding keys: ${holdKeys.join(`, ')}',);
+          `[${operationId}] Holding keys: ${holdKeys.join(', ')}`,
+        );
         await this.nutService.holdKeys(holdKeys, true);
       }
 
@@ -442,10 +451,14 @@ export class ComputerUseService {
         const coordinates = path[i];
         if (!coordinates) {
           this.logger.warn(
-            `[${operationId}] Skipping undefined coordinates at index ${i}`,);continue;
+            `[${operationId}] Skipping undefined coordinates at index ${i}`,
+          );
+          continue;
         }
         this.logger.debug(
-          `[${operationId}] Moving to path point ${i + 1}/${path.length}`,{x: coordinates.x,
+          `[${operationId}] Moving to path point ${i + 1}/${path.length}`,
+          {
+            x: coordinates.x,
             y: coordinates.y,
           },
         );
@@ -455,20 +468,27 @@ export class ComputerUseService {
       // Release hold keys
       if (holdKeys && holdKeys.length > 0) {
         this.logger.log(`[${operationId}] Releasing held keys`);
-    await this.nutService.holdKeys(holdKeys, false);}
+        await this.nutService.holdKeys(holdKeys, false);
+      }
 
-      this.logger.log(`[${operationId}] Mouse tracing completed successfully`);} catch (_error) {// Ensure keys are released on _error
+      this.logger.log(`[${operationId}] Mouse tracing completed successfully`);
+    } catch (_error) {
+      // Ensure keys are released on _error
       if (holdKeys && holdKeys.length > 0) {
         try {
           await this.nutService.holdKeys(holdKeys, false);
         } catch (releaseError) {
           this.logger.warn(
-            `[${operationId}] Failed to release held keys on error: ${ErrorHandler.extractErrorMessage(releaseError)}`,);}
+            `[${operationId}] Failed to release held keys on error: ${ErrorHandler.extractErrorMessage(releaseError)}`,
+          );
+        }
       }
 
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
-        `[${operationId}] Mouse tracing failed: ${errorMessage}`,{operationId,
+        `[${operationId}] Mouse tracing failed: ${errorMessage}`,
+        {
+          operationId,
           pathLength: path.length,
           holdKeys,
           error: errorMessage,
@@ -499,14 +519,17 @@ export class ComputerUseService {
       // Move to coordinates if provided
       if (coordinates) {
         this.logger.log(
-          `[${operationId}] Moving to click coordinates`,coordinates,);
+          `[${operationId}] Moving to click coordinates`,
+          coordinates,
+        );
         await this.nutService.mouseMoveEvent(coordinates);
       }
 
       // Hold keys if provided
       if (holdKeys && holdKeys.length > 0) {
         this.logger.log(
-          `[${operationId}] Holding keys: ${holdKeys.join(`, ')}',);
+          `[${operationId}] Holding keys: ${holdKeys.join(', ')}`,
+        );
         await this.nutService.holdKeys(holdKeys, true);
       }
 
@@ -514,16 +537,21 @@ export class ComputerUseService {
       const validClickCount = Math.max(1, Math.min(clickCount, 10)); // Limit to reasonable range
       if (validClickCount !== clickCount) {
         this.logger.warn(
-          `[${operationId}] Click count adjusted from ${clickCount} to ${validClickCount}`,);}
+          `[${operationId}] Click count adjusted from ${clickCount} to ${validClickCount}`,
+        );
+      }
 
       // Perform clicks
       if (validClickCount > 1) {
         // Perform multiple clicks with timing control
         this.logger.log(
-          `[${operationId}] Performing ${validClickCount} clicks`,);for (let i = 0; i < validClickCount; i++) {
+          `[${operationId}] Performing ${validClickCount} clicks`,
+        );
+        for (let i = 0; i < validClickCount; i++) {
           this.logger.debug(
-            `[${operationId}] Click ${i + 1}/${validClickCount}`,);
-    await this.nutService.mouseClickEvent(button);
+            `[${operationId}] Click ${i + 1}/${validClickCount}`,
+          );
+          await this.nutService.mouseClickEvent(button);
 
           // Add delay between clicks except for the last one
           if (i < validClickCount - 1) {
@@ -533,27 +561,35 @@ export class ComputerUseService {
       } else {
         // Perform a single click
         this.logger.log(`[${operationId}] Performing single ${button} click`);
-    await this.nutService.mouseClickEvent(button);}
+        await this.nutService.mouseClickEvent(button);
+      }
 
       // Release hold keys
       if (holdKeys && holdKeys.length > 0) {
         this.logger.log(`[${operationId}] Releasing held keys`);
-    await this.nutService.holdKeys(holdKeys, false);}
+        await this.nutService.holdKeys(holdKeys, false);
+      }
 
       this.logger.log(
-        `[${operationId}] Mouse click operation completed successfully`,);} catch (_error) {
+        `[${operationId}] Mouse click operation completed successfully`,
+      );
+    } catch (_error) {
       // Ensure keys are released on _error
       if (holdKeys && holdKeys.length > 0) {
         try {
           await this.nutService.holdKeys(holdKeys, false);
         } catch (releaseError) {
           this.logger.warn(
-            `[${operationId}] Failed to release held keys on error: ${ErrorHandler.extractErrorMessage(releaseError)}`,);}
+            `[${operationId}] Failed to release held keys on error: ${ErrorHandler.extractErrorMessage(releaseError)}`,
+          );
+        }
       }
 
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
-        `[${operationId}] Mouse click operation failed: ${errorMessage}`,{operationId,
+        `[${operationId}] Mouse click operation failed: ${errorMessage}`,
+        {
+          operationId,
           coordinates,
           button,
           clickCount,
@@ -574,7 +610,9 @@ export class ComputerUseService {
   private async pressMouse(action: PressMouseAction): Promise<void> {
     const operationId = `press_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
     const { coordinates, button, press } = action;this.logger.log(
-      `[${operationId}] Performing mouse button press operation`,{operationId,
+      `[${operationId}] Performing mouse button press operation`,
+      {
+        operationId,
         hasCoordinates: !!coordinates,
         coordinates,
         button,
@@ -599,7 +637,9 @@ export class ComputerUseService {
     await this.nutService.mouseButtonEvent(button, isPress);
 
       this.logger.log(
-        `[${operationId}] Mouse button operation completed successfully`,);} catch (_error) {
+        `[${operationId}] Mouse button operation completed successfully`,
+      );
+    } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
         `[${operationId}] Mouse button operation failed: ${errorMessage}`,{operationId,
@@ -651,7 +691,8 @@ export class ComputerUseService {
       // Hold keys if provided
       if (holdKeys && holdKeys.length > 0) {
         this.logger.log(
-          `[${operationId}] Holding keys: ${holdKeys.join(`, ')}',);
+          `[${operationId}] Holding keys: ${holdKeys.join(', ')}`,
+        );
         await this.nutService.holdKeys(holdKeys, true);
       }
 
@@ -688,7 +729,9 @@ export class ComputerUseService {
     await this.nutService.holdKeys(holdKeys, false);}
 
       this.logger.log(
-        `[${operationId}] Mouse drag operation completed successfully`,);} catch (_error) {
+        `[${operationId}] Mouse drag operation completed successfully`,
+      );
+    } catch (_error) {
       // Cleanup on _error - release mouse button if it was pressed
       if (mouseButtonPressed) {
         try {
@@ -748,7 +791,8 @@ export class ComputerUseService {
       // Hold keys if provided
       if (holdKeys && holdKeys.length > 0) {
         this.logger.log(
-          `[${operationId}] Holding keys: ${holdKeys.join(`, ')}',);
+          `[${operationId}] Holding keys: ${holdKeys.join(', ')}`,
+        );
         await this.nutService.holdKeys(holdKeys, true);
       }
 
@@ -777,7 +821,9 @@ export class ComputerUseService {
     await this.nutService.holdKeys(holdKeys, false);}
 
       this.logger.log(
-        `[${operationId}] Scroll operation completed successfully`,);} catch (_error) {
+        `[${operationId}] Scroll operation completed successfully`,
+      );
+    } catch (_error) {
       // Ensure keys are released on _error
       if (holdKeys && holdKeys.length > 0) {
         try {
@@ -845,10 +891,14 @@ export class ComputerUseService {
     try {
       await this.nutService.holdKeys(keys, press === 'down');
       this.logger.log(
-        `[${operationId}] Key ${press} operation completed successfully`,);} catch (_error) {
+        `[${operationId}] Key ${press} operation completed successfully`,
+      );
+    } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
-        `[${operationId}] Key ${press} operation failed: ${errorMessage}`,{operationId,
+        `[${operationId}] Key ${press} operation failed: ${errorMessage}`,
+        {
+          operationId,
           keys,
           press,
           error: errorMessage,
@@ -866,7 +916,9 @@ export class ComputerUseService {
    */
   private async typeText(action: TypeTextAction): Promise<void> {
     const operationId = `type_text${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const { text, delay } = action;this.logger.log(`[${operationId}] Typing text`, {
+    const { text, delay } = action;
+
+    this.logger.log(`[${operationId}] Typing text`, {
       operationId,
       textLength: text.length,
       hasDelay: !!delay,
@@ -877,9 +929,13 @@ export class ComputerUseService {
 
     try {
       await this.nutService.typeText(text, delay);
-      this.logger.log(`[${operationId}] Text typing completed successfully`);} catch (_error) {const errorMessage = ErrorHandler.extractErrorMessage(_error);
+      this.logger.log(`[${operationId}] Text typing completed successfully`);
+    } catch (_error) {
+      const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
-        `[${operationId}] Text typing failed: ${errorMessage}`,{operationId,
+        `[${operationId}] Text typing failed: ${errorMessage}`,
+        {
+          operationId,
           textLength: text.length,
           delay,
           error: errorMessage,
@@ -1142,7 +1198,9 @@ export class ComputerUseService {
       }).unref();
 
       this.logger.log(
-        `[${operationId}] Application ${application} launched successfully`,);} catch (_error) {
+        `[${operationId}] Application ${application} launched successfully`,
+      );
+    } catch (_error) {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       this.logger.error(
         `[${operationId}] Application management failed: ${errorMessage}`,{operationId,

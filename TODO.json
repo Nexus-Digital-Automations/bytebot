@@ -2397,9 +2397,9 @@
       "description": "Systematic elimination of all TS2339 TypeScript errors using proven methodology: property declarations, type guards, optional chaining, interface extensions, and type assertions. Target high-density files first for maximum impact. Achieve 150+ error reduction minimum (25% target). Document successful patterns in RAG.",
       "category": "error",
       "id": "error_1758494642972_ii0t4uc7z6",
-      "assigned_agent": "dev_session_1758494630834_1_general_1b21e845",
+      "assigned_agent": null,
       "started_at": "2025-09-21T22:44:54.690Z",
-      "claimed_by": "dev_session_1758494630834_1_general_1b21e845",
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758494630834_1_general_1b21e845",
@@ -2407,6 +2407,12 @@
           "assignedAt": "2025-09-21T22:44:54.690Z",
           "reassignReason": null,
           "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758494630834_1_general_1b21e845",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-21T23:14:44.502Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ],
       "completed_at": "2025-09-21T22:58:20.677Z",
@@ -2429,9 +2435,9 @@
       "description": "Fix all TypeScript TS2305 \"Module has no exported member\" errors through systematic export resolution. Target: 25% reduction minimum (18+ errors). Use proven methodology: Add missing exports, fix export type vs value, update barrel exports, fix named vs default imports, add re-exports. Validate with tsc --noEmit.",
       "category": "error",
       "id": "error_1758494643553_zxhy3i5f2xs",
-      "assigned_agent": "dev_session_1758494625450_1_general_8271c750",
+      "assigned_agent": null,
       "started_at": "2025-09-21T22:45:20.259Z",
-      "claimed_by": "dev_session_1758494625450_1_general_8271c750",
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758494625450_1_general_8271c750",
@@ -2439,6 +2445,12 @@
           "assignedAt": "2025-09-21T22:45:20.259Z",
           "reassignReason": null,
           "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758494625450_1_general_8271c750",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-21T23:14:44.502Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ],
       "completed_at": "2025-09-21T22:54:08.941Z",
@@ -2469,9 +2481,9 @@
       "description": "Critical mission to resolve all TypeScript type assignment compatibility (TS2322: 64 errors) and readonly property (TS2540: 50 errors) issues. Deploy systematic resolution patterns: 1) Type conversions and interface mapping for TS2322, 2) Readonly handling and mutable copies for TS2540, 3) Implement proper generic constraints, 4) Apply proven methodology with concurrent agents focusing on assignment compatibility and readonly property patterns",
       "category": "error",
       "id": "error_1758494650109_qserrxo16g",
-      "assigned_agent": "dev_session_1758494630834_1_general_1b21e845",
+      "assigned_agent": null,
       "started_at": "2025-09-21T22:45:48.601Z",
-      "claimed_by": "dev_session_1758494630834_1_general_1b21e845",
+      "claimed_by": null,
       "agent_assignment_history": [
         {
           "agentId": "dev_session_1758494630834_1_general_1b21e845",
@@ -2479,6 +2491,12 @@
           "assignedAt": "2025-09-21T22:45:48.601Z",
           "reassignReason": null,
           "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758494630834_1_general_1b21e845",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-21T23:14:44.502Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
         }
       ],
       "completed_at": "2025-09-21T22:55:31.003Z",
@@ -2501,176 +2519,7 @@
       "id": "error_1758494933707_rgebvmh03tl"
     }
   ],
-  "agents": {
-    "dev_session_1758494624265_1_general_f39394d8": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T22:43:44.265Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T22:43:44.265Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758494624590_1_general_1a84773b": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T22:43:44.591Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T22:43:44.591Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758494624931_1_general_d549f153": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T22:43:44.932Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T22:43:44.932Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758494625072_1_general_731ba143": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T22:43:45.072Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T22:43:45.072Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758494625303_1_general_42e901c2": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T22:43:45.304Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T22:43:45.304Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758494625450_1_general_8271c750": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T22:43:45.451Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T22:43:45.451Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758494629363_1_general_fe6bae7d": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T22:43:49.363Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T22:43:49.363Z",
-      "sessionId": null,
-      "metadata": {}
-    },
-    "dev_session_1758494630834_1_general_1b21e845": {
-      "name": "undefined Agent",
-      "role": "development",
-      "specialization": [],
-      "status": "active",
-      "assignedTasks": [],
-      "lastHeartbeat": "2025-09-21T22:43:50.834Z",
-      "parentAgentId": null,
-      "capabilities": [
-        "file-operations",
-        "linting",
-        "testing",
-        "build-fixes",
-        "refactoring"
-      ],
-      "workload": 0,
-      "maxConcurrentTasks": 5,
-      "createdAt": "2025-09-21T22:43:50.834Z",
-      "sessionId": null,
-      "metadata": {}
-    }
-  },
+  "agents": {},
   "settings": {
     "auto_sort_enabled": true,
     "sort_criteria": {

@@ -113,7 +113,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
           } catch (error) {
             errors.push({
               functionId: `file_${filePath}`,
-              error: error.message,
+              error: error instanceof Error ? error.message : String(error),
               context: { filePath }
             });
           }
@@ -150,7 +150,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
       };
 
     } catch (error) {
-      logger.error(`Discovery failed: ${error.message}`, error.stack);
+      logger.error(`Discovery failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -172,7 +172,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
 
       return await this.processFile(filePath, defaultConfig, []);
     } catch (error) {
-      this.logger.error(`Failed to discover functions in file ${filePath}: ${error.message}`);
+      this.logger.error(`Failed to discover functions in file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
@@ -199,7 +199,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
       return allFunctions;
 
     } catch (error) {
-      this.logger.error(`Failed to discover functions in directory ${directoryPath}: ${error.message}`);
+      this.logger.error(`Failed to discover functions in directory ${directoryPath}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }
@@ -229,7 +229,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
         result.failedRediscoveries++;
         result.errors.push({
           functionId,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           context: {}
         });
       }
@@ -393,7 +393,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
         }
       }
     } catch (error) {
-      this.logger.warn(`Failed to scan directory ${directoryPath}: ${error.message}`);
+      this.logger.warn(`Failed to scan directory ${directoryPath}: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     return files;
@@ -432,7 +432,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
     } catch (error) {
       errors.push({
         functionId: `file_${filePath}`,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         context: { filePath }
       });
       return [];
@@ -485,7 +485,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
       });
 
     } catch (error) {
-      this.logger.warn(`AST parsing failed for ${filePath}: ${error.message}`);
+      this.logger.warn(`AST parsing failed for ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     return functions;
@@ -640,7 +640,7 @@ export class FunctionDiscoveryService implements IFunctionDiscovery {
       };
 
     } catch (error) {
-      this.logger.warn(`Failed to extract function info from AST node: ${error.message}`);
+      this.logger.warn(`Failed to extract function info from AST node: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }

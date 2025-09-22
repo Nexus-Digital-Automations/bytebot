@@ -100,7 +100,7 @@ export class LoadTestingFrameworkService {
       // Execute test phases sequentially
       const phaseResults: LoadTestPhaseResult[] = [];
 
-      for (const [phaseIndex, phase] of testPlan.testPhases.entries()) {
+      for (const [phaseIndex, phase] of Array.from(testPlan.testPhases.entries())) {
         this.logger.log(`Executing load test phase ${phaseIndex + 1}: ${phase.name}`);
 
         const phaseResult = await this.executeLoadTestPhase(

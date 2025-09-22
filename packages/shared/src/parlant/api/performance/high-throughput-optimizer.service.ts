@@ -233,7 +233,7 @@ export class HighThroughputOptimizerService implements PerformanceOptimizer {
         `Throughput optimization failed after ${optimizationTime.toFixed(2)}ms`,
         {
           targetThroughput: config.targetThroughput,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           optimizationTime,
         },
       );
@@ -334,7 +334,7 @@ export class HighThroughputOptimizerService implements PerformanceOptimizer {
       };
     } catch (error) {
       this.logger.error(`Connection pooling implementation failed`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         poolConfig: JSON.stringify(poolConfig, null, 2),
       });
       throw error;
@@ -415,7 +415,7 @@ export class HighThroughputOptimizerService implements PerformanceOptimizer {
       };
     } catch (error) {
       this.logger.error(`Resource allocation optimization failed`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         currentUsage: JSON.stringify(currentUsage, null, 2),
       });
       throw error;
@@ -512,7 +512,7 @@ export class HighThroughputOptimizerService implements PerformanceOptimizer {
       };
     } catch (error) {
       this.logger.error(`Caching configuration failed`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         strategy: JSON.stringify(strategy, null, 2),
       });
       throw error;
@@ -615,7 +615,7 @@ export class HighThroughputOptimizerService implements PerformanceOptimizer {
       };
     } catch (error) {
       this.logger.error(`Load balancing setup failed`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         strategy: JSON.stringify(strategy, null, 2),
       });
       throw error;
@@ -718,7 +718,7 @@ export class HighThroughputOptimizerService implements PerformanceOptimizer {
       };
     } catch (error) {
       this.logger.error(`Auto-scaling setup failed`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         policy: JSON.stringify(policy, null, 2),
       });
       throw error;
@@ -777,7 +777,7 @@ export class HighThroughputOptimizerService implements PerformanceOptimizer {
       };
     } catch (error) {
       this.logger.error(`Performance metrics monitoring failed`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -975,7 +975,7 @@ export class HighThroughputOptimizerService implements PerformanceOptimizer {
         this.performanceMonitor.emit("metrics_collected", metrics);
       } catch (error) {
         this.logger.error(`Background metrics collection failed`, {
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }, 10000); // Every 10 seconds

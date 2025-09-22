@@ -702,7 +702,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       predictiveRefresh: true,
       refreshWindow: 300000, // 5 minutes
       gracePeriod: 60000, // 1 minute
-      ...this.configService.get('refresh', {}),
+      ...(this.configService.get('refresh') || {}),
     };
 
     this.sessionConfig = {
@@ -713,7 +713,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       compressionEnabled: true,
       encryptionEnabled: true,
       shardingStrategy: 'user',
-      ...this.configService.get('session', {}),
+      ...(this.configService.get('session') || {}),
       ...this.lifecycleConfig,
     };
 

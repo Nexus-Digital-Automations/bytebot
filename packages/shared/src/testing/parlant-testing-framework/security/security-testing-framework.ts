@@ -45,6 +45,7 @@ import {
   VulnerabilityScanType,
   AuthenticationTestScenario,
   Vulnerability,
+  SecurityThreatLevel,
 } from "../types/security-testing.types";
 
 /**
@@ -810,8 +811,8 @@ export class SecurityTestingFramework extends EventEmitter {
         overallRiskLevel: allVulnerabilities.some(
           (v) => v.severity === "CRITICAL",
         )
-          ? "critical"
-          : "medium",
+          ? SecurityThreatLevel.CRITICAL
+          : SecurityThreatLevel.MEDIUM,
         keyFindings: [`${allVulnerabilities.length} vulnerabilities found`],
         businessImpact: "Security assessment completed",
         immediateActions: [],

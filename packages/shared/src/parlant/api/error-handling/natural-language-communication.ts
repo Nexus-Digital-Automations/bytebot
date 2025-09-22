@@ -1562,9 +1562,7 @@ export class NaturalLanguageCommunicationSystem {
         engagement: {
           expectedEngagement: this.assessExpectedEngagement(message, resources, interactive),
           interactionPoints: this.countInteractionPoints(resources, interactive),
-          clarificationOpportunities: this.identifyClari
-
-ationOpportunities(message, category)
+          clarificationOpportunities: this.identifyClarificationOpportunities(message, category)
         }
       };
 
